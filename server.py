@@ -1,0 +1,130 @@
+import os
+import json
+import asyncio
+from fastapi import FastAPI, UploadFile, File, Form, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+import subprocess
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# A simple event queue to push logs to SSE
+log_queue = asyncio.Queue()
+
+# Ensure assets directory exists
+os.makedirs("assets", exist_ok=True)
+
+@app.get("/api/settings")
+def get_settings():
+    # Read settings from .env file or return defaults
+    settings = {}
+    if os.path.exists(".env"):
+        with open(".env", "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    settings[k] = v
+    return settings
+
+@app.post("/api/settings")
+async def save_settings(request: Request):
+    new_settings = await request.json()
+    
+    settings = {}
+    if os.path.exists(".env"):
+        with open(".env", "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    settings[k] = v
+                    
+    settings.update(new_settings)
+    
+    with open(".env", "w") as f:
+        for k, v in settings.items():
+            f.write(f"{k}={v}\n")
+    return {"status": "success"}
+
+@app.post("/api/upload")
+async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
+    # Create the course-specific directory
+    course_dir = os.path.join("assets", course_id)
+    os.makedirs(course_dir, exist_ok=True)
+    
+    # Save the file as course_id.docx which main.py expects
+    file_location = os.path.join(course_dir, f"{course_id}.docx")
+    with open(file_location, "wb+") as file_object:
+        file_object.write(file.file.read())
+    return {"info": f"archivo '{file.filename}' guardado exitosamente"}
+
+@app.get("/api/logs")
+async def stream_logs():
+    async def event_generator():
+        while True:
+            log_line = await log_queue.get()
+            yield f"data: {json.dumps({'message': log_line})}\n\n"
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.post("/api/run")
+async def run_automation():
+    # Clear the queue
+    while not log_queue.empty():
+        await log_queue.get()
+
+    async def run_script():
+        await log_queue.put("[Sistema] Iniciando la tarea de automatización...")
+        process = await asyncio.create_subprocess_exec(
+            "python", "main.py",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+        
+        while True:
+            line = await process.stdout.readline()
+            if not line:
+                break
+            await log_queue.put(line.decode(errors='replace').strip())
+        
+        await process.wait()
+        await log_queue.put(f"[Sistema] La tarea finalizó con código de salida {process.returncode}")
+        
+        # Cleanup uploaded assets
+        await log_queue.put("[Sistema] Limpiando los archivos temporales...")
+        
+        # Read the active course IDs from .env to clean up their docx files
+        courses = []
+        if os.path.exists(".env"):
+            with open(".env", "r") as f:
+                for line in f:
+                    if line.startswith("COURSES_TO_PROCESS="):
+                        courses = [c.strip() for c in line.split("=", 1)[1].split(",") if c.strip()]
+        
+        for cid in courses:
+            target_docx = os.path.join("assets", cid, f"{cid}.docx")
+            if os.path.exists(target_docx):
+                os.remove(target_docx)
+                
+        # Also clean up any loose files in the root assets dir just in case
+        for filename in os.listdir("assets"):
+            file_path = os.path.join("assets", filename)
+            if os.path.isfile(file_path) and (filename.endswith(".docx") or filename.endswith(".html")):
+                os.remove(file_path)
+                
+        await log_queue.put("[Sistema] Limpieza completada con éxito.")
+        
+    asyncio.create_task(run_script())
+    return {"status": "started"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

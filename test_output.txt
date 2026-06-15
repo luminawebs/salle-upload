@@ -1,0 +1,118 @@
+// Pregunta 1:
+::P01::¿Cuál de los siguientes es un tipo de modelo de datos NoSQL? {
+	=Documental
+	~Relacional
+	~Entidad Relación
+	~Parametrizada
+}
+
+// Pregunta 2:
+::P02::¿Cuál de los siguientes es un beneficio de utilizar un modelo de datos de documentos? {
+	=Flexibilidad
+	~Integridad referencial
+	~Portabilidad
+	~Mantenibilidad
+}
+
+// Pregunta 3:
+::P03::¿Cuál de los siguientes es un beneficio de utilizar un modelo de datos de clave-valor? {
+	=Escalabilidad
+	~Integridad referencial
+	~Indexación
+	~Tolerancia a fallos
+}
+
+// Pregunta 4:
+::P04::¿Cuál de los siguientes es un factor a tener en cuenta al elegir un modelo de datos NoSQL? {
+	=El tipo de datos que se van a almacenar
+	~Normalización
+	~Tener un sistema estándar y unificado
+	~Manejo de datos en menores escalas
+}
+
+// Pregunta 5:
+::P05::¿Cuál de los siguientes factores es una limitante de una bases de datos relacional? {
+	=Impedancia
+	~Integración
+	~Concurrencia
+	~Persistencia de datos
+}
+
+// Pregunta 6:
+::P06::¿Cuál de las siguientes definiciones corresponde al concepto de Documento en MongoDb? {
+	=Unidad básica de organización de información
+	~Un registro de información
+	~Un atributo de una tabla
+	~Una colección de datos
+}
+
+// Pregunta 7:
+::P07::¿En qué se diferencian los modelos de datos de documentos y los modelos de datos de clave-valor? {
+	=Los modelos de datos de documentos almacenan los datos en documentos, mientras que los modelos de datos de clave-valor almacenan los datos en pares de clave-valor.
+	~Los modelos de datos de documentos son más eficientes que los modelos de datos de clave-valor.
+	~Los modelos de datos de documentos son más flexibles que los modelos de datos de clave-valor.
+	~Los modelos de datos de documentos son más escalables que los modelos de datos de clave-valor.
+}
+
+// Pregunta 8:
+::P08::¿Por qué se utiliza la normalización en el modelado de datos relacionales, pero no en el modelado de datos NoSQL? {
+	~En el modelado de datos relacionales, los datos se almacenan en tablas, que tienen una estructura fija.
+	=En el modelado de datos relacionales, la integridad referencial es importante.
+	~En el modelado de datos relacionales, los datos se almacenan de forma flexible.
+	~En el modelado de datos relacionales, la escalabilidad no es importante.
+}
+
+// Pregunta 9:
+::P09::¿Qué es la desnormalización? {
+	~Es un proceso que se utiliza para reducir la redundancia de datos.
+	~Es un proceso que se utiliza para mejorar la integridad referencial.
+	=Es un proceso que se utiliza para aumentar el rendimiento de las consultas.
+	~Es un proceso que se utiliza para escalar una base de datos.
+}
+
+// Pregunta 10:
+::P10::¿Por qué se utiliza la desnormalización en el modelado de datos NoSQL? {
+	=Porque los datos se almacenan de forma flexible.
+	~Porque la integridad referencial es importante.
+	~Porque el rendimiento de las consultas no es importante.
+	~Porque la escalabilidad no es importante.
+}
+
+// Pregunta 11:
+::P11::¿Cuál de los siguientes corresponde a un tipo de dato en Mongo? {
+	=Array
+	~Int
+	~Float
+	~Integer
+	~¿Cómo lo vamos a evaluar?
+	~Criterios de desempeño
+	~Puntos
+	~Criterio 1
+	~1
+	~Criterio 2
+	~2
+	~1
+	~1
+	~La suma total debe dar
+	~5
+	~Criterios de desempeño
+	~Puntos
+	~Criterio 1
+	~1
+	~Criterio 2
+	~2
+	~1
+	~1
+	~La suma total debe dar
+	~5
+	~Criterios de desempeño
+	~Puntos
+	~Criterio 1
+	~1
+	~Criterio 2
+	~2
+	~1
+	~1
+	~La suma total debe dar
+	~5
+}
