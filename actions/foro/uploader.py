@@ -1,7 +1,7 @@
 import time
 import logging
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
@@ -118,6 +118,40 @@ def upload_foro_content(driver, course_id, week_name, resource_name, html_conten
                 driver.close()
                 driver.switch_to.window(original_window)
             return False
+            
+        # 5.5. Configure "Calificación" (Grade) section
+        try:
+            logger.info("Configuring forum grading...")
+            # Try to expand "Calificación" section if collapsed
+            try:
+                grade_header = driver.find_element(By.XPATH, "//a[contains(text(), 'Calificación') and contains(@class, 'fheader')]")
+                if grade_header.get_attribute("aria-expanded") == "false":
+                    driver.execute_script("arguments[0].click();", grade_header)
+                    time.sleep(0.5)
+            except:
+                pass
+                
+            # Select "Puntuación" (value="point") in the type dropdown
+            try:
+                modgrade_type_dropdown = driver.find_element(By.ID, "id_grade_forum_modgrade_type")
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", modgrade_type_dropdown)
+                select = Select(modgrade_type_dropdown)
+                select.select_by_value("point")
+                time.sleep(1) # Wait for DOM update revealing the point input
+            except Exception as ex:
+                logger.warning(f"Could not select 'Puntuación' in modgrade_type: {ex}")
+                
+            # Set Calificación máxima to 5
+            try:
+                modgrade_point_input = driver.find_element(By.ID, "id_grade_forum_modgrade_point")
+                driver.execute_script("arguments[0].value = '5';", modgrade_point_input)
+                # trigger change
+                driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", modgrade_point_input)
+            except Exception as ex:
+                logger.warning(f"Could not set max grade: {ex}")
+                
+        except Exception as e:
+            logger.warning(f"Error configuring forum grade: {e}")
             
         # 6. Save and return to course
         logger.info("Saving changes...")

@@ -207,6 +207,7 @@ function App() {
 
   const handleUpload = (e) => {
     processFile(e.target.files[0]);
+    e.target.value = null; // Reset the input value so the same file can be re-uploaded
   };
 
   const handleDragOver = (e) => {

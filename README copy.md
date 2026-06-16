@@ -33,6 +33,7 @@ The automation script uses Selenium WebDriver to log into Moodle and perform act
 ### Running the Automation
 ```bash
 python main.py
+python server.py
 ```
 
 ## 2. HTML Content Generator (`html_generator/generate_html.py`)

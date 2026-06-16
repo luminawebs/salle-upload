@@ -5,7 +5,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import subprocess
-
+import shutil
 app = FastAPI()
 
 app.add_middleware(
@@ -60,6 +60,24 @@ async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
     # Create the course-specific directory
     course_dir = os.path.join("assets", course_id)
     os.makedirs(course_dir, exist_ok=True)
+    
+    # Clean up old generated files to ensure we don't use data from past uploads
+    folders_to_clean = ["imgs", "actividades", "material", "introduccion", "unidades_intro"]
+    for folder_name in folders_to_clean:
+        folder_path = os.path.join(course_dir, folder_name)
+        if os.path.exists(folder_path):
+            try:
+                shutil.rmtree(folder_path)
+            except Exception as e:
+                print(f"Error removing {folder_path}: {e}")
+                
+    # Clean up the raw extracted html
+    raw_html_path = os.path.join(course_dir, "raw_docx_extracted.html")
+    if os.path.exists(raw_html_path):
+        try:
+            os.remove(raw_html_path)
+        except Exception as e:
+            print(f"Error removing {raw_html_path}: {e}")
     
     # Save the file as course_id.docx which main.py expects
     file_location = os.path.join(course_dir, f"{course_id}.docx")

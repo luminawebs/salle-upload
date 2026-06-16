@@ -281,6 +281,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                 
                 html_markers = "<p><span>-- Inicio texto presentación --</span></p><p><span>-- Fin texto de presentación --</span></p>"
                 template_path = os.path.join("assets", "example_course", "GENERALIDADES DEL CURSO.html")
+                course_dir = os.path.join("assets", str(course_id)) if course_id else "assets"
                 extracted_path = os.path.join(course_dir, "raw_docx_extracted.html")
                 if os.path.exists(template_path) and os.path.exists(extracted_path):
                     from actions.html_transformer import generate_dynamic_generalidades_html

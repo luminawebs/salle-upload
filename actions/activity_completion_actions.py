@@ -127,6 +127,19 @@ def update_activity_completion(driver, course_id: int, wait_time: int = 10):
                 except NoSuchElementException:
                     pass # Might not exist depending on Moodle version
                     
+                # 4. Uncheck "Hacer una entrega" (id_completionsubmit)
+                try:
+                    submit_cb_list = driver.find_elements(By.ID, "id_completionsubmit")
+                    if submit_cb_list:
+                        submit_cb = submit_cb_list[0]
+                        if submit_cb.is_selected():
+                            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit_cb)
+                            time.sleep(0.2)
+                            driver.execute_script("arguments[0].click();", submit_cb)
+                            logger.info("Unchecked 'Hacer una entrega' (id_completionsubmit).")
+                except Exception as e:
+                    logger.warning(f"Error unchecking 'id_completionsubmit': {e}")
+                    
                 # Click Save and return to course
                 save_btn_css = "#id_submitbutton2, input[name='submitbutton2'], button[name='submitbutton2']"
                 save_btn = driver.find_element(By.CSS_SELECTOR, save_btn_css)
