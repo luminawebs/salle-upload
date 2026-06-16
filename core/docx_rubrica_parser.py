@@ -93,12 +93,15 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
                     
             if next_criterios_table:
                 criteria_list = []
-                rows = next_criterios_table.find_all('tr')
+                rows = next_criterios_table.find_all('tr', recursive=False)
+                if not rows and next_criterios_table.tbody:
+                    rows = next_criterios_table.tbody.find_all('tr', recursive=False)
+                
                 for i, row in enumerate(rows):
                     if i == 0:
                         continue # Skip header row
                     
-                    cols = row.find_all(['th', 'td'])
+                    cols = row.find_all(['th', 'td'], recursive=False)
                     if len(cols) >= 2:
                         criterio_text = cols[0].get_text(strip=True)
                         puntos_text = cols[1].get_text(strip=True)

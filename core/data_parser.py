@@ -192,8 +192,33 @@ def run_docx_splitting_workflow(course_id: int):
                     i += 1
                 
                 act_html = "".join(act_html_parts)
+                
+                act_soup = BeautifulSoup(act_html, "html.parser")
+                
+                # Remove the title of the "Actividad" (e.g. ACTIVIDAD 1: ...)
+                title_pattern = re.compile(rf'ACTIVIDAD\s+{current_activity}\s*:', re.IGNORECASE)
+                for text_node in act_soup.find_all(string=title_pattern):
+                    parent = text_node.find_parent(['p', 'h1', 'h2', 'h3', 'h4'])
+                    if parent:
+                        parent.decompose()
+                    else:
+                        p = text_node.parent
+                        if p:
+                            p.decompose()
+
+                # Convert remaining h1, h2, h3 to <p><b>...</b></p>
+                for header in act_soup.find_all(['h1', 'h2', 'h3']):
+                    new_p = act_soup.new_tag("p")
+                    new_b = act_soup.new_tag("b")
+                    # Preserve contents by moving them
+                    new_b.extend(header.contents)
+                    new_p.append(new_b)
+                    header.replace_with(new_p)
+                
+                act_html_transformed = str(act_soup)
+                
                 with open(os.path.join(output_dirs["actividades"], f"actividad{current_activity}.html"), "w", encoding="utf-8") as f:
-                    f.write(act_html)
+                    f.write(act_html_transformed)
                 logger.info(f"  ✓ Extracted actividad{current_activity}.html")
 
         # Detect Material de Referencia (Lecturas complementarias)
