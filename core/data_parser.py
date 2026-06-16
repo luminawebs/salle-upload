@@ -169,8 +169,9 @@ def run_docx_splitting_workflow(course_id: int):
                 current_unit = int(m.group(1))
 
         # Detect Activity
-        if re.search(r'ACTIVIDAD\s+\d+\s*:', text):
-            m = re.search(r'ACTIVIDAD\s+(\d+)\s*:', text)
+        # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD 2:", "ACTIVIDAD 4:"
+        if re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text:
+            m = re.search(r'ACTIVIDAD\s+(\d+)', text)
             if m:
                 current_activity = int(m.group(1))
                 act_html_parts = []
@@ -183,7 +184,7 @@ def run_docx_splitting_workflow(course_id: int):
                 while i < len(trs):
                     next_tr = trs[i]
                     next_text = next_tr.get_text().strip().upper()
-                    if re.search(r'ACTIVIDAD\s+\d+\s*:', next_text) or "UNIDAD DIDÁCTICA" in next_text or "INFORMACIÓN PARA EL EQUIPO" in next_text:
+                    if (re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text) or "UNIDAD DIDÁCTICA" in next_text or "INFORMACIÓN PARA EL EQUIPO" in next_text:
                         # Reached the end of this activity, step back one so the outer loop processes it
                         i -= 1
                         break

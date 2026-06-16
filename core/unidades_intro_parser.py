@@ -39,21 +39,42 @@ def run_unidades_intro_splitting_workflow(course_id: int):
             continue
 
         if current_unidad:
-            tds = tr.find_all("td")
-            if len(tds) == 2:
-                td1_text = tds[0].get_text(strip=True).upper()
-                if td1_text == "RESUMEN":
+            tds = tr.find_all("td", recursive=False)
+            if not tds:
+                continue
+
+            td0_text = tds[0].get_text(strip=True).upper()
+            is_resumen = td0_text.startswith("RESUMEN")
+            is_preguntas = td0_text.startswith("PREGUNTAS ORIENTADORAS")
+
+            if is_resumen or is_preguntas:
+                if len(tds) >= 2:
+                    content_td = tds[1]
+                else:
+                    # Content is merged into the first TD. Remove the heading text.
+                    content_td = tds[0]
+                    if is_resumen:
+                        pattern = re.compile(r'^[\s]*RESUMEN[:\s]*', re.IGNORECASE)
+                    else:
+                        pattern = re.compile(r'^[\s]*PREGUNTAS ORIENTADORAS[:\s]*', re.IGNORECASE)
+                    
+                    for text_node in content_td.find_all(string=True):
+                        if pattern.search(text_node):
+                            text_node.replace_with(pattern.sub('', text_node))
+                            break
+
+                if is_resumen:
                     # Extract text from p tags
-                    resumen_ps = [p.get_text(strip=True) for p in tds[1].find_all('p') if p.get_text(strip=True)]
+                    resumen_ps = [p.get_text(strip=True) for p in content_td.find_all('p') if p.get_text(strip=True)]
                     if not resumen_ps:
-                        text_only = tds[1].get_text(strip=True)
+                        text_only = content_td.get_text(strip=True)
                         if text_only:
                             resumen_ps = [text_only]
                     unidades[current_unidad]["resumen"] = resumen_ps
 
-                elif td1_text == "PREGUNTAS ORIENTADORAS":
+                elif is_preguntas:
                     # Robust extraction: get raw HTML, replace breaks with delimiter, parse, split by delimiter and bullets
-                    raw_html = str(tds[1])
+                    raw_html = str(content_td)
                     raw_html = re.sub(r'<(br|/p|/div|/li)[^>]*>', '|||', raw_html, flags=re.IGNORECASE)
                     clean_text = BeautifulSoup(raw_html, "html.parser").get_text(separator=' ')
                     

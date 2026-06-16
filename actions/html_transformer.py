@@ -419,6 +419,15 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
             metodologia_html = "".join(blocks)
             break
 
+    # Extract course_id from path (e.g. assets\10\raw_docx_extracted.html -> 10)
+    course_id = None
+    try:
+        dirname = os.path.basename(os.path.dirname(extracted_html_path))
+        if dirname.isdigit():
+            course_id = int(dirname)
+    except:
+        pass
+
     # Extract Equipo Docente
     table = soup.find('table')
     if table:
@@ -442,7 +451,14 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
                 if len(tds) > 1:
                     img = tds[1].find('img')
                     if img and img.get('src'):
-                        foto = img['src']
+                        raw_src = img['src']
+                        # Convert to base64 so it works in Moodle WYSIWYG
+                        if raw_src.startswith("data:"):
+                            foto = raw_src
+                        else:
+                            foto = get_image_base64(raw_src, course_id)
+                            if not foto:
+                                foto = raw_src
 
         docente_html = f'''
         <div class="card-body" style="text-align: center;">

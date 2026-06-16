@@ -123,6 +123,6 @@ class ConfigSALLE:
     # List of Moodle course IDs to iterate over
     COURSES_TO_PROCESS = [
         int(x.strip())
-        for x in os.getenv("COURSES_TO_PROCESS", "9").split(",")
+        for x in os.getenv("COURSES_TO_PROCESS", "10").split(",")
         if x.strip().isdigit()
     ]
