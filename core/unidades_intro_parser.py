@@ -52,17 +52,20 @@ def run_unidades_intro_splitting_workflow(course_id: int):
                     unidades[current_unidad]["resumen"] = resumen_ps
 
                 elif td1_text == "PREGUNTAS ORIENTADORAS":
-                    lis = tds[1].find_all('li')
-                    if lis:
-                        for li in lis:
-                            text = li.get_text(strip=True)
-                            if text:
-                                unidades[current_unidad]["preguntas"].append(text)
-                    else:
-                        for p in tds[1].find_all('p'):
-                            text = p.get_text(strip=True)
-                            if text:
-                                unidades[current_unidad]["preguntas"].append(text)
+                    # Robust extraction: get raw HTML, replace breaks with delimiter, parse, split by delimiter and bullets
+                    raw_html = str(tds[1])
+                    raw_html = re.sub(r'<(br|/p|/div|/li)[^>]*>', '|||', raw_html, flags=re.IGNORECASE)
+                    clean_text = BeautifulSoup(raw_html, "html.parser").get_text(separator=' ')
+                    
+                    # \uf0b7 is Wingdings bullet. Include other common bullet chars.
+                    parts = re.split(r'\|\|\||[\uf0b7•·\n]+', clean_text)
+                    
+                    for part in parts:
+                        pt = part.strip()
+                        # remove leading bullets, dashes, or asterisks
+                        pt = re.sub(r'^[\uf0b7•·\-\*\s]+', '', pt)
+                        if pt:
+                            unidades[current_unidad]["preguntas"].append(pt)
 
     # Generate styled HTML files
     for unidad_key, data in unidades.items():
