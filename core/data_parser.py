@@ -170,7 +170,7 @@ def run_docx_splitting_workflow(course_id: int):
 
         # Detect Activity
         # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD 2:", "ACTIVIDAD 4:"
-        if re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text:
+        if re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text and current_unit > 0:
             m = re.search(r'ACTIVIDAD\s+(\d+)', text)
             if m:
                 current_activity = int(m.group(1))
@@ -184,7 +184,17 @@ def run_docx_splitting_workflow(course_id: int):
                 while i < len(trs):
                     next_tr = trs[i]
                     next_text = next_tr.get_text().strip().upper()
-                    if (re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text) or "UNIDAD DIDÁCTICA" in next_text or "INFORMACIÓN PARA EL EQUIPO" in next_text:
+                    
+                    stop_conditions = [
+                        re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
+                        "UNIDAD DIDÁCTICA" in next_text,
+                        "INFORMACIÓN PARA EL EQUIPO" in next_text,
+                        "INFORMACION PARA EL EQUIPO" in next_text,
+                        "EQUIPO DE PRODUCCI" in next_text,
+                        "ENCUENTRO VIRTUAL" in next_text
+                    ]
+                    
+                    if any(stop_conditions):
                         # Reached the end of this activity, step back one so the outer loop processes it
                         i -= 1
                         break
@@ -197,7 +207,7 @@ def run_docx_splitting_workflow(course_id: int):
                 act_soup = BeautifulSoup(act_html, "html.parser")
                 
                 # Remove the title of the "Actividad" (e.g. ACTIVIDAD 1: ...)
-                title_pattern = re.compile(rf'ACTIVIDAD\s+{current_activity}\s*:', re.IGNORECASE)
+                title_pattern = re.compile(rf'ACTIVIDAD\s+{current_activity}[\s:.-]*', re.IGNORECASE)
                 for text_node in act_soup.find_all(string=title_pattern):
                     parent = text_node.find_parent(['p', 'h1', 'h2', 'h3', 'h4'])
                     if parent:

@@ -35,7 +35,11 @@ def run_unidades_intro_splitting_workflow(course_id: int):
         if match:
             current_unidad = f"UNIDAD {match.group(1)}"
             if current_unidad not in unidades:
-                unidades[current_unidad] = {"resumen": [], "preguntas": []}
+                unidades[current_unidad] = {"resumen": [], "preguntas": [], "title": text}
+            else:
+                # Update title to the latest matching one (skips the syllabus table)
+                if len(text) > len(current_unidad) + 5: # ensure it's not just "UNIDAD 1"
+                    unidades[current_unidad]["title"] = text
             continue
 
         if current_unidad:
@@ -99,10 +103,18 @@ def run_unidades_intro_splitting_workflow(course_id: int):
         unidad_num = match.group(1)
 
         html_parts = []
-        for p_text in data["resumen"]:
-            html_parts.append(
-                f'<p><span style="font-family: tahoma, arial, helvetica, sans-serif; font-size: small; color: #000000;">{p_text}</span></p>'
-            )
+        
+        # Add Unit Title if available
+        if data.get("title"):
+            title_text = data["title"].title() # Capitalize nicely
+            # Fix some specific casing for known acronyms if needed, or just let it be
+            html_parts.append(f'<p><b>{title_text}</b></p>')
+
+        if data["resumen"]:
+            for p_text in data["resumen"]:
+                html_parts.append(
+                    f'<p><span style="font-family: tahoma, arial, helvetica, sans-serif; font-size: small; color: #000000;">{p_text}</span></p>'
+                )
 
         if data["preguntas"]:
             html_parts.append(
