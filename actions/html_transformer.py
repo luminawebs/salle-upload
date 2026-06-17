@@ -334,12 +334,17 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
         # Change the link text
         a_tag.string = "(disponible aquí)"
         
-        # Optionally clean up a preceding colon in the text right before the link
+        # Clean up preceding text like "Disponible" or colon before the link
         prev_node = a_tag.previous_sibling
-        if prev_node and isinstance(prev_node, str) and prev_node.strip().endswith(":"):
-            # Remove the colon
-            new_text = prev_node.rstrip()[:-1] + " "
-            prev_node.replace_with(new_text)
+        if prev_node and isinstance(prev_node, str):
+            # Remove "disponible:" or "Disponible" from the end of the text preceding the link
+            new_text = re.sub(r'(?i)\s*disponible\s*:?\s*$', ' ', prev_node)
+            if new_text == prev_node:
+                # If "disponible" is not there, just remove colon if it exists at the end
+                new_text = re.sub(r'\s*:\s*$', ' ', prev_node)
+            
+            if new_text != prev_node:
+                prev_node.replace_with(new_text)
             
     # 4. Apply Typography (wrap text in spans)
     for tag in soup.find_all(["p", "li"]):

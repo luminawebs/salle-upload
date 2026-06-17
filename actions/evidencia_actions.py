@@ -21,6 +21,8 @@ from actions.actividad_actions import (
     _remove_section_header,
     _extract_section_between_headings,
     _get_edit_url_global,
+    _configure_actividad_availability,
+    _configure_actividad_grading,
 )
 from core.wysiwyg_handler import inject_html_into_wysiwyg
 
@@ -193,6 +195,11 @@ def run_evidencia_export_workflow(driver, course_id: int, wait_time: int = 10):
                     html_content = f.read()
 
                 WebDriverWait(driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body")))
+                
+                # Configure the availability dates and grading before saving
+                _configure_actividad_availability(driver)
+                _configure_actividad_grading(driver)
+                
                 success = inject_html_into_wysiwyg(driver, html_content, wait_time)
 
                 if success:

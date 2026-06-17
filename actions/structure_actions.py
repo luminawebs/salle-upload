@@ -355,10 +355,11 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
             
             # Remove the checks on habilitar, on all actividades
             try:
-                from actions.actividad_actions import _configure_actividad_availability
+                from actions.actividad_actions import _configure_actividad_availability, _configure_actividad_grading
                 _configure_actividad_availability(driver)
+                _configure_actividad_grading(driver)
             except Exception as e:
-                logger.warning(f"Could not configure availability for {act_name}: {e}")
+                logger.warning(f"Could not configure availability and grading for {act_name}: {e}")
         
         submit_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='submitbutton2'], #id_submitbutton2")))
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit_btn)

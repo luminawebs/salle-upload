@@ -947,6 +947,45 @@ def _configure_actividad_availability(driver):
     except Exception as e:
         logger.error(f"  Error configuring availability: {e}")
 
+def _configure_actividad_grading(driver):
+    """Configures the Grading section in the Moodle activity form."""
+    try:
+        # Expand Calificación section if needed
+        grade_header = driver.find_elements(By.CSS_SELECTOR, "fieldset#id_modstandardgrade a[data-toggle='collapse']")
+        if grade_header:
+            is_expanded = grade_header[0].get_attribute("aria-expanded")
+            if is_expanded == "false":
+                driver.execute_script("arguments[0].click();", grade_header[0])
+                time.sleep(0.5)
+
+        # 1. Tipo: Puntuación (value="point")
+        type_dropdowns = driver.find_elements(By.ID, "id_grade_modgrade_type")
+        if type_dropdowns:
+            from selenium.webdriver.support.ui import Select
+            sel = Select(type_dropdowns[0])
+            if sel.first_selected_option.get_attribute("value") != "point":
+                sel.select_by_value("point")
+                time.sleep(0.5)
+
+        # 2. Calificación máxima: 5
+        max_inputs = driver.find_elements(By.ID, "id_grade_modgrade_point")
+        if max_inputs:
+            driver.execute_script("arguments[0].value = '5';", max_inputs[0])
+            driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", max_inputs[0])
+
+        # 3. Método de calificación: Rúbrica (value="rubric")
+        method_dropdowns = driver.find_elements(By.ID, "id_advancedgradingmethod_submissions")
+        if method_dropdowns:
+            from selenium.webdriver.support.ui import Select
+            sel = Select(method_dropdowns[0])
+            if sel.first_selected_option.get_attribute("value") != "rubric":
+                sel.select_by_value("rubric")
+                time.sleep(0.5)
+
+    except Exception as e:
+        logger.error(f"  Error configuring grading: {e}")
+
+
 
 def run_actividad_export_workflow(
     driver, course_id: int, mode: str, wait_time: int = 10
@@ -1068,6 +1107,7 @@ def run_actividad_export_workflow(
                 
                 # Configure the availability dates before saving
                 _configure_actividad_availability(driver)
+                _configure_actividad_grading(driver)
                 
                 success = inject_html_into_wysiwyg(driver, html_content, wait_time)
 
