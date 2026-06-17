@@ -456,7 +456,7 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
                         if raw_src.startswith("data:"):
                             foto = raw_src
                         else:
-                            foto = get_image_base64(raw_src, course_id)
+                            foto = get_image_base64(os.path.basename(raw_src), course_id)
                             if not foto:
                                 foto = raw_src
 

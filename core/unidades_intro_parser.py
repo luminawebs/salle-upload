@@ -30,8 +30,8 @@ def run_unidades_intro_splitting_workflow(course_id: int):
 
     for tr in soup.find_all("tr"):
         text = tr.get_text(strip=True).upper()
-        # Look for UNIDAD DIDACTICA or UNIDAD
-        match = re.search(r'UNIDAD\s*(?:DID\u00c1CTICA)?\s*(\d+)', text)
+        # Look for UNIDAD DIDACTICA or UNIDAD at the beginning
+        match = re.search(r'^\s*UNIDAD\s*(?:DID\u00c1CTICA)?\s*(\d+)', text)
         if match:
             current_unidad = f"UNIDAD {match.group(1)}"
             if current_unidad not in unidades:
