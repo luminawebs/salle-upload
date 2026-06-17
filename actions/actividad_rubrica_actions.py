@@ -870,10 +870,16 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
             except:
                 pass
                 
+            # Wait for the select element to go stale (indicating the page is reloading)
+            try:
+                WebDriverWait(driver, wait_time).until(EC.staleness_of(select_elem))
+            except Exception:
+                pass
+                
             WebDriverWait(driver, wait_time).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"
             )
-            time.sleep(1)
+            time.sleep(2)
     except Exception as e:
         logger.info(f"  Select dropdown not used ({e}). Checking for links...")
         
@@ -901,6 +907,14 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
                 
     # Re-parse source after potential activation
     try:
+        # Wait specifically for the rubric edit link to appear in the DOM
+        try:
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='rubric/edit.php']"))
+            )
+        except Exception:
+            pass
+            
         page_source2 = driver.page_source
         soup2 = BeautifulSoup(page_source2, "html.parser")
         rubric_edit_url = next(
@@ -921,10 +935,11 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
     except Exception as e:
         logger.warning(f"  Failed to find rubric/edit.php after activation attempt: {e}")
     else:
-        logger.warning(
-            "  No rubric/edit.php link and no 'setmethod=rubric' link found. "
-            "The activity may need 'Calificación avanzada' → 'Rúbrica' set in its settings."
-        )
+        if not rubric_edit_url:
+            logger.warning(
+                "  No rubric/edit.php link and no 'setmethod=rubric' link found. "
+                "The activity may need 'Calificación avanzada' → 'Rúbrica' set in its settings."
+            )
 
     return False
 

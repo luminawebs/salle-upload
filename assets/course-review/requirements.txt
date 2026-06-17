@@ -1,0 +1,7 @@
+Flask==3.0.3
+Flask-Cors==4.0.1
+Werkzeug==3.0.3
+mammoth==1.8.0
+beautifulsoup4==4.12.3
+lxml==5.2.2
+gunicorn==22.0.0

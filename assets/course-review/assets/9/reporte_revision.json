@@ -1,0 +1,64 @@
+{
+    "curso": 9,
+    "introduccion_general": {
+        "encontrado": true,
+        "detalles": "Encontrado"
+    },
+    "unidades": {
+        "1": {
+            "resumen": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            },
+            "preguntas_orientadoras": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            },
+            "actividades": [
+                "1",
+                "2",
+                "5",
+                "7",
+                "8"
+            ],
+            "material_referencia": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            }
+        },
+        "2": {
+            "resumen": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            },
+            "preguntas_orientadoras": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            },
+            "actividades": [
+                "4"
+            ],
+            "material_referencia": {
+                "encontrado": false,
+                "detalles": "No se encontró material de referencia o lecturas complementarias"
+            }
+        },
+        "3": {
+            "resumen": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            },
+            "preguntas_orientadoras": {
+                "encontrado": true,
+                "detalles": "Encontrado"
+            },
+            "actividades": [
+                "6"
+            ],
+            "material_referencia": {
+                "encontrado": false,
+                "detalles": "No se encontró material de referencia o lecturas complementarias"
+            }
+        }
+    }
+}

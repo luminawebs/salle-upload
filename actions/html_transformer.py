@@ -122,6 +122,58 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     gift_lines.append(gift)
                     q_num += 1
 
+    # FORMAT B LOGIC (Flat OL with (Respuesta))
+    if not gift_lines:
+        for ol in soup.find_all('ol'):
+            lis = ol.find_all('li', recursive=False)
+            has_respuesta = any("(respuesta)" in li.get_text(strip=True).lower() for li in lis)
+            if has_respuesta:
+                current_stem = None
+                current_options = []
+                for li in lis:
+                    text = li.get_text(strip=True)
+                    if not text: continue
+                    
+                    is_stem = False
+                    if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
+                        is_stem = True
+                    elif current_stem and len(current_options) >= 4:
+                        # Fallback heuristic
+                        is_stem = True
+                        
+                    if is_stem:
+                        if current_stem:
+                            q_num_padded = f'{q_num:02d}'
+                            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
+                            for opt in current_options:
+                                is_correct = False
+                                if "(respuesta)" in opt.lower():
+                                    is_correct = True
+                                    opt = re.sub(r'(?i)\s*\(respuesta\)', '', opt).strip()
+                                prefix = '=' if is_correct else '~'
+                                gift += f'\t{prefix}{opt}\n'
+                            gift += '}'
+                            gift_lines.append(gift)
+                            q_num += 1
+                        current_stem = text
+                        current_options = []
+                    else:
+                        current_options.append(text)
+                
+                if current_stem:
+                    q_num_padded = f'{q_num:02d}'
+                    gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
+                    for opt in current_options:
+                        is_correct = False
+                        if "(respuesta)" in opt.lower():
+                            is_correct = True
+                            opt = re.sub(r'(?i)\s*\(respuesta\)', '', opt).strip()
+                        prefix = '=' if is_correct else '~'
+                        gift += f'\t{prefix}{opt}\n'
+                    gift += '}'
+                    gift_lines.append(gift)
+                    q_num += 1
+
     # FALLBACK LOGIC
     if not gift_lines:
         paragraphs = soup.find_all(["p", "li", "div", "span"])

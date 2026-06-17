@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisor de Documentos - LA SALLE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=3">
+</head>
+
+<body>
+    <div class="background-blob"></div>
+    <div class="background-blob blob-2"></div>
+
+    <div class="container">
+        <header>
+            <div style="padding-bottom: 20px;"> <img src="/static/logoFondoOscuro.png" alt="Logo LA SALLE" width="100">
+            </div>
+            <h1>Revisor de Documentos</h1>
+            <p>Sube tu archivo .docx para verificar la estructura y elementos requeridos</p>
+        </header>
+
+        <div class="upload-zone" id="drop-zone">
+            <div class="upload-content">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h3>Arrastra y suelta tu archivo aquí</h3>
+                <p>O haz clic para seleccionar (solo .docx)</p>
+                <input type="file" id="file-input" accept=".docx" hidden>
+            </div>
+
+            <div class="loading-state hidden" id="loading-state">
+                <div class="spinner"></div>
+                <p>Analizando documento...</p>
+            </div>
+        </div>
+
+        <div id="results-container" class="results-container hidden">
+            <!-- Results injected here by JS -->
+        </div>
+    </div>
+
+    <script src="/static/script.js?v=4"></script>
+</body>
+
+</html>

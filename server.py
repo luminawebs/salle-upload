@@ -1,7 +1,11 @@
 import os
 import json
 import asyncio
+import traceback
 from fastapi import FastAPI, UploadFile, File, Form, Request
+from fastapi.responses import JSONResponse
+from core.data_parser import parse_docx_to_html
+from core.document_reviewer import review_document
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import subprocess
@@ -84,6 +88,58 @@ async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
     return {"info": f"archivo '{file.filename}' guardado exitosamente"}
+
+@app.post("/api/review")
+async def api_review(file: UploadFile = File(...)):
+    if not file.filename.endswith('.docx'):
+        return JSONResponse(status_code=400, content={"error": "El archivo debe ser un .docx."})
+
+    TEMP_COURSE_ID = "temp_upload"
+    TEMP_ASSETS_DIR = os.path.join("assets", TEMP_COURSE_ID)
+
+    if os.path.exists(TEMP_ASSETS_DIR):
+        try:
+            shutil.rmtree(TEMP_ASSETS_DIR)
+        except Exception:
+            pass
+    os.makedirs(TEMP_ASSETS_DIR, exist_ok=True)
+
+    try:
+        docx_path = os.path.join(TEMP_ASSETS_DIR, f"{TEMP_COURSE_ID}.docx")
+        with open(docx_path, "wb+") as file_object:
+            file_object.write(await file.read())
+
+        # 1. Parse DOCX to HTML
+        html_content = parse_docx_to_html(docx_path, TEMP_COURSE_ID)
+        if not html_content:
+            return JSONResponse(status_code=500, content={"error": "Fallo al extraer el contenido del documento."})
+            
+        output_html_path = os.path.join(TEMP_ASSETS_DIR, "raw_docx_extracted.html")
+        with open(output_html_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
+
+        # 2. Review the document
+        report = review_document(
+            course_id=TEMP_COURSE_ID,
+            generate_json=False,
+            generate_text=False
+        )
+
+        return report
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={
+            "error": f"Error interno: {str(e)}",
+            "trace": traceback.format_exc()
+        })
+        
+    finally:
+        # Cleanup temporary files
+        try:
+            if os.path.exists(TEMP_ASSETS_DIR):
+                shutil.rmtree(TEMP_ASSETS_DIR)
+        except Exception:
+            pass
 
 @app.get("/api/logs")
 async def stream_logs():

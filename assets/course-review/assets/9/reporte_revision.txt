@@ -1,0 +1,23 @@
+REPORTE DE REVISIÓN DE DOCUMENTO - CURSO 9
+============================================================
+
+[✓] Introducción General (Presentación del espacio académico) encontrada.
+
+--- UNIDAD 1 ---
+  [✓] Resumen encontrado.
+  [✓] Preguntas orientadoras encontradas.
+  [✓] Actividades encontradas: 1, 2, 5, 7, 8
+  [✓] Material de referencia / Lecturas complementarias encontrado.
+
+--- UNIDAD 2 ---
+  [✓] Resumen encontrado.
+  [✓] Preguntas orientadoras encontradas.
+  [✓] Actividades encontradas: 4
+  [X] Material de referencia / Lecturas complementarias NO encontrado.
+
+--- UNIDAD 3 ---
+  [✓] Resumen encontrado.
+  [✓] Preguntas orientadoras encontradas.
+  [✓] Actividades encontradas: 6
+  [X] Material de referencia / Lecturas complementarias NO encontrado.
+
