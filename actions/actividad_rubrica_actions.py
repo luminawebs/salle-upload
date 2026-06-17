@@ -1039,7 +1039,8 @@ def run_actividad_rubrica_workflow(driver, course_id: int, workflow_type: str = 
 
         # ── Fill rubric ───────────────────────────────────────────────────────
         try:
-            ok = fill_rubric(driver, criteria, wait_time=wait_time, rubric_name=label)
+            full_rubric_name = f"{label} {cfg['moodle_suffix']}"
+            ok = fill_rubric(driver, criteria, wait_time=wait_time, rubric_name=full_rubric_name)
             if ok:
                 logger.info(f"  ✓ Rúbrica uploaded and confirmed for {label}")
                 total_ok += 1
