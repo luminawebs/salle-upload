@@ -57,10 +57,21 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
                         normalized_name = ' '.join(name_text.split()).lower()
                         normalized_search = ' '.join(activity_name.split()).lower()
                         
-                        # We want to match the activity name, avoiding
+                        # We want to match the activity name flexibly, avoiding
                         # matching "Actividad 10" when searching for "Actividad 1".
-                        # Using regex to ensure it's not immediately followed by another digit or letter
-                        if re.search(rf'(^|\W){re.escape(normalized_search)}($|\W)', normalized_name):
+                        words = normalized_search.split()
+                        match = True
+                        for w in words:
+                            if w.isdigit():
+                                if not re.search(rf'(^|\W){w}($|\W)', normalized_name):
+                                    match = False
+                                    break
+                            else:
+                                if w not in normalized_name:
+                                    match = False
+                                    break
+                                    
+                        if match:
                             # Find the primary link — must be mod/assign
                             for link in activity.find_elements(By.CSS_SELECTOR, "a.aalink, a.instancename"):
                                 href = link.get_attribute("href") or ""

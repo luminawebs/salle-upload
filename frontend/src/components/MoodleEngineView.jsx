@@ -408,6 +408,35 @@ export default function MoodleEngineView({ setActiveTab }) {
             </label>
           </div>
 
+          {/* Status Card */}
+          <div className="bg-surface rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center">
+              <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
+              Monitor de Ejecución
+            </h2>
+
+            <div className="flex flex-col items-center justify-center mb-3 py-2">
+              <h3 className="text-lg font-bold text-success mb-1">
+                {status === 'Ready' && 'Listo para ejecutar'}
+                {status === 'Running' && 'Ejecutando'}
+                {status === 'Completed' && 'Completado'}
+                {status === 'Failed' && 'Error Crítico'}
+              </h3>
+              <p className="text-xs text-gray-400 mb-4 text-center">
+                {status === 'Ready' && 'Todo en orden. Presiona ejecutar para iniciar.'}
+                {status === 'Running' && currentTaskLabel}
+                {status === 'Completed' && 'El proceso ha finalizado exitosamente.'}
+                {status === 'Failed' && 'La ejecución se ha detenido por un error.'}
+              </p>
+              <CircularProgress percentage={progress} />
+
+              <div className="mt-4 flex flex-col items-center">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tiempo de ejecución</p>
+                <p className="text-xl font-bold text-primary mt-0.5">{formatTime(elapsedSeconds)}</p>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* Center Panel: Pipeline */}
@@ -487,34 +516,7 @@ export default function MoodleEngineView({ setActiveTab }) {
         {/* Right Panel: Monitor */}
         <div className="xl:col-span-4 flex flex-col space-y-6 h-full">
 
-          {/* Status Card */}
-          <div className="bg-surface rounded-xl border border-border p-4 shadow-sm">
-            <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center">
-              <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
-              Monitor de Ejecución
-            </h2>
 
-            <div className="flex flex-col items-center justify-center mb-3 py-2">
-              <h3 className="text-lg font-bold text-success mb-1">
-                {status === 'Ready' && 'Listo para ejecutar'}
-                {status === 'Running' && 'Ejecutando'}
-                {status === 'Completed' && 'Completado'}
-                {status === 'Failed' && 'Error Crítico'}
-              </h3>
-              <p className="text-xs text-gray-400 mb-4 text-center">
-                {status === 'Ready' && 'Todo en orden. Presiona ejecutar para iniciar.'}
-                {status === 'Running' && currentTaskLabel}
-                {status === 'Completed' && 'El proceso ha finalizado exitosamente.'}
-                {status === 'Failed' && 'La ejecución se ha detenido por un error.'}
-              </p>
-              <CircularProgress percentage={progress} />
-
-              <div className="mt-4 flex flex-col items-center">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tiempo de ejecución</p>
-                <p className="text-xl font-bold text-primary mt-0.5">{formatTime(elapsedSeconds)}</p>
-              </div>
-            </div>
-          </div>
 
           {/* Terminal Console */}
           <div className="flex-1 flex flex-col min-h-[400px]">
@@ -530,7 +532,7 @@ export default function MoodleEngineView({ setActiveTab }) {
               ))}
             </div>
 
-            <div className="flex-1 bg-[#0f141f] rounded-b-xl border border-border flex flex-col relative shadow-inner overflow-hidden">
+            <div className="flex-1 bg-[#0f141f] rounded-b-xl border border-border flex flex-col relative shadow-inner overflow-hidden" style={{ height: '700px' }}>
               <div className="flex items-center px-4 py-2 border-b border-white/5 bg-black/20">
                 <Terminal className="w-4 h-4 text-gray-400 mr-2" />
                 <h2 className="text-xs font-semibold text-gray-300 uppercase tracking-widest">
@@ -543,7 +545,7 @@ export default function MoodleEngineView({ setActiveTab }) {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 overflow-y-auto font-mono text-[13px] leading-relaxed space-y-2">
+              <div className="flex-1 p-4 overflow-y-auto font-mono text-[13px] leading-relaxed space-y-2" >
                 {logs.filter(l => l.phase === activeLogTab).length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-600">
                     <Activity className="w-8 h-8 mb-3 opacity-20" />

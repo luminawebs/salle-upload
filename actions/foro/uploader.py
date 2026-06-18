@@ -122,13 +122,15 @@ def upload_foro_content(driver, course_id, week_name, resource_name, html_conten
         # 5.5. Configure "Calificación" (Grade) section
         try:
             logger.info("Configuring forum grading...")
-            # Try to expand "Calificación" section if collapsed
+            # Try to expand "Evaluación del foro completo" or "Calificación" section if collapsed
             try:
-                grade_header = driver.find_element(By.XPATH, "//a[contains(text(), 'Calificación') and contains(@class, 'fheader')]")
-                if grade_header.get_attribute("aria-expanded") == "false":
+                # Moodle 4.x usually names the whole forum grading section "Evaluación del foro completo"
+                grade_header = driver.find_element(By.XPATH, "//a[(contains(text(), 'Calificación') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'evaluación del foro completo') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'whole forum grading')) and contains(@class, 'fheader')]")
+                if grade_header.get_attribute("aria-expanded") == "false" or "false" in str(grade_header.get_attribute("aria-expanded")):
                     driver.execute_script("arguments[0].click();", grade_header)
                     time.sleep(0.5)
-            except:
+            except Exception as header_ex:
+                logger.debug(f"Could not find or expand grade header: {header_ex}")
                 pass
                 
             # Select "Puntuación" (value="point") in the type dropdown

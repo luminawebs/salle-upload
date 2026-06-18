@@ -811,8 +811,10 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
     # ── Check for Moodle error messages or access errors ─────────────────────
     error_msg = soup.find("div", class_="alert-danger") or soup.find("div", class_="errormessage")
     if error_msg:
-        logger.warning(f"  Moodle error detected on manage page: {error_msg.get_text(strip=True)}")
-        return False
+        err_text = error_msg.get_text(strip=True)
+        logger.warning(f"  Moodle error/warning detected on manage page: {err_text}")
+        if "no está listo" not in err_text.lower() and "not ready" not in err_text.lower():
+            return False
 
     if "Error | Padre" in page_title or "error" in page_title.lower():
         logger.warning(f"  Access error to grading manage page for cmid {cmid}. Activity might not support advanced grading.")
