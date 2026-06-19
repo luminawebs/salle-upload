@@ -716,7 +716,20 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
     # Extract Plan de Formación
     tables = soup.find_all('table')
     for t in tables:
-        if 'PLAN DE FORMACIÓN' in t.get_text().upper() or 'PLAN DE FORMACION' in t.get_text().upper():
+        text_upper = t.get_text().upper()
+        if 'PLAN DE FORMACIÓN' in text_upper or 'PLAN DE FORMACION' in text_upper:
+            # If this table contains a nested table that ALSO matches, skip this outer one
+            nested_tables = t.find_all('table')
+            has_nested_match = False
+            for nt in nested_tables:
+                nt_text = nt.get_text().upper()
+                if 'PLAN DE FORMACIÓN' in nt_text or 'PLAN DE FORMACION' in nt_text:
+                    has_nested_match = True
+                    break
+            
+            if has_nested_match:
+                continue
+
             # Remove "(clic para ver ejemplos)" text/links
             for el in t.find_all(string=re.compile(r"clic para ver ejemplos", re.IGNORECASE)):
                 parent_p = el.find_parent('p')

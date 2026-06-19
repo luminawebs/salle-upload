@@ -186,12 +186,11 @@ def run_docx_splitting_workflow(course_id: int):
                     next_text = next_tr.get_text().strip().upper()
                     
                     stop_conditions = [
-                        re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
-                        "UNIDAD DIDÁCTICA" in next_text,
-                        "INFORMACIÓN PARA EL EQUIPO" in next_text,
-                        "INFORMACION PARA EL EQUIPO" in next_text,
-                        "EQUIPO DE PRODUCCI" in next_text,
-                        "ENCUENTRO VIRTUAL" in next_text
+                        re.match(r'^ACTIVIDAD\s+\d+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
+                        next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA"),
+                        next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"),
+                        next_text.startswith("EQUIPO DE PRODUCCI"),
+                        next_text.startswith("ENCUENTRO VIRTUAL")
                     ]
                     
                     if any(stop_conditions):
@@ -242,7 +241,7 @@ def run_docx_splitting_workflow(course_id: int):
             while i < len(trs):
                 next_tr = trs[i]
                 next_text = next_tr.get_text().strip().upper()
-                if re.search(r'ACTIVIDAD\s+\d+\s*:', next_text) or "UNIDAD DIDÁCTICA" in next_text or "INFORMACIÓN PARA EL EQUIPO" in next_text:
+                if re.match(r'^ACTIVIDAD\s+\d+[\s:.-]*', next_text) or next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA") or next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"):
                     i -= 1
                     break
                 for td in next_tr.find_all('td'):
