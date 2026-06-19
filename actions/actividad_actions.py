@@ -951,7 +951,7 @@ def _configure_actividad_grading(driver):
     """Configures the Grading section in the Moodle activity form."""
     try:
         # Expand Calificación section if needed (Supports Assignments and Forums)
-        grade_header = driver.find_elements(By.CSS_SELECTOR, "fieldset#id_modstandardgrade a[data-toggle='collapse'], fieldset#id_forumgradingset a[data-toggle='collapse']")
+        grade_header = driver.find_elements(By.CSS_SELECTOR, "fieldset#id_modstandardgrade a[data-toggle='collapse'], fieldset#id_grade_forum_header a[data-toggle='collapse']")
         if grade_header:
             is_expanded = grade_header[0].get_attribute("aria-expanded")
             if is_expanded == "false":
@@ -959,28 +959,34 @@ def _configure_actividad_grading(driver):
                 time.sleep(0.5)
 
         # 1. Tipo: Puntuación (value="point")
-        type_dropdowns = driver.find_elements(By.CSS_SELECTOR, "#id_grade_modgrade_type, #id_grade_forum_type")
+        type_dropdowns = driver.find_elements(By.CSS_SELECTOR, "#id_grade_modgrade_type, #id_grade_forum_modgrade_type")
         if type_dropdowns:
             from selenium.webdriver.support.ui import Select
             sel = Select(type_dropdowns[0])
             if sel.first_selected_option.get_attribute("value") != "point":
                 sel.select_by_value("point")
+                logger.info("  Set Grading Type to 'Puntuación'")
                 time.sleep(0.5)
 
         # 2. Calificación máxima: 5
-        max_inputs = driver.find_elements(By.CSS_SELECTOR, "#id_grade_modgrade_point, #id_grade_forum_point")
+        max_inputs = driver.find_elements(By.CSS_SELECTOR, "#id_grade_modgrade_point, #id_grade_forum_modgrade_point")
         if max_inputs:
             driver.execute_script("arguments[0].value = '5';", max_inputs[0])
             driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", max_inputs[0])
+            logger.info("  Set Max Grade to 5")
 
         # 3. Método de calificación: Rúbrica (value="rubric")
         method_dropdowns = driver.find_elements(By.CSS_SELECTOR, "#id_advancedgradingmethod_submissions, #id_advancedgradingmethod_forum")
         if method_dropdowns:
-            from selenium.webdriver.support.ui import Select
-            sel = Select(method_dropdowns[0])
-            if sel.first_selected_option.get_attribute("value") != "rubric":
-                sel.select_by_value("rubric")
-                time.sleep(0.5)
+            if method_dropdowns[0].get_attribute("disabled"):
+                logger.warning("  Advanced grading method dropdown is disabled. Skipping rubric selection.")
+            else:
+                from selenium.webdriver.support.ui import Select
+                sel = Select(method_dropdowns[0])
+                if sel.first_selected_option.get_attribute("value") != "rubric":
+                    sel.select_by_value("rubric")
+                    logger.info("  Set Grading Method to 'Rúbrica'")
+                    time.sleep(0.5)
 
     except Exception as e:
         logger.error(f"  Error configuring grading: {e}")
