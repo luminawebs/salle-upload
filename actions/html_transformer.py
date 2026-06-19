@@ -429,6 +429,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                 img["src"] = base64_data
         
     # 3. Format URLs
+    # First handle URLs that are already inside <a> tags
     for a_tag in soup.find_all("a"):
         # Set target attribute
         a_tag['target'] = "_blank"
@@ -447,6 +448,27 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
             
             if new_text != prev_node:
                 prev_node.replace_with(new_text)
+
+    # Next, handle plain text URLs that weren't converted to <a> tags
+    pattern = re.compile(r'(?i)(\s*(?:disponible(?:s)?|dispon[íi]vel|available)\s*(?:en|em|at)?\s*:?\s*)?(https?://[^\s<>"]+|www\.[^\s<>"]+)')
+
+    def repl(match):
+        url = match.group(2)
+        href = url if url.startswith('http') else 'https://' + url
+        return f' <a href="{href}" target="_blank" rel="noopener">(disponible aquí)</a>'
+
+    plain_urls_converted = 0
+    for text_node in soup.find_all(string=True):
+        if text_node.parent and text_node.parent.name == 'a':
+            continue
+        new_html = pattern.sub(repl, text_node)
+        if new_html != text_node:
+            plain_urls_converted += 1
+            new_soup = BeautifulSoup(new_html, 'html.parser')
+            text_node.replace_with(new_soup)
+            
+    if plain_urls_converted > 0:
+        logger.info(f"Converted {plain_urls_converted} plain-text URLs to '(disponible aquí)' anchors.")
             
     # 4. Apply Typography (wrap text in spans)
     for tag in soup.find_all(["p", "li"]):
