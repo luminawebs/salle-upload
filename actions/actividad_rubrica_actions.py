@@ -660,10 +660,10 @@ def _find_assign_url(driver, course_id: int, week_label: str, semana: int, moodl
                     continue
             
             if found_activity:
-                # Find the primary link — must be mod/assign
+                # Find the primary link — must be mod/assign or mod/forum
                 for link in found_activity.find_elements(By.CSS_SELECTOR, "a.aalink, a.instancename"):
                     href = link.get_attribute("href") or ""
-                    if "mod/assign" in href:
+                    if "mod/assign" in href or "mod/forum" in href:
                         if href.startswith("/"):
                             base = re.match(r"(https?://[^/]+)", Config.MOODLE_URL).group(1)
                             href = base + href
@@ -750,9 +750,12 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
     # ── Step 3: Navigate to grading management page (Fallback/Ensure) ──────────
     # We only force navigation if we didn't click a link OR if we are still not on a grading page
     if not link_clicked or "grading/manage.php" not in driver.current_url:
+        component = "mod_forum" if "mod/forum" in assign_url else "mod_assign"
+        area = "forum" if component == "mod_forum" else "submissions"
+        
         manage_url = (
             f"{base}/grade/grading/manage.php"
-            f"?component=mod_assign&area=submissions&cmid={cmid}"
+            f"?component={component}&area={area}&cmid={cmid}"
         )
         logger.info(f"  Ensuring we are on grading manage URL: {manage_url}")
         try:

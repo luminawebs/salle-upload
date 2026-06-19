@@ -122,12 +122,53 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     gift_lines.append(gift)
                     q_num += 1
 
-    # FORMAT B LOGIC (Flat OL with (Respuesta))
+    # FORMAT B LOGIC (Nested OL/UL with (Respuesta))
     if not gift_lines:
-        for ol in soup.find_all('ol'):
-            lis = ol.find_all('li', recursive=False)
-            has_respuesta = any("(respuesta)" in li.get_text(strip=True).lower() for li in lis)
-            if has_respuesta:
+        import copy
+        lists = soup.find_all(['ol', 'ul'])
+        for lst in lists:
+            lis = lst.find_all('li', recursive=False)
+            has_respuesta = any("(respuesta" in li.get_text(strip=True).lower() for li in lis)
+            is_nested = any(li.find(['ol', 'ul']) for li in lis)
+            if has_respuesta and is_nested:
+                for li in lis:
+                    inner_list = li.find(['ol', 'ul'])
+                    if not inner_list:
+                        continue
+                    
+                    li_clone = copy.copy(li)
+                    if li_clone.find(['ol', 'ul']):
+                        li_clone.find(['ol', 'ul']).decompose()
+                    stem = li_clone.get_text(strip=True)
+                    
+                    options = []
+                    inner_lis = inner_list.find_all('li', recursive=False)
+                    for inner_li in inner_lis:
+                        opt_text = inner_li.get_text(strip=True)
+                        is_correct = False
+                        if "(respuesta" in opt_text.lower():
+                            is_correct = True
+                            opt_text = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt_text).strip()
+                        options.append((opt_text, is_correct))
+                    
+                    if stem and options:
+                        q_num_padded = f'{q_num:02d}'
+                        gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{\n'
+                        for opt, is_corr in options:
+                            prefix = '=' if is_corr else '~'
+                            gift += f'\t{prefix}{opt}\n'
+                        gift += '}'
+                        gift_lines.append(gift)
+                        q_num += 1
+
+    # FORMAT C LOGIC (Flat OL/UL or Flat P with (Respuesta))
+    if not gift_lines:
+        # Check ol/ul first
+        lists = soup.find_all(['ol', 'ul'])
+        for lst in lists:
+            lis = lst.find_all('li', recursive=False)
+            has_respuesta = any("(respuesta" in li.get_text(strip=True).lower() for li in lis)
+            if has_respuesta and not any(li.find(['ol', 'ul']) for li in lis):
                 current_stem = None
                 current_options = []
                 for li in lis:
@@ -137,19 +178,18 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     is_stem = False
                     if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
                         is_stem = True
-                    elif current_stem and len(current_options) >= 4:
-                        # Fallback heuristic
+                    elif current_stem and len(current_options) >= 4 and not "(respuesta" in text.lower():
                         is_stem = True
                         
                     if is_stem:
-                        if current_stem:
+                        if current_stem and current_options:
                             q_num_padded = f'{q_num:02d}'
                             gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
                             for opt in current_options:
                                 is_correct = False
-                                if "(respuesta)" in opt.lower():
+                                if "(respuesta" in opt.lower():
                                     is_correct = True
-                                    opt = re.sub(r'(?i)\s*\(respuesta\)', '', opt).strip()
+                                    opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
                                 prefix = '=' if is_correct else '~'
                                 gift += f'\t{prefix}{opt}\n'
                             gift += '}'
@@ -158,16 +198,72 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                         current_stem = text
                         current_options = []
                     else:
-                        current_options.append(text)
+                        if current_stem:
+                            current_options.append(text)
                 
-                if current_stem:
+                if current_stem and current_options:
                     q_num_padded = f'{q_num:02d}'
                     gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
                     for opt in current_options:
                         is_correct = False
-                        if "(respuesta)" in opt.lower():
+                        if "(respuesta" in opt.lower():
                             is_correct = True
-                            opt = re.sub(r'(?i)\s*\(respuesta\)', '', opt).strip()
+                            opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
+                        prefix = '=' if is_correct else '~'
+                        gift += f'\t{prefix}{opt}\n'
+                    gift += '}'
+                    gift_lines.append(gift)
+                    q_num += 1
+
+        # If still no gift_lines, try flat paragraphs
+        if not gift_lines:
+            paragraphs = soup.find_all(['p', 'div'])
+            has_respuesta = any("(respuesta" in p.get_text(strip=True).lower() for p in paragraphs)
+            if has_respuesta:
+                current_stem = None
+                current_options = []
+                for p in paragraphs:
+                    text = p.get_text(strip=True)
+                    if not text: continue
+                    
+                    # Skip intros
+                    if len(text.split()) > 50: continue
+                    if "cómo lo vamos a" in text.lower() or "qué vamos a" in text.lower(): continue
+                    
+                    is_stem = False
+                    if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
+                        is_stem = True
+                    elif current_stem and len(current_options) >= 4 and not "(respuesta" in text.lower():
+                        is_stem = True
+                        
+                    if is_stem:
+                        if current_stem and current_options:
+                            q_num_padded = f'{q_num:02d}'
+                            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
+                            for opt in current_options:
+                                is_correct = False
+                                if "(respuesta" in opt.lower():
+                                    is_correct = True
+                                    opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
+                                prefix = '=' if is_correct else '~'
+                                gift += f'\t{prefix}{opt}\n'
+                            gift += '}'
+                            gift_lines.append(gift)
+                            q_num += 1
+                        current_stem = text
+                        current_options = []
+                    else:
+                        if current_stem:
+                            current_options.append(text)
+                
+                if current_stem and current_options:
+                    q_num_padded = f'{q_num:02d}'
+                    gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
+                    for opt in current_options:
+                        is_correct = False
+                        if "(respuesta" in opt.lower():
+                            is_correct = True
+                            opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
                         prefix = '=' if is_correct else '~'
                         gift += f'\t{prefix}{opt}\n'
                     gift += '}'
@@ -317,8 +413,14 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                 curr.decompose()
             curr = next_sib
             
-    # 2.7 Convert local images from the document (like from /imgs folder) to base64
+    # 2.7 Convert local images from the document (like from /imgs folder) to base64 and apply max-width
     for img in soup.find_all("img"):
+        # Apply max-width to prevent images from expanding outside the view
+        current_style = img.get("style", "")
+        if "max-width" not in current_style:
+            new_style = current_style + ("; " if current_style and not current_style.endswith(";") else "") + "max-width: 100%; height: auto;"
+            img["style"] = new_style.strip()
+            
         src = img.get("src")
         if src and not str(src).startswith("data:") and not str(src).startswith("http"):
             filename = os.path.basename(str(src))
@@ -337,10 +439,10 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
         # Clean up preceding text like "Disponible" or colon before the link
         prev_node = a_tag.previous_sibling
         if prev_node and isinstance(prev_node, str):
-            # Remove "disponible:" or "Disponible" from the end of the text preceding the link
-            new_text = re.sub(r'(?i)\s*disponible\s*:?\s*$', ' ', prev_node)
+            # Remove "disponible en:", "disponible:", "disponível em:", "available at:", etc.
+            new_text = re.sub(r'(?i)\s*(disponible(s)?|dispon[íi]vel|available)\s*(en|em|at)?\s*:?\s*$', ' ', prev_node)
             if new_text == prev_node:
-                # If "disponible" is not there, just remove colon if it exists at the end
+                # If the specific text is not there, just remove colon if it exists at the end
                 new_text = re.sub(r'\s*:\s*$', ' ', prev_node)
             
             if new_text != prev_node:

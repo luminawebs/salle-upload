@@ -72,10 +72,10 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
                                     break
                                     
                         if match:
-                            # Find the primary link — must be mod/assign
+                            # Find the primary link — must be mod/assign or mod/forum
                             for link in activity.find_elements(By.CSS_SELECTOR, "a.aalink, a.instancename"):
                                 href = link.get_attribute("href") or ""
-                                if "mod/assign" in href:
+                                if "mod/assign" in href or "mod/forum" in href:
                                     if href.startswith("/"):
                                         base = re.match(r"(https?://[^/]+)", ConfigSALLE.MOODLE_URL).group(1)
                                         href = base + href

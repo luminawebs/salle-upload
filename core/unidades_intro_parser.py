@@ -104,11 +104,9 @@ def run_unidades_intro_splitting_workflow(course_id: int):
 
         html_parts = []
         
-        # Add Unit Title if available
-        if data.get("title"):
-            title_text = data["title"].title() # Capitalize nicely
-            # Fix some specific casing for known acronyms if needed, or just let it be
-            html_parts.append(f'<p><b>{title_text}</b></p>')
+        # The Unit Title is no longer appended here because Moodle already
+        # displays the section title prominently at the top of the section.
+        # Removing this prevents repeating "Unidad Didáctica X: ..." in the text.
 
         if data["resumen"]:
             for p_text in data["resumen"]:

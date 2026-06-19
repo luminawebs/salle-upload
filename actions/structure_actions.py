@@ -95,10 +95,12 @@ def parse_raw_document(filepath):
                         "name": text,
                         "type": None
                     }
+                    if 'evaluación' in text.lower() or 'evaluacion' in text.lower():
+                        current_activity["type"] = "Cuestionario"
                     current_section["activities"].append(current_activity)
                     
         # Detect Activity Type
-        elif element.name in ['ul', 'ol'] and current_activity is not None:
+        if element.name in ['ul', 'ol'] and current_activity is not None:
             list_text = text.lower()
             if "foro" in list_text or "tarea" in list_text or "cuestionario" in list_text:
                 for li in element.find_all('li'):

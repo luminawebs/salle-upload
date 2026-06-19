@@ -258,7 +258,7 @@ export default function MoodleEngineView({ setActiveTab }) {
         setProgress(65);
         setCurrentTaskLabel("Configurando Evaluaciones");
       }
-      if (lower.includes("competencias") || lower.includes("configuracion final") || lower.includes("limpieza")) {
+      if (lower.includes("competencias") || lower.includes("configuracion final") || lower.includes("limpieza") || lower.includes("activity completion") || lower.includes("criterios de finalización")) {
         newPhase = 3;
         setProgress(90);
         setCurrentTaskLabel("Finalizando automatización");
@@ -310,7 +310,7 @@ export default function MoodleEngineView({ setActiveTab }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-gray-200 font-sans flex flex-col">
+    <div className="h-screen bg-background text-gray-200 font-sans flex flex-col overflow-hidden">
       {/* Header */}
       <header className="h-16 bg-surface border-b border-border flex items-center justify-between px-6 sticky top-0 z-10">
         <div className="flex items-center space-x-6">
@@ -323,30 +323,14 @@ export default function MoodleEngineView({ setActiveTab }) {
           <div className="h-6 w-px bg-border ml-4 mr-2"></div>
           <NavigationTabs activeTab="moodle" setActiveTab={setActiveTab} />
         </div>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handleSaveSettings}
-            className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-lg transition text-sm font-medium border border-transparent hover:border-border"
-          >
-            {isSaved ? <Check className="w-4 h-4 mr-2 text-success" /> : <Save className="w-4 h-4 mr-2 text-gray-400" />}
-            {isSaved ? "Guardado" : "Guardar Configuración"}
-          </button>
-          <button
-            onClick={handleRun}
-            disabled={status === 'Running'}
-            className={`flex items-center px-6 py-2 rounded-lg font-semibold transition-all shadow-lg text-sm ${status === 'Running' ? 'bg-border cursor-not-allowed text-gray-400' : 'bg-primary hover:bg-purple-500 text-white'}`}
-          >
-            {status === 'Running' ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-            {status === 'Running' ? "Procesando..." : "Iniciar Automatización"}
-          </button>
-        </div>
+
       </header>
 
       {/* Main Layout: 3 Columns */}
-      <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1600px] mx-auto w-full">
+      <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1600px] mx-auto w-full min-h-0 h-full">
 
         {/* Left Panel: Inputs */}
-        <div className="xl:col-span-3 space-y-6">
+        <div className="xl:col-span-3 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar h-full">
 
           <div className="bg-surface rounded-xl border border-border p-5 shadow-sm">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-5 flex items-center">
@@ -437,11 +421,30 @@ export default function MoodleEngineView({ setActiveTab }) {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-1 items-center">
+            <button
+              onClick={handleRun}
+              disabled={status === 'Running'}
+              className={`flex items-center px-6 py-4 rounded-lg font-semibold transition-all shadow-lg text-md justify-center w-full ${status === 'Running' ? 'bg-border cursor-not-allowed text-gray-400' : 'bg-primary hover:bg-purple-500 text-white'}`}
+            >
+              {status === 'Running' ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+              {status === 'Running' ? "Procesando..." : "Iniciar Automatización"}
+            </button>
+            <button
+              onClick={handleSaveSettings}
+              className="flex items-center  py-4 hover:bg-gray-800 rounded-lg transition text-sm justify-center w-full font-medium border border-transparent hover:border-border"
+            >
+              {isSaved ? <Check className="w-4 h-4 mr-2 text-success" /> : <Save className="w-4 h-4 mr-2 text-gray-400" />}
+              {isSaved ? "Guardado" : "Guardar Configuración"}
+            </button>
+
+          </div>
+
         </div>
 
         {/* Center Panel: Pipeline */}
-        <div className="xl:col-span-5 space-y-6">
-          <div className="bg-surface rounded-xl border border-border p-6 shadow-sm min-h-[calc(100vh-8rem)]">
+        <div className="xl:col-span-5 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar h-full">
+          <div className="bg-surface rounded-xl border border-border p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center">
                 <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
@@ -458,7 +461,7 @@ export default function MoodleEngineView({ setActiveTab }) {
 
             <div className="relative pl-6 space-y-8">
               {/* Vertical line indicator */}
-              <div className="absolute left-[11px] top-6 bottom-6 w-0.5 bg-border rounded-full">
+              <div className="absolute left-[-1px] top-6 bottom-6 w-0.5 bg-border rounded-full">
                 {status === 'Running' && <div className="w-full bg-primary transition-all duration-1000 rounded-full" style={{ height: `${progress}%` }}></div>}
               </div>
 
@@ -514,12 +517,12 @@ export default function MoodleEngineView({ setActiveTab }) {
         </div>
 
         {/* Right Panel: Monitor */}
-        <div className="xl:col-span-4 flex flex-col space-y-6 h-full">
+        <div className="xl:col-span-4 flex flex-col space-y-6 min-h-0 h-full">
 
 
 
           {/* Terminal Console */}
-          <div className="flex-1 flex flex-col min-h-[400px]">
+          <div className="flex-1 flex flex-col min-h-0">
             <div className="flex bg-surface rounded-t-xl border border-border border-b-0 overflow-hidden">
               {WORKFLOW_PHASES.map((phase, idx) => (
                 <button
@@ -532,7 +535,7 @@ export default function MoodleEngineView({ setActiveTab }) {
               ))}
             </div>
 
-            <div className="flex-1 bg-[#0f141f] rounded-b-xl border border-border flex flex-col relative shadow-inner overflow-hidden" style={{ height: '700px' }}>
+            <div className="flex-1 bg-[#0f141f] rounded-b-xl border border-border flex flex-col relative shadow-inner min-h-0">
               <div className="flex items-center px-4 py-2 border-b border-white/5 bg-black/20">
                 <Terminal className="w-4 h-4 text-gray-400 mr-2" />
                 <h2 className="text-xs font-semibold text-gray-300 uppercase tracking-widest">
