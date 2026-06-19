@@ -950,8 +950,8 @@ def _configure_actividad_availability(driver):
 def _configure_actividad_grading(driver):
     """Configures the Grading section in the Moodle activity form."""
     try:
-        # Expand Calificación section if needed
-        grade_header = driver.find_elements(By.CSS_SELECTOR, "fieldset#id_modstandardgrade a[data-toggle='collapse']")
+        # Expand Calificación section if needed (Supports Assignments and Forums)
+        grade_header = driver.find_elements(By.CSS_SELECTOR, "fieldset#id_modstandardgrade a[data-toggle='collapse'], fieldset#id_forumgradingset a[data-toggle='collapse']")
         if grade_header:
             is_expanded = grade_header[0].get_attribute("aria-expanded")
             if is_expanded == "false":
@@ -959,7 +959,7 @@ def _configure_actividad_grading(driver):
                 time.sleep(0.5)
 
         # 1. Tipo: Puntuación (value="point")
-        type_dropdowns = driver.find_elements(By.ID, "id_grade_modgrade_type")
+        type_dropdowns = driver.find_elements(By.CSS_SELECTOR, "#id_grade_modgrade_type, #id_grade_forum_type")
         if type_dropdowns:
             from selenium.webdriver.support.ui import Select
             sel = Select(type_dropdowns[0])
@@ -968,13 +968,13 @@ def _configure_actividad_grading(driver):
                 time.sleep(0.5)
 
         # 2. Calificación máxima: 5
-        max_inputs = driver.find_elements(By.ID, "id_grade_modgrade_point")
+        max_inputs = driver.find_elements(By.CSS_SELECTOR, "#id_grade_modgrade_point, #id_grade_forum_point")
         if max_inputs:
             driver.execute_script("arguments[0].value = '5';", max_inputs[0])
             driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", max_inputs[0])
 
         # 3. Método de calificación: Rúbrica (value="rubric")
-        method_dropdowns = driver.find_elements(By.ID, "id_advancedgradingmethod_submissions")
+        method_dropdowns = driver.find_elements(By.CSS_SELECTOR, "#id_advancedgradingmethod_submissions, #id_advancedgradingmethod_forum")
         if method_dropdowns:
             from selenium.webdriver.support.ui import Select
             sel = Select(method_dropdowns[0])

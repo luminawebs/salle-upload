@@ -558,7 +558,8 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
             nxt = el.find_next_sibling()
             blocks = []
             while nxt and nxt.name not in ['h1', 'h2', 'table']:
-                if 'OPCIÓN METODOLÓGICA' in nxt.get_text().upper() or 'PLAN DE FORMACIÓN' in nxt.get_text().upper():
+                nxt_text = nxt.get_text().upper()
+                if 'OPCIÓN METODOLÓGICA' in nxt_text or 'OPCION METODOLOGICA' in nxt_text or 'METODOLOGÍA DE APRENDIZAJE' in nxt_text or 'METODOLOGIA DE APRENDIZAJE' in nxt_text or 'PLAN DE FORMACIÓN' in nxt_text:
                     break
                 blocks.append(str(nxt))
                 nxt = nxt.find_next_sibling()
@@ -567,7 +568,8 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
 
     # Extract Metodología
     for el in soup.find_all(['p', 'h1', 'h2', 'h3']):
-        if 'OPCIÓN METODOLÓGICA DEL ESPACIO ACADÉMICO' in el.get_text().upper() or 'OPCION METODOLOGICA' in el.get_text().upper():
+        text_upper = el.get_text().upper()
+        if 'OPCIÓN METODOLÓGICA DEL ESPACIO ACADÉMICO' in text_upper or 'OPCION METODOLOGICA' in text_upper or 'METODOLOGÍA DE APRENDIZAJE' in text_upper or 'METODOLOGIA DE APRENDIZAJE' in text_upper:
             nxt = el.find_next_sibling()
             blocks = []
             while nxt and nxt.name not in ['h1', 'h2', 'table']:
