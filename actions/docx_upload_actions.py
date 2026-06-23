@@ -13,6 +13,17 @@ from config.settingsSALLE import ConfigSALLE as Config
 
 logger = logging.getLogger(__name__)
 
+def parse_activity_number(val):
+    if val.isdigit(): return int(val)
+    roman = {'i':1,'v':5,'x':10,'l':50,'c':100,'d':500,'m':1000}
+    res = 0; val = val.lower()
+    for i in range(len(val)):
+        if i + 1 < len(val) and roman.get(val[i], 0) < roman.get(val[i+1], 0):
+            res -= roman.get(val[i], 0)
+        else:
+            res += roman.get(val[i], 0)
+    return res
+
 def click_edit_for_activity(driver, activity_name_prefix, wait_time):
     """
     Finds an activity by prefix name and clicks 'Editar ajustes'.
@@ -57,6 +68,16 @@ def click_edit_for_activity(driver, activity_name_prefix, wait_time):
                 if normalized_search in normalized_name:
                     target_activity = activity
                     break
+                else:
+                    # Fallback for Actividad X matching Actividad Roman_X
+                    search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
+                    name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
+                    if search_match and name_match:
+                        search_val = parse_activity_number(search_match.group(1))
+                        name_val = parse_activity_number(name_match.group(1))
+                        if search_val is not None and search_val == name_val:
+                            target_activity = activity
+                            break
         except NoSuchElementException:
             continue
             
@@ -200,6 +221,16 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
                 if normalized_search in normalized_name:
                     target_activity = activity
                     break
+                else:
+                    # Fallback for Actividad X matching Actividad Roman_X
+                    search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
+                    name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
+                    if search_match and name_match:
+                        search_val = parse_activity_number(search_match.group(1))
+                        name_val = parse_activity_number(name_match.group(1))
+                        if search_val is not None and search_val == name_val:
+                            target_activity = activity
+                            break
         except NoSuchElementException:
             continue
             

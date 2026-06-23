@@ -1,0 +1,165 @@
+// Pregunta 01
+::Pregunta 01::Una experiencia traumática puede ser: {
+	~Un solo evento
+	~Una serie de eventos
+	~Una afección crónica
+	=Todos los anteriores
+}
+
+// Pregunta 02
+::Pregunta 02::Los traumas pueden afectar a individuos, familias, grupos, comunidades, culturas específicas y generaciones. Generalmente abruma los recursos de un individuo o comunidad para hacer frente, y a menudo enciende la reacción de “pelea, huida o congelación” en el momento del evento o eventos. Con frecuencia produce una sensación de miedo, vulnerabilidad e impotencia. {
+	=Verdadero
+	~Falso
+	~A menudo, los eventos traumáticos son esperados y los individuos pueden traumatizarse por eventos que ven en televisión o en una película.
+	~Verdadero
+	=Falso
+}
+
+// Pregunta 03
+::Pregunta 03::¿Cuáles de los siguientes son ejemplos de trauma social? {
+	~Negligencia infantil, violencia doméstica y abuso sexual
+	~Guerra, terrorismo, y violencia política
+	~Inundaciones, huracanes, tornados
+	~Enfermedades, dolor físico y crónico
+	=Todos los anteriores
+}
+
+// Pregunta 04
+::Pregunta 04::A que se refiere Samsha cuando expresa que hay que “ver el trauma a través de una lente sociocultural”: {
+	~Ver el trauma desde una perspectiva contextual que integre características biopsicosociales, interpersonales, comunitarias y sociales
+	~Tener en cuenta valores individuales, colectivos y culturales
+	~Profundizar en la naturaleza del trauma, en el respuesta inmediata y sostenida al evento o eventos, y en los efectos a corto y largo plazo del evento
+	~Incluir disponibilidad de vivienda, respuesta comunitaria, adherencia o mantenimiento de rutinas, estructura familiar, y nivel de apoyo familiar
+	=Todos los anteriores
+}
+
+// Pregunta 05
+::Pregunta 05::Para comprender más adecuadamente el trauma, se deben considerar: {
+	~Los contextos en los que ocurrió
+	~Comprender el trauma desde una perspectiva sistémica
+	~Reconoce las influencias de las interacciones sociales, comunidades,
+	=Todas las anteriores
+}
+
+// Pregunta 06
+::Pregunta 06::¿Cuáles de los siguientes autores desarrolló modelos ecológicos contextuales? {
+	~Bronfenbrenner y Ceci (1994)
+	~Stokols ( 1996)
+	=A y B
+	~Ninguno de los anteriores
+}
+
+// Pregunta 07
+::Pregunta 07::La cultura determina respuestas aceptables al trauma y da forma a la expresión de angustia. Influye significativamente en cómo las personas transmiten estrés traumático a través del comportamiento, las emociones y el pensamiento inmediatamente después de un trauma y mucho después de que la experiencia traumática haya cesado. {
+	=Verdadero
+	~Falso
+	~Además de dar forma a las creencias sobre formas aceptables de comportamiento de búsqueda de ayuda y prácticas de curación, la cultura puede proporcionar una fuente de fortaleza, estrategias de afrontamiento únicas y recursos específicos.
+	=Verdadero
+}
+
+// Pregunta 08
+::Pregunta 08::Según Samhsa, los enfoques basados en el trauma incorporan tres elementos clave: {
+	=Darse cuenta de la prevalencia del trauma, reconocer cómo el trauma afecta a la persona en su contexto y responder poniendo en práctica este conocimiento
+	~Ver lo que pasa, identificar los niveles de estrés y reconocer los impactos sociales
+	~Ver los síntomas, reconocer las afectaciones e intervenir
+	~Ninguna de las anteriores
+}
+
+// Pregunta 09
+::Pregunta 09::La atención informada sobre el trauma abarca una perspectiva sistémica y ecológica que resalta la adaptación sobre los síntomas y la resiliencia sobre la patología. {
+	=Verdadero
+	~Falso
+	~Lo más importante en los procesos de atención y acompañamiento psicosocial es la patologización de los traumas.
+	~Verdadero
+	=Falso
+}
+
+// Pregunta 10
+::Pregunta 10::Un enfoque basado en el trauma comienza por: {
+	~Aprender las señales que asocia con traumas
+	~Revisar la historia de vida
+	~Mantener una relación solidaria, empática y colaborativa
+	~Fomentar el diálogo continuo
+	=Todos los anteriores
+}
+
+// Pregunta 11
+::Pregunta 11::Fomentar las fortalezas, es un paso clave en la prevención cuando se trabaja con personas que han estado expuestas a traumas, es una estrategia de acompañamiento esencial, una que se basa en los recursos existentes del individuo y lo ve como un sobreviviente ingenioso y resiliente. {
+	=Verdadero
+	~Falso
+}
+
+// Pregunta 12
+::Pregunta 12::El caso de Camila podría estar categorizado como: {
+	~Trauma individual
+	~Trauma interpersonal
+	~Trauma grupal
+	~Trauma masivo
+	=Todas los anteriores
+}
+
+// Pregunta 13
+::Pregunta 13::El mejor término para resumir los síntomas que está presentado Camila es: {
+	~Miedo
+	~Dificultad para relajaste
+	=Hypervigilancia
+	~Flashbacks
+}
+
+// Pregunta 14
+::Pregunta 14::Como profesional de acompañamiento psicosocial usted debe ayudar a Camila en sus procesos de recuperación, ¿qué particularidades debería tener en cuenta? {
+	~Cultura
+	~Tradiciones
+	~Historia de vida
+	~Relaciones
+	=Todas las anteriores
+}
+
+// Pregunta 15
+::Pregunta 15::¿Que técnica sería la más pertinente para ayudar a Camila a explorar los eventos traumáticos de una forma expresiva? {
+	~Entrevista estructurada
+	~Cuestionario semiestrcuturado
+	~Test estandarizado
+	=Línea de vida pictórica
+}
+
+// Pregunta 16
+::Pregunta 16::En el proceso de acompañamiento psicosocial y después de elaborar la historia de vida de Camila, se identifican algunos traumas que han ocurrido en su infancia. ¿Qué técnicas expresivas y creativas se podrían aplicar en miras a sanar su niña interior? {
+	~La caja de arena
+	~El cuento infantil
+	~Carta a mi niña interior
+	~Álbum familiar indígena
+	=Todas las anteriores
+}
+
+// Pregunta 17
+::Pregunta 17::Este caso podría cumplir con los criterios para ser: {
+	~Desajuste emocional
+	=Estrés o reacción aguda al trauma
+	~Estrés postraumático crónico
+	~Estrés postraumático complejo
+}
+
+// Pregunta 18
+::Pregunta 18::De acuerdo con el caso de Sheila, ¿cómo el trauma afectó su nivel personal? {
+	=Recayó en el consumo de marihuana
+	~Volvió a jugar en casinos
+	~Recayó en la adicción al tabaco
+	~Ninguna de las anteriores
+}
+
+// Pregunta 19
+::Pregunta 19::Siguiendo el caso de Sheila la afectación del trauma a nivel familiar se demostró en: {
+	~Aislamiento hacia su familia extensa
+	~Comunicación asertiva hacia los miembros de su familia
+	=Arrebatos de ira poco característicos hacia su esposo, hijos
+	~Todas las anteriores
+}
+
+// Pregunta 20
+::Pregunta 20::¿Cómo se demostró en Sheila la afectación del trauma a nivel social?: {
+	~No quería volver a la iglesia
+	=Afectó su vida laboral, no quería volver al lugar donde trabajaba
+	~Abandonó su relación con la escuela
+	~Ninguna de las anteriores
+}

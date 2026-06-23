@@ -87,12 +87,19 @@ def parse_raw_document(filepath):
                 current_activity = None
                 
         # Detect Activity
-        elif "ACTIVIDAD" in text.upper():
+        elif "ACTIVIDAD" in text.upper() and not text.upper().startswith("ACTIVIDADES"):
             if current_section is not None:
                 m = re.match(r'^ACTIVIDAD\s*\d+\s*:', text.upper())
                 if m or text.upper().startswith("ACTIVIDAD"):
+                    name_part = text
+                    # If the name is just "ACTIVIDAD X:" or very short, the real title might be in the next paragraph
+                    if text.strip().endswith(":") or len(text.strip()) < 15:
+                        nxt = element.find_next_sibling(['p', 'h1', 'h2', 'h3'])
+                        if nxt and nxt.get_text().strip() and not nxt.get_text().strip().upper().startswith('ACTIVIDAD'):
+                            name_part = text.strip() + ' ' + nxt.get_text().strip()
+                            
                     current_activity = {
-                        "name": text,
+                        "name": name_part,
                         "type": None
                     }
                     if 'evaluación' in text.lower() or 'evaluacion' in text.lower():

@@ -161,13 +161,22 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                         gift_lines.append(gift)
                         q_num += 1
 
-    # FORMAT C LOGIC (Flat OL/UL or Flat P with (Respuesta))
+    # FORMAT C LOGIC (Flat OL/UL or Flat P with marks)
     if not gift_lines:
+        def is_correct_option(t):
+            return "(respuesta" in t.lower() or bool(re.search(r'(?i)[_\s]*x[_\s]*$', t.strip()))
+            
+        def clean_option_text(t):
+            t = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', t)
+            t = re.sub(r'(?i)[_\s]*x[_\s]*$', '', t)
+            t = re.sub(r'_+$', '', t).strip()
+            return t
+
         # Check ol/ul first
         lists = soup.find_all(['ol', 'ul'])
         for lst in lists:
             lis = lst.find_all('li', recursive=False)
-            has_respuesta = any("(respuesta" in li.get_text(strip=True).lower() for li in lis)
+            has_respuesta = any(is_correct_option(li.get_text(strip=True)) for li in lis)
             if has_respuesta and not any(li.find(['ol', 'ul']) for li in lis):
                 current_stem = None
                 current_options = []
@@ -176,9 +185,12 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     if not text: continue
                     
                     is_stem = False
+                    is_tf = current_options and any('verdadero' in o.lower() for o in current_options) and any('falso' in o.lower() for o in current_options)
                     if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
                         is_stem = True
-                    elif current_stem and len(current_options) >= 4 and not "(respuesta" in text.lower():
+                    elif re.match(r'^\d+\.\s+', text):
+                        is_stem = True
+                    elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text):
                         is_stem = True
                         
                     if is_stem:
@@ -186,12 +198,10 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                             q_num_padded = f'{q_num:02d}'
                             gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
                             for opt in current_options:
-                                is_correct = False
-                                if "(respuesta" in opt.lower():
-                                    is_correct = True
-                                    opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
+                                is_correct = is_correct_option(opt)
+                                opt_clean = clean_option_text(opt)
                                 prefix = '=' if is_correct else '~'
-                                gift += f'\t{prefix}{opt}\n'
+                                gift += f'\t{prefix}{opt_clean}\n'
                             gift += '}'
                             gift_lines.append(gift)
                             q_num += 1
@@ -205,12 +215,10 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     q_num_padded = f'{q_num:02d}'
                     gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
                     for opt in current_options:
-                        is_correct = False
-                        if "(respuesta" in opt.lower():
-                            is_correct = True
-                            opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
+                        is_correct = is_correct_option(opt)
+                        opt_clean = clean_option_text(opt)
                         prefix = '=' if is_correct else '~'
-                        gift += f'\t{prefix}{opt}\n'
+                        gift += f'\t{prefix}{opt_clean}\n'
                     gift += '}'
                     gift_lines.append(gift)
                     q_num += 1
@@ -218,7 +226,7 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
         # If still no gift_lines, try flat paragraphs
         if not gift_lines:
             paragraphs = soup.find_all(['p', 'div'])
-            has_respuesta = any("(respuesta" in p.get_text(strip=True).lower() for p in paragraphs)
+            has_respuesta = any(is_correct_option(p.get_text(strip=True)) for p in paragraphs)
             if has_respuesta:
                 current_stem = None
                 current_options = []
@@ -231,9 +239,12 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     if "cómo lo vamos a" in text.lower() or "qué vamos a" in text.lower(): continue
                     
                     is_stem = False
+                    is_tf = current_options and any('verdadero' in o.lower() for o in current_options) and any('falso' in o.lower() for o in current_options)
                     if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
                         is_stem = True
-                    elif current_stem and len(current_options) >= 4 and not "(respuesta" in text.lower():
+                    elif re.match(r'^\d+\.\s+', text):
+                        is_stem = True
+                    elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text):
                         is_stem = True
                         
                     if is_stem:
@@ -241,12 +252,10 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                             q_num_padded = f'{q_num:02d}'
                             gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
                             for opt in current_options:
-                                is_correct = False
-                                if "(respuesta" in opt.lower():
-                                    is_correct = True
-                                    opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
+                                is_correct = is_correct_option(opt)
+                                opt_clean = clean_option_text(opt)
                                 prefix = '=' if is_correct else '~'
-                                gift += f'\t{prefix}{opt}\n'
+                                gift += f'\t{prefix}{opt_clean}\n'
                             gift += '}'
                             gift_lines.append(gift)
                             q_num += 1
@@ -255,17 +264,15 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                     else:
                         if current_stem:
                             current_options.append(text)
-                
+                            
                 if current_stem and current_options:
                     q_num_padded = f'{q_num:02d}'
                     gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
                     for opt in current_options:
-                        is_correct = False
-                        if "(respuesta" in opt.lower():
-                            is_correct = True
-                            opt = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt).strip()
+                        is_correct = is_correct_option(opt)
+                        opt_clean = clean_option_text(opt)
                         prefix = '=' if is_correct else '~'
-                        gift += f'\t{prefix}{opt}\n'
+                        gift += f'\t{prefix}{opt_clean}\n'
                     gift += '}'
                     gift_lines.append(gift)
                     q_num += 1
@@ -401,6 +408,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                     p.clear()
                     img_tag = soup.new_tag("img", src=base64_data, width="60%")
                     p.append(img_tag)
+                    p["data-section"] = target_text
                 matched = True
                 break
                 
@@ -413,20 +421,41 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                 curr.decompose()
             curr = next_sib
             
-    # 2.7 Convert local images from the document (like from /imgs folder) to base64 and apply max-width
-    for img in soup.find_all("img"):
-        # Apply max-width to prevent images from expanding outside the view
-        current_style = img.get("style", "")
-        if "max-width" not in current_style:
-            new_style = current_style + ("; " if current_style and not current_style.endswith(";") else "") + "max-width: 100%; height: auto;"
-            img["style"] = new_style.strip()
+    # 2.7 Convert local images and apply styles based on section
+    current_section = None
+    for tag in soup.find_all(True):
+        if tag.name == "p" and tag.get("data-section"):
+            current_section = tag.get("data-section")
             
-        src = img.get("src")
-        if src and not str(src).startswith("data:") and not str(src).startswith("http"):
-            filename = os.path.basename(str(src))
-            base64_data = get_image_base64(filename, course_id)
-            if base64_data:
-                img["src"] = base64_data
+        elif tag.name == "img":
+            # Skip the actual header images
+            if tag.parent and tag.parent.name == "p" and tag.parent.get("data-section"):
+                continue
+                
+            current_style = tag.get("style", "")
+            
+            if current_section == "¿Cómo lo vamos a lograr?":
+                # Remove any existing max-width
+                current_style = re.sub(r'max-width:\s*[^;]+;?', '', current_style)
+                new_style = current_style + ("; " if current_style and not current_style.endswith(";") else "") + "max-width: 80%; height: auto; border-radius: 8px; display: block; margin: 0 auto;"
+                tag["style"] = new_style.strip()
+                
+                # Center the paragraph containing the image
+                if tag.parent and tag.parent.name == "p":
+                    parent_style = tag.parent.get("style", "")
+                    if "text-align" not in parent_style:
+                        tag.parent["style"] = parent_style + ("; " if parent_style and not parent_style.endswith(";") else "") + "text-align: center;"
+            else:
+                if "max-width" not in current_style:
+                    new_style = current_style + ("; " if current_style and not current_style.endswith(";") else "") + "max-width: 100%; height: auto;"
+                    tag["style"] = new_style.strip()
+                    
+            src = tag.get("src")
+            if src and not str(src).startswith("data:") and not str(src).startswith("http"):
+                filename = os.path.basename(str(src))
+                base64_data = get_image_base64(filename, course_id)
+                if base64_data:
+                    tag["src"] = base64_data
         
     # 3. Format URLs
     # First handle URLs that are already inside <a> tags

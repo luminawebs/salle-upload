@@ -155,8 +155,21 @@ def run_docx_splitting_workflow(course_id: int):
                 logger.info("  ✓ Extracted introduccion_general.html")
             break
 
+    def parse_activity_number(val):
+        if val.isdigit():
+            return int(val)
+        roman = {'I':1,'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000}
+        res = 0
+        val = val.upper()
+        for i in range(len(val)):
+            if i + 1 < len(val) and roman.get(val[i], 0) < roman.get(val[i+1], 0):
+                res -= roman.get(val[i], 0)
+            else:
+                res += roman.get(val[i], 0)
+        return res
+
     # 2. Extract Activities and Material de Referencia
-    trs = soup.find_all('tr')
+    trs = [tr for tr in soup.find_all('tr') if tr.find_parent('table') and not tr.find_parent('table').find_parent('table')]
     i = 0
     while i < len(trs):
         tr = trs[i]
@@ -169,11 +182,12 @@ def run_docx_splitting_workflow(course_id: int):
                 current_unit = int(m.group(1))
 
         # Detect Activity
-        # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD 2:", "ACTIVIDAD 4:"
-        if re.search(r'ACTIVIDAD\s+\d+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text and current_unit > 0:
-            m = re.search(r'ACTIVIDAD\s+(\d+)', text)
+        # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD II", "ACTIVIDAD 4:"
+        if re.search(r'ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text and current_unit > 0:
+            m = re.search(r'ACTIVIDAD\s+([\dIVXLCDM]+)', text)
             if m:
-                current_activity = int(m.group(1))
+                raw_activity_number = m.group(1)
+                current_activity = parse_activity_number(raw_activity_number)
                 act_html_parts = []
                 # Include the current row's td contents
                 for td in tr.find_all('td'):
@@ -186,7 +200,7 @@ def run_docx_splitting_workflow(course_id: int):
                     next_text = next_tr.get_text().strip().upper()
                     
                     stop_conditions = [
-                        re.match(r'^ACTIVIDAD\s+\d+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
+                        re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
                         next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA"),
                         next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"),
                         next_text.startswith("EQUIPO DE PRODUCCI"),
@@ -206,7 +220,7 @@ def run_docx_splitting_workflow(course_id: int):
                 act_soup = BeautifulSoup(act_html, "html.parser")
                 
                 # Remove the title of the "Actividad" (e.g. ACTIVIDAD 1: ...)
-                title_pattern = re.compile(rf'ACTIVIDAD\s+{current_activity}[\s:.-]*', re.IGNORECASE)
+                title_pattern = re.compile(rf'ACTIVIDAD\s+{re.escape(raw_activity_number)}[\s:.-]*', re.IGNORECASE)
                 for text_node in act_soup.find_all(string=title_pattern):
                     parent = text_node.find_parent(['p', 'h1', 'h2', 'h3', 'h4'])
                     if parent:
@@ -241,7 +255,7 @@ def run_docx_splitting_workflow(course_id: int):
             while i < len(trs):
                 next_tr = trs[i]
                 next_text = next_tr.get_text().strip().upper()
-                if re.match(r'^ACTIVIDAD\s+\d+[\s:.-]*', next_text) or next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA") or next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"):
+                if re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) or next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA") or next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"):
                     i -= 1
                     break
                 for td in next_tr.find_all('td'):

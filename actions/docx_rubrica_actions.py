@@ -13,7 +13,7 @@ from config.settingsSALLE import ConfigSALLE
 
 logger = logging.getLogger(__name__)
 
-def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_time: int) -> str | None:
+def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_time: int) -> tuple[str | None, str | None]:
     """
     Navigate to the course and find the assign activity matching the given name (e.g., 'Actividad 1').
     Searches across all sections.
@@ -79,8 +79,8 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
                                     if href.startswith("/"):
                                         base = re.match(r"(https?://[^/]+)", ConfigSALLE.MOODLE_URL).group(1)
                                         href = base + href
-                                    logger.info(f"  ✓ Found URL for '{activity_name}': {href}")
-                                    return href
+                                    logger.info(f"  ✓ Found URL for '{activity_name}' as '{name_text}': {href}")
+                                    return href, name_text
                 except Exception:
                     continue
                     
@@ -89,9 +89,9 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
                 time.sleep(2)
             else:
                 logger.warning(f"  Activity '{activity_name}' not found after {max_attempts} attempts.")
-                return None
+                return None, None
 
-    return None
+    return None, None
 
 def run_docx_rubrica_upload_workflow(driver, course_id: int, wait_time: int = 15):
     """
@@ -110,10 +110,10 @@ def run_docx_rubrica_upload_workflow(driver, course_id: int, wait_time: int = 15
         activity_name = f"ACTIVIDAD {act_num}"
         logger.info(f"Processing Rubrica for {activity_name} ({len(criteria_list)} criteria)...")
 
-        assign_url = _find_assign_url_by_name(driver, course_id, activity_name, wait_time)
+        assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, activity_name, wait_time)
         if not assign_url:
             # Fallback check for mixed case
-            assign_url = _find_assign_url_by_name(driver, course_id, f"Actividad {act_num}", wait_time)
+            assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, f"Actividad {act_num}", wait_time)
 
         if not assign_url:
             logger.error(f"Could not find Moodle assignment for {activity_name}. Skipping rubric.")
@@ -127,10 +127,11 @@ def run_docx_rubrica_upload_workflow(driver, course_id: int, wait_time: int = 15
 
         # Fill and save the rubric
         try:
-            success = fill_rubric(driver, criteria_list, wait_time, rubric_name=activity_name)
+            rubric_title = full_activity_name if full_activity_name else activity_name
+            success = fill_rubric(driver, criteria_list, wait_time, rubric_name=rubric_title)
             if success:
-                logger.info(f"Successfully uploaded rubric for {activity_name}.")
+                logger.info(f"Successfully uploaded rubric for {rubric_title}.")
             else:
-                logger.error(f"Failed to upload rubric for {activity_name}.")
+                logger.error(f"Failed to upload rubric for {rubric_title}.")
         except Exception as e:
             logger.error(f"Exception while filling rubric for {activity_name}: {e}")
