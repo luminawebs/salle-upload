@@ -157,11 +157,18 @@ async def run_automation():
 
     async def run_script():
         await log_queue.put("[Sistema] Iniciando la tarea de automatización...")
+        # process = await asyncio.create_subprocess_exec(
+        #     "python", "main.py",
+        #     stdout=subprocess.PIPE,
+        #     stderr=subprocess.STDOUT
+        # )
+
         process = await asyncio.create_subprocess_exec(
-            "python", "main.py",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
+    "/var/www/salle_automate/venv/bin/python",
+    "/var/www/salle_automate/main.py",
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT
+)
         
         while True:
             line = await process.stdout.readline()

@@ -63,3 +63,17 @@ The project dependencies are managed via pip. Ensure you have the necessary pack
 pip install -r html_generator/requirements.txt
 # Additionally, ensure selenium and python-dotenv are installed for the main automation script.
 ```
+Restart after code changes
+
+If you update server.py or other backend code:
+
+sudo systemctl restart salle-automate
+
+Follow logs live
+sudo journalctl -u salle-automate -f
+
+Typical development workflow
+
+If you modify backend code:
+
+ systemctl status salle-automate
