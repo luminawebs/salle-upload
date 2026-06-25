@@ -214,7 +214,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
     logger.info(f"Creating activity: '{act_name}' of type '{act_type}'")
     
     try:
-        add_activity_btns = section_element.find_elements(By.CSS_SELECTOR, "button.activity-add, a.section-modchooser-link")
+        add_activity_btns = section_element.find_elements(By.CSS_SELECTOR, "button.activity-add, a.section-modchooser-link:not([data-action='addSection']), button.section-modchooser-link, [data-action='open-chooser']")
         if not add_activity_btns:
             logger.error("Could not find 'Add activity' button in this section.")
             return False
@@ -226,11 +226,12 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
         except WebDriverException:
             driver.execute_script("arguments[0].click();", add_activity_btn)
             
-        chooser = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".modchooser")))
+        chooser_selector = ".modchooser, .modal-dialog, .modal-content, [data-region='chooserdialogue']"
+        chooser = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, chooser_selector)))
         time.sleep(1) # Wait for AJAX/JS to populate the options
         
         try:
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".modchooser .option, .modchooser .modchooser-item")))
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".modchooser .option, .modchooser .modchooser-item, .modal-dialog .option, .modal-dialog .modchooser-item, [data-region='chooserdialogue'] .option")))
         except TimeoutException:
             pass
             
@@ -239,13 +240,13 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
             "Tarea": ["assign", "tarea"],
             "Cuestionario": ["quiz", "cuestionario"],
             "Herramienta externa": ["lti", "external tool", "herramienta externa"],
-            "Área de texto y medios": ["label", "etiqueta", "área de texto y medios", "texto y medios"]
+            "Área de texto y medios": ["label", "etiqueta", "área de texto y medios", "texto y medios", "area de texto y medios"]
         }
         
         keywords = type_mapping.get(act_type, [act_type.lower()])
         
         found = False
-        options = chooser.find_elements(By.CSS_SELECTOR, ".option a, .option button, .option label, .modchooser-item")
+        options = chooser.find_elements(By.CSS_SELECTOR, ".option a, .option button, .option label, .modchooser-item, .option")
         found_options_debug = []
         for option in options:
             text = option.text.lower()
