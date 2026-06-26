@@ -4,7 +4,8 @@ import NavigationTabs from './NavigationTabs';
 
 // const API_BASE = "http://127.0.0.1:8000";
 // const API_BASE = "http://157.230.50.37:8000";
-const API_BASE = window.location.origin;
+// const API_BASE = window.location.origin;
+const API_BASE = "";
 
 export default function DocumentReviewerView({ setActiveTab }) {
   const [file, setFile] = useState(null);
