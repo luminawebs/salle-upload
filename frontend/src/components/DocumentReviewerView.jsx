@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Upload, CheckCircle2, FileText, AlertTriangle, RefreshCw, XCircle, Check } from 'lucide-react';
 import NavigationTabs from './NavigationTabs';
 
-const API_BASE = "http://127.0.0.1:8000";
+// const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://157.230.50.37:8000";
 
 export default function DocumentReviewerView({ setActiveTab }) {
   const [file, setFile] = useState(null);
@@ -128,7 +129,7 @@ export default function DocumentReviewerView({ setActiveTab }) {
 
       {/* Main content */}
       <main className="flex-1 p-6 max-w-5xl mx-auto w-full flex flex-col space-y-6">
-        
+
         {/* Upload Zone */}
         <div className="bg-surface rounded-xl border border-border p-6 shadow-lg">
           <div className="mb-4">
@@ -186,7 +187,7 @@ export default function DocumentReviewerView({ setActiveTab }) {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               {/* Introducción General */}
               <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-md">
                 <div className="p-4 bg-background border-b border-border flex items-center justify-between">
@@ -213,11 +214,11 @@ export default function DocumentReviewerView({ setActiveTab }) {
               {/* Unidades */}
               {report.unidades && Object.keys(report.unidades).length > 0 ? (
                 Object.entries(report.unidades).map(([num, unit]) => {
-                  const isComplete = unit.resumen?.encontrado && 
-                                     unit.preguntas_orientadoras?.encontrado && 
-                                     Object.keys(unit.actividades).length > 0 && 
-                                     unit.material_referencia?.encontrado;
-                  
+                  const isComplete = unit.resumen?.encontrado &&
+                    unit.preguntas_orientadoras?.encontrado &&
+                    Object.keys(unit.actividades).length > 0 &&
+                    unit.material_referencia?.encontrado;
+
                   const activitiesTags = Object.entries(unit.actividades).map(([id, act]) => ({
                     id, tipo: act.tipo, cantidad_preguntas: act.cantidad_preguntas
                   }));
@@ -238,10 +239,10 @@ export default function DocumentReviewerView({ setActiveTab }) {
                       </div>
                       <div className="p-1">
                         {renderItem('Resumen', unit.resumen?.encontrado, unit.resumen?.detalles)}
-                        {renderItem('Preguntas Orientadoras', unit.preguntas_orientadoras?.encontrado, 
+                        {renderItem('Preguntas Orientadoras', unit.preguntas_orientadoras?.encontrado,
                           unit.preguntas_orientadoras?.encontrado ? `Encontrado (${unit.preguntas_orientadoras.cantidad} preguntas)` : unit.preguntas_orientadoras?.detalles
                         )}
-                        {renderItem('Actividades', Object.keys(unit.actividades).length > 0, 
+                        {renderItem('Actividades', Object.keys(unit.actividades).length > 0,
                           Object.keys(unit.actividades).length > 0 ? `${Object.keys(unit.actividades).length} encontradas` : 'Ninguna actividad encontrada',
                           activitiesTags
                         )}
