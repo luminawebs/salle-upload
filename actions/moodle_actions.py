@@ -86,13 +86,33 @@ def login(driver, username, password, login_url, wait_time=10):
         # the inputs can be cleared or become stale midway (StaleElementReferenceException)
         time.sleep(1.5)
 
+        # 1. Open the user menu dropdown if it exists and form is not visible
+        try:
+            menu_toggle = driver.find_element(By.ID, "user-menu-toggle")
+            if menu_toggle.is_displayed():
+                menu_toggle.click()
+                time.sleep(1) # wait for dropdown animation
+        except Exception:
+            pass # Maybe we are on a direct login page without the dropdown
+
+        # 2. Click the external user login toggle to reveal the form
+        try:
+            login_toggle = driver.find_element(By.ID, "toggleLoginForm")
+            if login_toggle.is_displayed():
+                login_toggle.click()
+                # Wait for the collapse animation to finish
+                time.sleep(1) 
+        except Exception:
+            pass
+            
         # Re-fetch the elements right before interaction to bypass StaleElement exceptions
-        username_input = wait.until(EC.presence_of_element_located((By.ID, "username")))
+        # Wait for the username field to be VISIBLE (interactable), not just present
+        username_input = wait.until(EC.visibility_of_element_located((By.ID, "username")))
         username_input.clear()
         username_input.send_keys(username)
 
         time.sleep(0.5)
-        password_input = wait.until(EC.presence_of_element_located((By.ID, "password")))
+        password_input = wait.until(EC.visibility_of_element_located((By.ID, "password")))
         password_input.clear()
         password_input.send_keys(password)
 
