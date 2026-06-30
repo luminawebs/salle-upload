@@ -1,0 +1,114 @@
+<div class="d-flex align-items-stretch usermenu-container" data-region="usermenu">
+    <div class="usermenu">
+        <span class="login" data-asw-orgfontsize="15" style="font-size: 15px;">
+
+            <div class="dropdown">
+                <a href="#" role="button" id="user-menu-toggle" data-toggle="dropdown" aria-label="Menú de usuario"
+                    aria-haspopup="true" aria-controls="user-action-menu" class="nav-link p-0"
+                    title="Login Menú de usuario" data-asw-orgfontsize="15" style="font-size: 15px;">
+                    <div class="remuiicon">
+                        <i class="icon fa fa-user"></i>
+                    </div>
+                    Acceder
+                </a>
+
+                <div class="dropdown-menu dropdown-menu-right loginddown p-p-6" role="menu"
+                    data-region="popover-region-container">
+                    <div class="d-flex flex-column flex-gap-8">
+                        <div id="contenedor-authenticator" class="contenedor-authenticator"
+                            style="position: relative; z-index: 1000; display: block; width: 100%;"><a
+                                href="https://unisallevirtual.lasalle.edu.co/auth/oidc/"
+                                class="button-section btn btn-block"
+                                style="display: block; padding: 0px; border: medium;" role="button">
+                                <img src="https://res.cloudinary.com/dey8xbg7i/image/upload/fl_preserve_transparency/v1746652404/boton1_xqrqv1.jpg?_s=public-apps"
+                                    alt="Iniciar sesión con cuenta institucional de Office 365"
+                                    title="Iniciar sesión con cuenta institucional de Office 365"
+                                    style="width: 100%; height: auto; border-radius: 4px;">
+                            </a>
+                            <hr style="margin: 15px 0px;" aria-hidden="true"><button id="toggleLoginForm" type="button"
+                                class="btn btn-block"
+                                style="padding: 0px; border: medium; background-color: transparent; cursor: pointer;"
+                                aria-expanded="false" aria-controls="loginFormCollapse">
+                                <img id="toggleImage"
+                                    src="https://res.cloudinary.com/dey8xbg7i/image/upload/fl_preserve_transparency/v1746652628/boton2_zrdvkt.jpg?_s=public-apps"
+                                    alt="Acceso para usuarios externos. Pulse para mostrar el formulario de inicio de sesión."
+                                    title="Acceso para usuarios externos. Pulse para mostrar el formulario de inicio de sesión."
+                                    style="width: 100%; height: auto; border-radius: 4px;">
+                            </button>
+                            <div class="login-form-forgotpassword form-group text-right small-info-semibold"
+                                style="text-align: center; margin-top: 15px; display: block;">
+                                <a href="https://cipte.co/Moodle/GestorContrase%C3%B1as/" data-asw-orgfontsize="11"
+                                    style="font-size: 11px;" target="_blank"
+                                    aria-label="¿Olvidó su contraseña o desea cambiarla? Abre el gestor de contraseñas en una pestaña nueva."
+                                    title="¿Olvidó su contraseña o desea cambiarla? Abre una pestaña nueva.">¿Olvidó su
+                                    contraseña o desea cambiarla?</a>
+                            </div>
+                        </div>
+                        <form class="login-form collapse"
+                            action="https://unisallevirtual.lasalle.edu.co/login/index.php" method="post"
+                            id="loginFormCollapse" role="region" aria-labelledby="toggleLoginForm"
+                            style="margin-top: 15px;">
+                            <input type="hidden" name="logintoken" value="bHMP6KVdy9rZGhOpcGHSfLZAwoSNd9fh">
+                            <div class="login-form-username form-group">
+                                <label for="username" class="sr-only">
+                                    Correo electrónico
+                                </label>
+                                <label class="text-link-semibold " tabindex="-1">
+                                    Correo electrónico
+                                </label>
+                                <input type="text" name="username" id="username" class="form-control form-control-lg"
+                                    value="" placeholder="Correo electrónico" autocomplete="username">
+                            </div>
+                            <div class="login-form-password form-group">
+                                <label for="password" class="sr-only">Contraseña</label>
+                                <label class="text-link-semibold form-label-color" tabindex="-1">
+                                    Contraseña
+                                </label>
+                                <div class="position-relative password-field-eye">
+                                    <input type="password" name="password" id="password" value=""
+                                        class="form-control form-control-lg" placeholder="Contraseña"
+                                        autocomplete="current-password">
+                                    <span class="edw-icon edw-icon-Show show-password-icon" data-asw-orgfontsize="24"
+                                        style="font-size: 24px;"></span>
+                                </div>
+                            </div>
+
+                            <div class="login-form-submit form-group">
+                                <button class="btn btn-primary btn-lg btn-block" type="submit"
+                                    id="loginbtn">Acceder</button>
+                            </div>
+                        </form>
+                        <div class="login-identityproviders d-flex flex-column flex-gap-6"
+                            style="display: none !important;">
+                            <h2 class="login-heading text-align-middle h-semibold-6 m-0" data-asw-orgfontsize="13"
+                                style="font-size: 13px;">O inicie sesión con su cuenta</h2>
+
+                            <div class="login-identityprovider-btn-wrapper d-flex flex-gap-6 justify-content-center">
+                                <a class="login-identityprovider-btn border-0"
+                                    href="https://unisallevirtual.lasalle.edu.co/auth/oidc/?source=loginpage"
+                                    title="moodle365" data-asw-orgfontsize="15" style="font-size: 15px;">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </span>
+    </div>
+</div>
+
+
+<!-- this will open later /////////////////////////////////////////// -->
+
+
+<button id="toggleLoginForm" type="button" class="btn btn-block"
+    style="padding: 0px; border: medium; background-color: transparent; cursor: pointer;" aria-expanded="false"
+    aria-controls="loginFormCollapse">
+    <img id="toggleImage"
+        src="https://res.cloudinary.com/dey8xbg7i/image/upload/fl_preserve_transparency/v1746652628/boton2_zrdvkt.jpg?_s=public-apps"
+        alt="Acceso para usuarios externos. Pulse para mostrar el formulario de inicio de sesión."
+        title="Acceso para usuarios externos. Pulse para mostrar el formulario de inicio de sesión."
+        style="width: 100%; height: auto; border-radius: 4px;">
+</button>
+
+<!-- After clicking prev button, the user and login will open later /////////////////////////////////////////// -->
