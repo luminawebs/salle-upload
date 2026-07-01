@@ -77,3 +77,20 @@ Typical development workflow
 If you modify backend code:
 
  systemctl status salle-automate
+
+
+////////////////////////////////////////////////
+
+ If you only update the Python backend code:
+Bash
+
+cd /var/www/salle_automate
+git pull origin salle
+sudo systemctl restart salle_automate
+
+If you update the visual frontend interface code:
+Bash
+
+cd /var/www/salle_automate
+git pull origin salle
+cd frontend && npm run build
