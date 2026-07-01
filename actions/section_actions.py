@@ -138,7 +138,10 @@ def rename_all_sections(driver, wait_time=10):
     
     results = {}
     
+    from actions.moodle_actions import ensure_section_visible
+    
     for old_name, new_name in mapping.items():
+        ensure_section_visible(driver, old_name, wait_time=5)
         # First we can do a quick check if old_name exists before attempting to wait the full time
         try:
             # If not found immediately (within 2 seconds), continue to next
@@ -229,7 +232,10 @@ def update_all_section_descriptions(driver, course_id, descriptions_mapping, wai
     from config.settings import Config
     
     results = {}
+    from actions.moodle_actions import ensure_section_visible
+    
     for section_name, new_desc in descriptions_mapping.items():
+        ensure_section_visible(driver, section_name, wait_time=5)
         try:
             quick_wait = WebDriverWait(driver, 2)
             quick_xpath = f"//li[contains(@class, 'section')]//*[contains(., '{section_name}')]"

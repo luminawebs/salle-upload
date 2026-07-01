@@ -465,3 +465,41 @@ def upload_moodle_wysiwyg(driver, course_id, week_name, resource_name, html_cont
             pass
         return False
 
+def ensure_section_visible(driver, target_section_name, wait_time=10):
+    """
+    Ensures that a specific section is visible. 
+    If the course is using the 'Buttons format' (format-buttons class on body), 
+    it finds the corresponding button in the menu and clicks it.
+    """
+    wait = WebDriverWait(driver, wait_time)
+    try:
+        body = driver.find_element(By.TAG_NAME, "body")
+        classes = body.get_attribute("class") or ""
+        if "format-buttons" not in classes:
+            return True # Not in buttons format, assume it's a standard scrollable course
+            
+        logger.info(f"Course is in 'Buttons format'. Attempting to click button for section '{target_section_name}'...")
+        
+        # We will look for an element matching the target name that acts as a button
+        # The buttons text should contain the section name/number.
+        buttons_xpath = f"//*[(contains(@class, 'button') or contains(@class, 'sectionbutton') or ancestor::ul[contains(@class, 'buttons')])] " \
+                        f"[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), " \
+                        f"'{target_section_name.lower()}')]"
+                        
+        try:
+            button = wait.until(EC.element_to_be_clickable((By.XPATH, buttons_xpath)))
+            try:
+                button.click()
+            except:
+                driver.execute_script("arguments[0].click();", button)
+                
+            time.sleep(1) # Wait for section to appear (JS effect)
+            logger.info(f"Clicked button for section '{target_section_name}'.")
+            return True
+        except TimeoutException:
+            logger.warning(f"Could not find or click button for section '{target_section_name}'.")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error ensuring section visibility: {e}")
+        return False

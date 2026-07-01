@@ -49,37 +49,48 @@ def click_edit_for_activity(driver, activity_name_prefix, wait_time):
     except:
         pass
         
-    activities = driver.find_elements(By.CSS_SELECTOR, "li.activity")
-    target_activity = None
+    def find_target_in_current_dom():
+        activities = driver.find_elements(By.CSS_SELECTOR, "li.activity")
+        for activity in activities:
+            try:
+                name_el = activity.find_element(By.CSS_SELECTOR, ".instancename")
+                raw_text = name_el.text.strip() if name_el.text else name_el.get_attribute("innerText")
+                if raw_text:
+                    normalized_name = " ".join(raw_text.split()).lower()
+                    normalized_search = " ".join(activity_name_prefix.split()).lower()
+                    
+                    if normalized_search in normalized_name:
+                        return activity
+                    else:
+                        search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
+                        name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
+                        if search_match and name_match:
+                            search_val = parse_activity_number(search_match.group(1))
+                            name_val = parse_activity_number(name_match.group(1))
+                            if search_val is not None and search_val == name_val:
+                                return activity
+            except NoSuchElementException:
+                continue
+        return None
+        
+    target_activity = find_target_in_current_dom()
     
-    for activity in activities:
-        try:
-            name_el = activity.find_element(By.CSS_SELECTOR, ".instancename")
-            # Normalize whitespace: replaces newlines and multiple spaces with a single space
-            raw_text = name_el.text.strip() if name_el.text else name_el.get_attribute("innerText")
-            if raw_text:
-                normalized_name = " ".join(raw_text.split()).lower()
-                normalized_search = " ".join(activity_name_prefix.split()).lower()
-                
-                # Debug log to see what we are comparing
-                logger.info(f"Comparing search '{normalized_search}' with found activity name: '{normalized_name}' (Raw: '{raw_text}')")
-                
-                # Check if the normalized search string is in the normalized activity name
-                if normalized_search in normalized_name:
-                    target_activity = activity
-                    break
-                else:
-                    # Fallback for Actividad X matching Actividad Roman_X
-                    search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
-                    name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
-                    if search_match and name_match:
-                        search_val = parse_activity_number(search_match.group(1))
-                        name_val = parse_activity_number(name_match.group(1))
-                        if search_val is not None and search_val == name_val:
-                            target_activity = activity
-                            break
-        except NoSuchElementException:
-            continue
+    if not target_activity:
+        body = driver.find_element(By.TAG_NAME, "body")
+        if "format-buttons" in (body.get_attribute("class") or ""):
+            logger.info("Activity not found immediately in Buttons format. Scanning all sections...")
+            buttons = driver.find_elements(By.CSS_SELECTOR, "ul.buttons li, .buttonbox a, .sectionbutton")
+            for button in buttons:
+                if not button.is_displayed(): continue
+                try:
+                    driver.execute_script("arguments[0].click();", button)
+                    time.sleep(1)
+                    target_activity = find_target_in_current_dom()
+                    if target_activity:
+                        logger.info("Activity found after scanning buttons.")
+                        break
+                except:
+                    pass
             
     if not target_activity:
         logger.error(f"Activity matching '{activity_name_prefix}' not found.")
@@ -117,13 +128,30 @@ def upload_introduccion_general(driver, html_path, wait_time):
     
     # The Introduccion General is inside a label that contains "-- Inicio texto presentación --"
     # Wait, the label itself doesn't have an instancename.
-    activities = driver.find_elements(By.CSS_SELECTOR, "li.activity.label")
-    target_label = None
+    def find_target_label():
+        activities = driver.find_elements(By.CSS_SELECTOR, "li.activity.label, li.activity.text")
+        for activity in activities:
+            if "Inicio texto presentac" in activity.get_attribute("innerHTML") or "Inicio texto presentac" in activity.text:
+                return activity
+        return None
+        
+    target_label = find_target_label()
     
-    for activity in activities:
-        if "Inicio texto presentac" in activity.get_attribute("innerHTML") or "Inicio texto presentac" in activity.text:
-            target_label = activity
-            break
+    if not target_label:
+        body = driver.find_element(By.TAG_NAME, "body")
+        if "format-buttons" in (body.get_attribute("class") or ""):
+            logger.info("Introduccion General not found immediately in Buttons format. Scanning all sections...")
+            buttons = driver.find_elements(By.CSS_SELECTOR, "ul.buttons li, .buttonbox a, .sectionbutton")
+            for button in buttons:
+                if not button.is_displayed(): continue
+                try:
+                    driver.execute_script("arguments[0].click();", button)
+                    time.sleep(1)
+                    target_label = find_target_label()
+                    if target_label:
+                        break
+                except:
+                    pass
             
     if not target_label:
         logger.error("Could not find the label containing the Introducción General accordion.")

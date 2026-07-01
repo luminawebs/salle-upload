@@ -419,6 +419,9 @@ def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
         sec_name = section_info["section_name"]
         activities = section_info["activities"]
         
+        from actions.moodle_actions import ensure_section_visible
+        ensure_section_visible(driver, sec_name, wait_time)
+        
         try:
             xpath_sec = f"//li[contains(@class, 'section') and (@id='section-{unit_num}' or @data-section='{unit_num}' or @data-number='{unit_num}')]"
             section_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sec)))
