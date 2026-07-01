@@ -1,0 +1,1329 @@
+[2:02:50 p. m.]➜[Sistema] Conectando con el proceso de automatización...
+[14:02:50]➜[Sistema] Iniciando la tarea de automatización...
+[14:02:51]·2026-07-01 19:02:51,323 - main - INFO - Starting Moodle Automation Script...
+[14:02:51]·2026-07-01 19:02:51,324 - main - INFO - Initializing WebDriver...
+[14:03:06]⚠2026-07-01 19:03:05,661 - selenium.webdriver.common.selenium_manager - WARNING - Unsupported architecture:
+[14:03:10]·2026-07-01 19:03:10,076 - actions.moodle_actions - INFO - Navigating to Moodle login page...
+[14:03:10]·2026-07-01 19:03:10,093 - actions.moodle_actions - INFO - Loading login page (attempt 1)...
+[14:03:20]✓2026-07-01 19:03:19,512 - actions.moodle_actions - INFO - Login page loaded successfully (URL:
+https://unisallevirtual.lasalle.edu.co/login/index.php)
+[14:03:49]✓2026-07-01 19:03:48,710 - actions.moodle_actions - INFO - Successfully logged into Moodle.
+[14:03:49]·2026-07-01 19:03:48,729 - main - INFO - --- Processing Course ID: 66713 ---
+[14:03:49]·2026-07-01 19:03:48,729 - main - INFO - Nombre del curso: Curso 66713
+[14:03:49]·2026-07-01 19:03:48,735 - actions.moodle_actions - INFO - Navigating to course ID 66713
+[14:04:07]✓2026-07-01 19:04:06,396 - actions.moodle_actions - INFO - Course 66713 loaded successfully
+[14:04:07]·2026-07-01 19:04:06,422 - main - INFO - Executing DOCX extraction workflow...
+[14:04:07]·2026-07-01 19:04:06,426 - core.data_parser - INFO - Executing DOCX parsing workflow for course 66713...
+[14:04:09]✓2026-07-01 19:04:08,769 - core.data_parser - INFO - ✓ DOCX successfully extracted and saved to
+assets/66713/raw_docx_extracted.html
+[14:04:09]·2026-07-01 19:04:08,770 - main - INFO - Executing DOCX splitting workflow...
+[14:04:09]·2026-07-01 19:04:08,770 - core.data_parser - INFO - Executing DOCX splitting workflow for course 66713...
+[14:04:09]·2026-07-01 19:04:08,813 - core.data_parser - INFO - ✓ Extracted introduccion_general.html
+
+[14:04:39]·2026-07-01 19:04:39,054 - main - INFO - Executing course structure creation workflow...
+[14:04:39]·2026-07-01 19:04:39,060 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow
+for Course 66713 ---
+[14:04:40]·2026-07-01 19:04:39,459 - actions.structure_actions - INFO - Workflow requires 5 sections.
+[14:04:40]·2026-07-01 19:04:39,501 - actions.structure_actions - INFO - Found 2 existing sections. Required: 5
+[14:04:40]·2026-07-01 19:04:39,501 - actions.structure_actions - INFO - Need to create 3 new sections.
+[14:04:50]✖2026-07-01 19:04:49,678 - actions.structure_actions - ERROR - Failed to click 'Add section' button: Message:
+[14:04:50]·Stacktrace:
+[14:04:50]·#0 0x651859d4f0fa <unknown>
+    [14:04:50]·#1 0x651859728939 <unknown>
+        [14:04:50]·#2 0x65185977df52 <unknown>
+            [14:04:50]·#3 0x65185977e1a1 <unknown>
+                [14:04:50]·#4 0x6518597c9124 <unknown>
+                    [14:04:50]·#5 0x6518597c630d <unknown>
+                        [14:04:50]·#6 0x65185977149f <unknown>
+                            [14:04:50]·#7 0x651859772301 <unknown>
+                                [14:04:50]·#8 0x651859d15167 <unknown>
+                                    [14:04:50]·#9 0x651859d13948 <unknown>
+                                        [14:04:50]·#10 0x651859cfedc6 <unknown>
+                                            [14:04:50]·#11 0x651859d1450a <unknown>
+                                                [14:04:50]·#12 0x651859ce6e70 <unknown>
+                                                    [14:04:50]·#13 0x651859d3ac38 <unknown>
+                                                        [14:04:50]·#14 0x651859d3add5 <unknown>
+                                                            [14:04:50]·#15 0x651859d4dcae <unknown>
+                                                                [14:04:50]·#16 0x7f9a6509caa4 <unknown>
+                                                                    [14:04:50]·#17 0x7f9a65129c6c <unknown>
+                                                                        [14:04:50]·
+                                                                        [14:04:50]·2026-07-01 19:04:49,715 -
+                                                                        actions.moodle_actions - INFO - Course is in
+                                                                        'Buttons format'. Attempting to click button for
+                                                                        section 'Bienvenidos al curso'...
+                                                                        [14:04:52]·2026-07-01 19:04:51,745 -
+                                                                        actions.moodle_actions - INFO - Clicked button
+                                                                        for section 'Bienvenidos al curso'.
+                                                                        [14:04:53]⚠2026-07-01 19:04:53,255 -
+                                                                        actions.structure_actions - INFO - Activity
+                                                                        'Avisos' already exists in Bienvenidos al curso.
+                                                                        Skipping.
+                                                                        [14:07:29]·2026-07-01 19:07:28,681 -
+                                                                        actions.structure_actions - INFO - --- Course
+                                                                        Structure Creation Workflow Complete ---
+                                                                        [14:07:29]·2026-07-01 19:07:28,688 - main - INFO
+                                                                        - Executing DOCX HTML upload workflow...
+                                                                        [14:07:29]·2026-07-01 19:07:28,695 -
+                                                                        actions.moodle_actions - INFO - Navigating to
+                                                                        course ID 66713
+                                                                        [14:07:53]✓2026-07-01 19:07:52,705 -
+                                                                        actions.moodle_actions - INFO - Course 66713
+                                                                        loaded successfully
+                                                                        [14:07:53]·2026-07-01 19:07:52,745 -
+                                                                        actions.docx_upload_actions - INFO - Uploading
+                                                                        Introducción General for course 66713...
+                                                                        [14:08:46]✓2026-07-01 19:08:45,814 -
+                                                                        actions.docx_upload_actions - INFO -
+                                                                        Successfully updated Introducción General.
+                                                                        [14:09:54]·2026-07-01 19:09:54,259 -
+                                                                        actions.docx_upload_actions - INFO - Uploading
+                                                                        Material_de_referencia_U1.html to Material de
+                                                                        referencia Unidad 1...
+                                                                        [14:09:55]·2026-07-01 19:09:54,487 -
+                                                                        actions.docx_upload_actions - INFO - Activity
+                                                                        not found immediately in Buttons format.
+                                                                        Scanning all sections...
+                                                                        [14:10:06]✖2026-07-01 19:10:05,490 -
+                                                                        actions.docx_upload_actions - ERROR - Activity
+                                                                        matching 'Material de referencia Unidad 1' not
+                                                                        found.
+                                                                        [14:10:08]·2026-07-01 19:10:07,499 -
+                                                                        actions.docx_upload_actions - INFO - Uploading
+                                                                        Material_de_referencia_U2.html to Material de
+                                                                        referencia Unidad 2...
+                                                                        [14:10:08]·2026-07-01 19:10:07,782 -
+                                                                        actions.docx_upload_actions - INFO - Activity
+                                                                        not found immediately in Buttons format.
+                                                                        Scanning all sections...
+                                                                        [14:10:19]✖2026-07-01 19:10:18,788 -
+                                                                        actions.docx_upload_actions - ERROR - Activity
+                                                                        matching 'Material de referencia Unidad 2' not
+                                                                        found.
+                                                                        [14:10:21]·2026-07-01 19:10:20,796 -
+                                                                        actions.docx_upload_actions - INFO - Uploading
+                                                                        Material_de_referencia_U3.html to Material de
+                                                                        referencia Unidad 3...
+                                                                        [14:10:21]·2026-07-01 19:10:21,032 -
+                                                                        actions.docx_upload_actions - INFO - Activity
+                                                                        not found immediately in Buttons format.
+                                                                        Scanning all sections...
+                                                                        [14:10:32]✖2026-07-01 19:10:32,058 -
+                                                                        actions.docx_upload_actions - ERROR - Activity
+                                                                        matching 'Material de referencia Unidad 3' not
+                                                                        found.
+                                                                        [14:10:36]·2026-07-01 19:10:35,735 -
+                                                                        actions.unidades_intro_actions - INFO -
+                                                                        Uploading introduccion_unidad_1.html to UNIDAD
+                                                                        1...
+                                                                        [14:10:46]✖2026-07-01 19:10:45,792 -
+                                                                        actions.unidades_intro_actions - ERROR - Section
+                                                                        matching 'UNIDAD 1' not found.
+                                                                        [14:10:46]✖2026-07-01 19:10:45,792 -
+                                                                        actions.unidades_intro_actions - ERROR - Could
+                                                                        not open editor for UNIDAD 1
+                                                                        [14:10:46]·2026-07-01 19:10:45,793 -
+                                                                        actions.unidades_intro_actions - INFO -
+                                                                        Uploading introduccion_unidad_2.html to UNIDAD
+                                                                        2...
+                                                                        [14:10:56]✖2026-07-01 19:10:56,227 -
+                                                                        actions.unidades_intro_actions - ERROR - Section
+                                                                        matching 'UNIDAD 2' not found.
+                                                                        [14:10:56]✖2026-07-01 19:10:56,227 -
+                                                                        actions.unidades_intro_actions - ERROR - Could
+                                                                        not open editor for UNIDAD 2
+                                                                        [14:10:56]·2026-07-01 19:10:56,227 -
+                                                                        actions.unidades_intro_actions - INFO -
+                                                                        Uploading introduccion_unidad_3.html to UNIDAD
+                                                                        3...
+                                                                        [14:11:07]✖2026-07-01 19:11:06,700 -
+                                                                        actions.unidades_intro_actions - ERROR - Section
+                                                                        matching 'UNIDAD 3' not found.
+                                                                        [14:11:07]✖2026-07-01 19:11:06,701 -
+                                                                        actions.unidades_intro_actions - ERROR - Could
+                                                                        not open editor for UNIDAD 3
+                                                                        [14:11:07]·2026-07-01 19:11:06,701 - main - INFO
+                                                                        - Executing DOCX Rubrica upload workflow...
+                                                                        [14:11:07]·2026-07-01 19:11:06,701 -
+                                                                        actions.docx_rubrica_actions - INFO - Starting
+                                                                        DOCX Rubrica upload workflow...
+                                                                        [14:11:19]·2026-07-01 19:11:18,803 - main - INFO
+                                                                        - Section rename workflow is disabled via
+                                                                        config.
+                                                                        [14:11:19]·2026-07-01 19:11:18,803 - main - INFO
+                                                                        - Section description update workflow is
+                                                                        disabled via config.
+                                                                        [14:11:19]·2026-07-01 19:11:18,803 - main - INFO
+                                                                        - Local HTML intro generation workflow is
+                                                                        disabled via config.
+                                                                        [14:11:19]·2026-07-01 19:11:18,804 - main - INFO
+                                                                        - General HTML intro generation workflow is
+                                                                        disabled via config.
+                                                                        [14:11:19]·2026-07-01 19:11:18,804 - main - INFO
+                                                                        - Infografia export workflow is disabled via
+                                                                        config.
+
+                                                                        [14:04:09]·2026-07-01 19:04:08,826 -
+                                                                        core.data_parser - INFO - ✓ Extracted
+                                                                        actividad1.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,828 -
+                                                                        core.data_parser - INFO - ✓ Appended to
+                                                                        Material_de_referencia_U1.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,836 -
+                                                                        core.data_parser - INFO - ✓ Extracted
+                                                                        actividad2.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,837 -
+                                                                        core.data_parser - INFO - ✓ Appended to
+                                                                        Material_de_referencia_U1.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,847 -
+                                                                        core.data_parser - INFO - ✓ Extracted
+                                                                        actividad3.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,849 -
+                                                                        core.data_parser - INFO - ✓ Appended to
+                                                                        Material_de_referencia_U2.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,859 -
+                                                                        core.data_parser - INFO - ✓ Extracted
+                                                                        actividad4.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,860 -
+                                                                        core.data_parser - INFO - ✓ Appended to
+                                                                        Material_de_referencia_U2.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,868 -
+                                                                        core.data_parser - INFO - ✓ Extracted
+                                                                        actividad5.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,870 -
+                                                                        core.data_parser - INFO - ✓ Appended to
+                                                                        Material_de_referencia_U3.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,870 -
+                                                                        core.data_parser - INFO - ✓ DOCX splitting
+                                                                        workflow completed.
+                                                                        [14:04:09]·2026-07-01 19:04:08,870 - main - INFO
+                                                                        - Executing Unidades Intro splitting workflow...
+                                                                        [14:04:09]·2026-07-01 19:04:08,907 -
+                                                                        core.unidades_intro_parser - INFO - ✓ Extracted
+                                                                        introduccion_unidad_1.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,907 -
+                                                                        core.unidades_intro_parser - INFO - ✓ Extracted
+                                                                        introduccion_unidad_2.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,907 -
+                                                                        core.unidades_intro_parser - INFO - ✓ Extracted
+                                                                        introduccion_unidad_3.html
+                                                                        [14:04:09]·2026-07-01 19:04:08,907 -
+                                                                        core.unidades_intro_parser - INFO - ✓ Unidades
+                                                                        Intro splitting workflow completed.
+                                                                        [14:04:09]·2026-07-01 19:04:08,907 -
+                                                                        actions.section_actions - INFO - Checking
+                                                                        editing mode status...
+                                                                        [14:04:39]✓2026-07-01 19:04:39,012 -
+                                                                        actions.section_actions - INFO - Successfully
+                                                                        enabled editing mode.
+                                                                        [14:04:53]⚠2026-07-01 19:04:53,255 -
+                                                                        actions.structure_actions - INFO - Activity
+                                                                        'Foro permanente de dudas' already exists in
+                                                                        Bienvenidos al curso. Skipping.
+                                                                        [14:04:53]⚠2026-07-01 19:04:53,255 -
+                                                                        actions.structure_actions - INFO - Activity
+                                                                        'Encuentros virtuales' already exists in
+                                                                        Bienvenidos al curso. Skipping.
+                                                                        [14:04:53]·2026-07-01 19:04:53,283 -
+                                                                        actions.moodle_actions - INFO - Course is in
+                                                                        'Buttons format'. Attempting to click button for
+                                                                        section 'GENERALIDADES DEL CURSO'...
+                                                                        [14:04:55]·2026-07-01 19:04:54,683 -
+                                                                        actions.moodle_actions - INFO - Clicked button
+                                                                        for section 'GENERALIDADES DEL CURSO'.
+                                                                        [14:04:56]·2026-07-01 19:04:55,971 -
+                                                                        actions.structure_actions - INFO - Creating
+                                                                        activity: 'Introducción General' of type 'Área
+                                                                        de texto y medios'
+                                                                        [14:06:26]✖2026-07-01 19:06:25,949 -
+                                                                        actions.structure_actions - ERROR - Failed to
+                                                                        create activity 'Introducción General': Message:
+                                                                        [14:06:26]·Stacktrace:
+                                                                        [14:06:26]·#0 0x651859d4f0fa <unknown>
+                                                                            [14:06:26]·#1 0x651859728939 <unknown>
+                                                                                [14:06:26]·#2 0x65185977df52 <unknown>
+                                                                                    [14:06:26]·#3 0x65185977e1a1
+                                                                                    <unknown>
+                                                                                        [14:06:26]·#4 0x6518597c9124
+                                                                                        <unknown>
+                                                                                            [14:06:26]·#5 0x6518597c630d
+                                                                                            <unknown>
+                                                                                                [14:06:26]·#6
+                                                                                                0x65185977149f <unknown>
+                                                                                                    [14:06:26]·#7
+                                                                                                    0x651859772301
+                                                                                                    <unknown>
+                                                                                                        [14:06:26]·#8
+                                                                                                        0x651859d15167
+                                                                                                        <unknown>
+                                                                                                            [14:06:26]·#9
+                                                                                                            0x651859d13948
+                                                                                                            <unknown>
+                                                                                                                [14:06:26]·#10
+                                                                                                                0x651859cfedc6
+                                                                                                                <unknown>
+                                                                                                                    [14:06:26]·#11
+                                                                                                                    0x651859d1450a
+                                                                                                                    <unknown>
+                                                                                                                        [14:06:26]·#12
+                                                                                                                        0x651859ce6e70
+                                                                                                                        <unknown>
+                                                                                                                            [14:06:26]·#13
+                                                                                                                            0x651859d3ac38
+                                                                                                                            <unknown>
+                                                                                                                                [14:06:26]·#14
+                                                                                                                                0x651859d3add5
+                                                                                                                                <unknown>
+                                                                                                                                    [14:06:26]·#15
+                                                                                                                                    0x651859d4dcae
+                                                                                                                                    <unknown>
+                                                                                                                                        [14:06:26]·#16
+                                                                                                                                        0x7f9a6509caa4
+                                                                                                                                        <unknown>
+                                                                                                                                            [14:06:26]·#17
+                                                                                                                                            0x7f9a65129c6c
+                                                                                                                                            <unknown>
+                                                                                                                                                [14:06:26]·
+                                                                                                                                                [14:06:26]·2026-07-01
+                                                                                                                                                19:06:26,222
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Course
+                                                                                                                                                is
+                                                                                                                                                in
+                                                                                                                                                'Buttons
+                                                                                                                                                format'.
+                                                                                                                                                Attempting
+                                                                                                                                                to
+                                                                                                                                                click
+                                                                                                                                                button
+                                                                                                                                                for
+                                                                                                                                                section
+                                                                                                                                                'UNIDAD
+                                                                                                                                                1.
+                                                                                                                                                Fundamentos
+                                                                                                                                                de
+                                                                                                                                                Salud
+                                                                                                                                                Mental
+                                                                                                                                                y
+                                                                                                                                                Desarrollo
+                                                                                                                                                Personal'...
+                                                                                                                                                [14:06:37]⚠2026-07-01
+                                                                                                                                                19:06:36,485
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                WARNING
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                or
+                                                                                                                                                click
+                                                                                                                                                button
+                                                                                                                                                for
+                                                                                                                                                section
+                                                                                                                                                'UNIDAD
+                                                                                                                                                1.
+                                                                                                                                                Fundamentos
+                                                                                                                                                de
+                                                                                                                                                Salud
+                                                                                                                                                Mental
+                                                                                                                                                y
+                                                                                                                                                Desarrollo
+                                                                                                                                                Personal'.
+                                                                                                                                                [14:06:47]✖2026-07-01
+                                                                                                                                                19:06:46,599
+                                                                                                                                                -
+                                                                                                                                                actions.structure_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                section-2
+                                                                                                                                                on
+                                                                                                                                                the
+                                                                                                                                                page.
+                                                                                                                                                Skipping.
+                                                                                                                                                [14:06:47]·2026-07-01
+                                                                                                                                                19:06:46,628
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Course
+                                                                                                                                                is
+                                                                                                                                                in
+                                                                                                                                                'Buttons
+                                                                                                                                                format'.
+                                                                                                                                                Attempting
+                                                                                                                                                to
+                                                                                                                                                click
+                                                                                                                                                button
+                                                                                                                                                for
+                                                                                                                                                section
+                                                                                                                                                'UNIDAD
+                                                                                                                                                2.
+                                                                                                                                                Fortalecimiento
+                                                                                                                                                de
+                                                                                                                                                recursos
+                                                                                                                                                personales'...
+                                                                                                                                                [14:06:58]⚠2026-07-01
+                                                                                                                                                19:06:57,458
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                WARNING
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                or
+                                                                                                                                                click
+                                                                                                                                                button
+                                                                                                                                                for
+                                                                                                                                                section
+                                                                                                                                                'UNIDAD
+                                                                                                                                                2.
+                                                                                                                                                Fortalecimiento
+                                                                                                                                                de
+                                                                                                                                                recursos
+                                                                                                                                                personales'.
+                                                                                                                                                [14:07:08]✖2026-07-01
+                                                                                                                                                19:07:07,551
+                                                                                                                                                -
+                                                                                                                                                actions.structure_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                section-3
+                                                                                                                                                on
+                                                                                                                                                the
+                                                                                                                                                page.
+                                                                                                                                                Skipping.
+                                                                                                                                                [14:07:08]·2026-07-01
+                                                                                                                                                19:07:07,575
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Course
+                                                                                                                                                is
+                                                                                                                                                in
+                                                                                                                                                'Buttons
+                                                                                                                                                format'.
+                                                                                                                                                Attempting
+                                                                                                                                                to
+                                                                                                                                                click
+                                                                                                                                                button
+                                                                                                                                                for
+                                                                                                                                                section
+                                                                                                                                                'UNIDAD
+                                                                                                                                                3.
+                                                                                                                                                Relaciones
+                                                                                                                                                saludables
+                                                                                                                                                y
+                                                                                                                                                promoción
+                                                                                                                                                de
+                                                                                                                                                la
+                                                                                                                                                salud
+                                                                                                                                                mental'...
+                                                                                                                                                [14:07:18]⚠2026-07-01
+                                                                                                                                                19:07:18,208
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                WARNING
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                or
+                                                                                                                                                click
+                                                                                                                                                button
+                                                                                                                                                for
+                                                                                                                                                section
+                                                                                                                                                'UNIDAD
+                                                                                                                                                3.
+                                                                                                                                                Relaciones
+                                                                                                                                                saludables
+                                                                                                                                                y
+                                                                                                                                                promoción
+                                                                                                                                                de
+                                                                                                                                                la
+                                                                                                                                                salud
+                                                                                                                                                mental'.
+                                                                                                                                                [14:07:29]✖2026-07-01
+                                                                                                                                                19:07:28,679
+                                                                                                                                                -
+                                                                                                                                                actions.structure_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                section-4
+                                                                                                                                                on
+                                                                                                                                                the
+                                                                                                                                                page.
+                                                                                                                                                Skipping.
+                                                                                                                                                [14:08:49]·2026-07-01
+                                                                                                                                                19:08:48,491
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Uploading
+                                                                                                                                                actividad1.html
+                                                                                                                                                to
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                1...
+                                                                                                                                                [14:08:49]·2026-07-01
+                                                                                                                                                19:08:48,861
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                not
+                                                                                                                                                found
+                                                                                                                                                immediately
+                                                                                                                                                in
+                                                                                                                                                Buttons
+                                                                                                                                                format.
+                                                                                                                                                Scanning
+                                                                                                                                                all
+                                                                                                                                                sections...
+                                                                                                                                                [14:09:00]✖2026-07-01
+                                                                                                                                                19:08:59,687
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                matching
+                                                                                                                                                'ACTIVIDAD
+                                                                                                                                                1'
+                                                                                                                                                not
+                                                                                                                                                found.
+                                                                                                                                                [14:09:02]·2026-07-01
+                                                                                                                                                19:09:01,738
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Uploading
+                                                                                                                                                actividad2.html
+                                                                                                                                                to
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                2...
+                                                                                                                                                [14:09:02]·2026-07-01
+                                                                                                                                                19:09:02,087
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                not
+                                                                                                                                                found
+                                                                                                                                                immediately
+                                                                                                                                                in
+                                                                                                                                                Buttons
+                                                                                                                                                format.
+                                                                                                                                                Scanning
+                                                                                                                                                all
+                                                                                                                                                sections...
+                                                                                                                                                [14:09:13]✖2026-07-01
+                                                                                                                                                19:09:12,890
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                matching
+                                                                                                                                                'ACTIVIDAD
+                                                                                                                                                2'
+                                                                                                                                                not
+                                                                                                                                                found.
+                                                                                                                                                [14:09:15]·2026-07-01
+                                                                                                                                                19:09:14,902
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Uploading
+                                                                                                                                                actividad3.html
+                                                                                                                                                to
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                3...
+                                                                                                                                                [14:09:16]·2026-07-01
+                                                                                                                                                19:09:15,464
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                not
+                                                                                                                                                found
+                                                                                                                                                immediately
+                                                                                                                                                in
+                                                                                                                                                Buttons
+                                                                                                                                                format.
+                                                                                                                                                Scanning
+                                                                                                                                                all
+                                                                                                                                                sections...
+                                                                                                                                                [14:09:26]✖2026-07-01
+                                                                                                                                                19:09:26,204
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                matching
+                                                                                                                                                'ACTIVIDAD
+                                                                                                                                                3'
+                                                                                                                                                not
+                                                                                                                                                found.
+                                                                                                                                                [14:09:28]·2026-07-01
+                                                                                                                                                19:09:28,213
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Uploading
+                                                                                                                                                actividad4.html
+                                                                                                                                                to
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                4...
+                                                                                                                                                [14:09:29]·2026-07-01
+                                                                                                                                                19:09:28,489
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                not
+                                                                                                                                                found
+                                                                                                                                                immediately
+                                                                                                                                                in
+                                                                                                                                                Buttons
+                                                                                                                                                format.
+                                                                                                                                                Scanning
+                                                                                                                                                all
+                                                                                                                                                sections...
+                                                                                                                                                [14:09:39]✖2026-07-01
+                                                                                                                                                19:09:39,258
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                matching
+                                                                                                                                                'ACTIVIDAD
+                                                                                                                                                4'
+                                                                                                                                                not
+                                                                                                                                                found.
+                                                                                                                                                [14:09:41]·2026-07-01
+                                                                                                                                                19:09:41,268
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Uploading
+                                                                                                                                                actividad5.html
+                                                                                                                                                to
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                5...
+                                                                                                                                                [14:09:42]·2026-07-01
+                                                                                                                                                19:09:41,522
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                not
+                                                                                                                                                found
+                                                                                                                                                immediately
+                                                                                                                                                in
+                                                                                                                                                Buttons
+                                                                                                                                                format.
+                                                                                                                                                Scanning
+                                                                                                                                                all
+                                                                                                                                                sections...
+                                                                                                                                                [14:09:52]✖2026-07-01
+                                                                                                                                                19:09:52,246
+                                                                                                                                                -
+                                                                                                                                                actions.docx_upload_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Activity
+                                                                                                                                                matching
+                                                                                                                                                'ACTIVIDAD
+                                                                                                                                                5'
+                                                                                                                                                not
+                                                                                                                                                found.
+                                                                                                                                                [14:10:34]·2026-07-01
+                                                                                                                                                19:10:34,063
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Executing
+                                                                                                                                                Cuestionario
+                                                                                                                                                export/grade
+                                                                                                                                                workflow...
+                                                                                                                                                [14:10:34]·2026-07-01
+                                                                                                                                                19:10:34,067
+                                                                                                                                                -
+                                                                                                                                                actions.cuestionario_export_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Starting
+                                                                                                                                                Cuestionario
+                                                                                                                                                Export
+                                                                                                                                                workflow
+                                                                                                                                                for
+                                                                                                                                                course
+                                                                                                                                                66713...
+                                                                                                                                                [14:10:36]·2026-07-01
+                                                                                                                                                19:10:35,734
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Executing
+                                                                                                                                                Unidades
+                                                                                                                                                Intro
+                                                                                                                                                upload
+                                                                                                                                                workflow...
+                                                                                                                                                [14:11:07]·2026-07-01
+                                                                                                                                                19:11:06,747
+                                                                                                                                                -
+                                                                                                                                                core.docx_rubrica_parser
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Parsed
+                                                                                                                                                rubric
+                                                                                                                                                for
+                                                                                                                                                Actividad
+                                                                                                                                                1
+                                                                                                                                                with
+                                                                                                                                                4
+                                                                                                                                                criteria.
+                                                                                                                                                [14:11:07]·2026-07-01
+                                                                                                                                                19:11:06,750
+                                                                                                                                                -
+                                                                                                                                                core.docx_rubrica_parser
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Parsed
+                                                                                                                                                rubric
+                                                                                                                                                for
+                                                                                                                                                Actividad
+                                                                                                                                                2
+                                                                                                                                                with
+                                                                                                                                                4
+                                                                                                                                                criteria.
+                                                                                                                                                [14:11:07]·2026-07-01
+                                                                                                                                                19:11:06,751
+                                                                                                                                                -
+                                                                                                                                                core.docx_rubrica_parser
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Parsed
+                                                                                                                                                rubric
+                                                                                                                                                for
+                                                                                                                                                Actividad
+                                                                                                                                                3
+                                                                                                                                                with
+                                                                                                                                                4
+                                                                                                                                                criteria.
+                                                                                                                                                [14:11:07]·2026-07-01
+                                                                                                                                                19:11:06,753
+                                                                                                                                                -
+                                                                                                                                                core.docx_rubrica_parser
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Parsed
+                                                                                                                                                rubric
+                                                                                                                                                for
+                                                                                                                                                Actividad
+                                                                                                                                                4
+                                                                                                                                                with
+                                                                                                                                                4
+                                                                                                                                                criteria.
+                                                                                                                                                [14:11:07]·2026-07-01
+                                                                                                                                                19:11:06,755
+                                                                                                                                                -
+                                                                                                                                                core.docx_rubrica_parser
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Parsed
+                                                                                                                                                rubric
+                                                                                                                                                for
+                                                                                                                                                Actividad
+                                                                                                                                                5
+                                                                                                                                                with
+                                                                                                                                                4
+                                                                                                                                                criteria.
+                                                                                                                                                [14:11:07]·2026-07-01
+                                                                                                                                                19:11:06,756
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Processing
+                                                                                                                                                Rubrica
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                1
+                                                                                                                                                (4
+                                                                                                                                                criteria)...
+                                                                                                                                                [14:11:09]✖2026-07-01
+                                                                                                                                                19:11:09,022
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                Moodle
+                                                                                                                                                assignment
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                1.
+                                                                                                                                                Skipping
+                                                                                                                                                rubric.
+                                                                                                                                                [14:11:09]·2026-07-01
+                                                                                                                                                19:11:09,022
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Processing
+                                                                                                                                                Rubrica
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                2
+                                                                                                                                                (4
+                                                                                                                                                criteria)...
+                                                                                                                                                [14:11:11]✖2026-07-01
+                                                                                                                                                19:11:11,209
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                Moodle
+                                                                                                                                                assignment
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                2.
+                                                                                                                                                Skipping
+                                                                                                                                                rubric.
+                                                                                                                                                [14:11:11]·2026-07-01
+                                                                                                                                                19:11:11,210
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Processing
+                                                                                                                                                Rubrica
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                3
+                                                                                                                                                (4
+                                                                                                                                                criteria)...
+                                                                                                                                                [14:11:14]✖2026-07-01
+                                                                                                                                                19:11:13,724
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                Moodle
+                                                                                                                                                assignment
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                3.
+                                                                                                                                                Skipping
+                                                                                                                                                rubric.
+                                                                                                                                                [14:11:14]·2026-07-01
+                                                                                                                                                19:11:13,725
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Processing
+                                                                                                                                                Rubrica
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                4
+                                                                                                                                                (4
+                                                                                                                                                criteria)...
+                                                                                                                                                [14:11:16]✖2026-07-01
+                                                                                                                                                19:11:16,257
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                Moodle
+                                                                                                                                                assignment
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                4.
+                                                                                                                                                Skipping
+                                                                                                                                                rubric.
+                                                                                                                                                [14:11:16]·2026-07-01
+                                                                                                                                                19:11:16,258
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Processing
+                                                                                                                                                Rubrica
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                5
+                                                                                                                                                (4
+                                                                                                                                                criteria)...
+                                                                                                                                                [14:11:19]✖2026-07-01
+                                                                                                                                                19:11:18,802
+                                                                                                                                                -
+                                                                                                                                                actions.docx_rubrica_actions
+                                                                                                                                                -
+                                                                                                                                                ERROR
+                                                                                                                                                -
+                                                                                                                                                Could
+                                                                                                                                                not
+                                                                                                                                                find
+                                                                                                                                                Moodle
+                                                                                                                                                assignment
+                                                                                                                                                for
+                                                                                                                                                ACTIVIDAD
+                                                                                                                                                5.
+                                                                                                                                                Skipping
+                                                                                                                                                rubric.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Foro
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Actualidad
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Preguntas
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Recursos
+                                                                                                                                                apoyo
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Recursos
+                                                                                                                                                apoyo
+                                                                                                                                                edit
+                                                                                                                                                classes
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Actividad
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Actividad
+                                                                                                                                                recursos
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Actividad
+                                                                                                                                                rúbrica
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Trabajo
+                                                                                                                                                rúbrica
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Evidencia
+                                                                                                                                                rúbrica
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Trabajo
+                                                                                                                                                final
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Evidencia
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,804
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Recursos
+                                                                                                                                                HTML
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,805
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Clear
+                                                                                                                                                puntos
+                                                                                                                                                extras
+                                                                                                                                                questions
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,806
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Puntos
+                                                                                                                                                extras
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,806
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Recuperacion
+                                                                                                                                                export
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:40]·2026-07-01
+                                                                                                                                                19:11:39,690
+                                                                                                                                                -
+                                                                                                                                                actions.activity_completion_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                No
+                                                                                                                                                'Actividad'
+                                                                                                                                                elements
+                                                                                                                                                found
+                                                                                                                                                to
+                                                                                                                                                update
+                                                                                                                                                completion
+                                                                                                                                                conditions.
+                                                                                                                                                [14:11:40]·2026-07-01
+                                                                                                                                                19:11:39,697
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Depositphotos
+                                                                                                                                                download
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:40]·2026-07-01
+                                                                                                                                                19:11:39,698
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Shutting
+                                                                                                                                                down
+                                                                                                                                                WebDriver...
+                                                                                                                                                [14:11:42]➜[Sistema]
+                                                                                                                                                La
+                                                                                                                                                tarea
+                                                                                                                                                finalizó
+                                                                                                                                                con
+                                                                                                                                                código
+                                                                                                                                                de
+                                                                                                                                                salida
+                                                                                                                                                0
+                                                                                                                                                [14:11:42]➜[Sistema]
+                                                                                                                                                Limpiando
+                                                                                                                                                los
+                                                                                                                                                archivos
+                                                                                                                                                temporales...
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,806
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Ajuste
+                                                                                                                                                competencias
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,806
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Configuracion
+                                                                                                                                                final
+                                                                                                                                                workflow
+                                                                                                                                                is
+                                                                                                                                                disabled
+                                                                                                                                                via
+                                                                                                                                                config.
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,806
+                                                                                                                                                -
+                                                                                                                                                main
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Executing
+                                                                                                                                                activity
+                                                                                                                                                completion
+                                                                                                                                                update
+                                                                                                                                                workflow...
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,835
+                                                                                                                                                -
+                                                                                                                                                actions.activity_completion_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Navigating
+                                                                                                                                                to
+                                                                                                                                                course
+                                                                                                                                                66713
+                                                                                                                                                to
+                                                                                                                                                update
+                                                                                                                                                Activity
+                                                                                                                                                Completion
+                                                                                                                                                conditions...
+                                                                                                                                                [14:11:19]·2026-07-01
+                                                                                                                                                19:11:18,835
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Navigating
+                                                                                                                                                to
+                                                                                                                                                course
+                                                                                                                                                ID
+                                                                                                                                                66713
+                                                                                                                                                [14:11:40]✓2026-07-01
+                                                                                                                                                19:11:39,382
+                                                                                                                                                -
+                                                                                                                                                actions.moodle_actions
+                                                                                                                                                -
+                                                                                                                                                INFO
+                                                                                                                                                -
+                                                                                                                                                Course
+                                                                                                                                                66713
+                                                                                                                                                loaded
+                                                                                                                                                successfully
+                                                                                                                                                [14:11:42]✓[Sistema]
+                                                                                                                                                Limpieza
+                                                                                                                                                completada
+                                                                                                                                                con
+                                                                                                                                                éxito.

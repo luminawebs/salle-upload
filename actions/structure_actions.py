@@ -139,7 +139,15 @@ def check_and_create_sections(driver, required_sections_count, wait_time=10):
             
             for _ in range(needed):
                 try:
-                    add_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-action='addSection'], .changenumsections a, .add-sections, .add-section, a.add-section")))
+                    xpath_selector = (
+                        "//button[@data-action='addSection'] | "
+                        "//a[contains(@class, 'add-section')] | "
+                        "//a[contains(@href, 'changenumsections.php')] | "
+                        "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'add section')] | "
+                        "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'añadir secci')] | "
+                        "//*[contains(@class, 'changenumsections')]//a"
+                    )
+                    add_btn = wait.until(EC.presence_of_element_located((By.XPATH, xpath_selector)))
                     try:
                         add_btn.click()
                     except:
