@@ -300,6 +300,16 @@ export default function MoodleEngineView({ setActiveTab }) {
     }
   };
 
+  const handleStop = async () => {
+    try {
+      await fetch(`${API_BASE}/api/stop`, { method: 'POST' });
+      setStatus('Failed');
+      setCurrentTaskLabel('Tarea cancelada por el usuario.');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const allTaskKeys = WORKFLOW_PHASES.flatMap(phase => phase.tasks.map(t => t.key));
   const areAllSelected = allTaskKeys.every(key => settings[key] === 'True');
 
@@ -425,14 +435,38 @@ export default function MoodleEngineView({ setActiveTab }) {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-1 items-center">
-            <button
-              onClick={handleRun}
-              disabled={status === 'Running'}
-              className={`flex items-center px-6 py-4 rounded-lg font-semibold transition-all shadow-lg text-md justify-center w-full ${status === 'Running' ? 'bg-border cursor-not-allowed text-gray-400' : 'bg-primary hover:bg-purple-500 text-white'}`}
-            >
-              {status === 'Running' ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-              {status === 'Running' ? "Procesando..." : "Iniciar Automatización"}
-            </button>
+            {/* Start/Stop Actions */}
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={handleRun}
+                disabled={status === 'Running'}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold flex items-center justify-center transition-all ${status === 'Running'
+                  ? 'bg-primary/50 text-white cursor-not-allowed'
+                  : 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5'
+                  }`}
+              >
+                <svg className={`w-5 h-5 mr-2 ${status === 'Running' ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {status === 'Running' ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  )}
+                </svg>
+                {status === 'Running' ? "Procesando..." : "Iniciar Automatización"}
+              </button>
+              {status === 'Running' && (
+                <button
+                  onClick={handleStop}
+                  className="py-3 px-6 rounded-lg font-semibold flex items-center justify-center transition-all bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/20 hover:shadow-red-500/40 hover:-translate-y-0.5"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                  </svg>
+                  Detener
+                </button>
+              )}
+            </div>
             <button
               onClick={handleSaveSettings}
               className="flex items-center  py-4 hover:bg-gray-800 rounded-lg transition text-sm justify-center w-full font-medium border border-transparent hover:border-border"

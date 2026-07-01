@@ -149,8 +149,14 @@ async def stream_logs():
             yield f"data: {json.dumps({'message': log_line})}\n\n"
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
+current_process = None
+
 @app.post("/api/run")
 async def run_automation():
+    global current_process
+    if current_process is not None and current_process.returncode is None:
+        return {"status": "already_running"}
+
     # Clear the queue
     while not log_queue.empty():
         await log_queue.get()
@@ -163,21 +169,22 @@ async def run_automation():
         #     stderr=subprocess.STDOUT
         # )
 
-        process = await asyncio.create_subprocess_exec(
-    "/var/www/salle_automate/venv/bin/python",
-    "/var/www/salle_automate/main.py",
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT
-)
+        global current_process
+        current_process = await asyncio.create_subprocess_exec(
+            "/var/www/salle_automate/venv/bin/python",
+            "/var/www/salle_automate/main.py",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
         
         while True:
-            line = await process.stdout.readline()
+            line = await current_process.stdout.readline()
             if not line:
                 break
             await log_queue.put(line.decode(errors='replace').strip())
         
-        await process.wait()
-        await log_queue.put(f"[Sistema] La tarea finalizó con código de salida {process.returncode}")
+        await current_process.wait()
+        await log_queue.put(f"[Sistema] La tarea finalizó con código de salida {current_process.returncode}")
         
         # Cleanup uploaded assets
         await log_queue.put("[Sistema] Limpiando los archivos temporales...")
@@ -205,6 +212,18 @@ async def run_automation():
         
     asyncio.create_task(run_script())
     return {"status": "started"}
+
+@app.post("/api/stop")
+async def stop_automation():
+    global current_process
+    if current_process is not None and current_process.returncode is None:
+        try:
+            current_process.terminate()
+            await log_queue.put("[Sistema] La tarea fue cancelada por el usuario. (Detenida)")
+            return {"status": "stopped"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+    return {"status": "not_running"}
 
 if __name__ == "__main__":
     import uvicorn
