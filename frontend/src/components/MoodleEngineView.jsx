@@ -287,7 +287,7 @@ export default function MoodleEngineView({ setActiveTab }) {
         setProgress(100);
         setCurrentTaskLabel('Flujo completado exitosamente.');
       }
-      if (msg.toLowerCase().includes("error crítico") || msg.toLowerCase().includes("exception")) {
+      if (msg.toLowerCase().includes("Proceso Detenido") || msg.toLowerCase().includes("exception")) {
         setStatus('Failed');
       }
     };
