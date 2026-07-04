@@ -313,12 +313,17 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         
         # 5. Click Save Changes
         try:
-            save_btn = driver.find_element(By.CSS_SELECTOR, "input[type='submit'], button[type='submit']")
+            save_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='savechanges'], input[type='submit'][value*='Guardar'], button[type='submit']")))
+            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", save_btn)
+            time.sleep(0.5)
             driver.execute_script("arguments[0].click();", save_btn)
-            wait.until(EC.staleness_of(save_btn))
+            try:
+                wait.until(EC.staleness_of(save_btn))
+            except:
+                pass
             time.sleep(1)
-        except:
-            logger.warning("No submit button found on filters page. It might be auto-saving.")
+        except Exception as e:
+            logger.warning(f"Could not find or click save button on filters page: {e}")
             time.sleep(1)
             
         logger.info(f"Successfully disabled multimedia filter for {activity_name_prefix}")

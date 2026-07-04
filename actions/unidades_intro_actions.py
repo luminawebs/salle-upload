@@ -15,6 +15,20 @@ def click_edit_for_section(driver, section_prefix: str, wait_time: int = 10) -> 
     Case-insensitive search.
     """
     wait = WebDriverWait(driver, wait_time)
+    
+    # 1. Try Sidebar first
+    try:
+        from actions.moodle_actions import get_section_id_from_sidebar
+        from config.settings import Config
+        section_id = get_section_id_from_sidebar(driver, section_prefix)
+        if section_id:
+            logger.info(f"Sidebar found section ID {section_id} for '{section_prefix}'. Using direct URL edit.")
+            driver.get(f"{Config.MOODLE_URL}/course/editsection.php?id={section_id}")
+            return True
+    except Exception as e:
+        logger.warning(f"Failed to use sidebar for '{section_prefix}': {e}")
+        
+    # 2. Fallback to UI clicks
     try:
         lower_prefix = section_prefix.lower()
         # Find the li.section that contains the text

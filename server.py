@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import asyncio
 import traceback
@@ -163,28 +164,40 @@ async def run_automation():
 
     async def run_script():
         await log_queue.put("[Sistema] Iniciando la tarea de automatización...")
-        # process = await asyncio.create_subprocess_exec(
-        #     "python", "main.py",
-        #     stdout=subprocess.PIPE,
-        #     stderr=subprocess.STDOUT
-        # )
+        settings = {}
+        if os.path.exists(".env"):
+            with open(".env", "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        settings[k] = v
+
+        python_exec = settings.get("PYTHON_EXEC", sys.executable)
+        main_script = settings.get("MAIN_SCRIPT", "main.py")
 
         global current_process
-        current_process = await asyncio.create_subprocess_exec(
-            "/var/www/salle_automate/venv/bin/python",
-            "/var/www/salle_automate/main.py",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
-        
-        while True:
-            line = await current_process.stdout.readline()
-            if not line:
-                break
-            await log_queue.put(line.decode(errors='replace').strip())
-        
-        await current_process.wait()
-        await log_queue.put(f"[Sistema] La tarea finalizó con código de salida {current_process.returncode}")
+        try:
+            current_process = await asyncio.create_subprocess_exec(
+                python_exec,
+                "-u",
+                main_script,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
+            
+            while True:
+                line = await current_process.stdout.readline()
+                if not line:
+                    break
+                await log_queue.put(line.decode(errors='replace').strip())
+            
+            await current_process.wait()
+            await log_queue.put(f"[Sistema] La tarea finalizó con código de salida {current_process.returncode}")
+        except Exception as e:
+            await log_queue.put(f"[Sistema] Error al iniciar el proceso: {str(e)}")
+            import traceback
+            traceback.print_exc()
         
         # Cleanup uploaded assets
         await log_queue.put("[Sistema] Limpiando los archivos temporales...")

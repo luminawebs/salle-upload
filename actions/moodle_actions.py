@@ -268,6 +268,35 @@ def navigate_to_course(driver, base_url, course_id, wait_time=10):
     logger.error(f"Failed to navigate to course {course_id} after 3 attempts.")
     return False
 
+def dismiss_moodle_error_overlays(driver):
+    """
+    Checks for and dismisses any Moodle error overlays or toast notifications that might block the UI,
+    such as 'invalidrecordunknown' exceptions.
+    """
+    try:
+        # Check for buttons that say 'descartar esta notificación' or standard alert closes
+        dismiss_buttons = driver.find_elements(
+            By.XPATH, 
+            "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'descartar esta notificación')] | "
+            "//button[@data-dismiss='alert' or @data-action='hide'] | "
+            "//*[contains(@class, 'moodle-exception')]//button[contains(@class, 'close')]"
+        )
+        
+        dismissed = False
+        for btn in dismiss_buttons:
+            if btn.is_displayed():
+                try:
+                    driver.execute_script("arguments[0].click();", btn)
+                    dismissed = True
+                    logger.info("Dismissed a Moodle error notification overlay.")
+                    time.sleep(0.5)
+                except Exception:
+                    pass
+        return dismissed
+    except Exception as e:
+        logger.debug(f"Error checking for Moodle overlays: {e}")
+        return False
+
 
 class MoodleAutomation:
     def __init__(self, driver):
@@ -503,3 +532,59 @@ def ensure_section_visible(driver, target_section_name, wait_time=10):
     except Exception as e:
         logger.error(f"Error ensuring section visibility: {e}")
         return False
+
+def get_section_id_from_sidebar(driver, section_name: str) -> str:
+    """
+    Scans the sidebar (course-index) for the section and extracts its ID from the href.
+    Returns the section ID as a string, or None if not found.
+    """
+    try:
+        # If sidebar is not visible, attempt to open it (RemUI/Boost)
+        try:
+            drawer_toggle = driver.find_element(By.CSS_SELECTOR, "button[data-action='togglecourseindex']")
+            if "true" not in str(drawer_toggle.get_attribute("aria-expanded")).lower():
+                driver.execute_script("arguments[0].click();", drawer_toggle)
+                time.sleep(0.5)
+        except Exception:
+            pass
+            
+        lower_name = section_name.lower().strip()
+        xpath = f"//nav[contains(@class, 'courseindex')]//a[contains(@class, 'courseindex-link') and contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{lower_name}')]"
+        links = driver.find_elements(By.XPATH, xpath)
+        
+        for link in links:
+            href = link.get_attribute("href")
+            if href and "section.php?id=" in href:
+                return href.split("section.php?id=")[1].split("&")[0].split("#")[0]
+                
+    except Exception as e:
+        logger.warning(f"Sidebar extraction failed for section '{section_name}': {e}")
+    return None
+
+def get_activity_id_from_sidebar(driver, activity_name_prefix: str) -> str:
+    """
+    Scans the sidebar (course-index) for an activity and extracts its module ID (cm_id) from the href.
+    Returns the cm_id as a string, or None if not found.
+    """
+    try:
+        lower_name = activity_name_prefix.lower().strip()
+        xpath = f"//nav[contains(@class, 'courseindex')]//a[contains(@class, 'courseindex-link') and contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{lower_name}')]"
+        links = driver.find_elements(By.XPATH, xpath)
+        
+        for link in links:
+            href = link.get_attribute("href")
+            if not href:
+                continue
+            
+            # Usually activity hrefs are like: mod/page/view.php?id=1234
+            if "id=" in href and "section.php" not in href:
+                return href.split("id=")[1].split("&")[0].split("#")[0]
+            
+            # Labels and text areas use anchor links like: course/section.php?id=877783#module-2471580
+            if "#module-" in href:
+                return href.split("#module-")[1].split("&")[0]
+                
+    except Exception as e:
+        logger.warning(f"Sidebar extraction failed for activity '{activity_name_prefix}': {e}")
+    return None
+

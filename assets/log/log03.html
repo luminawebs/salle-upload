@@ -1,0 +1,593 @@
+[21:26:49]·2026-07-03 21:26:49,853 - main - INFO - Executing course structure creation workflow...
+[21:26:49]·2026-07-03 21:26:49,853 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow
+for Course 66713 ---
+[21:26:49]·2026-07-03 21:26:49,908 - actions.structure_actions - INFO - Workflow requires 5 sections.
+[21:26:50]·2026-07-03 21:26:50,017 - actions.structure_actions - INFO - Found 2 existing sections. Required: 5
+[21:26:50]·2026-07-03 21:26:50,017 - actions.structure_actions - INFO - Need to create 3 new sections.
+[21:27:07]·2026-07-03 21:27:07,313 - actions.moodle_actions - INFO - Course is in 'Buttons format'. Attempting to click
+button for section 'Bienvenidos al curso'...
+[21:27:08]·2026-07-03 21:27:08,584 - actions.moodle_actions - INFO - Clicked button for section 'Bienvenidos al curso'.
+[21:28:16]·2026-07-03 21:28:16,604 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_1.html to
+UNIDAD 1...
+[21:28:16]✖2026-07-03 21:28:16,606 - main - ERROR - Error executing upload_unidades_intro_for_course for course 66713:
+Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,609 - main - ERROR - Traceback (most recent call last):
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\main.py", line 243, in main
+[21:28:16]·upload_unidades_intro_for_course(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\actions\unidades_intro_actions.py", line 98, in
+upload_unidades_intro_for_course
+[21:28:16]·if "course/view.php" not in driver.current_url:
+[21:28:16]·^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 560, in current_url
+[21:28:16]·return self.execute(Command.GET_CURRENT_URL)["value"]
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 450, in execute
+[21:28:16]✖self.error_handler.check_response(response)
+[21:28:16]✖File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\errorhandler.py",
+line 232, in check_response
+[21:28:16]✖raise exception_class(message, screen, stacktrace)
+[21:28:16]✖selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this
+error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,612 - main - INFO - Navigating back to course 66713 home after error...
+[21:28:16]·2026-07-03 21:28:16,613 - actions.moodle_actions - INFO - Navigating to course ID 66713
+[21:28:16]✖2026-07-03 21:28:16,614 - actions.moodle_actions - WARNING - Navigation error on attempt 1: Message: invalid
+session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,616 - actions.moodle_actions - ERROR - Unexpected error navigating to course 66713
+(attempt 1): Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!
+[21:28:16]✖2026-07-03 21:28:16,617 - actions.moodle_actions - ERROR - Browser window no longer accessible.
+[21:28:16]·2026-07-03 21:28:16,619 - main - INFO - Executing DOCX Rubrica upload workflow...
+[21:28:16]·2026-07-03 21:28:16,619 - actions.docx_rubrica_actions - INFO - Starting DOCX Rubrica upload workflow...
+[21:28:16]·2026-07-03 21:28:16,801 - main - INFO - Section rename workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,801 - main - INFO - Section description update workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,801 - main - INFO - Local HTML intro generation workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,801 - main - INFO - General HTML intro generation workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,801 - main - INFO - Infografia export workflow is disabled via config.
+
+[21:26:35]·2026-07-03 21:26:35,891 - core.data_parser - INFO - \u2713 Extracted actividad1.html
+[21:26:35]·2026-07-03 21:26:35,893 - core.data_parser - INFO - \u2713 Appended to Material_de_referencia_U1.html
+[21:26:35]·2026-07-03 21:26:35,904 - core.data_parser - INFO - \u2713 Extracted actividad2.html
+[21:26:35]·2026-07-03 21:26:35,907 - core.data_parser - INFO - \u2713 Appended to Material_de_referencia_U1.html
+[21:26:35]·2026-07-03 21:26:35,932 - core.data_parser - INFO - \u2713 Extracted actividad3.html
+[21:26:35]·2026-07-03 21:26:35,934 - core.data_parser - INFO - \u2713 Appended to Material_de_referencia_U2.html
+[21:26:35]·2026-07-03 21:26:35,963 - core.data_parser - INFO - \u2713 Extracted actividad4.html
+[21:26:35]·2026-07-03 21:26:35,965 - core.data_parser - INFO - \u2713 Appended to Material_de_referencia_U2.html
+[21:26:35]·2026-07-03 21:26:35,983 - core.data_parser - INFO - \u2713 Extracted actividad5.html
+[21:26:36]·2026-07-03 21:26:35,986 - core.data_parser - INFO - \u2713 Appended to Material_de_referencia_U3.html
+[21:26:36]·2026-07-03 21:26:35,986 - core.data_parser - INFO - \u2713 DOCX splitting workflow completed.
+[21:26:36]·2026-07-03 21:26:35,987 - main - INFO - Executing Unidades Intro splitting workflow...
+[21:26:36]·2026-07-03 21:26:36,054 - core.unidades_intro_parser - INFO - \u2713 Extracted introduccion_unidad_1.html
+[21:26:36]·2026-07-03 21:26:36,055 - core.unidades_intro_parser - INFO - \u2713 Extracted introduccion_unidad_2.html
+[21:26:36]·2026-07-03 21:26:36,058 - core.unidades_intro_parser - INFO - \u2713 Extracted introduccion_unidad_3.html
+[21:26:36]·2026-07-03 21:26:36,059 - core.unidades_intro_parser - INFO - \u2713 Unidades Intro splitting workflow
+completed.
+[21:26:36]·2026-07-03 21:26:36,059 - actions.section_actions - INFO - Checking editing mode status...
+[21:26:49]✓2026-07-03 21:26:49,852 - actions.section_actions - INFO - Successfully enabled editing mode.
+[21:26:49]·2026-07-03 21:26:49,853 - main - INFO - Course format change workflow is disabled via config.
+[21:27:11]·2026-07-03 21:27:11,731 - actions.structure_actions - INFO - Creating activity: 'Avisos' of type 'Foro'
+[21:27:25]·2026-07-03 21:27:25,011 - actions.actividad_actions - INFO - Set Grading Type to 'Puntuaci�n'
+[21:27:25]·2026-07-03 21:27:25,548 - actions.actividad_actions - INFO - Set Max Grade to 5
+[21:27:25]·2026-07-03 21:27:25,720 - actions.actividad_actions - INFO - Set Grading Method to 'R�brica'
+[21:27:32]✓2026-07-03 21:27:32,071 - actions.structure_actions - INFO - Successfully created 'Avisos'.
+[21:27:32]⚠2026-07-03 21:27:32,325 - actions.structure_actions - INFO - Activity 'Foro permanente de dudas' already
+exists in Bienvenidos al curso. Skipping.
+[21:27:32]⚠2026-07-03 21:27:32,326 - actions.structure_actions - INFO - Activity 'Encuentros virtuales' already exists
+in Bienvenidos al curso. Skipping.
+[21:27:32]·2026-07-03 21:27:32,343 - actions.moodle_actions - INFO - Course is in 'Buttons format'. Attempting to click
+button for section 'GENERALIDADES DEL CURSO'...
+[21:27:42]⚠2026-07-03 21:27:42,702 - actions.moodle_actions - WARNING - Could not find or click button for section
+'GENERALIDADES DEL CURSO'.
+[21:27:42]✖2026-07-03 21:27:42,759 - actions.structure_actions - ERROR - Failed to rename section: Message: no such
+element: Unable to locate element: {"method":"css selector","selector":".quickediticon, [data-action='edittitle'],
+.edit-icon, i.fa-pen, i.fa-pencil"}
+[21:27:42]✖(Session info: chrome=149.0.7827.201); For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+[21:27:42]·Stacktrace:
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba52793d]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba581aad]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba581dac]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba57591c]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba5757c6]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba5cf39b]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba57401c]
+[21:27:42]·chromedriver!(No symbol) [0x7ff7ba574f43]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7ba9ed744+1e0c4]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7ba9ed8d4+1e254]
+[21:27:42]·chromedriver!GetHandleVerifier [0x7ff7ba9d1447+1dc7]
+[21:27:42]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:27:42]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:27:42]·
+[21:27:43]·2026-07-03 21:27:43,783 - actions.structure_actions - INFO - Creating activity: 'Introducci�n General' of
+type '�rea de texto y medios'
+[21:28:06]✖2026-07-03 21:28:06,456 - actions.structure_actions - ERROR - Failed to create activity 'Introducci�n
+General': Message:
+[21:28:06]·Stacktrace:
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba52793d]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba581aad]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba581dac]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba5d27d7]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba5cf39b]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba57401c]
+[21:28:06]·chromedriver!(No symbol) [0x7ff7ba574f43]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7ba9ed744+1e0c4]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7ba9ed8d4+1e254]
+[21:28:06]·chromedriver!GetHandleVerifier [0x7ff7ba9d1447+1dc7]
+[21:28:06]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:06]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:06]·
+[21:28:06]·2026-07-03 21:28:06,506 - actions.moodle_actions - INFO - Course is in 'Buttons format'. Attempting to click
+button for section 'UNIDAD 1. Fundamentos de Salud Mental y Desarrollo Personal'...
+[21:28:16]✖2026-07-03 21:28:16,346 - actions.moodle_actions - ERROR - Error ensuring section visibility: Message:
+invalid session id: session deleted as the browser has closed the connection
+[21:28:16]·from disconnected: not connected to DevTools
+[21:28:16]✖(Session info: chrome=149.0.7827.201); For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba52793d]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba512d82]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5390cc]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5b1aa0]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5cec82]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba57401c]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba574f43]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9ed744+1e0c4]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9ed8d4+1e254]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9d1447+1dc7]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,511 - main - ERROR - Error executing run_course_structure_creation_workflow for course
+66713: Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,518 - main - ERROR - Traceback (most recent call last):
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\main.py", line 192, in main
+[21:28:16]·run_course_structure_creation_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\actions\structure_actions.py", line 435, in
+run_course_structure_creation_workflow
+[21:28:16]·section_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sec)))
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\support\wait.py",
+line 112, in until
+[21:28:16]·value = method(self._driver)
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\support\expected_conditions.py",
+line 92, in _predicate
+[21:28:16]·return driver.find_element(*locator)
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 823, in find_element
+[21:28:16]·return self.execute(Command.FIND_ELEMENT, {"using": by, "value": value})["value"]
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 450, in execute
+[21:28:16]✖self.error_handler.check_response(response)
+[21:28:16]✖File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\errorhandler.py",
+line 232, in check_response
+[21:28:16]✖raise exception_class(message, screen, stacktrace)
+[21:28:16]✖selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this
+error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,520 - main - INFO - Navigating back to course 66713 home after error...
+[21:28:16]·2026-07-03 21:28:16,520 - actions.moodle_actions - INFO - Navigating to course ID 66713
+[21:28:16]✖2026-07-03 21:28:16,523 - actions.moodle_actions - WARNING - Navigation error on attempt 1: Message: invalid
+session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,525 - actions.moodle_actions - ERROR - Unexpected error navigating to course 66713
+(attempt 1): Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!
+[21:28:16]✖2026-07-03 21:28:16,528 - actions.moodle_actions - ERROR - Browser window no longer accessible.
+[21:28:16]·2026-07-03 21:28:16,528 - main - INFO - Executing DOCX HTML upload workflow...
+[21:28:16]·2026-07-03 21:28:16,528 - actions.moodle_actions - INFO - Navigating to course ID 66713
+[21:28:16]✖2026-07-03 21:28:16,532 - actions.moodle_actions - WARNING - Navigation error on attempt 1: Message: invalid
+session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,534 - actions.moodle_actions - ERROR - Unexpected error navigating to course 66713
+(attempt 1): Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!
+[21:28:16]✖2026-07-03 21:28:16,535 - actions.moodle_actions - ERROR - Browser window no longer accessible.
+[21:28:16]·2026-07-03 21:28:16,535 - main - INFO - Executing Cuestionario export/grade workflow...
+[21:28:16]·2026-07-03 21:28:16,535 - actions.cuestionario_export_actions - INFO - Starting Cuestionario Export workflow
+for course 66713...
+[21:28:16]·2026-07-03 21:28:16,603 - main - INFO - Executing Unidades Intro upload workflow...
+[21:28:16]·2026-07-03 21:28:16,779 - core.docx_rubrica_parser - INFO - Parsed rubric for Actividad 1 with 4 criteria.
+[21:28:16]·2026-07-03 21:28:16,780 - core.docx_rubrica_parser - INFO - Parsed rubric for Actividad 2 with 4 criteria.
+[21:28:16]·2026-07-03 21:28:16,782 - core.docx_rubrica_parser - INFO - Parsed rubric for Actividad 3 with 4 criteria.
+[21:28:16]·2026-07-03 21:28:16,784 - core.docx_rubrica_parser - INFO - Parsed rubric for Actividad 4 with 4 criteria.
+[21:28:16]·2026-07-03 21:28:16,785 - core.docx_rubrica_parser - INFO - Parsed rubric for Actividad 5 with 4 criteria.
+[21:28:16]·2026-07-03 21:28:16,785 - actions.docx_rubrica_actions - INFO - Processing Rubrica for ACTIVIDAD 1 (4
+criteria)...
+[21:28:16]✖2026-07-03 21:28:16,787 - main - ERROR - Error executing run_docx_rubrica_upload_workflow for course 66713:
+Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,791 - main - ERROR - Traceback (most recent call last):
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\main.py", line 260, in main
+[21:28:16]·run_docx_rubrica_upload_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\actions\docx_rubrica_actions.py", line 113, in
+run_docx_rubrica_upload_workflow
+[21:28:16]·assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, activity_name, wait_time)
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\actions\docx_rubrica_actions.py", line 21, in
+_find_assign_url_by_name
+[21:28:16]·if "course/view.php" not in driver.current_url:
+[21:28:16]·^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 560, in current_url
+[21:28:16]·return self.execute(Command.GET_CURRENT_URL)["value"]
+[21:28:16]·^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 450, in execute
+[21:28:16]✖self.error_handler.check_response(response)
+[21:28:16]✖File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\errorhandler.py",
+line 232, in check_response
+[21:28:16]✖raise exception_class(message, screen, stacktrace)
+[21:28:16]✖selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this
+error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,794 - main - INFO - Navigating back to course 66713 home after error...
+[21:28:16]·2026-07-03 21:28:16,795 - actions.moodle_actions - INFO - Navigating to course ID 66713
+[21:28:16]✖2026-07-03 21:28:16,797 - actions.moodle_actions - WARNING - Navigation error on attempt 1: Message: invalid
+session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,799 - actions.moodle_actions - ERROR - Unexpected error navigating to course 66713
+(attempt 1): Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!
+[21:28:16]✖2026-07-03 21:28:16,801 - actions.moodle_actions - ERROR - Browser window no longer accessible.
+[21:28:16]·2026-07-03 21:28:16,801 - main - INFO - Foro export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Actualidad export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Preguntas export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Recursos apoyo export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Recursos apoyo edit classes workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Actividad export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Actividad recursos export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Actividad r�brica export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Trabajo r�brica export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Evidencia r�brica export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Trabajo final export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Evidencia export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Recursos HTML export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Clear puntos extras questions workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Puntos extras export workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,802 - main - INFO - Recuperacion export workflow is disabled via config.
+
+[21:28:16]·2026-07-03 21:28:16,803 - main - INFO - Ajuste competencias workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,803 - main - INFO - Configuracion final workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,803 - main - INFO - Executing activity completion update workflow...
+[21:28:16]·2026-07-03 21:28:16,804 - actions.activity_completion_actions - INFO - Navigating to course 66713 to update
+Activity Completion conditions...
+[21:28:16]·2026-07-03 21:28:16,804 - actions.moodle_actions - INFO - Navigating to course ID 66713
+[21:28:16]✖2026-07-03 21:28:16,806 - actions.moodle_actions - WARNING - Navigation error on attempt 1: Message: invalid
+session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,809 - actions.moodle_actions - ERROR - Unexpected error navigating to course 66713
+(attempt 1): Message: invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!
+[21:28:16]✖2026-07-03 21:28:16,810 - actions.moodle_actions - ERROR - Browser window no longer accessible.
+[21:28:16]✖2026-07-03 21:28:16,811 - actions.activity_completion_actions - ERROR - Failed to navigate to course 66713.
+[21:28:16]·2026-07-03 21:28:16,811 - main - INFO - Course format revert workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,811 - main - INFO - Setting final course format to 'Formato de botones'...
+[21:28:16]·2026-07-03 21:28:16,811 - actions.course_format_final_actions - INFO - Navigating to course settings for
+course 66713...
+[21:28:16]✖2026-07-03 21:28:16,814 - main - ERROR - Error executing set_final_buttons_format for course 66713: Message:
+invalid session id; For documentation on this error, please visit:
+https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]✖2026-07-03 21:28:16,817 - main - ERROR - Traceback (most recent call last):
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\main.py", line 563, in main
+[21:28:16]·set_final_buttons_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+[21:28:16]·File "D:\29 LA SALLE\automatizacion_selenium_SALLE-frontend\actions\course_format_final_actions.py", line 26,
+in set_final_buttons_format
+[21:28:16]·driver.get(edit_url)
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 470, in get
+[21:28:16]·self.execute(Command.GET, {"url": url})
+[21:28:16]·File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\webdriver.py",
+line 450, in execute
+[21:28:16]✖self.error_handler.check_response(response)
+[21:28:16]✖File
+"C:\Users\Usuario\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\selenium\webdriver\remote\errorhandler.py",
+line 232, in check_response
+[21:28:16]✖raise exception_class(message, screen, stacktrace)
+[21:28:16]✖selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id; For documentation on this
+error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+[21:28:16]·Stacktrace:
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e3fa5+14925]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7ba9e4000+14980]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba527726]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba573083]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5aa2d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a40d2]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba5a3892]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4f03e5]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc7591+5f7f11]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafc1902+5f2282]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bafe7115+617a95]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa01dce+3274e]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7baa0a82c+3b1ac]
+[21:28:16]·chromedriver!(No symbol) [0x7ff7ba4ef188]
+[21:28:16]·chromedriver!GetHandleVerifier [0x7ff7bb197b58+7c84d8]
+[21:28:16]·KERNEL32!BaseThreadInitThunk [0x7ffa36c5e957+17]
+[21:28:16]·ntdll!RtlUserThreadStart [0x7ffa37c0ad6c+2c]
+[21:28:16]·
+[21:28:16]·
+[21:28:16]·2026-07-03 21:28:16,819 - main - INFO - Depositphotos download workflow is disabled via config.
+[21:28:16]·2026-07-03 21:28:16,819 - main - INFO - Shutting down WebDriver...
+[21:28:18]➜[Sistema] La tarea fue cancelada por el usuario. (Detenida)
+[21:28:18]➜[Sistema] La tarea finalizó con código de salida 1
+[21:28:18]➜[Sistema] Limpiando los archivos temporales...
+[21:28:18]✓[Sistema] Limpieza completada con éxito.

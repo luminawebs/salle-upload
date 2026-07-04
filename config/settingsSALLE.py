@@ -44,6 +44,14 @@ class ConfigSALLE:
         "t",
     )
 
+    ENABLE_COURSE_FORMAT_CHANGE = os.getenv(
+        "ENABLE_COURSE_FORMAT_CHANGE", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
+
     ENABLE_COURSE_STRUCTURE_CREATION = os.getenv(
         "ENABLE_COURSE_STRUCTURE_CREATION", "False"
     ).lower() in (
@@ -107,6 +115,14 @@ class ConfigSALLE:
     # Actualiza las condiciones de finalización de actividad a "Recibir una calificación" -> "Cualquier calificación"
     ENABLE_ACTIVITY_COMPLETION_UPDATE = os.getenv(
         "ENABLE_ACTIVITY_COMPLETION_UPDATE", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
+    
+    ENABLE_FINAL_COURSE_FORMAT_BUTTONS = os.getenv(
+        "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", "False"
     ).lower() in (
         "true",
         "1",

@@ -31,6 +31,7 @@ const WORKFLOW_PHASES = [
     icon: <FolderTree className="w-5 h-5" />,
     estimatedMins: 3,
     tasks: [
+      { key: 'ENABLE_COURSE_FORMAT_CHANGE', label: 'Cambiar formato a Secciones personalizadas' },
       { key: 'ENABLE_COURSE_STRUCTURE_CREATION', label: 'Crear Estructura del Curso' },
       { key: 'ENABLE_UNIDADES_INTRO_UPLOAD', label: 'Subir Introducciones' },
       { key: 'ENABLE_DOCX_UPLOAD_HTML', label: 'Subir Recursos HTML' }
@@ -55,7 +56,8 @@ const WORKFLOW_PHASES = [
     icon: <CheckCircle2 className="w-5 h-5" />,
     estimatedMins: 1,
     tasks: [
-      { key: 'ENABLE_ACTIVITY_COMPLETION_UPDATE', label: 'Actualizar Criterios de Finalización' }
+      { key: 'ENABLE_ACTIVITY_COMPLETION_UPDATE', label: 'Actualizar Criterios de Finalización' },
+      { key: 'ENABLE_FINAL_COURSE_FORMAT_BUTTONS', label: 'Configuración final del formato de curso (Botones)' }
     ]
   }
 ];
@@ -104,6 +106,7 @@ export default function MoodleEngineView({ setActiveTab }) {
     ENABLE_DOCX_PARSING: 'False',
     ENABLE_DOCX_SPLITTING_HTML: 'False',
     ENABLE_UNIDADES_INTRO_SPLIT: 'False',
+    ENABLE_COURSE_FORMAT_CHANGE: 'True',
     ENABLE_COURSE_STRUCTURE_CREATION: 'False',
     ENABLE_UNIDADES_INTRO_UPLOAD: 'False',
     ENABLE_DOCX_UPLOAD_HTML: 'False',
@@ -111,6 +114,7 @@ export default function MoodleEngineView({ setActiveTab }) {
     ENABLE_CUESTIONARIO_EXPORT: 'False',
     ENABLE_CUESTIONARIO_GRADE_UPDATE: 'False',
     ENABLE_ACTIVITY_COMPLETION_UPDATE: 'True',
+    ENABLE_FINAL_COURSE_FORMAT_BUTTONS: 'False',
     COURSES_TO_PROCESS: '9'
   });
 
@@ -283,11 +287,19 @@ export default function MoodleEngineView({ setActiveTab }) {
       }
 
       if (msg.includes("La tarea finalizó") || msg.includes("Limpieza completada")) {
-        setStatus('Completed');
-        setProgress(100);
-        setCurrentTaskLabel('Flujo completado exitosamente.');
+        // Only mark as completed if we see the final exit log, and it wasn't a hard error code
+        if (msg.includes("código de salida") && !msg.includes("código de salida 0")) {
+          setStatus('Failed');
+          setCurrentTaskLabel('La ejecución se ha detenido por un error.');
+        } else {
+          setStatus('Completed');
+          setProgress(100);
+          setCurrentTaskLabel('Flujo completado exitosamente.');
+        }
       }
-      if (msg.toLowerCase().includes("Proceso Detenido") || msg.toLowerCase().includes("exception")) {
+      
+      // Removed the generic "exception" check that was causing false-positives
+      if (msg.toLowerCase().includes("proceso detenido por el usuario")) {
         setStatus('Failed');
       }
     };
@@ -417,7 +429,7 @@ export default function MoodleEngineView({ setActiveTab }) {
                 {status === 'Ready' && 'Listo para ejecutar'}
                 {status === 'Running' && 'Ejecutando'}
                 {status === 'Completed' && 'Completado'}
-                {status === 'Failed' && 'Error Crítico'}
+                {status === 'Failed' && 'Ejecución Incompleta'}
               </h3>
               <p className="text-xs text-gray-400 mb-4 text-center">
                 {status === 'Ready' && 'Todo en orden. Presiona ejecutar para iniciar.'}

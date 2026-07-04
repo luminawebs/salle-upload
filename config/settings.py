@@ -15,6 +15,10 @@ class Config:
     # Converts string values like "True", "1", "t" to a boolean
     HEADLESS_MODE = os.getenv("HEADLESS_MODE", "False").lower() in ("true", "1", "t")
 
+    # Remote Execution Toggle
+    EXECUTE_REMOTE = os.getenv("EXECUTE_REMOTE", "False").lower() in ("true", "1", "t")
+    SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub")
+
     # Toggle specific processes
 
     # --------------------------------------------------- FASE 00 --------------------------------------------------------------------------------------------------------------------------------------------
