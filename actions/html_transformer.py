@@ -389,9 +389,9 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
             
     # 2. Replace headings with images
     heading_map = {
-        "¿Qué vamos a lograr?": "eti-actividades.png",
-        "¿Cómo lo vamos a lograr?": "eti-actividades-b.png",
-        "¿Cómo lo vamos a evaluar?": "banner_evaluacion.png"
+        "¿Qué vamos a lograr?": "https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/quevamosalograr.png",
+        "¿Cómo lo vamos a lograr?": "https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/comolovamosalograr.png",
+        "¿Cómo lo vamos a evaluar?": "https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/comolovamosaevaluar.png"
     }
     
     eval_header_p = None
@@ -399,16 +399,15 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
         text = p.get_text(" ", strip=True)
         # Check against heading map
         matched = False
-        for target_text, img_file in heading_map.items():
+        for target_text, img_url in heading_map.items():
             if target_text in text:
                 if target_text == "¿Cómo lo vamos a evaluar?":
                     eval_header_p = p
-                base64_data = get_image_base64(img_file, course_id)
-                if base64_data:
-                    p.clear()
-                    img_tag = soup.new_tag("img", src=base64_data, width="60%")
-                    p.append(img_tag)
-                    p["data-section"] = target_text
+                p.clear()
+                img_tag = soup.new_tag("img", src=img_url, width="60%")
+                img_tag["class"] = "img-fluid"
+                p.append(img_tag)
+                p["data-section"] = target_text
                 matched = True
                 break
                 
