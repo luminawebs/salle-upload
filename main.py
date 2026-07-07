@@ -35,6 +35,7 @@ from actions.recursos_semana_actions import run_recursos_html_export_workflow
 from actions.configuracion_final_actions import run_configuracion_final_workflow
 from actions.competencias_actions import run_ajuste_competencias_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
+from actions.materiales_estudio_actions import run_materiales_estudio_workflow
 from config.settingsSALLE import ConfigSALLE as Config
 
 # Setup base logging for the application
@@ -163,6 +164,7 @@ def main():
                     or getattr(Config, "ENABLE_AJUSTE_COMPETENCIAS", False)
                     or getattr(Config, "ENABLE_CONFIGURACION_FINAL", False)
                     or getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False)
+                    or getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False)
                 ):
                     edit_enabled = enable_edit_mode(
                         driver, wait_time=Config.EXPLICIT_WAIT_TIME
@@ -531,6 +533,25 @@ def main():
                     )
                 elif not getattr(Config, "ENABLE_CONFIGURACION_FINAL", False):
                     logger.info("Configuracion final workflow is disabled via config.")
+
+                if getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False) and edit_enabled:
+                    logger.info("Executing Materiales de Estudio workflow...")
+                    try:
+                        run_materiales_estudio_workflow(
+                            driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
+                        )
+                    except Exception as e:
+                        import traceback
+                        logger.error(f"Error executing run_materiales_estudio_workflow for course {course_id}: {e}")
+                        logger.error(traceback.format_exc())
+                        try:
+                            dismiss_moodle_error_overlays(driver)
+                            logger.info(f"Navigating back to course {course_id} home after error...")
+                            moodle.navigate_to_course(course_id)
+                        except Exception:
+                            pass
+                elif not getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False):
+                    logger.info("Materiales de Estudio workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False) and edit_enabled:
                     logger.info("Executing activity completion update workflow...")

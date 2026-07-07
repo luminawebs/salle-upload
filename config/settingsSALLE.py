@@ -87,9 +87,17 @@ class ConfigSALLE:
         "t",
     )
 
-    # Convierte preguntas de actividades (cuestionarios) a GIFT y las sube al Banco de Preguntas
     ENABLE_CUESTIONARIO_EXPORT = os.getenv(
         "ENABLE_CUESTIONARIO_EXPORT", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
+
+    # Añadir recursos finales a las unidades (Materiales de estudio y Página)
+    ENABLE_MATERIALES_ESTUDIO_EXPORT = os.getenv(
+        "ENABLE_MATERIALES_ESTUDIO_EXPORT", "True"
     ).lower() in (
         "true",
         "1",

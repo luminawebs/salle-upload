@@ -375,6 +375,61 @@ def remove_questions_from_html(html_content: str) -> str:
             
     return str(soup)
 
+def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
+    """
+    Finds all URLs (both in <a> tags and plain text) in the given BeautifulSoup object
+    and formats them to open in a new tab with the specified link text.
+    """
+    # First handle URLs that are already inside <a> tags
+    for a_tag in soup.find_all("a"):
+        # Set target attribute
+        a_tag['target'] = "_blank"
+        
+        # Change the link text
+        a_tag.string = link_text
+        
+        # Clean up preceding text like "Disponible" or colon before the link
+        prev_node = a_tag.previous_sibling
+        if prev_node and isinstance(prev_node, str):
+            # Remove "disponible en:", "disponible:", "disponível em:", "available at:", etc.
+            new_text = re.sub(r'(?i)\s*(disponible(s)?|dispon[íi]vel|available)\s*(en|em|at)?\s*:?\s*$', ' ', prev_node)
+            if new_text == prev_node:
+                # If the specific text is not there, just remove colon if it exists at the end
+                new_text = re.sub(r'\s*:\s*$', ' ', prev_node)
+            
+            if new_text != prev_node:
+                prev_node.replace_with(new_text)
+
+    # Next, handle plain text URLs that weren't converted to <a> tags
+    pattern = re.compile(r'(?i)(\s*(?:disponible(?:s)?|dispon[íi]vel|available)\s*(?:en|em|at)?\s*:?\s*)?(https?://[^\s<>"]+|www\.[^\s<>"]+)')
+
+    def repl(match):
+        url = match.group(2)
+        href = url if url.startswith('http') else 'https://' + url
+        return f' <a href="{href}" target="_blank" rel="noopener">{link_text}</a>'
+
+    plain_urls_converted = 0
+    from bs4 import BeautifulSoup as BS  # Ensure BeautifulSoup is available
+    for text_node in soup.find_all(string=True):
+        if text_node.parent and text_node.parent.name == 'a':
+            continue
+        new_html = pattern.sub(repl, text_node)
+        if new_html != text_node:
+            plain_urls_converted += 1
+            new_soup = BS(new_html, 'html.parser')
+            text_node.replace_with(new_soup)
+            
+    if plain_urls_converted > 0:
+        logger.info(f"Converted {plain_urls_converted} plain-text URLs to '{link_text}' anchors.")
+
+def format_urls_in_html(html_content: str, link_text: str = "(disponible aquí)") -> str:
+    from bs4 import BeautifulSoup as BS
+    if not html_content or not html_content.strip():
+        return html_content
+    soup = BS(html_content, 'html.parser')
+    format_urls_in_soup(soup, link_text)
+    return str(soup)
+
 def transform_activity_html(html_content: str, course_id: int = None) -> str:
     if not html_content or not html_content.strip():
         return html_content
@@ -457,46 +512,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                     tag["src"] = base64_data
         
     # 3. Format URLs
-    # First handle URLs that are already inside <a> tags
-    for a_tag in soup.find_all("a"):
-        # Set target attribute
-        a_tag['target'] = "_blank"
-        
-        # Change the link text
-        a_tag.string = "(disponible aquí)"
-        
-        # Clean up preceding text like "Disponible" or colon before the link
-        prev_node = a_tag.previous_sibling
-        if prev_node and isinstance(prev_node, str):
-            # Remove "disponible en:", "disponible:", "disponível em:", "available at:", etc.
-            new_text = re.sub(r'(?i)\s*(disponible(s)?|dispon[íi]vel|available)\s*(en|em|at)?\s*:?\s*$', ' ', prev_node)
-            if new_text == prev_node:
-                # If the specific text is not there, just remove colon if it exists at the end
-                new_text = re.sub(r'\s*:\s*$', ' ', prev_node)
-            
-            if new_text != prev_node:
-                prev_node.replace_with(new_text)
-
-    # Next, handle plain text URLs that weren't converted to <a> tags
-    pattern = re.compile(r'(?i)(\s*(?:disponible(?:s)?|dispon[íi]vel|available)\s*(?:en|em|at)?\s*:?\s*)?(https?://[^\s<>"]+|www\.[^\s<>"]+)')
-
-    def repl(match):
-        url = match.group(2)
-        href = url if url.startswith('http') else 'https://' + url
-        return f' <a href="{href}" target="_blank" rel="noopener">(disponible aquí)</a>'
-
-    plain_urls_converted = 0
-    for text_node in soup.find_all(string=True):
-        if text_node.parent and text_node.parent.name == 'a':
-            continue
-        new_html = pattern.sub(repl, text_node)
-        if new_html != text_node:
-            plain_urls_converted += 1
-            new_soup = BeautifulSoup(new_html, 'html.parser')
-            text_node.replace_with(new_soup)
-            
-    if plain_urls_converted > 0:
-        logger.info(f"Converted {plain_urls_converted} plain-text URLs to '(disponible aquí)' anchors.")
+    format_urls_in_soup(soup, "(disponible aquí)")
             
     # 4. Apply Typography (wrap text in spans)
     for tag in soup.find_all(["p", "li"]):

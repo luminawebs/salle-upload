@@ -443,13 +443,14 @@ def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
             logger.error(f"Could not find section-{unit_num} on the page. Skipping.")
             continue
             
-        try:
-            from actions.etiqueta_actividades_actions import add_etiqueta_actividades_to_section
-            add_etiqueta_actividades_to_section(driver, section_element, wait_time)
-            # Re-fetch section element because adding the label triggers a page reload/redirect
-            section_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sec)))
-        except Exception as e:
-            logger.error(f"Error adding video label to section {unit_num}: {e}")
+        if "UNIDAD" in sec_name.upper():
+            try:
+                from actions.etiqueta_actividades_actions import add_etiqueta_actividades_to_section
+                add_etiqueta_actividades_to_section(driver, section_element, wait_time)
+                # Re-fetch section element because adding the label triggers a page reload/redirect
+                section_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sec)))
+            except Exception as e:
+                logger.error(f"Error adding video label to section {unit_num}: {e}")
             
         existing_acts = get_existing_activities(section_element)
         
