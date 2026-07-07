@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
+from core.moodle_handler import MoodleHandler
 from core.wysiwyg_handler import inject_html_into_wysiwyg
 from actions.html_transformer import format_urls_in_html
 
@@ -191,6 +192,12 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
 
 def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
     logger.info(f"Starting Materiales de Estudio workflow for course {course_id}")
+    
+    # Ensure we are on the course homepage
+    moodle = MoodleHandler()
+    logger.info("Navigating to course homepage to find sections...")
+    moodle.navigate_to_course(course_id)
+    time.sleep(2)
     
     for unidad_num in [1, 2, 3]:
         logger.info(f"Processing Unidad {unidad_num}")
