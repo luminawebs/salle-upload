@@ -388,6 +388,11 @@ def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
         # Change the link text
         a_tag.string = link_text
         
+        if link_text.lower() == "(disponible aquí)":
+            existing_style = a_tag.get('style', '')
+            existing_style = re.sub(r'(?i)color\s*:[^;]+;?', '', existing_style)
+            a_tag['style'] = f"color: #0000EE; {existing_style}".strip()
+        
         # Clean up preceding text like "Disponible" or colon before the link
         prev_node = a_tag.previous_sibling
         if prev_node and isinstance(prev_node, str):
@@ -406,7 +411,8 @@ def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
     def repl(match):
         url = match.group(2)
         href = url if url.startswith('http') else 'https://' + url
-        return f' <a href="{href}" target="_blank" rel="noopener">{link_text}</a>'
+        style_attr = ' style="color: #0000EE;"' if link_text.lower() == "(disponible aquí)" else ''
+        return f' <a href="{href}" target="_blank" rel="noopener"{style_attr}>{link_text}</a>'
 
     plain_urls_converted = 0
     from bs4 import BeautifulSoup as BS  # Ensure BeautifulSoup is available
@@ -621,6 +627,8 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
     docente_html = ""
     plan_html = ""
 
+    font_style = "font-family: tahoma, arial, helvetica, sans-serif; font-size: small; color: #000000;"
+
     # Extract Presentación
     for el in soup.find_all(['p', 'h1', 'h2', 'h3']):
         if 'PRESENTACIÓN DEL ESPACIO ACADÉMICO' in el.get_text().upper() or 'PRESENTACION DEL ESPACIO ACADEMICO' in el.get_text().upper():
@@ -630,9 +638,16 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
                 nxt_text = nxt.get_text().upper()
                 if 'OPCIÓN METODOLÓGICA' in nxt_text or 'OPCION METODOLOGICA' in nxt_text or 'METODOLOGÍA DE APRENDIZAJE' in nxt_text or 'METODOLOGIA DE APRENDIZAJE' in nxt_text or 'PLAN DE FORMACIÓN' in nxt_text:
                     break
+                if hasattr(nxt, 'name') and nxt.name:
+                    for tag in [nxt] + nxt.find_all(True):
+                        if tag.has_attr('style'):
+                            s = tag['style']
+                            s = re.sub(r'(?i)font-family\s*:[^;]+;?', '', s)
+                            s = re.sub(r'(?i)font-size\s*:[^;]+;?', '', s)
+                            tag['style'] = s
                 blocks.append(str(nxt))
                 nxt = nxt.find_next_sibling()
-            presentacion_html = "".join(blocks)
+            presentacion_html = f'<div style="{font_style}">{"".join(blocks)}</div>'
             break
 
     # Extract Metodología
@@ -644,9 +659,16 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
             while nxt and nxt.name not in ['h1', 'h2', 'table']:
                 if 'PRESENTACIÓN DEL' in nxt.get_text().upper() or 'PLAN DE FORMACIÓN' in nxt.get_text().upper():
                     break
+                if hasattr(nxt, 'name') and nxt.name:
+                    for tag in [nxt] + nxt.find_all(True):
+                        if tag.has_attr('style'):
+                            s = tag['style']
+                            s = re.sub(r'(?i)font-family\s*:[^;]+;?', '', s)
+                            s = re.sub(r'(?i)font-size\s*:[^;]+;?', '', s)
+                            tag['style'] = s
                 blocks.append(str(nxt))
                 nxt = nxt.find_next_sibling()
-            metodologia_html = "".join(blocks)
+            metodologia_html = f'<div style="{font_style}">{"".join(blocks)}</div>'
             break
 
     # Extract course_id from path (e.g. assets\10\raw_docx_extracted.html -> 10)
@@ -759,6 +781,18 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
                     if p.has_attr('style'): del p['style']
                     if p.has_attr('align'): del p['align']
                     if p.has_attr('class'): del p['class']
+                    
+        # Remove tabulation from list items
+        for list_tag in table_tag.find_all(['ul', 'ol']):
+            existing_style = list_tag.get('style', '')
+            # Clean up existing padding/margin if any
+            existing_style = re.sub(r'(?i)(padding|margin)[^;]+;?', '', existing_style)
+            list_tag['style'] = f"padding-left: 0; margin-left: 0; list-style-position: inside; {existing_style}".strip()
+            
+        for li_tag in table_tag.find_all('li'):
+            existing_style = li_tag.get('style', '')
+            existing_style = re.sub(r'(?i)(padding|margin)[^;]+;?', '', existing_style)
+            li_tag['style'] = f"margin: 0; padding: 0; {existing_style}".strip()
                     
     # Extract Plan de Formación
     tables = soup.find_all('table')
