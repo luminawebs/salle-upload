@@ -62,33 +62,38 @@ async def save_settings(request: Request):
 
 @app.post("/api/upload")
 async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
-    # Create the course-specific directory
-    course_dir = os.path.join("assets", course_id)
-    os.makedirs(course_dir, exist_ok=True)
-    
-    # Clean up old generated files to ensure we don't use data from past uploads
-    folders_to_clean = ["imgs", "actividades", "material", "introduccion", "unidades_intro"]
-    for folder_name in folders_to_clean:
-        folder_path = os.path.join(course_dir, folder_name)
-        if os.path.exists(folder_path):
-            try:
-                shutil.rmtree(folder_path)
-            except Exception as e:
-                print(f"Error removing {folder_path}: {e}")
-                
-    # Clean up the raw extracted html
-    raw_html_path = os.path.join(course_dir, "raw_docx_extracted.html")
-    if os.path.exists(raw_html_path):
+    global current_process
+    # 1. Stop any currently running task
+    if current_process is not None and current_process.returncode is None:
         try:
-            os.remove(raw_html_path)
+            current_process.terminate()
+        except Exception:
+            pass
+            
+    # 2. Clear previous logs
+    while not log_queue.empty():
+        try:
+            log_queue.get_nowait()
+        except asyncio.QueueEmpty:
+            break
+            
+    await log_queue.put("[Sistema] Nueva subida de archivo detectada. Tareas anteriores canceladas y registros limpiados.")
+
+    # 3. Clean up the course directory aggressively to remove all previous tempfiles
+    course_dir = os.path.join("assets", course_id)
+    if os.path.exists(course_dir):
+        try:
+            shutil.rmtree(course_dir)
         except Exception as e:
-            print(f"Error removing {raw_html_path}: {e}")
+            print(f"Error removing {course_dir}: {e}")
+    
+    os.makedirs(course_dir, exist_ok=True)
     
     # Save the file as course_id.docx which main.py expects
     file_location = os.path.join(course_dir, f"{course_id}.docx")
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
-    return {"info": f"archivo '{file.filename}' guardado exitosamente"}
+    return {"info": f"archivo '{file.filename}' guardado exitosamente y entorno reiniciado"}
 
 @app.post("/api/review")
 async def api_review(file: UploadFile = File(...)):
