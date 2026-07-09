@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Upload, Play, Save, Check, Terminal, Activity, FileText,
   FolderTree, BookOpen, Settings, CheckCircle2, Circle, Clock,
-  AlertTriangle, XCircle, ChevronDown, ChevronUp, RefreshCw
+  AlertTriangle, XCircle, ChevronDown, ChevronUp, RefreshCw, Download
 } from 'lucide-react';
 import NavigationTabs from './NavigationTabs';
 
@@ -183,6 +183,20 @@ export default function MoodleEngineView({ setActiveTab }) {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDownloadLogs = () => {
+    if (!logs || logs.length === 0) return;
+    const logText = logs.map(l => `[${l.timeStr}] ${l.text}`).join('\n');
+    const blob = new Blob([logText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'terminal_logs.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const processFile = async (file) => {
@@ -590,10 +604,20 @@ export default function MoodleEngineView({ setActiveTab }) {
                 <h2 className="text-xs font-semibold text-gray-300 uppercase tracking-widest">
                   Terminal de Moodle
                 </h2>
-                <div className="ml-auto flex space-x-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-error/50"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-warning/50"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-success/50"></div>
+                <div className="ml-auto flex items-center space-x-4">
+                  <button 
+                    onClick={handleDownloadLogs}
+                    className="flex items-center text-[10px] font-semibold text-gray-400 hover:text-white transition-colors"
+                    title="Descargar Logs"
+                  >
+                    <Download className="w-3.5 h-3.5 mr-1" />
+                    TXT
+                  </button>
+                  <div className="flex space-x-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-error/50"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-warning/50"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-success/50"></div>
+                  </div>
                 </div>
               </div>
 

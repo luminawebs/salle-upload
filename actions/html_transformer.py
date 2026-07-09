@@ -529,7 +529,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
     tables = soup.find_all("table")
     for table in tables:
         if "Criterios de desempeño" in table.get_text():
-            table['style'] = "width: 60%;"
+            table['style'] = "width: 60%; border-collapse: collapse; border: 1px solid #000;"
             table['border'] = "1"
             table['cellspacing'] = "0"
             table['cellpadding'] = "0"
@@ -546,6 +546,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                     row['style'] = RUBRIC_HEADER_STYLE
                     for td in tds:
                         td['valign'] = "top"
+                        td['style'] = "border: 1px solid #000;"
                         if "Criterios" in td.get_text():
                             td['width'] = "436"
                             inner_p = td.find("p")
@@ -561,11 +562,12 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                         td['valign'] = "top"
                         if j == 0:
                             td['width'] = "436"
+                            td['style'] = "border: 1px solid #000;"
                             inner_p = td.find("p")
                             if inner_p: inner_p['align'] = "left"
                         else:
                             td['width'] = "48"
-                            td['style'] = "text-align: center;"
+                            td['style'] = "text-align: center; border: 1px solid #000;"
                             inner_p = td.find("p")
                             if inner_p: 
                                 inner_p['align'] = "right"
@@ -581,6 +583,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                         td['valign'] = "top"
                         if j == 0:
                             td['width'] = "436"
+                            td['style'] = "border: 1px solid #000;"
                             inner_p = td.find("p")
                             if inner_p:
                                 inner_p['align'] = "right"
@@ -590,7 +593,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                                         t_node.replace_with("Total")
                         else:
                             td['width'] = "48"
-                            td['style'] = "text-align: center;"
+                            td['style'] = "text-align: center; border: 1px solid #000;"
                             inner_p = td.find("p")
                             if inner_p:
                                 inner_p['align'] = "right"
