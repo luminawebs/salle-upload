@@ -88,7 +88,9 @@ def update_activity_completion(driver, course_id: int, wait_time: int = 10):
                 try:
                     completion_header = driver.find_element(By.ID, "id_activitycompletionheader")
                     if "collapsed" in completion_header.get_attribute("class"):
-                        completion_header.click()
+                        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", completion_header)
+                        time.sleep(0.5)
+                        driver.execute_script("arguments[0].click();", completion_header)
                         time.sleep(0.5)
                 except NoSuchElementException:
                     logger.warning("Activity completion header not found.")

@@ -79,25 +79,37 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
         if not prev_node:
             continue
             
-        # Flatten nested lists if any (like ul > li > ol > li)
-        lis = prev_node.find_all('li')
-        options = [li.get_text(strip=True) for li in lis if not li.find(['ol', 'ul'])]
+        # Extract options and stem from the list
+        options = []
+        stem = ""
+        outer_lis = prev_node.find_all('li', recursive=False)
+        if outer_lis and outer_lis[-1].find(['ol', 'ul']): # usually the stem is in the only outer li or the last one
+            import copy
+            outer_li_clone = copy.copy(outer_lis[-1])
+            inner_list = outer_li_clone.find(['ol', 'ul'])
+            if inner_list:
+                inner_list.decompose()
+            stem = outer_li_clone.get_text(strip=True)
+            inner_lis = outer_lis[-1].find(['ol', 'ul']).find_all('li')
+            options = [li.get_text(strip=True) for li in inner_lis]
+        else:
+            lis = prev_node.find_all('li')
+            options = [li.get_text(strip=True) for li in lis if not li.find(['ol', 'ul'])]
         
         if not options:
             continue
             
-        # Find stem
-        stem = ""
-        stem_p = prev_node.find_previous_sibling('p')
-        if stem_p:
-            stem_text = stem_p.get_text(strip=True)
-            if stem_text.upper() != "PREGUNTAS:" and len(stem_text) > 3:
-                stem = stem_text
-                
-        # If no valid stem found in previous p, assume it's the first list item
-        if not stem and len(options) > 1:
-            stem = options[0]
-            options = options[1:]
+        if not stem:
+            stem_p = prev_node.find_previous_sibling('p')
+            if stem_p:
+                stem_text = stem_p.get_text(strip=True)
+                if stem_text.upper() != "PREGUNTAS:" and len(stem_text) > 3 and "respuesta correcta" not in stem_text.lower() and "respuestas correctas" not in stem_text.lower():
+                    stem = stem_text
+                    
+            # If no valid stem found in previous p, assume it's the first list item
+            if not stem and len(options) > 1:
+                stem = options[0]
+                options = options[1:]
             
         is_true_false = False
         gift_ans = ""
@@ -124,10 +136,18 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
             q_num_padded = f'{q_num:02d}'
             gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{\n'
             for opt in options:
+                import re
                 opt_norm = opt.lower().strip('. ')
                 correct_norm = correct_text.lower().strip('. ')
                 
-                is_correct = opt_norm in correct_norm or correct_norm in opt_norm
+                is_correct = (opt_norm == correct_norm)
+                if not is_correct:
+                    clean_opt = re.sub(r'^[a-ea-e][\.\)]\s*', '', opt_norm).strip()
+                    clean_correct = re.sub(r'^[a-ea-e][\.\)]\s*', '', correct_norm).strip()
+                    is_correct = (clean_opt == clean_correct)
+                if not is_correct and len(clean_opt) > 10 and len(clean_correct) > 10:
+                    is_correct = (clean_opt in clean_correct or clean_correct in clean_opt)
+                    
                 prefix = '=' if is_correct else '~'
                 gift += f'\t{prefix}{opt}\n'
                 

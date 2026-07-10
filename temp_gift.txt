@@ -1,0 +1,218 @@
+// Pregunta 01
+::Pregunta 01::¿Cuál es el objetivo principal de esta clase? {
+	=Conocer la persona de Jesús y su mensaje
+	~Aprender sobre los profetas del Antiguo Testamento
+	~Estudiar la historia de la Iglesia primitiva
+	~Analizar los milagros de Moisés
+}
+
+// Pregunta 02
+::Pregunta 02::Respuesta correcta: Conocer la persona de Jesús y su mensaje {
+	~¿En qué siglo vivió Jesús de Nazaret?
+	=Siglo I
+	=Siglo II
+	=Siglo III
+	=Siglo IV
+}
+
+// Pregunta 03
+::Pregunta 03::Respuesta correcta: Siglo I {
+	~¿Cuál es el contexto geográfico principal en la vida de Jesús?
+	~Egipto
+	=Palestina
+	~Grecia
+	~Roma
+}
+
+// Pregunta 04
+::Pregunta 04::Respuesta correcta: Palestina {
+	~¿Qué significa el término 'Abba' que Jesús utiliza para referirse a Dios?
+	~Maestro
+	=Padre
+	~Rey
+	~Amigo
+}
+
+// Pregunta 05
+::Pregunta 05::Respuesta correcta: Padre {
+	~¿Cuál es el centro del mensaje que Jesús predicó según los Evangelios?
+	=La llegada del Reino de Dios
+	~La construcción del templo
+	~El cumplimiento de la ley mosaica
+	~La creación de una nueva religión
+}
+
+// Pregunta 06
+::Pregunta 06::Respuesta correcta: La llegada del Reino de Dios {
+	~¿Cuál es la principal fuente para conocer la vida y el mensaje de Jesús?
+	=Los Evangelios
+	~El Apocalipsis
+	~Las Cartas Paulinas
+	~El Pentateuco
+}
+
+// Pregunta 07
+::Pregunta 07::Respuesta correcta: Los Evangelios {
+	~¿Cuáles son los valores que proclama el Reino de Dios según Jesús?
+	~Poder político
+	=Justicia, amor y misericordia
+	~Riqueza, ostentación
+	~Dominio social y militar
+}
+
+// Pregunta 08
+::Pregunta 08::Respuesta correcta: Justicia, amor y misericordia {
+	~¿Qué significa la resurrección de Jesús para la fe cristiana?
+	~Fin de la historia
+	=La esperanza en el Reino de Dios
+	~Fracaso del proyecto
+	~Inicio de la Iglesia
+}
+
+// Pregunta 09
+::Pregunta 09::Respuesta correcta: La esperanza en el Reino de Dios {
+	~¿Qué grupo social fue especialmente atendido por Jesús?
+	=Empobrecidos y marginados
+	~Sacerdotes
+	~Reyes
+	~Comerciantes
+}
+
+// Pregunta 10
+::Pregunta 10::Respuesta correcta: Empobrecidos y marginados {
+	~¿Qué relación establece Jesús entre Dios y los seres humanos?
+	~Distancia y temor
+	=Cercanía y confianza filial
+	~Obediencia ciega
+	~Indiferencia
+}
+
+// Pregunta 11
+::Pregunta 11::Respuesta correcta: Cercanía y confianza filial {
+	~¿Por qué existen tantas imágenes de Jesús en nuestro contexto?
+	~Porque Jesús fue un personaje histórico.
+	~Porque Jesús fue el hijo de Dios
+	=Porque Jesús fue ampliamente interpretado en la historia
+	~Porque Jesús murió por nosotros
+}
+
+// Pregunta 12
+::Pregunta 12::Respuesta correcta: Porque Jesús fue ampliamente interpretado en la historia {
+	~¿Qué significa la expresión 'Jesús Maestro de Humanidad'?
+	~Profeta apocalíptico
+	~Fundador de una religión
+	~Rey político
+	=Ejemplo de vida ética y solidaria
+}
+
+// Pregunta 13
+::Pregunta 13::Respuesta correcta: Ejemplo de vida ética y solidaria {
+	~¿Cuál es el valor central promueve el proyecto del Reino de Dios según el mensaje de Jesús?
+	=Justicia
+	~Riqueza
+	~Poder
+	~Venganza
+}
+
+// Pregunta 14
+::Pregunta 14::Respuesta correcta: Justicia {
+	~¿Qué implica seguir creyendo en Jesús hoy?
+	~Repetir tradiciones sin reflexión
+	=Vivir los valores del Reino en la sociedad actual
+	~Buscar poder personal
+	~Evitar el compromiso social
+}
+
+// Pregunta 15
+::Pregunta 15::Respuesta correcta: Vivir los valores del Reino en la sociedad actual {
+	~¿Cómo se expresa la misericordia de Dios en el mensaje de Jesús?
+	=Perdón y acogida a todos
+	~Castigo a los pecadores
+	~Exclusión de los débiles
+	~Rechazo a los extranjeros
+}
+
+// Pregunta 16
+::Pregunta 16::Respuesta correcta: Perdón y acogida a todos {
+	~¿Qué desafío plantea el Reino de Dios para la sociedad actual?
+	~Transformar las estructuras injustas
+	~Transformar la sociedad actual
+	~Construir una sociedad donde reine la paz, la justicia y el amor
+	=Todas las anteriores
+}
+
+// Pregunta 17
+::Pregunta 17::Respuesta correcta: Todas las anteriores {
+	~¿Cuál es el mensaje central de la resurrección de Jesús?
+	~El sufrimiento es inútil
+	~La muerte es el final
+	=La vida vence a la muerte
+	~El castigo es inevitable
+}
+
+// Pregunta 18
+::Pregunta 18::Respuesta correcta: La vida vence a la muerte {
+	~¿Qué significa para los cristianos la expresión 'Cristo ha resucitado'
+	~Que Jesús fue recordado por sus discípulos
+	=Que Jesús vive y da esperanza de vida eterna
+	~Que su mensaje terminó con su muerte
+	~Que fue un líder político
+}
+
+// Pregunta 19
+::Pregunta 19::Respuesta correcta: Que Jesús vive y da esperanza de vida eterna {
+	~¿Cuál era la ciudad considerada centro religioso y político en Palestina?
+	~Nazaret
+	~Belén
+	=Jerusalén
+	~Cafarnaúm
+}
+
+// Pregunta 20
+::Pregunta 20::Respuesta correcta: Jerusalén {
+	~¿En qué fiesta importante de Israel murió y resucitó Jesús?
+	=En la Pascua
+	~En Pentecostés
+	~En la Fiesta de los Tabernáculos
+	~En Yom Kipur
+}
+
+// Pregunta 21
+::Pregunta 21::Respuesta correcta: En la Pascua {
+	~El énfasis en la riqueza material
+	=La búsqueda de paz interior y compasión
+	~La obediencia ciega a normas sociales
+	~El rechazo a cualquier práctica espiritual
+}
+
+// Pregunta 22
+::Pregunta 22::Respuesta correcta: La búsqueda de paz interior y compasión {
+	~Ambos se autodefinen únicamente como mensajeros
+	=Jesús afirma una unidad personal con Dios; Mahoma se presenta como profeta de un Dios absoluto
+	~Mahoma predica el politeísmo, Jesús el monoteísmo
+	~Ambos rechazan la oración y la meditación
+}
+
+// Pregunta 23
+::Pregunta 23::Respuesta correcta:  Jesús afirma una unidad personal con Dios; Mahoma se presenta como profeta de un Dios absoluto {
+	~Porque elimina los rituales
+	~Porque sustituye el estudio de los textos originales
+	~Porque crea una religión única mundial
+	=Porque fomenta respeto, comprensión crítica y convivencia ética
+}
+
+// Pregunta 24
+::Pregunta 24::Respuesta correcta:  Porque fomenta respeto, comprensión crítica y convivencia ética {
+	~La imposición de conductas
+	~El radicalismo dogmático
+	=La inclusión, el cuidado del otro y la esperanza frente al sufrimiento
+	~El aislamiento y la autorreferencialidad
+}
+
+// Pregunta 25
+::Pregunta 25::Respuesta correcta:  La inclusión, el cuidado del otro y la esperanza frente al sufrimiento {
+	~Fue una muerte accidental
+	=Se interpreta como un acto redentor y de salvación para la humanidad
+	~Ocurrió en la vejez y en paz
+	~No tuvo impacto en sus seguidores
+}
