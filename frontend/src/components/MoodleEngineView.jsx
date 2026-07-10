@@ -605,14 +605,6 @@ export default function MoodleEngineView({ setActiveTab }) {
                   Terminal de Moodle
                 </h2>
                 <div className="ml-auto flex items-center space-x-4">
-                  <button 
-                    onClick={handleDownloadLogs}
-                    className="flex items-center text-[10px] font-semibold text-gray-400 hover:text-white transition-colors"
-                    title="Descargar Logs"
-                  >
-                    <Download className="w-3.5 h-3.5 mr-1" />
-                    TXT
-                  </button>
                   <div className="flex space-x-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-error/50"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-warning/50"></div>
@@ -661,6 +653,16 @@ export default function MoodleEngineView({ setActiveTab }) {
                 )}
                 <div ref={logsEndRef} />
               </div>
+            </div>
+            
+            <div className="flex justify-end mt-4 shrink-0">
+              <button 
+                onClick={handleDownloadLogs}
+                className="flex items-center px-4 py-2 bg-[#1e2638] hover:bg-primary/90 text-white font-medium rounded-lg transition-colors shadow-sm text-sm border border-border hover:border-primary/50"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Descargar todos los registros (.txt)
+              </button>
             </div>
           </div>
         </div>

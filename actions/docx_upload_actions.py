@@ -62,6 +62,14 @@ def click_edit_for_activity(driver, activity_name_prefix, wait_time):
                     if normalized_search in normalized_name:
                         return activity
                     else:
+                        # Fallback for "Material de referencia" which might be named "Material de estudio" etc.
+                        if "material de" in normalized_search and "unidad" in normalized_search:
+                            u_match = re.search(r'unidad\s+(\d+)', normalized_search)
+                            if u_match:
+                                u_num = u_match.group(1)
+                                if "material" in normalized_name and f"unidad {u_num}" in normalized_name:
+                                    return activity
+                                    
                         search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
                         name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
                         if search_match and name_match:
@@ -131,7 +139,13 @@ def upload_introduccion_general(driver, html_path, wait_time):
     def find_target_label():
         activities = driver.find_elements(By.CSS_SELECTOR, "li.activity.label, li.activity.text")
         for activity in activities:
-            if "Inicio texto presentac" in activity.get_attribute("innerHTML") or "Inicio texto presentac" in activity.text:
+            html = activity.get_attribute("innerHTML").lower()
+            text = activity.text.lower()
+            if ("inicio texto presentaci" in html or 
+                "inicio texto presentaci" in text or 
+                "presentación del espacio" in html or 
+                "presentacion del espacio" in html or 
+                "generalidades del curso" in html):
                 return activity
         return None
         
@@ -313,10 +327,18 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         
         # 5. Click Save Changes
         try:
-            save_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='savechanges'], input[type='submit'][value*='Guardar'], button[type='submit']")))
+            # We use XPath to specifically find the save button and avoid matching header search buttons
+            save_xpath = "//input[@name='savechanges' or contains(translate(@value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'guardar') or contains(translate(@value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'save')]"
+            save_btn = wait.until(EC.presence_of_element_located((By.XPATH, save_xpath)))
+            
             driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", save_btn)
             time.sleep(0.5)
-            driver.execute_script("arguments[0].click();", save_btn)
+            
+            try:
+                wait.until(EC.element_to_be_clickable((By.XPATH, save_xpath))).click()
+            except:
+                driver.execute_script("arguments[0].click();", save_btn)
+                
             try:
                 wait.until(EC.staleness_of(save_btn))
             except:

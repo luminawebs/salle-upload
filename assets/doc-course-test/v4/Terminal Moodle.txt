@@ -1,0 +1,334 @@
+Terminal de Moodle
+
+Procesamiento
+
+[8:53:59 a. m.]
+➜
+[Sistema] Conectando con el proceso de automatización...
+[08:53:59]
+➜
+[Sistema] Iniciando la tarea de automatización...
+[08:54:00]
+·
+2026-07-09 13:52:39,093 - main - INFO - Starting Moodle Automation Script...
+[08:54:00]
+·
+2026-07-09 13:52:39,094 - main - INFO - Initializing WebDriver...
+[08:54:25]
+⚠
+2026-07-09 13:53:04,719 - selenium.webdriver.common.selenium_manager - WARNING - Unsupported architecture:
+[08:54:29]
+·
+2026-07-09 13:53:07,584 - actions.moodle_actions - INFO - Navigating to Moodle login page...
+[08:54:29]
+·
+2026-07-09 13:53:07,598 - actions.moodle_actions - INFO - Loading login page (attempt 1)...
+[08:54:35]
+✓
+2026-07-09 13:53:13,911 - actions.moodle_actions - INFO - Login page loaded successfully (URL: https://unisallevirtual.lasalle.edu.co/login/index.php)
+[08:54:56]
+✓
+2026-07-09 13:53:34,925 - actions.moodle_actions - INFO - Successfully logged into Moodle.
+[08:54:56]
+·
+2026-07-09 13:53:34,963 - main - INFO - --- Processing Course ID: 66749 ---
+[08:54:56]
+·
+2026-07-09 13:53:34,964 - main - INFO - Nombre del curso: Curso 66749
+[08:54:56]
+·
+2026-07-09 13:53:34,969 - actions.moodle_actions - INFO - Navigating to course ID 66749
+[08:55:12]
+✓
+2026-07-09 13:53:50,929 - actions.moodle_actions - INFO - Course 66749 loaded successfully
+[08:55:12]
+·
+2026-07-09 13:53:50,950 - main - INFO - Executing DOCX extraction workflow...
+[08:55:12]
+·
+2026-07-09 13:53:50,953 - core.data_parser - INFO - Executing DOCX parsing workflow for course 66749...
+[08:55:14]
+✓
+2026-07-09 13:53:52,886 - core.data_parser - INFO - ✓ DOCX successfully extracted and saved to assets/66749/raw_docx_extracted.html
+[08:55:14]
+·
+2026-07-09 13:53:52,887 - main - INFO - Executing DOCX splitting workflow...
+[08:55:14]
+·
+2026-07-09 13:53:52,887 - core.data_parser - INFO - Executing DOCX splitting workflow for course 66749...
+[08:55:14]
+·
+2026-07-09 13:53:52,954 - core.data_parser - INFO - ✓ Extracted introduccion_general.html
+
+Estructura
+
+[08:55:41]
+·
+2026-07-09 13:54:20,628 - main - INFO - Executing course structure creation workflow...
+[08:55:41]
+·
+2026-07-09 13:54:20,635 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow for Course 66749 ---
+[08:55:42]
+·
+2026-07-09 13:54:20,982 - actions.structure_actions - INFO - Workflow requires 5 sections.
+[08:55:42]
+·
+2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Found 1 existing sections. Required: 5
+[08:55:42]
+·
+2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Need to create 4 new sections.
+[08:55:56]
+⚠
+2026-07-09 13:54:35,071 - actions.structure_actions - INFO - Activity 'Avisos' already exists in Bienvenidos al curso. Skipping.
+[09:09:56]
+·
+2026-07-09 14:08:35,740 - actions.structure_actions - INFO - --- Course Structure Creation Workflow Complete ---
+[09:09:56]
+·
+2026-07-09 14:08:35,749 - main - INFO - Executing DOCX HTML upload workflow...
+[09:09:56]
+·
+2026-07-09 14:08:35,754 - actions.moodle_actions - INFO - Navigating to course ID 66749
+[09:10:23]
+✓
+2026-07-09 14:09:02,216 - actions.moodle_actions - INFO - Course 66749 loaded successfully
+[09:10:23]
+·
+2026-07-09 14:09:02,279 - actions.docx_upload_actions - INFO - Uploading Introducción General for course 66749...
+[09:10:23]
+✖
+2026-07-09 14:09:02,647 - actions.docx_upload_actions - ERROR - Could not find the label containing the Introducción General accordion.
+[09:28:50]
+·
+2026-07-09 14:27:29,692 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U1.html to Material de referencia Unidad 1...
+[09:28:51]
+✖
+2026-07-09 14:27:30,357 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 1' not found.
+[09:28:53]
+·
+2026-07-09 14:27:32,367 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U2.html to Material de referencia Unidad 2...
+[09:28:53]
+✖
+2026-07-09 14:27:32,843 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 2' not found.
+[09:28:55]
+·
+2026-07-09 14:27:34,852 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U3.html to Material de referencia Unidad 3...
+[09:28:56]
+✖
+2026-07-09 14:27:35,316 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 3' not found.
+[09:28:58]
+·
+2026-07-09 14:27:37,494 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_1.html to UNIDAD 1...
+[09:29:59]
+✓
+2026-07-09 14:28:38,666 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_1.html
+[09:29:59]
+·
+2026-07-09 14:28:38,685 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_2.html to UNIDAD 2...
+[09:30:00]
+·
+2026-07-09 14:28:38,902 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
+[09:31:34]
+✓
+2026-07-09 14:30:13,329 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_2.html
+[09:31:34]
+·
+2026-07-09 14:30:13,354 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_3.html to UNIDAD 3...
+[09:31:36]
+·
+2026-07-09 14:30:14,957 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
+[09:33:03]
+✓
+2026-07-09 14:31:41,793 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_3.html
+[09:33:03]
+·
+2026-07-09 14:31:41,820 - main - INFO - Executing DOCX Rubrica upload workflow...
+[09:33:03]
+·
+2026-07-09 14:31:41,824 - actions.docx_rubrica_actions - INFO - Starting DOCX Rubrica upload workflow...
+[09:53:54]
+·
+2026-07-09 14:52:33,364 - main - INFO - Section rename workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,366 - main - INFO - Section description update workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,367 - main - INFO - Local HTML intro generation workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,367 - main - INFO - General HTML intro generation workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,367 - main - INFO - Infografia export workflow is disabled via config.
+
+Evaluaciones
+
+[08:55:41]
+·
+2026-07-09 13:54:20,628 - main - INFO - Executing course structure creation workflow...
+[08:55:41]
+·
+2026-07-09 13:54:20,635 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow for Course 66749 ---
+[08:55:42]
+·
+2026-07-09 13:54:20,982 - actions.structure_actions - INFO - Workflow requires 5 sections.
+[08:55:42]
+·
+2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Found 1 existing sections. Required: 5
+[08:55:42]
+·
+2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Need to create 4 new sections.
+[08:55:56]
+⚠
+2026-07-09 13:54:35,071 - actions.structure_actions - INFO - Activity 'Avisos' already exists in Bienvenidos al curso. Skipping.
+[09:09:56]
+·
+2026-07-09 14:08:35,740 - actions.structure_actions - INFO - --- Course Structure Creation Workflow Complete ---
+[09:09:56]
+·
+2026-07-09 14:08:35,749 - main - INFO - Executing DOCX HTML upload workflow...
+[09:09:56]
+·
+2026-07-09 14:08:35,754 - actions.moodle_actions - INFO - Navigating to course ID 66749
+[09:10:23]
+✓
+2026-07-09 14:09:02,216 - actions.moodle_actions - INFO - Course 66749 loaded successfully
+[09:10:23]
+·
+2026-07-09 14:09:02,279 - actions.docx_upload_actions - INFO - Uploading Introducción General for course 66749...
+[09:10:23]
+✖
+2026-07-09 14:09:02,647 - actions.docx_upload_actions - ERROR - Could not find the label containing the Introducción General accordion.
+[09:28:50]
+·
+2026-07-09 14:27:29,692 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U1.html to Material de referencia Unidad 1...
+[09:28:51]
+✖
+2026-07-09 14:27:30,357 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 1' not found.
+[09:28:53]
+·
+2026-07-09 14:27:32,367 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U2.html to Material de referencia Unidad 2...
+[09:28:53]
+✖
+2026-07-09 14:27:32,843 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 2' not found.
+[09:28:55]
+·
+2026-07-09 14:27:34,852 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U3.html to Material de referencia Unidad 3...
+[09:28:56]
+✖
+2026-07-09 14:27:35,316 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 3' not found.
+[09:28:58]
+·
+2026-07-09 14:27:37,494 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_1.html to UNIDAD 1...
+[09:29:59]
+✓
+2026-07-09 14:28:38,666 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_1.html
+[09:29:59]
+·
+2026-07-09 14:28:38,685 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_2.html to UNIDAD 2...
+[09:30:00]
+·
+2026-07-09 14:28:38,902 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
+[09:31:34]
+✓
+2026-07-09 14:30:13,329 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_2.html
+[09:31:34]
+·
+2026-07-09 14:30:13,354 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_3.html to UNIDAD 3...
+[09:31:36]
+·
+2026-07-09 14:30:14,957 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
+[09:33:03]
+✓
+2026-07-09 14:31:41,793 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_3.html
+[09:33:03]
+·
+2026-07-09 14:31:41,820 - main - INFO - Executing DOCX Rubrica upload workflow...
+[09:33:03]
+·
+2026-07-09 14:31:41,824 - actions.docx_rubrica_actions - INFO - Starting DOCX Rubrica upload workflow...
+[09:53:54]
+·
+2026-07-09 14:52:33,364 - main - INFO - Section rename workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,366 - main - INFO - Section description update workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,367 - main - INFO - Local HTML intro generation workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,367 - main - INFO - General HTML intro generation workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,367 - main - INFO - Infografia export workflow is disabled via config.
+
+Finalización
+
+[09:34:40]
+·
+2026-07-09 14:33:17,315 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:34:42]
+·
+2026-07-09 14:33:17,452 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:38:56]
+·
+2026-07-09 14:37:35,084 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:38:57]
+·
+2026-07-09 14:37:35,225 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:43:11]
+·
+2026-07-09 14:41:49,967 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:43:12]
+·
+2026-07-09 14:41:50,144 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:47:30]
+·
+2026-07-09 14:46:08,343 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:47:32]
+·
+2026-07-09 14:46:08,542 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:51:45]
+·
+2026-07-09 14:50:22,755 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:51:46]
+·
+2026-07-09 14:50:22,949 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
+[09:53:54]
+·
+2026-07-09 14:52:33,373 - main - INFO - Ajuste competencias workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,373 - main - INFO - Configuracion final workflow is disabled via config.
+[09:53:54]
+·
+2026-07-09 14:52:33,373 - main - INFO - Executing activity completion update workflow...
+[09:53:54]
+·
+2026-07-09 14:52:33,481 - actions.activity_completion_actions - INFO - Navigating to course 66749 to update Activity Completion conditions...
+[09:53:54]
+·
+2026-07-09 14:52:33,483 - actions.moodle_actions - INFO - Navigating to course ID 66749
+[09:54:21]
+✓
+2026-07-09 14:53:00,022 - actions.moodle_actions - INFO - Course 66749 loaded successfully
+[10:09:41]
+✓
+2026-07-09 15:03:26,621 - actions.activity_completion_actions - INFO - Successfully finished updating activity completion conditions.
+[10:09:41]
+·
+2026-07-09 15:03:26,641 - main - INFO - Depositphotos download workflow is disabled via config.
+[10:09:41]
+·
+2026-07-09 15:03:26,641 - main - INFO - Shutting down WebDriver...
+[10:09:41]
+➜
+[Sistema] La tarea finalizó con código de salida 0
+[10:09:41]
+➜
+[Sistema] Limpiando los archivos temporales...
+[10:09:41]
+✓
+[Sistema] Limpieza completada con éxito.

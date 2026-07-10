@@ -1,0 +1,14 @@
+// Pregunta 01
+::Pregunta 01::Verdadero {F}
+
+// Pregunta 02
+::Pregunta 02::Verdadero {T}
+
+// Pregunta 03
+::Pregunta 03::Verdadero {T}
+
+// Pregunta 04
+::Pregunta 04::Verdadero {F}
+
+// Pregunta 05
+::Pregunta 05::Verdadero {T}
