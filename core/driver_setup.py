@@ -22,6 +22,9 @@ def get_driver():
     chrome_options.add_argument("--disable-background-networking")
     chrome_options.add_argument("--disable-extensions")
 
+    if Config.CHROME_BINARY_LOCATION:
+        chrome_options.binary_location = Config.CHROME_BINARY_LOCATION
+
     # Initialize the WebDriver.
     if Config.EXECUTE_REMOTE:
         # For Remote WebDriver (e.g., Selenium Grid or Docker)
@@ -33,8 +36,12 @@ def get_driver():
         # With Selenium 4.6+, Selenium Manager handles the chromedriver executable automatically locally
         # Enable robust logging for ChromeDriver
         from selenium.webdriver.chrome.service import Service
-        service = Service(log_output="chromedriver.log")
         
+        if Config.CHROMEDRIVER_PATH:
+            service = Service(executable_path=Config.CHROMEDRIVER_PATH, log_output="chromedriver.log")
+        else:
+            service = Service(log_output="chromedriver.log")
+            
         driver = webdriver.Chrome(options=chrome_options, service=service)
 
     # Allow up to 90s for heavy Moodle course pages to load
