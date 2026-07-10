@@ -37,3 +37,29 @@ chunked_transfer_encoding off;
 proxy_buffering off;
 proxy_read_timeout 3600s;
 client_max_body_size 50M; # Overrides Nginx 1MB default file upload restriction
+
+
+
+### 🛑 CRITICAL REPOSITORY GUARDRAIL: DO NOT INSTALL CHROMIUM
+
+```bash
+# NEVER RUN THESE COMMANDS ON THIS PRODUCTION SERVER:
+sudo apt-get install -y chromium-browser chromium-chromedriver
+
+Why it is strictly forbidden (Systemic Reasons):
+
+    Severe Storage Exhaustion & Terminal Locks (No space left on device): The Droplet operates on a highly constrained 10 GB total hard drive (/dev/vda1). When running standard Ubuntu package managers (apt), installing chromium-browser triggers the downloading and structural deployment of the Snapd core ecosystem. This process completely consumes all remaining available disk blocks, throwing a fatal No space left on device exception. This explicitly breaks the low-level dpkg state machine file handles (/var/cache/debconf/templates.dat-new), locks the frontend installer, and freezes terminal input entirely.
+
+    Snapd Daemon Memory Throttling: Ubuntu's Snap subsystem wraps target binaries in heavily containerized, isolated sandbox environments. On a rigid 1 vCPU / 512 MB RAM hardware configuration, running the snap background layers consumes massive amounts of RAM and forces an uncontrollable snapd restart loop. This creates extreme resource exhaustion, choking out the 2GB Swap space file and causing the kernel's Out-Of-Memory (OOM) killer to drop active production connections.
+
+    Redundant Engine Conflict: The Droplet already features a perfectly clean, native installation of Google Chrome Stable (google-chrome-stable) acting as the global system binary. Forcing a concurrent Chromium/Snap installation is completely redundant and causes binary mapping confusion inside the automation scripts.
+
+Correct Action for AI Agents / Maintainers:
+
+    Leave System Packages Intact: Do not try to solve browser dependency issues via apt or snap.
+
+    Rely on Selenium Manager: The automated Python architecture utilizes Selenium 4's built-in Selenium Manager. It automatically discovers, couples, and routes the lightweight, native Google Chrome installation on the Droplet dynamically at runtime without any hardcoded driver binary strings or .env path keys required.
+
+    Maintain Low-RAM Headless Flags: Keep browser operational arguments locked to --headless=new, --disable-gpu, --no-sandbox, and --disable-dev-shm-usage to protect server persistence.
+
+    What is actually installed and running on Droplet is Google Chrome Stable (the official, native browser from Google) instead of the community-maintained Chromium build.
