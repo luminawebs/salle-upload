@@ -50,7 +50,7 @@ def get_image_base64(image_filename: str, course_id: int = None) -> str:
         logger.error(f"Failed to encode image {image_path}: {e}")
         return ""
 
-def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str) -> bool:
+def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str = None) -> int:
     """
     Finds questions in HTML (either via <ol> DOM structures or 'Pregunta N' blocks)
     and exports them to a GIFT file.
@@ -350,16 +350,17 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
                 gift_lines.append(gift)
 
     if not gift_lines:
-        return False
+        return 0
         
-    try:
-        with open(output_txt_path, 'w', encoding='utf-8') as f:
-            f.write('\n\n'.join(gift_lines))
-        logger.info(f"Successfully created {output_txt_path} with {len(gift_lines)} questions.")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to write GIFT file {output_txt_path}: {e}")
-        return False
+    if output_txt_path:
+        try:
+            with open(output_txt_path, 'w', encoding='utf-8') as f:
+                f.write('\n\n'.join(gift_lines))
+            logger.info(f"Successfully created {output_txt_path} with {len(gift_lines)} questions.")
+        except Exception as e:
+            logger.error(f"Failed to write GIFT file {output_txt_path}: {e}")
+            
+    return len(gift_lines)
 
 def remove_questions_from_html(html_content: str) -> str:
     """

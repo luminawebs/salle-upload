@@ -1,334 +1,682 @@
-Terminal de Moodle
-
-Procesamiento
-
-[8:53:59 a. m.]
+[3:46:10 p. m.]
 ➜
 [Sistema] Conectando con el proceso de automatización...
-[08:53:59]
+[15:46:10]
 ➜
 [Sistema] Iniciando la tarea de automatización...
-[08:54:00]
+[15:46:12]
 ·
-2026-07-09 13:52:39,093 - main - INFO - Starting Moodle Automation Script...
-[08:54:00]
+2026-07-09 20:44:51,222 - main - INFO - Starting Moodle Automation Script...
+[15:46:12]
 ·
-2026-07-09 13:52:39,094 - main - INFO - Initializing WebDriver...
-[08:54:25]
+2026-07-09 20:44:51,223 - main - INFO - Initializing WebDriver...
+[15:46:13]
 ⚠
-2026-07-09 13:53:04,719 - selenium.webdriver.common.selenium_manager - WARNING - Unsupported architecture:
-[08:54:29]
+2026-07-09 20:44:52,145 - selenium.webdriver.common.selenium_manager - WARNING - Unsupported architecture:
+[15:46:16]
 ·
-2026-07-09 13:53:07,584 - actions.moodle_actions - INFO - Navigating to Moodle login page...
-[08:54:29]
+2026-07-09 20:44:55,560 - actions.moodle_actions - INFO - Navigating to Moodle login page...
+[15:46:16]
 ·
-2026-07-09 13:53:07,598 - actions.moodle_actions - INFO - Loading login page (attempt 1)...
-[08:54:35]
+2026-07-09 20:44:55,572 - actions.moodle_actions - INFO - Loading login page (attempt 1)...
+[15:46:29]
 ✓
-2026-07-09 13:53:13,911 - actions.moodle_actions - INFO - Login page loaded successfully (URL: https://unisallevirtual.lasalle.edu.co/login/index.php)
-[08:54:56]
+2026-07-09 20:45:08,204 - actions.moodle_actions - INFO - Login page loaded successfully (URL: https://unisallevirtual.lasalle.edu.co/login/index.php)
+[15:46:56]
 ✓
-2026-07-09 13:53:34,925 - actions.moodle_actions - INFO - Successfully logged into Moodle.
-[08:54:56]
+2026-07-09 20:45:35,977 - actions.moodle_actions - INFO - Successfully logged into Moodle.
+[15:46:56]
 ·
-2026-07-09 13:53:34,963 - main - INFO - --- Processing Course ID: 66749 ---
-[08:54:56]
+2026-07-09 20:45:35,995 - main - INFO - --- Processing Course ID: 66756 ---
+[15:46:56]
 ·
-2026-07-09 13:53:34,964 - main - INFO - Nombre del curso: Curso 66749
-[08:54:56]
+2026-07-09 20:45:35,995 - main - INFO - Nombre del curso: Curso 66756
+[15:46:56]
 ·
-2026-07-09 13:53:34,969 - actions.moodle_actions - INFO - Navigating to course ID 66749
-[08:55:12]
+2026-07-09 20:45:35,998 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[15:47:18]
 ✓
-2026-07-09 13:53:50,929 - actions.moodle_actions - INFO - Course 66749 loaded successfully
-[08:55:12]
+2026-07-09 20:45:58,008 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[15:47:18]
 ·
-2026-07-09 13:53:50,950 - main - INFO - Executing DOCX extraction workflow...
-[08:55:12]
+2026-07-09 20:45:58,022 - main - INFO - Executing DOCX extraction workflow...
+[15:47:18]
 ·
-2026-07-09 13:53:50,953 - core.data_parser - INFO - Executing DOCX parsing workflow for course 66749...
-[08:55:14]
+2026-07-09 20:45:58,025 - core.data_parser - INFO - Executing DOCX parsing workflow for course 66756...
+[15:47:22]
 ✓
-2026-07-09 13:53:52,886 - core.data_parser - INFO - ✓ DOCX successfully extracted and saved to assets/66749/raw_docx_extracted.html
-[08:55:14]
+2026-07-09 20:46:01,244 - core.data_parser - INFO - ✓ DOCX successfully extracted and saved to assets/66756/raw_docx_extracted.html
+[15:47:22]
 ·
-2026-07-09 13:53:52,887 - main - INFO - Executing DOCX splitting workflow...
-[08:55:14]
+2026-07-09 20:46:01,245 - main - INFO - Executing DOCX splitting workflow...
+[15:47:22]
 ·
-2026-07-09 13:53:52,887 - core.data_parser - INFO - Executing DOCX splitting workflow for course 66749...
-[08:55:14]
+2026-07-09 20:46:01,245 - core.data_parser - INFO - Executing DOCX splitting workflow for course 66756...
+[15:47:22]
 ·
-2026-07-09 13:53:52,954 - core.data_parser - INFO - ✓ Extracted introduccion_general.html
+2026-07-09 20:46:01,439 - core.data_parser - INFO - ✓ Extracted introduccion_general.html
 
-Estructura
-
-[08:55:41]
+[15:47:54]
 ·
-2026-07-09 13:54:20,628 - main - INFO - Executing course structure creation workflow...
-[08:55:41]
+2026-07-09 20:46:33,837 - main - INFO - Executing course structure creation workflow...
+[15:47:54]
 ·
-2026-07-09 13:54:20,635 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow for Course 66749 ---
-[08:55:42]
+2026-07-09 20:46:33,841 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow for Course 66756 ---
+[15:47:55]
 ·
-2026-07-09 13:54:20,982 - actions.structure_actions - INFO - Workflow requires 5 sections.
-[08:55:42]
+2026-07-09 20:46:34,497 - actions.structure_actions - INFO - Workflow requires 5 sections.
+[15:47:55]
 ·
-2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Found 1 existing sections. Required: 5
-[08:55:42]
+2026-07-09 20:46:34,570 - actions.structure_actions - INFO - Found 1 existing sections. Required: 5
+[15:47:55]
 ·
-2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Need to create 4 new sections.
-[08:55:56]
+2026-07-09 20:46:34,571 - actions.structure_actions - INFO - Need to create 4 new sections.
+[15:48:09]
 ⚠
-2026-07-09 13:54:35,071 - actions.structure_actions - INFO - Activity 'Avisos' already exists in Bienvenidos al curso. Skipping.
-[09:09:56]
+2026-07-09 20:46:48,543 - actions.structure_actions - INFO - Activity 'Avisos' already exists in Bienvenidos al curso. Skipping.
+[16:09:01]
 ·
-2026-07-09 14:08:35,740 - actions.structure_actions - INFO - --- Course Structure Creation Workflow Complete ---
-[09:09:56]
+2026-07-09 21:07:40,822 - actions.structure_actions - INFO - --- Course Structure Creation Workflow Complete ---
+[16:09:01]
 ·
-2026-07-09 14:08:35,749 - main - INFO - Executing DOCX HTML upload workflow...
-[09:09:56]
+2026-07-09 21:07:40,837 - main - INFO - Executing DOCX HTML upload workflow...
+[16:09:01]
 ·
-2026-07-09 14:08:35,754 - actions.moodle_actions - INFO - Navigating to course ID 66749
-[09:10:23]
+2026-07-09 21:07:40,848 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:10:00]
 ✓
-2026-07-09 14:09:02,216 - actions.moodle_actions - INFO - Course 66749 loaded successfully
-[09:10:23]
+2026-07-09 21:08:39,533 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:10:00]
 ·
-2026-07-09 14:09:02,279 - actions.docx_upload_actions - INFO - Uploading Introducción General for course 66749...
-[09:10:23]
+2026-07-09 21:08:39,624 - actions.docx_upload_actions - INFO - Uploading Introducción General for course 66756...
+[16:10:03]
 ✖
-2026-07-09 14:09:02,647 - actions.docx_upload_actions - ERROR - Could not find the label containing the Introducción General accordion.
-[09:28:50]
+2026-07-09 21:08:42,365 - actions.docx_upload_actions - ERROR - Could not find the label containing the Introducción General accordion.
+[16:38:12]
 ·
-2026-07-09 14:27:29,692 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U1.html to Material de referencia Unidad 1...
-[09:28:51]
+2026-07-09 21:36:51,459 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U1.html to Material de referencia Unidad 1...
+[16:38:13]
 ✖
-2026-07-09 14:27:30,357 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 1' not found.
-[09:28:53]
+2026-07-09 21:36:52,880 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 1' not found.
+[16:38:15]
 ·
-2026-07-09 14:27:32,367 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U2.html to Material de referencia Unidad 2...
-[09:28:53]
+2026-07-09 21:36:54,898 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U2.html to Material de referencia Unidad 2...
+[16:38:16]
 ✖
-2026-07-09 14:27:32,843 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 2' not found.
-[09:28:55]
+2026-07-09 21:36:55,531 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 2' not found.
+[16:38:18]
 ·
-2026-07-09 14:27:34,852 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U3.html to Material de referencia Unidad 3...
-[09:28:56]
+2026-07-09 21:36:57,542 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U3.html to Material de referencia Unidad 3...
+[16:38:19]
 ✖
-2026-07-09 14:27:35,316 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 3' not found.
-[09:28:58]
-·
-2026-07-09 14:27:37,494 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_1.html to UNIDAD 1...
-[09:29:59]
-✓
-2026-07-09 14:28:38,666 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_1.html
-[09:29:59]
-·
-2026-07-09 14:28:38,685 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_2.html to UNIDAD 2...
-[09:30:00]
-·
-2026-07-09 14:28:38,902 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
-[09:31:34]
-✓
-2026-07-09 14:30:13,329 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_2.html
-[09:31:34]
-·
-2026-07-09 14:30:13,354 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_3.html to UNIDAD 3...
-[09:31:36]
-·
-2026-07-09 14:30:14,957 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
-[09:33:03]
-✓
-2026-07-09 14:31:41,793 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_3.html
-[09:33:03]
-·
-2026-07-09 14:31:41,820 - main - INFO - Executing DOCX Rubrica upload workflow...
-[09:33:03]
-·
-2026-07-09 14:31:41,824 - actions.docx_rubrica_actions - INFO - Starting DOCX Rubrica upload workflow...
-[09:53:54]
-·
-2026-07-09 14:52:33,364 - main - INFO - Section rename workflow is disabled via config.
-[09:53:54]
-·
-2026-07-09 14:52:33,366 - main - INFO - Section description update workflow is disabled via config.
-[09:53:54]
-·
-2026-07-09 14:52:33,367 - main - INFO - Local HTML intro generation workflow is disabled via config.
-[09:53:54]
-·
-2026-07-09 14:52:33,367 - main - INFO - General HTML intro generation workflow is disabled via config.
-[09:53:54]
-·
-2026-07-09 14:52:33,367 - main - INFO - Infografia export workflow is disabled via config.
+2026-07-09 21:36:58,493 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 3' not found.
 
-Evaluaciones
-
-[08:55:41]
+[15:47:22]
 ·
-2026-07-09 13:54:20,628 - main - INFO - Executing course structure creation workflow...
-[08:55:41]
+2026-07-09 20:46:01,453 - core.data_parser - INFO - ✓ Extracted actividad1.html
+[15:47:22]
 ·
-2026-07-09 13:54:20,635 - actions.structure_actions - INFO - --- Executing Course Structure Creation Workflow for Course 66749 ---
-[08:55:42]
+2026-07-09 20:46:01,455 - core.data_parser - INFO - ✓ Appended to Material_de_referencia_U1.html
+[15:47:22]
 ·
-2026-07-09 13:54:20,982 - actions.structure_actions - INFO - Workflow requires 5 sections.
-[08:55:42]
+2026-07-09 20:46:01,463 - core.data_parser - INFO - ✓ Extracted actividad2.html
+[15:47:22]
 ·
-2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Found 1 existing sections. Required: 5
-[08:55:42]
+2026-07-09 20:46:01,465 - core.data_parser - INFO - ✓ Appended to Material_de_referencia_U1.html
+[15:47:22]
 ·
-2026-07-09 13:54:21,027 - actions.structure_actions - INFO - Need to create 4 new sections.
-[08:55:56]
+2026-07-09 20:46:01,471 - core.data_parser - INFO - ✓ Extracted actividad3.html
+[15:47:22]
+·
+2026-07-09 20:46:01,472 - core.data_parser - INFO - ✓ Appended to Material_de_referencia_U2.html
+[15:47:22]
+·
+2026-07-09 20:46:01,477 - core.data_parser - INFO - ✓ Extracted actividad4.html
+[15:47:22]
+·
+2026-07-09 20:46:01,478 - core.data_parser - INFO - ✓ Appended to Material_de_referencia_U2.html
+[15:47:22]
+·
+2026-07-09 20:46:01,484 - core.data_parser - INFO - ✓ Extracted actividad5.html
+[15:47:22]
+·
+2026-07-09 20:46:01,485 - core.data_parser - INFO - ✓ Appended to Material_de_referencia_U3.html
+[15:47:22]
+·
+2026-07-09 20:46:01,490 - core.data_parser - INFO - ✓ Extracted actividad6.html
+[15:47:22]
+·
+2026-07-09 20:46:01,491 - core.data_parser - INFO - ✓ Appended to Material_de_referencia_U3.html
+[15:47:22]
+·
+2026-07-09 20:46:01,525 - core.data_parser - INFO - ✓ Extracted actividad7.html
+[15:47:22]
+·
+2026-07-09 20:46:01,525 - core.data_parser - INFO - ✓ DOCX splitting workflow completed.
+[15:47:22]
+·
+2026-07-09 20:46:01,526 - main - INFO - Executing Unidades Intro splitting workflow...
+[15:47:22]
+·
+2026-07-09 20:46:01,582 - core.unidades_intro_parser - INFO - ✓ Extracted introduccion_unidad_1.html
+[15:47:22]
+·
+2026-07-09 20:46:01,583 - core.unidades_intro_parser - INFO - ✓ Extracted introduccion_unidad_2.html
+[15:47:22]
+·
+2026-07-09 20:46:01,583 - core.unidades_intro_parser - INFO - ✓ Extracted introduccion_unidad_3.html
+[15:47:22]
+·
+2026-07-09 20:46:01,583 - core.unidades_intro_parser - INFO - ✓ Unidades Intro splitting workflow completed.
+[15:47:22]
+·
+2026-07-09 20:46:01,583 - actions.section_actions - INFO - Checking editing mode status...
+[15:47:54]
+✓
+2026-07-09 20:46:33,809 - actions.section_actions - INFO - Successfully enabled editing mode.
+[15:48:09]
 ⚠
-2026-07-09 13:54:35,071 - actions.structure_actions - INFO - Activity 'Avisos' already exists in Bienvenidos al curso. Skipping.
-[09:09:56]
+2026-07-09 20:46:48,555 - actions.structure_actions - INFO - Activity 'Foro permanente de dudas' already exists in Bienvenidos al curso. Skipping.
+[15:48:09]
+⚠
+2026-07-09 20:46:48,555 - actions.structure_actions - INFO - Activity 'Encuentros virtuales' already exists in Bienvenidos al curso. Skipping.
+[15:48:14]
 ·
-2026-07-09 14:08:35,740 - actions.structure_actions - INFO - --- Course Structure Creation Workflow Complete ---
-[09:09:56]
-·
-2026-07-09 14:08:35,749 - main - INFO - Executing DOCX HTML upload workflow...
-[09:09:56]
-·
-2026-07-09 14:08:35,754 - actions.moodle_actions - INFO - Navigating to course ID 66749
-[09:10:23]
-✓
-2026-07-09 14:09:02,216 - actions.moodle_actions - INFO - Course 66749 loaded successfully
-[09:10:23]
-·
-2026-07-09 14:09:02,279 - actions.docx_upload_actions - INFO - Uploading Introducción General for course 66749...
-[09:10:23]
+2026-07-09 20:46:53,324 - actions.structure_actions - INFO - Creating activity: 'Introducción General' of type 'Área de texto y medios'
+[15:49:57]
 ✖
-2026-07-09 14:09:02,647 - actions.docx_upload_actions - ERROR - Could not find the label containing the Introducción General accordion.
-[09:28:50]
+2026-07-09 20:48:36,220 - actions.structure_actions - ERROR - Failed to create activity 'Introducción General': Message:
+[15:49:57]
 ·
-2026-07-09 14:27:29,692 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U1.html to Material de referencia Unidad 1...
-[09:28:51]
-✖
-2026-07-09 14:27:30,357 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 1' not found.
-[09:28:53]
+Stacktrace:
+[15:49:57]
 ·
-2026-07-09 14:27:32,367 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U2.html to Material de referencia Unidad 2...
-[09:28:53]
-✖
-2026-07-09 14:27:32,843 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 2' not found.
-[09:28:55]
+#0 0x565c2180641a <unknown>
+[15:49:57]
 ·
-2026-07-09 14:27:34,852 - actions.docx_upload_actions - INFO - Uploading Material_de_referencia_U3.html to Material de referencia Unidad 3...
-[09:28:56]
-✖
-2026-07-09 14:27:35,316 - actions.docx_upload_actions - ERROR - Activity matching 'Material de referencia Unidad 3' not found.
-[09:28:58]
+#1 0x565c211de689 <unknown>
+[15:49:57]
 ·
-2026-07-09 14:27:37,494 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_1.html to UNIDAD 1...
-[09:29:59]
+#2 0x565c21233cff <unknown>
+[15:49:57]
+·
+#3 0x565c21233f51 <unknown>
+[15:49:57]
+·
+#4 0x565c2127f144 <unknown>
+[15:49:57]
+·
+#5 0x565c2127c329 <unknown>
+[15:49:57]
+·
+#6 0x565c212271df <unknown>
+[15:49:57]
+·
+#7 0x565c21228031 <unknown>
+[15:49:57]
+·
+#8 0x565c217cbbd7 <unknown>
+[15:49:57]
+·
+#9 0x565c217ca3a8 <unknown>
+[15:49:57]
+·
+#10 0x565c217b5076 <unknown>
+[15:49:57]
+·
+#11 0x565c217caf7a <unknown>
+[15:49:57]
+·
+#12 0x565c2179cf70 <unknown>
+[15:49:57]
+·
+#13 0x565c217f1c38 <unknown>
+[15:49:57]
+·
+#14 0x565c217f1dd5 <unknown>
+[15:49:57]
+·
+#15 0x565c21804fce <unknown>
+[15:49:57]
+·
+#16 0x706c5509caa4 <unknown>
+[15:49:57]
+·
+#17 0x706c55129c6c <unknown>
+[15:49:57]
+·
+[15:50:03]
+·
+2026-07-09 20:48:42,208 - actions.structure_actions - INFO - Creating activity: 'ACTIVIDAD 1. Lectura crítica – 100 Lecturas Selectas' of type 'Tarea'
+[15:52:16]
+·
+2026-07-09 20:50:55,526 - actions.actividad_actions - INFO - Set Max Grade to 5
+[15:52:18]
+·
+2026-07-09 20:50:57,382 - actions.actividad_actions - INFO - Set Grading Method to 'Rúbrica'
+[15:53:10]
 ✓
-2026-07-09 14:28:38,666 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_1.html
-[09:29:59]
+2026-07-09 20:51:49,498 - actions.structure_actions - INFO - Successfully created 'ACTIVIDAD 1. Lectura crítica – 100 Lecturas Selectas'.
+[15:53:15]
 ·
-2026-07-09 14:28:38,685 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_2.html to UNIDAD 2...
-[09:30:00]
+2026-07-09 20:51:54,305 - actions.structure_actions - INFO - Creating activity: 'ACTIVIDAD 2. Aplicación del Análisis Exploratorio de Datos con RStudio' of type 'Tarea'
+[15:54:48]
 ·
-2026-07-09 14:28:38,902 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
-[09:31:34]
+2026-07-09 20:53:27,713 - actions.actividad_actions - INFO - Set Max Grade to 5
+[15:54:51]
+·
+2026-07-09 20:53:30,209 - actions.actividad_actions - INFO - Set Grading Method to 'Rúbrica'
+[15:55:38]
 ✓
-2026-07-09 14:30:13,329 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_2.html
-[09:31:34]
+2026-07-09 20:54:17,240 - actions.structure_actions - INFO - Successfully created 'ACTIVIDAD 2. Aplicación del Análisis Exploratorio de Datos con RStudio'.
+[15:55:47]
 ·
-2026-07-09 14:30:13,354 - actions.unidades_intro_actions - INFO - Uploading introduccion_unidad_3.html to UNIDAD 3...
-[09:31:36]
+2026-07-09 20:54:26,601 - actions.structure_actions - INFO - Creating activity: 'ACTIVIDAD 3. Planeación inferencial' of type 'Tarea'
+[15:57:16]
 ·
-2026-07-09 14:30:14,957 - actions.unidades_intro_actions - INFO - Not on course view page, navigating back...
-[09:33:03]
+2026-07-09 20:55:55,388 - actions.actividad_actions - INFO - Set Max Grade to 5
+[15:57:17]
+·
+2026-07-09 20:55:57,069 - actions.actividad_actions - INFO - Set Grading Method to 'Rúbrica'
+[15:58:03]
 ✓
-2026-07-09 14:31:41,793 - actions.unidades_intro_actions - INFO - Success: introduccion_unidad_3.html
-[09:33:03]
+2026-07-09 20:56:42,118 - actions.structure_actions - INFO - Successfully created 'ACTIVIDAD 3. Planeación inferencial'.
+[15:58:05]
 ·
-2026-07-09 14:31:41,820 - main - INFO - Executing DOCX Rubrica upload workflow...
-[09:33:03]
+2026-07-09 20:56:44,499 - actions.structure_actions - INFO - Creating activity: 'ACTIVIDAD 4. Implementación del análisis inferencial en RStudio' of type 'Tarea'
+[15:59:42]
 ·
-2026-07-09 14:31:41,824 - actions.docx_rubrica_actions - INFO - Starting DOCX Rubrica upload workflow...
-[09:53:54]
+2026-07-09 20:58:21,605 - actions.actividad_actions - INFO - Set Max Grade to 5
+[15:59:45]
 ·
-2026-07-09 14:52:33,364 - main - INFO - Section rename workflow is disabled via config.
-[09:53:54]
+2026-07-09 20:58:24,160 - actions.actividad_actions - INFO - Set Grading Method to 'Rúbrica'
+[16:00:42]
+✓
+2026-07-09 20:59:21,726 - actions.structure_actions - INFO - Successfully created 'ACTIVIDAD 4. Implementación del análisis inferencial en RStudio'.
+[16:00:54]
 ·
-2026-07-09 14:52:33,366 - main - INFO - Section description update workflow is disabled via config.
-[09:53:54]
+2026-07-09 20:59:33,354 - actions.structure_actions - INFO - Creating activity: 'ACTIVIDAD 5. Selección de prueba no paramétrica' of type 'Tarea'
+[16:02:37]
 ·
-2026-07-09 14:52:33,367 - main - INFO - Local HTML intro generation workflow is disabled via config.
-[09:53:54]
+2026-07-09 21:01:16,464 - actions.actividad_actions - INFO - Set Max Grade to 5
+[16:02:38]
 ·
-2026-07-09 14:52:33,367 - main - INFO - General HTML intro generation workflow is disabled via config.
-[09:53:54]
+2026-07-09 21:01:17,616 - actions.actividad_actions - INFO - Set Grading Method to 'Rúbrica'
+[16:03:23]
+✓
+2026-07-09 21:02:02,674 - actions.structure_actions - INFO - Successfully created 'ACTIVIDAD 5. Selección de prueba no paramétrica'.
+[16:03:24]
 ·
-2026-07-09 14:52:33,367 - main - INFO - Infografia export workflow is disabled via config.
+2026-07-09 21:02:04,113 - actions.structure_actions - INFO - Creating activity: 'ACTIVIDAD 6. Implementación del análisis no paramétrico en RStudio' of type 'Tarea'
+[16:05:04]
+·
+2026-07-09 21:03:43,102 - actions.actividad_actions - INFO - Set Max Grade to 5
+[16:05:05]
+·
+2026-07-09 21:03:44,277 - actions.actividad_actions - INFO - Set Grading Method to 'Rúbrica'
+[16:05:56]
+✓
+2026-07-09 21:04:35,566 - actions.structure_actions - INFO - Successfully created 'ACTIVIDAD 6. Implementación del análisis no paramétrico en RStudio'.
+[16:05:57]
+·
+2026-07-09 21:04:36,363 - actions.structure_actions - INFO - Creating activity: 'Actividad 7. Evaluación final' of type 'Cuestionario'
+[16:08:59]
+✓
+2026-07-09 21:07:38,243 - actions.structure_actions - INFO - Successfully created 'Actividad 7. Evaluación final'.
+[16:10:05]
+·
+2026-07-09 21:08:44,396 - actions.docx_upload_actions - INFO - Uploading actividad1.html to ACTIVIDAD 1...
+[16:12:41]
+✓
+2026-07-09 21:11:20,339 - actions.docx_upload_actions - INFO - Success: actividad1.html
+[16:14:04]
+⚠
+2026-07-09 21:12:43,834 - actions.docx_upload_actions - WARNING - No submit button found on filters page. It might be auto-saving.
+[16:14:05]
+✓
+2026-07-09 21:12:44,849 - actions.docx_upload_actions - INFO - Successfully disabled multimedia filter for ACTIVIDAD 1
+[16:14:05]
+·
+2026-07-09 21:12:44,906 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:14:44]
+✓
+2026-07-09 21:13:23,115 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:14:46]
+·
+2026-07-09 21:13:25,171 - actions.docx_upload_actions - INFO - Uploading actividad2.html to ACTIVIDAD 2...
+[16:16:55]
+✓
+2026-07-09 21:15:34,427 - actions.docx_upload_actions - INFO - Success: actividad2.html
+[16:18:09]
+⚠
+2026-07-09 21:16:49,042 - actions.docx_upload_actions - WARNING - No submit button found on filters page. It might be auto-saving.
+[16:18:10]
+✓
+2026-07-09 21:16:50,058 - actions.docx_upload_actions - INFO - Successfully disabled multimedia filter for ACTIVIDAD 2
+[16:18:10]
+·
+2026-07-09 21:16:50,089 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:18:55]
+✓
+2026-07-09 21:17:34,507 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:18:57]
+·
+2026-07-09 21:17:36,551 - actions.docx_upload_actions - INFO - Uploading actividad3.html to ACTIVIDAD 3...
+[16:21:03]
+✓
+2026-07-09 21:19:42,269 - actions.docx_upload_actions - INFO - Success: actividad3.html
+[16:22:32]
+⚠
+2026-07-09 21:21:11,706 - actions.docx_upload_actions - WARNING - No submit button found on filters page. It might be auto-saving.
+[16:22:33]
+✓
+2026-07-09 21:21:12,721 - actions.docx_upload_actions - INFO - Successfully disabled multimedia filter for ACTIVIDAD 3
+[16:22:33]
+·
+2026-07-09 21:21:12,740 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:23:21]
+✓
+2026-07-09 21:22:00,278 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:23:23]
+·
+2026-07-09 21:22:02,343 - actions.docx_upload_actions - INFO - Uploading actividad4.html to ACTIVIDAD 4...
+[16:25:16]
+✓
+2026-07-09 21:23:55,464 - actions.docx_upload_actions - INFO - Success: actividad4.html
+[16:26:32]
+⚠
+2026-07-09 21:25:11,945 - actions.docx_upload_actions - WARNING - No submit button found on filters page. It might be auto-saving.
+[16:26:33]
+✓
+2026-07-09 21:25:12,971 - actions.docx_upload_actions - INFO - Successfully disabled multimedia filter for ACTIVIDAD 4
+[16:26:33]
+·
+2026-07-09 21:25:13,009 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:27:10]
+✓
+2026-07-09 21:25:49,467 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:27:12]
+·
+2026-07-09 21:25:51,514 - actions.docx_upload_actions - INFO - Uploading actividad5.html to ACTIVIDAD 5...
+[16:29:37]
+✓
+2026-07-09 21:28:16,219 - actions.docx_upload_actions - INFO - Success: actividad5.html
+[16:30:50]
+⚠
+2026-07-09 21:29:29,278 - actions.docx_upload_actions - WARNING - No submit button found on filters page. It might be auto-saving.
+[16:30:51]
+✓
+2026-07-09 21:29:30,295 - actions.docx_upload_actions - INFO - Successfully disabled multimedia filter for ACTIVIDAD 5
+[16:30:51]
+·
+2026-07-09 21:29:30,336 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:31:19]
+✓
+2026-07-09 21:29:58,614 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:31:21]
+·
+2026-07-09 21:30:00,709 - actions.docx_upload_actions - INFO - Uploading actividad6.html to ACTIVIDAD 6...
+[16:33:55]
+✓
+2026-07-09 21:32:34,518 - actions.docx_upload_actions - INFO - Success: actividad6.html
+[16:35:12]
+⚠
+2026-07-09 21:33:51,950 - actions.docx_upload_actions - WARNING - No submit button found on filters page. It might be auto-saving.
+[16:35:13]
+✓
+2026-07-09 21:33:52,966 - actions.docx_upload_actions - INFO - Successfully disabled multimedia filter for ACTIVIDAD 6
+[16:35:13]
+·
+2026-07-09 21:33:52,992 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:35:58]
+✓
+2026-07-09 21:34:37,529 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:36:00]
+·
+2026-07-09 21:34:39,569 - actions.docx_upload_actions - INFO - Uploading actividad7.html to ACTIVIDAD 7...
+[16:36:57]
+✓
+2026-07-09 21:35:36,665 - actions.html_transformer - INFO - Successfully created assets/66756/actividades/ACTIVIDAD 7_questions.txt with 1 questions.
+[16:37:08]
+✖
+2026-07-09 21:35:47,355 - core.wysiwyg_handler - ERROR - Error injecting HTML into WYSIWYG: Message: element click intercepted: Element <input type="submit" class="btn
+[16:37:08]
+·
+btn-primary
+[16:37:08]
+·
+[16:37:08]
+·
+[16:37:08]
+·
+" name="submitbutton2" id="id_submitbutton2" value="Guardar cambios y regresar al curso"> is not clickable at point (963, 918). Other element would receive the click: <a class="btn btn-dark btn-lg d-flex align-items-center justify-content-center floating-add-block-button" title="Add a block button" type="button" data-asw-orgfontsize="14" href="https://unisallevirtual.lasalle.edu.co/course/modedit.php?update=2474124&amp;bui_addblock&amp;sesskey=qpfSK9FKLS&amp;bui_blockregion=side-pre" data-key="addblock" data-url="?update=2474124&amp;bui_addblock&amp;sesskey=qpfSK9FKLS&amp;bui_blockregion=side-pre" id="addblock-6a5013f7c650d6a5013f6830d37" style="font-size: 14px;">...</a>
+[16:37:08]
+✖
+(Session info: chrome=150.0.7871.115); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception
+[16:37:08]
+·
+Stacktrace:
+[16:37:08]
+·
+#0 0x565c2180641a <unknown>
+[16:37:08]
+·
+#1 0x565c211de689 <unknown>
+[16:37:08]
+·
+#2 0x565c2123a795 <unknown>
+[16:37:08]
+·
+#3 0x565c21238872 <unknown>
+[16:37:08]
+·
+#4 0x565c2123625c <unknown>
+[16:37:08]
+·
+#5 0x565c21235357 <unknown>
+[16:37:08]
+·
+#6 0x565c21229162 <unknown>
+[16:37:08]
+·
+#7 0x565c21228aa7 <unknown>
+[16:37:08]
+·
+#8 0x565c2127c329 <unknown>
+[16:37:08]
+·
+#9 0x565c212271df <unknown>
+[16:37:08]
+·
+#10 0x565c21228031 <unknown>
+[16:37:08]
+·
+#11 0x565c217cbbd7 <unknown>
+[16:37:08]
+·
+#12 0x565c217ca3a8 <unknown>
+[16:37:08]
+·
+#13 0x565c217b5076 <unknown>
+[16:37:08]
+·
+#14 0x565c217caf7a <unknown>
+[16:37:08]
+·
+#15 0x565c2179cf70 <unknown>
+[16:37:08]
+·
+#16 0x565c217f1c38 <unknown>
+[16:37:08]
+·
+#17 0x565c217f1dd5 <unknown>
+[16:37:08]
+·
+#18 0x565c21804fce <unknown>
+[16:37:08]
+·
+#19 0x706c5509caa4 <unknown>
+[16:37:08]
+·
+#20 0x706c55129c6c <unknown>
+[16:37:08]
+·
+[16:37:08]
+✖
+2026-07-09 21:35:47,378 - actions.docx_upload_actions - ERROR - Failed to inject actividad7.html
+[16:37:10]
+·
+2026-07-09 21:35:49,427 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:38:12]
+✓
+2026-07-09 21:36:51,421 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:38:21]
+·
+2026-07-09 21:37:00,504 - main - INFO - Executing Cuestionario export/grade workflow...
+[16:38:21]
+·
+2026-07-09 21:37:00,509 - actions.cuestionario_export_actions - INFO - Starting Cuestionario Export workflow for course 66756...
+[16:38:21]
+✓
+2026-07-09 21:37:00,775 - actions.html_transformer - INFO - Successfully created assets/66756/actividades/ACTIVIDAD 7_questions.txt with 1 questions.
+[16:38:21]
+·
+2026-07-09 21:37:00,777 - actions.cuestionario_export_actions - INFO - Exporting questions for ACTIVIDAD 7...
+[16:38:21]
+·
+2026-07-09 21:37:00,779 - actions.moodle_actions - INFO - Navigating to course ID 66756
+[16:39:13]
+✓
+2026-07-09 21:37:52,666 - actions.moodle_actions - INFO - Course 66756 loaded successfully
+[16:39:54]
+·
+2026-07-09 21:38:33,409 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 1: Navigating to import page...
+[16:40:05]
+·
+2026-07-09 21:38:44,104 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 2: Expanding 'General' section...
+[16:40:05]
+·
+2026-07-09 21:38:44,560 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 3: Selecting correct category...
+[16:40:05]
+·
+2026-07-09 21:38:44,709 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Searching for category: 'por defecto en actividad 7'
+[16:40:06]
+·
+2026-07-09 21:38:45,321 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 4a: Opening file picker...
+[16:40:08]
+·
+2026-07-09 21:38:48,082 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 4b: Selecting 'Subir un archivo' tab...
+[16:40:10]
+·
+2026-07-09 21:38:49,602 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 4c: Choosing file...
+[16:40:11]
+·
+2026-07-09 21:38:50,850 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 4d: Clicking 'Subir este archivo' in modal...
+[16:40:14]
+·
+2026-07-09 21:38:53,503 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 5: Submitting import...
+[16:40:56]
+·
+2026-07-09 21:39:35,575 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Step 6: Clicking continue on import summary...
+[16:41:39]
+✓
+2026-07-09 21:40:18,300 - actions.cuestionario_export_actions - INFO - Successfully imported GIFT file for ACTIVIDAD 7.
+[16:41:41]
+·
+2026-07-09 21:40:20,961 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Navigating to quiz to find 'Preguntas' tab...
+[16:42:36]
+·
+2026-07-09 21:41:15,008 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Clicked 'Preguntas' tab.
+[16:42:37]
+·
+2026-07-09 21:41:17,044 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Checking for existing questions...
+[16:42:38]
+·
+2026-07-09 21:41:17,218 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Finding 'Agregar' menu...
+[16:42:40]
+·
+2026-07-09 21:41:19,584 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Opening 'pregunta aleatoria' modal...
+[16:42:43]
+·
+2026-07-09 21:41:22,989 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Searching for category in modal...
+[16:42:51]
+·
+2026-07-09 21:41:30,755 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Clicking 'Aplicar filtros'...
+[16:42:56]
+·
+2026-07-09 21:41:35,496 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Selecting all bank questions...
+[16:43:06]
+⚠
+2026-07-09 21:41:45,799 - actions.cuestionario_export_actions - WARNING - [ACTIVIDAD 7] Could not find or click 'Seleccionar todos': Message:
+[16:43:06]
+·
+Stacktrace:
+[16:43:06]
+·
+#0 0x565c2180641a <unknown>
+[16:43:06]
+·
+#1 0x565c211de689 <unknown>
+[16:43:06]
+·
+#2 0x565c21233cff <unknown>
+[16:43:06]
+·
+#3 0x565c21233f51 <unknown>
+[16:43:06]
+·
+#4 0x565c2127f144 <unknown>
+[16:43:06]
+·
+#5 0x565c2127c329 <unknown>
+[16:43:06]
+·
+#6 0x565c212271df <unknown>
+[16:43:06]
+·
+#7 0x565c21228031 <unknown>
+[16:43:06]
+·
+#8 0x565c217cbbd7 <unknown>
+[16:43:06]
+·
+#9 0x565c217ca3a8 <unknown>
+[16:43:06]
+·
+#10 0x565c217b5076 <unknown>
+[16:43:06]
+·
+#11 0x565c217caf7a <unknown>
+[16:43:06]
+·
+#12 0x565c2179cf70 <unknown>
+[16:43:06]
+·
+#13 0x565c217f1c38 <unknown>
+[16:43:06]
+·
+#14 0x565c217f1dd5 <unknown>
+[16:43:06]
+·
+#15 0x565c21804fce <unknown>
+[16:43:06]
+·
+#16 0x706c5509caa4 <unknown>
+[16:43:06]
+·
+#17 0x706c55129c6c <unknown>
+[16:43:06]
+·
+[16:43:06]
+·
+2026-07-09 21:41:45,803 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Selecting 1 random questions...
+[16:43:07]
+·
+2026-07-09 21:41:46,655 - actions.cuestionario_export_actions - INFO - [ACTIVIDAD 7] Clicking 'Agregar pregunta aleatoria'...
+[16:43:11]
+✓
+2026-07-09 21:41:50,965 - actions.cuestionario_export_actions - INFO - Successfully added questions and random questions to ACTIVIDAD 7 quiz.
+[16:43:11]
+·
+2026-07-09 21:41:51,054 - actions.cuestionario_grade_actions - INFO - [ACTIVIDAD 7] Updating quiz grades (Max: 5.00)...
 
-Finalización
-
-[09:34:40]
-·
-2026-07-09 14:33:17,315 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:34:42]
-·
-2026-07-09 14:33:17,452 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:38:56]
-·
-2026-07-09 14:37:35,084 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:38:57]
-·
-2026-07-09 14:37:35,225 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:43:11]
-·
-2026-07-09 14:41:49,967 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:43:12]
-·
-2026-07-09 14:41:50,144 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:47:30]
-·
-2026-07-09 14:46:08,343 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:47:32]
-·
-2026-07-09 14:46:08,542 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:51:45]
-·
-2026-07-09 14:50:22,755 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:51:46]
-·
-2026-07-09 14:50:22,949 - actions.actividad_rubrica_actions - INFO - [COMPETENCIAS DIGITALES] → https://unisallevirtual.lasalle.edu.co/course/index.php?categoryid=2966
-[09:53:54]
-·
-2026-07-09 14:52:33,373 - main - INFO - Ajuste competencias workflow is disabled via config.
-[09:53:54]
-·
-2026-07-09 14:52:33,373 - main - INFO - Configuracion final workflow is disabled via config.
-[09:53:54]
-·
-2026-07-09 14:52:33,373 - main - INFO - Executing activity completion update workflow...
-[09:53:54]
-·
-2026-07-09 14:52:33,481 - actions.activity_completion_actions - INFO - Navigating to course 66749 to update Activity Completion conditions...
-[09:53:54]
-·
-2026-07-09 14:52:33,483 - actions.moodle_actions - INFO - Navigating to course ID 66749
-[09:54:21]
-✓
-2026-07-09 14:53:00,022 - actions.moodle_actions - INFO - Course 66749 loaded successfully
-[10:09:41]
-✓
-2026-07-09 15:03:26,621 - actions.activity_completion_actions - INFO - Successfully finished updating activity completion conditions.
-[10:09:41]
-·
-2026-07-09 15:03:26,641 - main - INFO - Depositphotos download workflow is disabled via config.
-[10:09:41]
-·
-2026-07-09 15:03:26,641 - main - INFO - Shutting down WebDriver...
-[10:09:41]
-➜
-[Sistema] La tarea finalizó con código de salida 0
-[10:09:41]
-➜
-[Sistema] Limpiando los archivos temporales...
-[10:09:41]
-✓
-[Sistema] Limpieza completada con éxito.

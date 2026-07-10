@@ -87,14 +87,27 @@ export default function DocumentReviewerView({ setActiveTab }) {
           <div className="flex flex-wrap gap-2 mt-2">
             {tags.map((t, idx) => {
               let colorClass = 'bg-surface border-border text-gray-300';
-              if (t.tipo === 'No sabe') colorClass = 'bg-error/20 border-error/50 text-error';
-              else if (t.tipo === 'Foro') colorClass = 'bg-blue-500/20 border-blue-500/50 text-blue-400';
-              else if (t.tipo === 'Tarea') colorClass = 'bg-purple-500/20 border-purple-500/50 text-purple-400';
-              else if (t.tipo === 'Cuestionario') colorClass = 'bg-warning/20 border-warning/50 text-warning';
+              const tipoLower = t.tipo?.toLowerCase();
+              if (tipoLower === 'no sabe' || tipoLower === 'desconocido' || tipoLower === 'unknown') {
+                colorClass = 'bg-error/20 border-error/50 text-error';
+              } else if (tipoLower === 'foro') {
+                colorClass = 'bg-blue-500/20 border-blue-500/50 text-blue-400';
+              } else if (tipoLower === 'tarea') {
+                colorClass = 'bg-purple-500/20 border-purple-500/50 text-purple-400';
+              } else if (tipoLower === 'cuestionario') {
+                if (!t.cantidad_preguntas || t.cantidad_preguntas === 0) {
+                  colorClass = 'bg-error/20 border-error/50 text-error';
+                } else {
+                  colorClass = 'bg-warning/20 border-warning/50 text-warning';
+                }
+              }
+
+              const isCuestionario = tipoLower === 'cuestionario';
+              const pregText = isCuestionario ? `(${t.cantidad_preguntas || 0} preg)` : (t.cantidad_preguntas > 0 ? `(${t.cantidad_preguntas} preg)` : '');
 
               return (
                 <span key={idx} className={`text-[10px] px-2 py-0.5 rounded border font-medium ${colorClass}`}>
-                  Actividad {t.id} - {t.tipo} {t.cantidad_preguntas > 0 ? `(${t.cantidad_preguntas} preg)` : ''}
+                  Actividad {t.id} - {t.tipo} {pregText}
                 </span>
               );
             })}
@@ -104,13 +117,27 @@ export default function DocumentReviewerView({ setActiveTab }) {
     </div>
   );
 
-  let hasNoSabe = false;
+  let alertMessages = [];
   if (report && report.unidades) {
+    let unknownFound = false;
+    let emptyQuizFound = false;
     Object.values(report.unidades).forEach(unit => {
       Object.values(unit.actividades).forEach(act => {
-        if (act.tipo === 'No sabe') hasNoSabe = true;
+        const tipo = act.tipo?.toLowerCase();
+        if (tipo === 'no sabe' || tipo === 'desconocido' || tipo === 'unknown') {
+          unknownFound = true;
+        }
+        if (tipo === 'cuestionario' && (!act.cantidad_preguntas || act.cantidad_preguntas === 0)) {
+          emptyQuizFound = true;
+        }
       });
     });
+    if (unknownFound) {
+      alertMessages.push('Se encontró al menos una actividad con tipo desconocido en la herramienta virtual. Por favor, revisa el documento.');
+    }
+    if (emptyQuizFound) {
+      alertMessages.push('Se encontró al menos un cuestionario sin preguntas. Por favor, asegúrate de incluir preguntas en el documento.');
+    }
   }
 
   return (
@@ -171,12 +198,14 @@ export default function DocumentReviewerView({ setActiveTab }) {
         {/* Results */}
         {report && (
           <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {hasNoSabe && (
-              <div className="p-4 rounded-lg bg-warning/10 border border-warning/30 flex items-start text-warning">
+            {alertMessages.length > 0 && (
+              <div className="p-4 rounded-lg bg-error/10 border border-error/30 flex items-start text-error">
                 <AlertTriangle className="w-6 h-6 mr-3 flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-sm">¡Atención!</h3>
-                  <p className="text-xs mt-1">Se encontró al menos una actividad marcada como "No sabe" en la herramienta virtual. Por favor, revisa el documento.</p>
+                  {alertMessages.map((msg, idx) => (
+                    <p key={idx} className="text-xs mt-1">{msg}</p>
+                  ))}
                 </div>
               </div>
             )}

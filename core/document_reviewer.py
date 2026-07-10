@@ -2,6 +2,7 @@ import os
 import re
 import json
 import logging
+import shutil
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,13 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
         report["error"] = msg
         _save_reports(base_dir, report, generate_json, generate_text)
         return
+
+    # Ensure splits are generated for exact parsing (just like Automatizacion)
+    try:
+        from core.data_parser import run_docx_splitting_workflow
+        run_docx_splitting_workflow(course_id)
+    except Exception as e:
+        logger.error(f"Error executing DOCX splitting workflow: {e}")
 
     with open(raw_html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -122,13 +130,8 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
                         "cantidad_preguntas": 0
                     }
             
-            # Count preguntas if inside an activity
-            if 'current_actividad' in locals() and current_actividad and current_actividad in report["unidades"][current_unidad]["actividades"]:
-                preguntas = re.findall(r'PREGUNTA\s+(\d+)[:\.]?', text)
-                if preguntas:
-                    max_preg = max(int(p) for p in preguntas)
-                    current_count = report["unidades"][current_unidad]["actividades"][current_actividad]["cantidad_preguntas"]
-                    report["unidades"][current_unidad]["actividades"][current_actividad]["cantidad_preguntas"] = max(current_count, max_preg)
+            # Count preguntas logic moved to the second pass to use exact DOM-based extraction
+            pass
 
             # Detectar tipo de actividad
             if "HERRAMIENTA" in text and "PLATAFORMA VIRTUAL" in text:
@@ -152,6 +155,30 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
             if "LECTURAS COMPLEMENTARIAS" in text or "MATERIAL DE REFERENCIA" in text or "LECTURAS DE REFERENCIA" in text:
                 report["unidades"][current_unidad]["material_referencia"]["encontrado"] = True
                 report["unidades"][current_unidad]["material_referencia"]["detalles"] = "Encontrado"
+
+    # Second pass: Use extracted HTML files to get exact questions and clean up
+    from actions.html_transformer import extract_questions_from_html_to_gift
+    for u_num, u_data in report["unidades"].items():
+        if u_data.get("actividades"):
+            for act_num, act_data in u_data["actividades"].items():
+                if act_data["tipo"] == "Cuestionario":
+                    act_html_path = os.path.join(base_dir, "actividades", f"actividad{act_num}.html")
+                    if os.path.exists(act_html_path):
+                        with open(act_html_path, "r", encoding="utf-8") as act_f:
+                            act_html_content = act_f.read()
+                        
+                        # Use the exact same parser as Automatización
+                        exact_count = extract_questions_from_html_to_gift(act_html_content, None)
+                        act_data["cantidad_preguntas"] = exact_count
+                        
+    # Clean up temporary split folders
+    for folder in ["actividades", "material", "introduccion"]:
+        folder_path = os.path.join(base_dir, folder)
+        if os.path.exists(folder_path):
+            try:
+                shutil.rmtree(folder_path)
+            except Exception as e:
+                logger.error(f"Error al eliminar la carpeta {folder_path}: {e}")
 
     # Log results for units
     if not report["unidades"]:
