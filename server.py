@@ -148,12 +148,27 @@ async def api_review(file: UploadFile = File(...)):
             pass
 
 @app.get("/api/logs")
-async def stream_logs():
+async def stream_logs(request: Request):
     async def event_generator():
         while True:
-            log_line = await log_queue.get()
-            yield f"data: {json.dumps({'message': log_line})}\n\n"
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+            if await request.is_disconnected():
+                print("Client disconnected from log stream")
+                break
+            
+            try:
+                log_line = await asyncio.wait_for(
+                    log_queue.get(),
+                    timeout=1
+                )
+                yield f"data: {json.dumps({'message': log_line})}\n\n"
+            except asyncio.TimeoutError:
+                # keep the connection alive
+                yield ": ping\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
 
 current_process = None
 
