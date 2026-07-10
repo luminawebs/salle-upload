@@ -58,69 +58,84 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str)
     soup = BeautifulSoup(html_content, 'html.parser')
     gift_lines = []
     
-    # NEW ROBUST LOGIC (DOM Based)
-    ols = soup.find_all('ol')
+    # NEW ROBUST LOGIC (DOM Based anchored on Respuesta Correcta)
+    correct_ps = soup.find_all(lambda tag: tag.name == 'p' and ('Respuesta correcta:' in tag.get_text() or 'Respuestas correctas:' in tag.get_text()))
+    
     q_num = 1
-    for ol in ols:
-        correct_p = ol.find_next_sibling('p')
-        if correct_p:
-            correct_text_full = correct_p.get_text(strip=True)
-            if "Respuesta correcta:" in correct_text_full or "Respuestas correctas:" in correct_text_full:
-                correct_text = correct_text_full.replace("Respuesta correcta:", "").replace("Respuestas correctas:", "").strip()
+    for correct_p in correct_ps:
+        correct_text_full = correct_p.get_text(strip=True)
+        correct_text = correct_text_full.replace("Respuesta correcta:", "").replace("Respuestas correctas:", "").strip()
+        
+        # Extract feedback
+        feedback_text = ""
+        feedback_p = correct_p.find_next_sibling('p')
+        if feedback_p:
+            feedback_text_full = feedback_p.get_text(strip=True)
+            if "Retroalimentación:" in feedback_text_full or "Retroalimentación incorrecta:" in feedback_text_full:
+                feedback_text = feedback_text_full.replace("Retroalimentación incorrecta:", "").replace("Retroalimentación:", "").strip()
+        
+        # Find options list
+        prev_node = correct_p.find_previous_sibling(['ul', 'ol'])
+        if not prev_node:
+            continue
+            
+        # Flatten nested lists if any (like ul > li > ol > li)
+        lis = prev_node.find_all('li')
+        options = [li.get_text(strip=True) for li in lis if not li.find(['ol', 'ul'])]
+        
+        if not options:
+            continue
+            
+        # Find stem
+        stem = ""
+        stem_p = prev_node.find_previous_sibling('p')
+        if stem_p:
+            stem_text = stem_p.get_text(strip=True)
+            if stem_text.upper() != "PREGUNTAS:" and len(stem_text) > 3:
+                stem = stem_text
                 
-                # Extract feedback
-                feedback_text = ""
-                feedback_p = correct_p.find_next_sibling('p')
-                if feedback_p:
-                    feedback_text_full = feedback_p.get_text(strip=True)
-                    if "Retroalimentación:" in feedback_text_full or "Retroalimentación incorrecta:" in feedback_text_full:
-                        feedback_text = feedback_text_full.replace("Retroalimentación incorrecta:", "").replace("Retroalimentación:", "").strip()
+        # If no valid stem found in previous p, assume it's the first list item
+        if not stem and len(options) > 1:
+            stem = options[0]
+            options = options[1:]
+            
+        is_true_false = False
+        gift_ans = ""
+        
+        if len(options) == 0:
+            is_true_false = True
+        elif len(options) == 2:
+            opt_lower = [o.lower() for o in options]
+            if any("verdadero" in o or "true" in o for o in opt_lower) and any("falso" in o or "false" in o for o in opt_lower):
+                is_true_false = True
                 
-                # Extract stem and options
-                lis = ol.find_all('li')
-                if not lis:
-                    continue
+        if is_true_false or "verdadero" in correct_text.lower() or "falso" in correct_text.lower():
+            is_true = "verdadero" in correct_text.lower() or "true" in correct_text.lower()
+            gift_ans = "T" if is_true else "F"
+            
+            q_num_padded = f'{q_num:02d}'
+            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{{gift_ans}'
+            if feedback_text:
+                gift += f'####{feedback_text}'
+            gift += '}'
+            gift_lines.append(gift)
+            q_num += 1
+        else:
+            q_num_padded = f'{q_num:02d}'
+            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{\n'
+            for opt in options:
+                opt_norm = opt.lower().strip('. ')
+                correct_norm = correct_text.lower().strip('. ')
                 
-                stem = lis[0].get_text(strip=True)
-                options = [li.get_text(strip=True) for li in lis[1:]]
+                is_correct = opt_norm in correct_norm or correct_norm in opt_norm
+                prefix = '=' if is_correct else '~'
+                gift += f'\t{prefix}{opt}\n'
                 
-                is_true_false = False
-                gift_ans = ""
-                
-                if len(options) == 0:
-                    is_true_false = True
-                elif len(options) == 2:
-                    opt_lower = [o.lower() for o in options]
-                    if any("verdadero" in o or "true" in o for o in opt_lower) and any("falso" in o or "false" in o for o in opt_lower):
-                        is_true_false = True
-                        
-                if is_true_false or "verdadero" in correct_text.lower() or "falso" in correct_text.lower():
-                    is_true = "verdadero" in correct_text.lower() or "true" in correct_text.lower()
-                    gift_ans = "T" if is_true else "F"
-                    
-                    q_num_padded = f'{q_num:02d}'
-                    gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{{gift_ans}'
-                    if feedback_text:
-                        gift += f'####{feedback_text}'
-                    gift += '}'
-                    gift_lines.append(gift)
-                    q_num += 1
-                else:
-                    q_num_padded = f'{q_num:02d}'
-                    gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{\n'
-                    for opt in options:
-                        opt_norm = opt.lower().strip('. ')
-                        correct_norm = correct_text.lower().strip('. ')
-                        
-                        is_correct = opt_norm in correct_norm or correct_norm in opt_norm
-                        prefix = '=' if is_correct else '~'
-                        gift += f'\t{prefix}{opt}\n'
-                        
-                    if feedback_text:
-                        gift += f'####{feedback_text}\n'
-                    gift += '}'
-                    gift_lines.append(gift)
-                    q_num += 1
+            if feedback_text:
+                gift += f'####{feedback_text}\n'
+            gift += '}'
+            gift_lines.append(gift)
+            q_num += 1
 
     # FORMAT B LOGIC (Nested OL/UL with (Respuesta))
     if not gift_lines:

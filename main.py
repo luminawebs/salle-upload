@@ -40,7 +40,7 @@ from config.settingsSALLE import ConfigSALLE as Config
 
 # Setup base logging for the application
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("main")
 
