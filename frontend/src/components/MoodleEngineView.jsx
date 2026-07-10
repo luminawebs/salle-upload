@@ -260,33 +260,50 @@ export default function MoodleEngineView({ setActiveTab }) {
     setCurrentTaskLabel('Iniciando entorno Moodle...');
     setLogs([{ text: "[Sistema] Conectando con el proceso de automatización...", phase: 0, timeStr: new Date().toLocaleTimeString() }]);
 
+    let localHasFailed = false;
+
     const eventSource = new EventSource(`${API_BASE}/api/logs`);
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const msg = data.message;
       const lower = msg.toLowerCase();
 
+      // Check for errors before advancing phases
+      if (lower.includes("error al iniciar el proceso") || (lower.includes("código de salida") && !lower.includes("código de salida 0"))) {
+        localHasFailed = true;
+        setStatus('Failed');
+        setCurrentTaskLabel('La ejecución se ha detenido por un error.');
+      }
+      
+      if (lower.includes("proceso detenido por el usuario")) {
+        localHasFailed = true;
+        setStatus('Failed');
+      }
+
       let newPhase = currentLogPhase.current;
 
-      // Phase Transitions based on log content
-      if (lower.includes("course structure") || lower.includes("section rename") || lower.includes("uploading") || lower.includes("subiendo recursos")) {
-        newPhase = 1;
-        setProgress(35);
-        setCurrentTaskLabel("Estructurando Moodle");
-      }
-      if (lower.includes("cuestionario") || lower.includes("actividad") || lower.includes("foro") || lower.includes("quiz") || lower.includes("exporting questions")) {
-        newPhase = 2;
-        setProgress(65);
-        setCurrentTaskLabel("Configurando Evaluaciones");
-      }
-      if (lower.includes("competencias") || lower.includes("configuracion final") || lower.includes("limpieza") || lower.includes("activity completion") || lower.includes("criterios de finalización")) {
-        newPhase = 3;
-        setProgress(90);
-        setCurrentTaskLabel("Finalizando automatización");
-      }
+      // Solo avanzar de fase si no ha ocurrido un error
+      if (!localHasFailed) {
+        // Phase Transitions based on log content
+        if (lower.includes("course structure") || lower.includes("section rename") || lower.includes("uploading") || lower.includes("subiendo recursos")) {
+          newPhase = 1;
+          setProgress(35);
+          setCurrentTaskLabel("Estructurando Moodle");
+        }
+        if (lower.includes("cuestionario") || lower.includes("actividad") || lower.includes("foro") || lower.includes("quiz") || lower.includes("exporting questions")) {
+          newPhase = 2;
+          setProgress(65);
+          setCurrentTaskLabel("Configurando Evaluaciones");
+        }
+        if (lower.includes("competencias") || lower.includes("configuracion final") || lower.includes("limpieza") || lower.includes("activity completion") || lower.includes("criterios de finalización")) {
+          newPhase = 3;
+          setProgress(90);
+          setCurrentTaskLabel("Finalizando automatización");
+        }
 
-      currentLogPhase.current = newPhase;
-      setActiveLogTab(newPhase);
+        currentLogPhase.current = newPhase;
+        setActiveLogTab(newPhase);
+      }
 
       const timeStr = new Date().toLocaleTimeString('es-ES', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
       setLogs(prev => [...prev, { text: msg, phase: newPhase, timeStr }]);
@@ -302,19 +319,11 @@ export default function MoodleEngineView({ setActiveTab }) {
 
       if (msg.includes("La tarea finalizó") || msg.includes("Limpieza completada")) {
         // Only mark as completed if we see the final exit log, and it wasn't a hard error code
-        if (msg.includes("código de salida") && !msg.includes("código de salida 0")) {
-          setStatus('Failed');
-          setCurrentTaskLabel('La ejecución se ha detenido por un error.');
-        } else {
+        if (!localHasFailed) {
           setStatus('Completed');
           setProgress(100);
           setCurrentTaskLabel('Flujo completado exitosamente.');
         }
-      }
-      
-      // Removed the generic "exception" check that was causing false-positives
-      if (msg.toLowerCase().includes("proceso detenido por el usuario")) {
-        setStatus('Failed');
       }
     };
 
