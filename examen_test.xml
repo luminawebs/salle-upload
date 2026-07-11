@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una abogada revisa un acuerdo mediante el cual una empresa se compromete a entregar computadores a una universidad y esta debe pagar el precio en tres cuotas. El documento describe cantidad, características, fechas de entrega y forma de pago. La universidad pregunta si el negocio debe clasificarse según las obligaciones que surgen para ambas partes. Para responder, se debe identificar la categoría contractual que mejor explica la reciprocidad de prestaciones pactadas. En este caso, corresponde]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo como contrato bilateral, dado que universidad y empresa asumen prestaciones principales correlativas sobre entrega de computadores y pago fraccionado del precio acordado entre partes plenamente identificadas.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. tratarlo como contrato unilateral, al destacar la entrega de equipos como prestación dominante y considerar el pago aplazado como consecuencia económica accesoria en la estructura pactada.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. ubicarlo como contrato gratuito, atendiendo el beneficio académico recibido antes de completar cuotas y la utilidad institucional inmediata de los computadores durante la ejecución inicial.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. definirlo como contrato aleatorio, debido a que el provecho educativo de los equipos depende del uso, programas académicos y necesidades tecnológicas futuras en el contexto universitario.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un estudiante analiza un acuerdo por el cual una persona entrega gratuitamente un libro antiguo a una biblioteca privada, sin exigir pago ni contraprestación económica. El documento precisa identificación del bien, voluntad de transferirlo y aceptación de la entidad receptora. El docente solicita clasificar el contrato según la utilidad patrimonial perseguida por las partes. Para resolver, debe distinguirse entre los contratos que generan provecho recíproco y aquellos basados en una liberalidad. La respuesta adecuada es]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. identificarlo como contrato gratuito, pues el beneficio patrimonial recae principalmente en la biblioteca y deriva de una liberalidad aceptada sobre el libro antiguo por la entidad receptora.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. definirlo como contrato oneroso, al valorar que el bien cultural posee utilidad económica e institucional apreciable para quienes intervienen en la transferencia durante el traslado patrimonial.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. clasificarlo como contrato conmutativo, porque el valor cultural del libro puede estimarse antes de la entrega y registrarse documentalmente dentro del análisis clasificatorio propuesto por el docente.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. considerarlo bilateral, debido a que la biblioteca asume deberes de recepción, conservación y reconocimiento derivados de aceptar la liberalidad ofrecida tras la recepción del bien donado.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa aseguradora celebra con un comerciante una póliza contra incendio. El comerciante paga una prima determinada, mientras la aseguradora solo deberá indemnizar si ocurre el siniestro cubierto durante la vigencia. Al momento de contratar, ninguna parte sabe si el incendio sucederá ni cuál será el monto definitivo de la prestación eventual. El asesor jurídico debe clasificar el contrato según la certeza o incertidumbre de las ventajas económicas asumidas. En este escenario, se debe]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. reconocerlo como contrato aleatorio, porque la indemnización de la aseguradora depende de un siniestro incierto previsto durante la vigencia de la póliza entre aseguradora y comerciante.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarlo como contrato conmutativo, al considerar que la prima permite valorar desde el inicio la cobertura empresarial otorgada por la aseguradora al pactarse la prima.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirlo como contrato gratuito, puesto que la aseguradora puede conservar la prima durante la vigencia cuando el riesgo asegurado permanece eventual en ausencia de siniestro.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. considerarlo unilateral, resaltando que el comerciante paga de inmediato mientras la aseguradora queda sometida a una prestación condicionada por hechos futuros dentro de la relación aseguraticia.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una sociedad compra a otra cien escritorios por un precio determinado, con entrega en quince días. Ambas conocen desde la celebración el valor de las prestaciones, la cantidad de bienes y el monto que deberá pagarse. El gerente pregunta si el contrato se caracteriza por incertidumbre económica o por equivalencia previamente apreciable. El análisis debe atender la clasificación que distingue negocios aleatorios y conmutativos dentro de los contratos onerosos. Para resolver, corresponde]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo como contrato conmutativo, pues precio, cantidad, entrega y valor de las prestaciones son apreciables desde la celebración del acuerdo entre las empresas contratantes respectivo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. ubicarlo como contrato aleatorio, considerando que la utilidad posterior de los escritorios dependerá del uso, duración y necesidades administrativas en la empresa compradora de referencia.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. tratarlo como contrato gratuito, porque la entrega ocurre antes del pago y el comprador recibe aprovechamiento inicial de los bienes dentro de la operación comercial.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. definirlo como contrato de adhesión, al estimar que cantidad, precio y plazo fueron aceptados dentro de una operación comercial estandarizada para el suministro de escritorios.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 5</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una persona promete prestar gratuitamente su vehículo a un vecino durante un fin de semana, con obligación de devolverlo en buen estado. El acuerdo no prevé pago, pero sí impone al vecino deberes de conservación y restitución. En clase se discute si todo contrato gratuito es necesariamente unilateral o si puede generar obligaciones para quien recibe el beneficio. El docente pide clasificar correctamente el negocio atendiendo sus efectos obligacionales. La opción pertinente es]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. señalar que puede ser gratuito y generar deberes para el beneficiario, especialmente conservación y restitución del vehículo recibido durante el fin de semana por el vecino beneficiario.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. afirmar que todo contrato gratuito excluye cargas exigibles para quien recibe el bien, aun cuando exista acuerdo sobre uso cuidadoso en el préstamo de uso.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. concluir que la devolución transforma el préstamo en contrato oneroso bilateral, por generar deberes posteriores vinculados al bien recibido durante la tenencia temporal contractual evaluado.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. sostener que la gratuidad impide ubicar el acuerdo dentro de categorías contractuales, pese a voluntad, bien prestado y restitución pactada en la situación descrita aplicable.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 6  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 6</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa tecnológica licencia un programa a un cliente mediante condiciones generales predispuestas. El cliente no negocia cada cláusula, pero acepta precio, alcance de uso, soporte, restricciones y duración antes de descargar el software. Luego cuestiona si el contrato puede clasificarse por la forma de incorporación de las condiciones. El área jurídica debe explicar la categoría aplicable a negocios celebrados mediante aceptación de términos previamente elaborados por una de las partes. En este caso, procede]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo como contrato de adhesión, porque el cliente acepta condiciones predispuestas sobre uso, soporte, restricciones y duración antes de descargar el programa por el proveedor tecnológico.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. considerarlo contrato negociado, dado que la aceptación digital expresa conformidad con precio, alcance y soporte dentro de la licencia ofrecida en la licencia informática analizado.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirlo como contrato gratuito, atendiendo el acceso inicial al programa antes de aprovechar plenamente sus funcionalidades y soporte técnico durante la fase de descarga planteado.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. catalogarlo como contrato aleatorio, porque el rendimiento del software puede variar según infraestructura, necesidades internas y expectativas operativas del usuario en la operación digital evaluado.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 7</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una constructora y una firma de ingeniería redactan conjuntamente un contrato para diseñar una estructura compleja. Durante varias reuniones ajustan alcance, honorarios, cronograma, responsabilidad técnica y entrega de planos. Ninguna parte impone condiciones generales; ambas discuten y modifican cláusulas relevantes antes de firmar. El profesor solicita clasificar el contrato según la manera en que se formó su contenido. La respuesta debe diferenciar la negociación individual frente a modelos contractuales predispuestos. Para resolver, se debe]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. identificarlo como contrato negociado, ya que las cláusulas principales fueron discutidas, ajustadas y aprobadas por ambas partes antes de la firma dentro de la negociación técnica.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarlo como contrato de adhesión, al destacar que la especialidad técnica suele conducir a aceptar condiciones propuestas por quien diseña estructuras en proyectos de ingeniería especializada.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirlo como contrato gratuito, porque la firma de ingeniería aporta conocimiento especializado y tiempo profesional antes de recibir los honorarios durante la etapa preparatoria contractual.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. considerarlo contrato aleatorio, debido a que los planos pueden requerir ajustes técnicos y costos variables durante la ejecución del proyecto para el diseño estructural académico.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 8  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 8</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa acuerda con un proveedor la entrega mensual de insumos durante un año, fijando cantidades aproximadas, precios, fechas de despacho y obligaciones de pago. La relación no se agota en una sola entrega, sino que exige prestaciones reiteradas durante el tiempo pactado. El asesor debe clasificar el contrato según la forma temporal de ejecución de las obligaciones. Para responder, debe diferenciarse entre contratos instantáneos y contratos de tracto sucesivo. En este escenario, corresponde]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo como contrato de tracto sucesivo, pues las prestaciones se cumplen periódicamente durante el año mediante entregas mensuales de insumos con el proveedor de insumos.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. considerarlo contrato instantáneo, dado que el acuerdo nace completo desde la firma y contiene cantidades, precios y fechas futuras para organizar entregas posteriores jurídicamente relevante.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirlo como contrato aleatorio, atendiendo que las necesidades comerciales del comprador pueden variar durante el año de ejecución dentro de la relación anual del escenario.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. catalogarlo como contrato gratuito, porque el comprador recibe insumos antes de cada pago y obtiene funcionamiento anticipado de su operación en la operación del comprador.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 9  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 9</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una compradora adquiere una motocicleta usada y paga el precio completo en el mismo momento en que recibe el bien. El contrato identifica vehículo, precio, estado y entrega inmediata. No se pactan prestaciones periódicas ni obligaciones prolongadas, salvo deberes legales derivados de saneamiento. El docente pregunta cómo clasificar el negocio según la ejecución temporal de sus prestaciones principales. El análisis debe distinguir entre cumplimiento inmediato y ejecución continuada en el tiempo. La opción correcta consiste en]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo como contrato de ejecución instantánea, porque pago completo y entrega de la motocicleta ocurren en un mismo momento contractual entre vendedor y compradora correspondiente.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. considerarlo contrato de tracto sucesivo, por la posible aparición posterior de saneamientos y reclamaciones vinculadas al vehículo usado frente al negocio celebrado para el análisis.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirlo como contrato aleatorio, debido a que la motocicleta puede presentar fallas futuras que afecten la utilidad económica esperada para la adquirente del vehículo relevante.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. catalogarlo como contrato solemne, al relacionar la transferencia del vehículo con trámites registrales oponibles frente a terceros interesados dentro de la transferencia vehicular de análisis.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 10  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 10</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un empresario celebra contrato para que una agencia diseñe una campaña publicitaria personalizada. El documento exige elaborar piezas gráficas, presentar informes, ajustar contenidos y entregar resultados creativos dentro de un plazo. Aunque habrá pagos parciales, el interés principal recae en la actividad profesional y los entregables comprometidos. El asesor debe clasificar las obligaciones predominantes dentro del contrato. Para ello, debe diferenciarse entre prestaciones de dar, hacer o no hacer. En este caso, procede]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. reconocer obligaciones de hacer, porque la agencia debe desplegar actividad creativa, elaborar piezas, presentar informes y ajustar contenidos comprometidos para la campaña personalizada para clasificación.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. identificar obligaciones de dar, dado que el cliente recibirá piezas gráficas, informes y materiales publicitarios al finalizar la campaña por la agencia contratada del acuerdo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. clasificarlo como obligación de abstención, pues la agencia debe respetar lineamientos creativos y evitar copias de anuncios competidores durante la creación publicitaria en el caso.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. concluir que las prestaciones creativas vuelven impreciso el cumplimiento cuando el resultado depende de criterios estéticos y aprobación empresarial dentro del encargo creativo del contrato.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 11  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 11</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa firma un acuerdo de exclusividad con un distribuidor, comprometiéndose a no vender determinados productos a competidores dentro de una zona durante dos años. El distribuidor, a cambio, asume metas de compra y pago oportuno. La gerencia solicita clasificar la obligación principal asumida por la empresa frente al mercado territorial pactado. El análisis debe atender el contenido de la prestación y no solo la denominación comercial del documento. En este escenario, corresponde]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. identificar una obligación de abstención, porque la empresa debe dejar de vender productos a competidores dentro del territorio pactado por la empresa concedente del negocio.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarla como obligación de dar, al vincular la exclusividad con productos que serán entregados al distribuidor durante la relación con el proveedor territorial de estudio.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirla como obligación de hacer, considerando que la empresa desarrolla conductas comerciales orientadas a fortalecer el mercado territorial asignado del distribuidor autorizado del curso aplicado.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. negar exigibilidad a la restricción territorial, al asociarla con limitaciones comerciales que requieren control especial para producir efectos en el mercado asignado de la materia.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 12  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 12</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una compañía compra materia prima a un proveedor para fabricar alimentos. El contrato exige entregar una cantidad específica de producto, con calidad certificada y en una fecha determinada. Además, el comprador pagará el precio dentro de los diez días siguientes a la recepción. El docente pide clasificar la prestación principal del proveedor según el tipo de obligación que surge del contrato. La respuesta debe centrarse en el contenido patrimonial asumido frente al comprador. En este caso, se debe]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. reconocer una obligación de dar, porque el proveedor debe entregar bienes determinados con calidad certificada y fecha pactada al comprador para fabricar alimentos de referencia.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarla como obligación de hacer, debido a las actividades logísticas, certificaciones y coordinación operativa previas a la entrega por el proveedor contratado en clave jurídica.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. identificar una obligación de abstención, al resaltar el deber de evitar producto defectuoso o distinto al convenido con el comprador en la materia prima principal.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. considerar inexistente la obligación, porque la calidad certificada depende de controles externos y podría variar antes de la recepción por factores de producción en curso.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 13  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 13</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una entidad cultural contrata a una artista para pintar un mural en una biblioteca pública. El contrato define tema, dimensiones, plazo, honorarios, materiales permitidos y criterios de aprobación. La entidad no busca adquirir un bien ya existente, sino recibir una obra creada mediante la actividad personal de la contratista. El equipo jurídico debe clasificar la prestación principal para redactar cláusulas claras sobre cumplimiento. Frente a esta situación, corresponde]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificar la prestación como obligación de hacer, porque exige actividad creativa específica de la artista para elaborar el mural contratado para la biblioteca pública vigente.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. identificarla como obligación de dar, dado que el mural termina incorporado físicamente en un inmueble público y produce resultado material dentro del proyecto cultural descrito.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirla como obligación de abstención, por deberes de respetar materiales permitidos y criterios de aprobación establecidos por la entidad por la artista contratada.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. considerarlo acuerdo gratuito, porque el valor cultural del mural puede superar el monto de honorarios pactado con la artista en la valoración artística de referencia.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 14  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 14</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una firma jurídica prepara un acuerdo comercial entre una empresa tecnológica y un operador logístico. Durante la revisión, el equipo identifica cláusulas redactadas con distintos estilos, expresiones ambiguas y secuencias desordenadas en la estructura documental. La coordinación solicita reorganizar el contenido contractual para facilitar interpretación jurídica, lectura operativa y aplicación práctica entre las partes involucradas. ¿Qué clasificación contractual favorece una redacción estructurada, clara y funcional en este contexto?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. Reconocer un contrato principal y bilateral, debido a obligaciones recíprocas organizadas mediante cláusulas coordinadas que fortalecen coherencia documental y comprensión jurídica integral.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Identificar un contrato aleatorio y accesorio, considerando prestaciones variables derivadas de circunstancias futuras relacionadas con eventos económicos sujetos a interpretación posterior.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Proponer un contrato gratuito y unilateral, dado que permite expresar compromisos patrimoniales mediante manifestaciones individuales formuladas bajo criterios operativos independientes.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Establecer un contrato real y consensual, teniendo presente formalidades vinculadas con entrega material y aceptación progresiva desarrollada durante actuaciones posteriores.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 15  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 15</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una pareja contrata la construcción de una vivienda con una empresa especializada. El contrato incluye elaboración de planos, compra de materiales, ejecución de obra, pagos por avance y entrega final. El asesor debe advertir que el negocio combina prestaciones diversas y que su clasificación puede depender de la obligación predominante. Para redactar cláusulas eficaces, necesita distinguir los deberes de hacer y dar contenidos en el acuerdo. La opción más adecuada es]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. reconocer un contrato mixto con prestaciones de hacer y dar, atendiendo construcción, materiales, pagos por avance y entrega final en el proyecto habitacional del escenario.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarlo como compraventa de materiales, porque la obra incorpora bienes físicos adquiridos para levantar la vivienda encargada por la empresa constructora para la clasificación jurídica.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. considerarlo contrato gratuito, debido a que los pagos por avance pueden diferir del valor total durante la ejecución del proyecto contratado en el escenario académico.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. definirlo como contrato aleatorio, porque los costos de construcción pueden variar y modificar la utilidad esperada por las partes durante la obra pactada de análisis.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 16  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 16</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una universidad firma con una editorial un contrato para imprimir y entregar manuales académicos. La editorial debe diseñar diagramación, corregir estilo, producir ejemplares físicos y entregarlos en fechas específicas. El documento combina actividades intelectuales, procesos técnicos y suministro de bienes impresos. El área jurídica pregunta cómo clasificar el contrato al redactar obligaciones y responsabilidades. El análisis debe evitar una etiqueta simplista y atender el contenido real de las prestaciones. En este escenario, corresponde]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. tratarlo como contrato mixto, porque integra actividades de hacer y entrega de bienes mediante diagramación, corrección, impresión y suministro para manuales académicos según la clasificación.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarlo como contrato de depósito, porque la editorial conserva archivos académicos mientras desarrolla labores técnicas e intelectuales durante el proceso editorial según el caso planteado.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. definirlo como contrato unilateral, al concentrar la editorial la mayoría de labores materiales e intelectuales para producir manuales según el encargo universitario para valoración contractual.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. considerarlo aleatorio, porque la utilidad pedagógica de los manuales puede variar según estudiantes, metodología docente y uso posterior en el entorno educativo del escenario planteado.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 17  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 17</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa ofrece a consumidores un contrato estándar para instalar internet residencial. El formulario contiene precio, velocidad, permanencia, equipos, visitas técnicas y causales de suspensión. El usuario solo puede aceptar o rechazar el paquete, aunque la empresa debe informar claramente sus condiciones. El profesor solicita clasificar el negocio según la intervención del consumidor en la redacción contractual. Para responder, debe analizarse la uniformidad del texto y la posibilidad real de negociación. La respuesta correcta es]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. identificarlo como contrato de adhesión, porque el usuario acepta condiciones uniformes diseñadas previamente por el proveedor de internet residencial por el consumidor solicitante para clasificación.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. clasificarlo como contrato negociado, al valorar que el consumidor decide aceptar o rechazar el paquete ofrecido por el proveedor dentro de la oferta residencial jurídico.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. considerarlo contrato aleatorio, porque la velocidad puede depender de factores técnicos externos, ubicación y disponibilidad de red durante la prestación del servicio en sede académica.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. definirlo como contrato gratuito, atendiendo que la instalación inicial puede ofrecerse con costo reducido o diferido en el plan en la contratación masiva del acuerdo.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 18  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 18</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa redacta un contrato para contratar mantenimiento preventivo de sus ascensores. El documento exige visitas mensuales, reportes técnicos, atención de fallas, suministro eventual de repuestos y capacitación básica al personal. El gerente quiere clasificar adecuadamente las obligaciones para evitar confusión entre servicio continuo y entrega ocasional de piezas. El abogado debe identificar la categoría predominante, sin desconocer prestaciones accesorias de dar. Para resolver, se debe]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo principalmente como prestación de hacer, con entregas accesorias cuando se suministren repuestos necesarios para mantenimiento de ascensores de la empresa usuaria para el análisis.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. definirlo como compraventa, porque cualquier repuesto incorporado revela suministro de bienes dentro de la relación contractual durante el mantenimiento técnico dentro del análisis contractual propuesto.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. considerarlo contrato instantáneo, debido a que cada visita técnica concluye el mismo día y produce un reporte verificable por la empresa contratante en el caso.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. catalogarlo como gratuito, si el proveedor incluye capacitaciones básicas como valor agregado dentro del servicio preventivo pactado al personal de la empresa del curso aplicado.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 19  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 19</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una compañía celebra un contrato por el cual otra empresa custodiará archivos físicos durante tres años, permitirá consultas autorizadas y devolverá documentos al finalizar la relación. El cliente pagará una tarifa mensual y exigirá confidencialidad. El área jurídica debe clasificar el contrato teniendo en cuenta que las prestaciones se extienden en el tiempo y requieren conductas continuadas de conservación. Para redactar el documento, debe precisarse su forma de ejecución temporal. En este caso, procede]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. clasificarlo como contrato de tracto sucesivo, porque las obligaciones de custodia, consulta y conservación se prolongan durante tres años con la empresa custodia del contrato.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. definirlo como contrato instantáneo, porque la entrega inicial de archivos ocurre en un momento y permite iniciar la relación de conservación documental de la materia.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. considerarlo gratuito, dado que el custodio conserva documentos ajenos y devuelve archivos al finalizar la relación pactada durante la vigencia pactada con finalidad clasificatoria clara.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. identificarlo como aleatorio, porque los documentos podrían consultarse muchas veces o permanecer guardados durante todo el plazo en la custodia contratada para resolver la categoría.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 20  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 20</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un abogado revisa un contrato empresarial que combina suministro de equipos, instalación, capacitación, soporte técnico y confidencialidad. El gerente desea usar una plantilla única y breve sin diferenciar las obligaciones de dar, hacer y no hacer. El abogado advierte que la clasificación adecuada permite redactar cláusulas más claras sobre cumplimiento, riesgos y sanciones. El caso exige aplicar criterios de simplicidad y orden para elaborar el texto contractual. La recomendación correcta consiste en]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. organizar el contrato por tipos de obligaciones, precisando entregas, actividades, abstenciones, plazos, riesgos y consecuencias específicas de incumplimiento para la empresa contratante en clave jurídica.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. redactar una cláusula general, porque las categorías obligacionales pueden dificultar la lectura rápida del documento empresarial complejo ante la gerencia interesada en el estudio contractual.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. omitir clasificación de prestaciones, ya que el precio global y la firma final orientan suficientemente el cumplimiento empresarial en el contrato empresarial según la clasificación.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. copiar una plantilla estándar, porque contratos complejos suelen compartir estructura básica y lenguaje obligacional semejante entre empresas para relaciones empresariales complejas dentro del análisis propuesto.]]></text>
+    </answer>
+  </question>
+</quiz>

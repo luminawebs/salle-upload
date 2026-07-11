@@ -9,13 +9,13 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from config.settingsSALLE import ConfigSALLE as Config
 from actions.moodle_actions import navigate_to_course
-from actions.html_transformer import extract_questions_from_html_to_gift
+from actions.html_transformer import extract_questions_from_html_to_moodle_xml
 from actions.puntos_extras_actions import _get_cmid_for_activity
 from actions.cuestionario_grade_actions import update_quiz_grades
 
 logger = logging.getLogger(__name__)
 
-def import_gift_to_cuestionario(driver, course_id: int, activity_name_prefix: str, txt_path: str, wait_time: int) -> bool:
+def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str, xml_path: str, wait_time: int) -> bool:
     wait = WebDriverWait(driver, wait_time)
     
     navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
@@ -28,9 +28,9 @@ def import_gift_to_cuestionario(driver, course_id: int, activity_name_prefix: st
     
     try:
         logger.info(f"[{activity_name_prefix}] Step 1: Navigating to import page...")
-        format_gift_radio = wait.until(EC.presence_of_element_located((By.ID, "id_format_gift")))
-        if not format_gift_radio.is_selected():
-            driver.execute_script("arguments[0].click();", format_gift_radio)
+        format_xml_radio = wait.until(EC.presence_of_element_located((By.ID, "id_format_xml")))
+        if not format_xml_radio.is_selected():
+            driver.execute_script("arguments[0].click();", format_xml_radio)
             
         logger.info(f"[{activity_name_prefix}] Step 2: Expanding 'General' section...")
         general_header = driver.find_elements(By.XPATH, "//a[contains(text(), 'General')]")
@@ -96,7 +96,7 @@ def import_gift_to_cuestionario(driver, course_id: int, activity_name_prefix: st
             
         logger.info(f"[{activity_name_prefix}] Step 4c: Choosing file...")
         file_input = wait.until(EC.presence_of_element_located((By.NAME, "repo_upload_file")))
-        file_input.send_keys(os.path.abspath(txt_path))
+        file_input.send_keys(os.path.abspath(xml_path))
         time.sleep(1)
         
         logger.info(f"[{activity_name_prefix}] Step 4d: Clicking 'Subir este archivo' in modal...")
@@ -115,10 +115,10 @@ def import_gift_to_cuestionario(driver, course_id: int, activity_name_prefix: st
         continue_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'continuar') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'continue')]")))
         driver.execute_script("arguments[0].click();", continue_btn)
         
-        logger.info(f"Successfully imported GIFT file for {activity_name_prefix}.")
+        logger.info(f"Successfully imported Moodle XML file for {activity_name_prefix}.")
         return True
     except Exception as e:
-        logger.error(f"Failed to import GIFT file for {activity_name_prefix}: {e}")
+        logger.error(f"Failed to import Moodle XML file for {activity_name_prefix}: {e}")
         return False
 
 def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: str, question_count: int, wait_time: int) -> bool:
@@ -324,25 +324,22 @@ def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10
                 activity_prefix = f"ACTIVIDAD {act_num}"
                 
                 html_path = os.path.join(actividades_dir, filename)
-                gift_txt_path = os.path.join(actividades_dir, f"{activity_prefix}_questions.txt")
+                xml_path = os.path.join(actividades_dir, f"{activity_prefix}_questions.xml")
                 
-                # We need to extract the questions from HTML to create the GIFT file
+                # We need to extract the questions from HTML to create the XML file
                 with open(html_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                     
-                questions_extracted = extract_questions_from_html_to_gift(content, gift_txt_path)
+                q_count = extract_questions_from_html_to_moodle_xml(content, xml_path, course_id)
                 
-                if questions_extracted and os.path.exists(gift_txt_path) and os.path.getsize(gift_txt_path) > 0:
-                    with open(gift_txt_path, 'r', encoding='utf-8') as f:
-                        gift_content = f.read()
-                    q_count = len([q for q in gift_content.split('\n\n') if q.strip()])
+                if q_count > 0 and os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
                     export_enabled = getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
                     grade_update_enabled = getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)
                     
                     if export_enabled:
                         logger.info(f"Exporting questions for {activity_prefix}...")
                         export_success = False
-                        if import_gift_to_cuestionario(driver, course_id, activity_prefix, gift_txt_path, wait_time):
+                        if import_xml_to_cuestionario(driver, course_id, activity_prefix, xml_path, wait_time):
                             if add_questions_to_cuestionario(driver, course_id, activity_prefix, q_count, wait_time):
                                 export_success = True
                         

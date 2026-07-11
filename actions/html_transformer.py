@@ -50,96 +50,113 @@ def get_image_base64(image_filename: str, course_id: int = None) -> str:
         logger.error(f"Failed to encode image {image_path}: {e}")
         return ""
 
-def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str = None) -> int:
+def process_image_src(html_str, course_id=None):
+    if not html_str: return ""
+    soup = BeautifulSoup(html_str, 'html.parser')
+    for img in soup.find_all('img'):
+        src = img.get('src')
+        if src and not str(src).startswith('data:'):
+            filename = os.path.basename(str(src))
+            base64_data = get_image_base64(filename, course_id)
+            if base64_data:
+                img['src'] = base64_data
+            img['style'] = "max-width: 100%; height: auto;"
+    return soup.decode_contents()
+
+def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None) -> int:
     """
     Finds questions in HTML (either via <ol> DOM structures or 'Pregunta N' blocks)
-    and exports them to a GIFT file.
+    and exports them to a Moodle XML file retaining full HTML.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
-    gift_lines = []
+    xml_questions = []
     
-    # NEW ROBUST LOGIC (DOM Based anchored on Respuesta Correcta)
-    correct_ps = soup.find_all(lambda tag: tag.name == 'p' and ('Respuesta correcta:' in tag.get_text() or 'Respuestas correctas:' in tag.get_text()))
+    xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
+    xml_footer = '</quiz>\n'
     
+    def add_question(q_num, stem_html, options, is_true_false, correct_is_true, feedback_html=""):
+        q_xml = f'<!-- question: {q_num}  -->\n'
+        q_type = 'truefalse' if is_true_false else 'multichoice'
+        q_xml += f'  <question type="{q_type}">\n'
+        q_xml += f'    <name>\n      <text>Pregunta {q_num}</text>\n    </name>\n'
+        q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{stem_html}]]></text>\n    </questiontext>\n'
+        if feedback_html:
+            q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{feedback_html}]]></text>\n    </generalfeedback>\n'
+        q_xml += '    <defaultgrade>1.0000000</defaultgrade>\n'
+        q_xml += '    <penalty>0.3333333</penalty>\n'
+        q_xml += '    <hidden>0</hidden>\n'
+        
+        if is_true_false:
+            q_xml += f'    <answer fraction="{"100" if correct_is_true else "0"}" format="moodle_auto_format">\n      <text>true</text>\n    </answer>\n'
+            q_xml += f'    <answer fraction="{"0" if correct_is_true else "100"}" format="moodle_auto_format">\n      <text>false</text>\n    </answer>\n'
+        else:
+            q_xml += '    <single>true</single>\n'
+            q_xml += '    <shuffleanswers>true</shuffleanswers>\n'
+            q_xml += '    <answernumbering>abc</answernumbering>\n'
+            for opt_html, is_correct in options:
+                fraction = "100" if is_correct else "0"
+                q_xml += f'    <answer fraction="{fraction}" format="html">\n      <text><![CDATA[{opt_html}]]></text>\n    </answer>\n'
+                
+        q_xml += '  </question>\n'
+        xml_questions.append(q_xml)
+
     q_num = 1
+    
+    # FORMAT A LOGIC (DOM Based anchored on Respuesta Correcta)
+    correct_ps = soup.find_all(lambda tag: tag.name == 'p' and ('Respuesta correcta:' in tag.get_text() or 'Respuestas correctas:' in tag.get_text()))
     for correct_p in correct_ps:
-        correct_text_full = correct_p.get_text(strip=True)
-        correct_text = correct_text_full.replace("Respuesta correcta:", "").replace("Respuestas correctas:", "").strip()
-        
-        # Extract feedback
-        feedback_text = ""
+        correct_text = correct_p.get_text(strip=True).replace("Respuesta correcta:", "").replace("Respuestas correctas:", "").strip()
+        feedback_html = ""
         feedback_p = correct_p.find_next_sibling('p')
-        if feedback_p:
-            feedback_text_full = feedback_p.get_text(strip=True)
-            if "Retroalimentación:" in feedback_text_full or "Retroalimentación incorrecta:" in feedback_text_full:
-                feedback_text = feedback_text_full.replace("Retroalimentación incorrecta:", "").replace("Retroalimentación:", "").strip()
+        if feedback_p and ("Retroalimentación:" in feedback_p.get_text() or "Retroalimentación incorrecta:" in feedback_p.get_text()):
+            feedback_html = process_image_src(feedback_p.decode_contents().replace("Retroalimentación incorrecta:", "").replace("Retroalimentación:", "").strip(), course_id)
         
-        # Find options list
         prev_node = correct_p.find_previous_sibling(['ul', 'ol'])
         if not prev_node:
             continue
             
-        # Extract options and stem from the list
-        options = []
-        stem = ""
+        options_tags = []
+        stem_html = ""
         outer_lis = prev_node.find_all('li', recursive=False)
-        if outer_lis and outer_lis[-1].find(['ol', 'ul']): # usually the stem is in the only outer li or the last one
+        if outer_lis and outer_lis[-1].find(['ol', 'ul']):
             import copy
             outer_li_clone = copy.copy(outer_lis[-1])
             inner_list = outer_li_clone.find(['ol', 'ul'])
-            if inner_list:
-                inner_list.decompose()
-            stem = outer_li_clone.get_text(strip=True)
+            if inner_list: inner_list.decompose()
+            stem_html = process_image_src(outer_li_clone.decode_contents(), course_id)
             inner_lis = outer_lis[-1].find(['ol', 'ul']).find_all('li')
-            options = [li.get_text(strip=True) for li in inner_lis]
+            options_tags = inner_lis
         else:
-            lis = prev_node.find_all('li')
-            options = [li.get_text(strip=True) for li in lis if not li.find(['ol', 'ul'])]
-        
-        if not options:
-            continue
+            options_tags = [li for li in prev_node.find_all('li') if not li.find(['ol', 'ul'])]
             
-        if not stem:
+        if not stem_html:
             stem_p = prev_node.find_previous_sibling('p')
             if stem_p:
                 stem_text = stem_p.get_text(strip=True)
                 if stem_text.upper() != "PREGUNTAS:" and len(stem_text) > 3 and "respuesta correcta" not in stem_text.lower() and "respuestas correctas" not in stem_text.lower():
-                    stem = stem_text
-                    
-            # If no valid stem found in previous p, assume it's the first list item
-            if not stem and len(options) > 1:
-                stem = options[0]
-                options = options[1:]
-            
+                    stem_html = process_image_src(stem_p.decode_contents(), course_id)
+            if not stem_html and len(options_tags) > 1:
+                stem_html = process_image_src(options_tags[0].decode_contents(), course_id)
+                options_tags = options_tags[1:]
+
         is_true_false = False
-        gift_ans = ""
-        
-        if len(options) == 0:
+        opt_texts = [o.get_text(strip=True) for o in options_tags]
+        if len(opt_texts) == 0:
             is_true_false = True
-        elif len(options) == 2:
-            opt_lower = [o.lower() for o in options]
+        elif len(opt_texts) == 2:
+            opt_lower = [o.lower() for o in opt_texts]
             if any("verdadero" in o or "true" in o for o in opt_lower) and any("falso" in o or "false" in o for o in opt_lower):
                 is_true_false = True
                 
         if is_true_false or "verdadero" in correct_text.lower() or "falso" in correct_text.lower():
             is_true = "verdadero" in correct_text.lower() or "true" in correct_text.lower()
-            gift_ans = "T" if is_true else "F"
-            
-            q_num_padded = f'{q_num:02d}'
-            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{{gift_ans}'
-            if feedback_text:
-                gift += f'####{feedback_text}'
-            gift += '}'
-            gift_lines.append(gift)
+            add_question(q_num, stem_html, [], True, is_true, feedback_html)
             q_num += 1
         else:
-            q_num_padded = f'{q_num:02d}'
-            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{\n'
-            for opt in options:
-                import re
-                opt_norm = opt.lower().strip('. ')
+            final_options = []
+            for opt_tag, opt_text in zip(options_tags, opt_texts):
+                opt_norm = opt_text.lower().strip('. ')
                 correct_norm = correct_text.lower().strip('. ')
-                
                 is_correct = (opt_norm == correct_norm)
                 if not is_correct:
                     clean_opt = re.sub(r'^[a-ea-e][\.\)]\s*', '', opt_norm).strip()
@@ -147,18 +164,13 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                     is_correct = (clean_opt == clean_correct)
                 if not is_correct and len(clean_opt) > 10 and len(clean_correct) > 10:
                     is_correct = (clean_opt in clean_correct or clean_correct in clean_opt)
-                    
-                prefix = '=' if is_correct else '~'
-                gift += f'\t{prefix}{opt}\n'
-                
-            if feedback_text:
-                gift += f'####{feedback_text}\n'
-            gift += '}'
-            gift_lines.append(gift)
+                final_options.append((process_image_src(opt_tag.decode_contents(), course_id), is_correct))
+            
+            add_question(q_num, stem_html, final_options, False, False, feedback_html)
             q_num += 1
 
     # FORMAT B LOGIC (Nested OL/UL with (Respuesta))
-    if not gift_lines:
+    if not xml_questions:
         import copy
         lists = soup.find_all(['ol', 'ul'])
         for lst in lists:
@@ -168,44 +180,36 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
             if has_respuesta and is_nested:
                 for li in lis:
                     inner_list = li.find(['ol', 'ul'])
-                    if not inner_list:
-                        continue
+                    if not inner_list: continue
                     
                     li_clone = copy.copy(li)
                     if li_clone.find(['ol', 'ul']):
                         li_clone.find(['ol', 'ul']).decompose()
-                    stem = li_clone.get_text(strip=True)
+                    stem_html = process_image_src(li_clone.decode_contents(), course_id)
                     
                     options = []
-                    inner_lis = inner_list.find_all('li', recursive=False)
-                    for inner_li in inner_lis:
-                        opt_text = inner_li.get_text(strip=True)
+                    for inner_li in inner_list.find_all('li', recursive=False):
+                        opt_html = process_image_src(inner_li.decode_contents(), course_id)
                         is_correct = False
-                        if "(respuesta" in opt_text.lower():
+                        if "(respuesta" in inner_li.get_text().lower():
                             is_correct = True
-                            opt_text = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt_text).strip()
-                        options.append((opt_text, is_correct))
+                            opt_html = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt_html).strip()
+                        options.append((opt_html, is_correct))
                     
-                    if stem and options:
-                        q_num_padded = f'{q_num:02d}'
-                        gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{stem} {{\n'
-                        for opt, is_corr in options:
-                            prefix = '=' if is_corr else '~'
-                            gift += f'\t{prefix}{opt}\n'
-                        gift += '}'
-                        gift_lines.append(gift)
+                    if stem_html and options:
+                        add_question(q_num, stem_html, options, False, False)
                         q_num += 1
 
     # FORMAT C LOGIC (Flat OL/UL or Flat P with marks)
-    if not gift_lines:
+    if not xml_questions:
         def is_correct_option(t):
-            return "(respuesta" in t.lower() or bool(re.search(r'(?i)[_\s]*x[_\s]*$', t.strip()))
+            return "(respuesta" in t.lower() or bool(re.search(r'(?i)[_\s]*x[_\s]*$', t.strip())) or t.strip().startswith('=')
             
-        def clean_option_text(t):
-            t = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', t)
-            t = re.sub(r'(?i)[_\s]*x[_\s]*$', '', t)
-            t = re.sub(r'_+$', '', t).strip()
-            return t
+        def clean_option_html(h, t):
+            h = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', h)
+            h = re.sub(r'(?i)[_\s]*x[_\s]*$', '', h)
+            h = re.sub(r'^\s*=\s*', '', h)
+            return h.strip()
 
         # Check ol/ul first
         lists = soup.find_all(['ol', 'ul'])
@@ -217,10 +221,11 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                 current_options = []
                 for li in lis:
                     text = li.get_text(strip=True)
+                    html = process_image_src(li.decode_contents(), course_id)
                     if not text: continue
                     
                     is_stem = False
-                    is_tf = current_options and any('verdadero' in o.lower() for o in current_options) and any('falso' in o.lower() for o in current_options)
+                    is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
                     if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
                         is_stem = True
                     elif re.match(r'^\d+\.\s+', text):
@@ -230,36 +235,19 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                         
                     if is_stem:
                         if current_stem and current_options:
-                            q_num_padded = f'{q_num:02d}'
-                            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
-                            for opt in current_options:
-                                is_correct = is_correct_option(opt)
-                                opt_clean = clean_option_text(opt)
-                                prefix = '=' if is_correct else '~'
-                                gift += f'\t{prefix}{opt_clean}\n'
-                            gift += '}'
-                            gift_lines.append(gift)
+                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
                             q_num += 1
-                        current_stem = text
+                        current_stem = html
                         current_options = []
                     else:
                         if current_stem:
-                            current_options.append(text)
+                            current_options.append((html, text))
                 
                 if current_stem and current_options:
-                    q_num_padded = f'{q_num:02d}'
-                    gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
-                    for opt in current_options:
-                        is_correct = is_correct_option(opt)
-                        opt_clean = clean_option_text(opt)
-                        prefix = '=' if is_correct else '~'
-                        gift += f'\t{prefix}{opt_clean}\n'
-                    gift += '}'
-                    gift_lines.append(gift)
+                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
                     q_num += 1
 
-        # If still no gift_lines, try flat paragraphs
-        if not gift_lines:
+        if not xml_questions:
             paragraphs = soup.find_all(['p', 'div'])
             has_respuesta = any(is_correct_option(p.get_text(strip=True)) for p in paragraphs)
             if has_respuesta:
@@ -267,14 +255,14 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                 current_options = []
                 for p in paragraphs:
                     text = p.get_text(strip=True)
+                    html = process_image_src(p.decode_contents(), course_id)
                     if not text: continue
                     
-                    # Skip intros
                     if len(text.split()) > 50: continue
                     if "cómo lo vamos a" in text.lower() or "qué vamos a" in text.lower(): continue
                     
                     is_stem = False
-                    is_tf = current_options and any('verdadero' in o.lower() for o in current_options) and any('falso' in o.lower() for o in current_options)
+                    is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
                     if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
                         is_stem = True
                     elif re.match(r'^\d+\.\s+', text):
@@ -284,48 +272,31 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                         
                     if is_stem:
                         if current_stem and current_options:
-                            q_num_padded = f'{q_num:02d}'
-                            gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
-                            for opt in current_options:
-                                is_correct = is_correct_option(opt)
-                                opt_clean = clean_option_text(opt)
-                                prefix = '=' if is_correct else '~'
-                                gift += f'\t{prefix}{opt_clean}\n'
-                            gift += '}'
-                            gift_lines.append(gift)
+                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
                             q_num += 1
-                        current_stem = text
+                        current_stem = html
                         current_options = []
                     else:
                         if current_stem:
-                            current_options.append(text)
+                            current_options.append((html, text))
                             
                 if current_stem and current_options:
-                    q_num_padded = f'{q_num:02d}'
-                    gift = f'// Pregunta {q_num_padded}\n::Pregunta {q_num_padded}::{current_stem} {{\n'
-                    for opt in current_options:
-                        is_correct = is_correct_option(opt)
-                        opt_clean = clean_option_text(opt)
-                        prefix = '=' if is_correct else '~'
-                        gift += f'\t{prefix}{opt_clean}\n'
-                    gift += '}'
-                    gift_lines.append(gift)
+                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
                     q_num += 1
 
     # FALLBACK LOGIC
-    if not gift_lines:
+    if not xml_questions:
         paragraphs = soup.find_all(["p", "li", "div", "span"])
         lines = []
         for p in paragraphs:
             text = p.get_text(strip=True)
             if text:
                 if not p.find_parent(["p", "li"]):
-                    lines.append(text)
+                    lines.append((text, process_image_src(p.decode_contents(), course_id)))
                     
-        text = '\n'.join(lines)
-        
         # Split by 'Pregunta N:'
-        questions = re.split(r'(?i)^(Pregunta\s+(\d+):?)\s*$', text, flags=re.MULTILINE)
+        lines_text = '\n'.join([t for t, h in lines])
+        questions = re.split(r'(?i)^(Pregunta\s+(\d+):?)\s*$', lines_text, flags=re.MULTILINE)
         
         if len(questions) >= 3:
             for i in range(1, len(questions), 3):
@@ -340,7 +311,8 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                 if not body_lines:
                     continue
                     
-                stem = body_lines[0]
+                stem_text = body_lines[0]
+                stem_html = stem_text # Fallback doesn't easily map back to html without complex indexing
                 options_lines = body_lines[1:]
                 
                 options = []
@@ -351,36 +323,36 @@ def extract_questions_from_html_to_gift(html_content: str, output_txt_path: str 
                     if re.search(r'\([xX]\)$', opt_line):
                         is_correct = True
                         opt_text = re.sub(r'\([xX]\)$', '', opt_line).strip()
+                    elif opt_line.strip().startswith('='):
+                        is_correct = True
+                        opt_text = opt_line.strip()[1:].strip()
                     else:
                         is_correct = False
                         opt_text = opt_line
                         
-                    prefix = '=' if is_correct else '~'
-                    options.append(f'\t{prefix}{opt_text}')
+                    options.append((opt_text, is_correct))
                     
                 try:
-                    q_num_padded = f'{int(old_q_num):02d}'
+                    q_num_padded = int(old_q_num)
                 except ValueError:
-                    q_num_padded = old_q_num
+                    q_num_padded = q_num
                     
-                gift = f'// {q_label}\n::P{q_num_padded}::{stem} {{\n'
-                for opt in options:
-                    gift += f'{opt}\n'
-                gift += '}\n'
-                gift_lines.append(gift)
+                add_question(q_num_padded, stem_html, options, False, False)
+                q_num += 1
 
-    if not gift_lines:
+    if not xml_questions:
         return 0
         
-    if output_txt_path:
+    if output_xml_path:
         try:
-            with open(output_txt_path, 'w', encoding='utf-8') as f:
-                f.write('\n\n'.join(gift_lines))
-            logger.info(f"Successfully created {output_txt_path} with {len(gift_lines)} questions.")
+            with open(output_xml_path, 'w', encoding='utf-8') as f:
+                f.write(xml_header + '\n'.join(xml_questions) + xml_footer)
+            logger.info(f"Successfully created {output_xml_path} with {len(xml_questions)} questions.")
         except Exception as e:
-            logger.error(f"Failed to write GIFT file {output_txt_path}: {e}")
+            logger.error(f"Failed to write XML file {output_xml_path}: {e}")
             
-    return len(gift_lines)
+    return len(xml_questions)
+
 
 def remove_questions_from_html(html_content: str) -> str:
     """
