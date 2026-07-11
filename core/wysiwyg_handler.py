@@ -112,7 +112,10 @@ def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, tar
                 )
             )
         )
-        submit_btn.click()
+        try:
+            submit_btn.click()
+        except:
+            driver.execute_script("arguments[0].click();", submit_btn)
 
         try:
             wait.until(EC.staleness_of(submit_btn))

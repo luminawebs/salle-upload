@@ -74,16 +74,6 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
     success = inject_html_into_wysiwyg(driver, video_html, wait_time, target_section="intro")
     if not success: 
         return False
-    
-    save_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton2, input[name='submitbutton2'], button[name='submitbutton2']")
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", save_btn)
-    time.sleep(0.5)
-    
-    try:
-        save_btn.click()
-    except:
-        driver.execute_script("arguments[0].click();", save_btn)
-        
     # Wait for redirect back to course view
     try:
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
@@ -173,16 +163,6 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
     if not success: 
         logger.error("Failed to inject HTML into WYSIWYG")
         return False
-    
-    save_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton2, input[name='submitbutton2'], button[name='submitbutton2']")
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", save_btn)
-    time.sleep(0.5)
-    
-    try:
-        save_btn.click()
-    except:
-        driver.execute_script("arguments[0].click();", save_btn)
-        
     # Wait for redirect back to course view
     try:
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))

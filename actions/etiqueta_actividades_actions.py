@@ -99,15 +99,7 @@ def add_etiqueta_actividades_to_section(driver, section_element, wait_time=10):
             logger.error("  Failed to inject video HTML into WYSIWYG.")
             return False
             
-        # 6. Save and return to course
-        save_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton2, input[name='submitbutton2'], button[name='submitbutton2']")
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", save_btn)
-        time.sleep(0.5)
-        
-        try:
-            save_btn.click()
-        except:
-            driver.execute_script("arguments[0].click();", save_btn)
+        # 6. Save and return to course (handled by inject_html_into_wysiwyg)
             
         # Wait for redirect back to course view
         try:

@@ -43,25 +43,41 @@ def _change_course_format(driver, course_id, wait_time, target_format_value, for
         
         # First, try to see if the current selected option matches either the value or the text
         current_option = select.first_selected_option
+        current_text = current_option.get_attribute("textContent") or ""
         already_selected = (current_option.get_attribute("value") == target_format_value) or \
-                           (format_name.lower() in current_option.text.lower())
+                           (format_name.lower() in current_text.lower())
         
         if not already_selected:
-            try:
-                # Try selecting by value first
-                select.select_by_value(target_format_value)
-            except Exception:
-                logger.info(f"Could not select by value '{target_format_value}'. Falling back to visible text '{format_name}'...")
-                # Fall back to finding an option containing the format_name
-                matched = False
-                for option in select.options:
-                    if format_name.lower() in option.text.lower():
-                        select.select_by_value(option.get_attribute("value"))
-                        matched = True
-                        break
-                if not matched:
-                    raise Exception(f"Could not find any format option matching value '{target_format_value}' or text '{format_name}'")
-            
+            # Check for Moodle 4.x custom dropdown elements first
+            custom_option_css = f"a[data-form-controls='id_format'][data-value='{target_format_value}']"
+            custom_options = driver.find_elements(By.CSS_SELECTOR, custom_option_css)
+            if custom_options:
+                logger.info(f"Found Moodle custom dropdown for '{target_format_value}'. Clicking via JS...")
+                driver.execute_script("arguments[0].click();", custom_options[0])
+            else:
+                try:
+                    # Try selecting by value first
+                    select.select_by_value(target_format_value)
+                except Exception:
+                    logger.info(f"Could not select by value '{target_format_value}'. Falling back to visible text '{format_name}'...")
+                    matched = False
+                    for option in select.options:
+                        opt_text = option.get_attribute("textContent") or ""
+                        if format_name.lower() in opt_text.lower():
+                            opt_value = option.get_attribute("value")
+                            try:
+                                select.select_by_value(opt_value)
+                            except Exception:
+                                # Standard Select fails if select is hidden; force via JS
+                                logger.info(f"Select native failed for hidden option '{opt_value}', forcing via JS...")
+                                driver.execute_script("""
+                                    arguments[0].value = arguments[1];
+                                    arguments[0].dispatchEvent(new Event('change'));
+                                """, format_select_element, opt_value)
+                            matched = True
+                            break
+                    if not matched:
+                        raise Exception(f"Could not find any format option matching value '{target_format_value}' or text '{format_name}'")
             # Wait for the select element to become stale (Moodle reloads the page/form when format changes)
             try:
                 logger.info("Waiting for page/form reload after format change...")
