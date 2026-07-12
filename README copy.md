@@ -96,3 +96,7 @@ cd /var/www/salle_automate
 git fetch
 git pull origin salle
 cd frontend && npm run build
+
+
+
+https://aistudio.google.com/

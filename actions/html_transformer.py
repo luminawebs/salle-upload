@@ -341,6 +341,27 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 q_num += 1
 
     if not xml_questions:
+        if "cuestionario" in html_content.lower() or "evaluemos" in html_content.lower() or "pregunta " in html_content.lower():
+            logger.info("Parsing found 0 questions but keywords indicate a questionnaire. Invoking AI Structurer fallback...")
+            try:
+                from core.ai_structurer import extract_missing_questions
+                ai_result = extract_missing_questions(html_content)
+                if ai_result and ai_result.get("extracted_questions"):
+                    logger.info(f"AI Structurer successfully extracted {len(ai_result['extracted_questions'])} questions.")
+                    logger.warning(f"\n--- AI PRE-LLM PARSER IMPROVEMENT SUGGESTION ---\n{ai_result.get('code_improvement_feedback', '')}\n----------------------------------------------\n")
+                    
+                    q_num_fallback = 1
+                    for q in ai_result["extracted_questions"]:
+                        stem = q.get("stem_html", "")
+                        opts = []
+                        for opt in q.get("options", []):
+                            opts.append((opt.get("text_html", ""), opt.get("is_correct", False)))
+                        add_question(q_num_fallback, stem, opts, False, False)
+                        q_num_fallback += 1
+            except Exception as e:
+                logger.error(f"AI Structurer fallback failed: {e}")
+
+    if not xml_questions:
         return 0
         
     if output_xml_path:

@@ -118,7 +118,15 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
         logger.info(f"Successfully imported Moodle XML file for {activity_name_prefix}.")
         return True
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
         logger.error(f"Failed to import Moodle XML file for {activity_name_prefix}: {e}")
+        try:
+            from core.ai_structurer import analyze_selenium_error
+            current_url = driver.current_url
+            suggestion = analyze_selenium_error(error_trace, current_url, f"Importing XML for {activity_name_prefix}")
+            logger.warning(f"\n--- AI SELENIUM IMPROVEMENT SUGGESTION ---\n{suggestion}\n------------------------------------------\n")
+        except: pass
         return False
 
 def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: str, question_count: int, wait_time: int) -> bool:
@@ -304,7 +312,15 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
             return False
             
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
         logger.error(f"Failed to add random questions to {activity_name_prefix} quiz: {e}")
+        try:
+            from core.ai_structurer import analyze_selenium_error
+            current_url = driver.current_url
+            suggestion = analyze_selenium_error(error_trace, current_url, f"Adding random questions for {activity_name_prefix}")
+            logger.warning(f"\n--- AI SELENIUM IMPROVEMENT SUGGESTION ---\n{suggestion}\n------------------------------------------\n")
+        except: pass
         return False
 
 def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10):
