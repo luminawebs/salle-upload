@@ -183,7 +183,7 @@ def run_docx_splitting_workflow(course_id: int):
 
         # Detect Activity
         # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD II", "ACTIVIDAD 4:"
-        if re.search(r'ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text and current_unit > 0:
+        if re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', text) and "ACTIVIDADES DE APRENDIZAJE" not in text and current_unit > 0:
             m = re.search(r'ACTIVIDAD\s+([\dIVXLCDM]+)', text)
             if m:
                 raw_activity_number = m.group(1)
@@ -214,8 +214,42 @@ def run_docx_splitting_workflow(course_id: int):
                     for td in next_tr.find_all('td'):
                         act_html_parts.append(td.decode_contents())
                     i += 1
-                
                 act_html = "".join(act_html_parts)
+                
+                # Extract Lecturas complementarias / Material de referencia from the activity HTML
+                act_soup_mat = BeautifulSoup(act_html, "html.parser")
+                header_mat = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and ('lecturas complementarias' in t.text.lower() or 'material de referencia' in t.text.lower()))
+                if header_mat:
+                    block_elem = header_mat
+                    while block_elem.parent and block_elem.parent.name not in ['td', 'body', 'div', 'tr', '[document]']:
+                        block_elem = block_elem.parent
+                    
+                    mat_parts = []
+                    # Get activity title
+                    title_tag = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and re.search(r'ACTIVIDAD\s+[\dIVXLCDM]+', t.text, re.IGNORECASE))
+                    if title_tag:
+                        act_title = title_tag.text.strip()
+                    else:
+                        act_title = f"Actividad {raw_activity_number}"
+                    mat_parts.append(f"<h4>{act_title}</h4>")
+                    mat_parts.append(str(block_elem))
+                    
+                    for sibling in block_elem.find_next_siblings():
+                        if sibling.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
+                            break
+                        mat_parts.append(str(sibling))
+                    
+                    mat_html_append = "".join(mat_parts)
+                    unit_num = current_unit if current_unit > 0 else 1
+                    mat_file = os.path.join(output_dirs["material"], f"Material_de_referencia_U{unit_num}.html")
+                    mode = "a" if os.path.exists(mat_file) else "w"
+                    with open(mat_file, mode, encoding="utf-8") as f:
+                        f.write(mat_html_append)
+                    logger.info(f"  ✓ Extracted Material de referencia for '{act_title}'")
+                    logger.info(f"    - Appended to: {os.path.basename(mat_file)} (Unidad {unit_num})")
+                    logger.debug(f"    - Content length: {len(mat_html_append)} characters")
+                else:
+                    logger.debug(f"  - No 'Lecturas complementarias' or 'Material de referencia' found for Actividad {raw_activity_number}")
                 
                 act_soup = BeautifulSoup(act_html, "html.parser")
                 
@@ -244,32 +278,9 @@ def run_docx_splitting_workflow(course_id: int):
                 with open(os.path.join(output_dirs["actividades"], f"actividad{current_activity}.html"), "w", encoding="utf-8") as f:
                     f.write(act_html_transformed)
                 logger.info(f"  ✓ Extracted actividad{current_activity}.html")
-
-        # Detect Material de Referencia (Lecturas complementarias)
-        elif "LECTURAS COMPLEMENTARIAS" in text or "MATERIAL DE REFERENCIA" in text:
-            mat_html_parts = []
-            for td in tr.find_all('td'):
-                mat_html_parts.append(td.decode_contents())
-                
-            i += 1
-            while i < len(trs):
-                next_tr = trs[i]
-                next_text = next_tr.get_text().strip().upper()
-                if re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) or next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA") or next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"):
-                    i -= 1
-                    break
-                for td in next_tr.find_all('td'):
-                    mat_html_parts.append(td.decode_contents())
-                i += 1
-                
-            mat_html = "".join(mat_html_parts)
-            unit_num = current_unit if current_unit > 0 else 1
-            mat_file = os.path.join(output_dirs["material"], f"Material_de_referencia_U{unit_num}.html")
-            mode = "a" if os.path.exists(mat_file) else "w"
-            with open(mat_file, mode, encoding="utf-8") as f:
-                f.write(mat_html)
-            logger.info(f"  ✓ Appended to Material_de_referencia_U{unit_num}.html")
-        
+        else:
+            # Not a unit, not an activity.
+            pass
         i += 1
 
     logger.info("  ✓ DOCX splitting workflow completed.")
