@@ -223,6 +223,11 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             if has_respuesta and not any(li.find(['ol', 'ul']) for li in lis):
                 current_stem = None
                 current_options = []
+                current_feedback_html = ""
+                current_correct_feedback_html = ""
+                current_incorrect_feedback_html = ""
+                active_feedback_type = None
+                
                 for li in lis:
                     text = li.get_text(strip=True)
                     html = process_image_src(li.decode_contents(), course_id)
@@ -230,25 +235,52 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     
                     is_stem = False
                     is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
-                    if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
-                        is_stem = True
-                    elif re.match(r'^\d+\.\s+', text):
-                        is_stem = True
-                    elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text):
-                        is_stem = True
+                    
+                    is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
+                    
+                    if not is_feedback_header:
+                        if text.startswith('¿') or text.endswith('?'):
+                            is_stem = True
+                        elif text.endswith(':') and not active_feedback_type:
+                            is_stem = True
+                        elif re.match(r'^\d+\.\s+', text):
+                            is_stem = True
+                        elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text) and not active_feedback_type:
+                            is_stem = True
                         
                     if is_stem:
                         if current_stem and current_options:
-                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
+                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
                             q_num += 1
                         current_stem = html
                         current_options = []
+                        current_feedback_html = ""
+                        current_correct_feedback_html = ""
+                        current_incorrect_feedback_html = ""
+                        active_feedback_type = None
                     else:
-                        if current_stem:
-                            current_options.append((html, text))
+                        if is_feedback_header:
+                            if "correcta" in text.lower() and "incorrecta" not in text.lower(): active_feedback_type = "correct"
+                            elif "incorrecta" in text.lower(): active_feedback_type = "incorrect"
+                            else: active_feedback_type = "general"
+                            
+                            clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html).strip()
+                            if clean_html:
+                                if active_feedback_type == "correct": current_correct_feedback_html += clean_html
+                                elif active_feedback_type == "incorrect": current_incorrect_feedback_html += clean_html
+                                else: current_feedback_html += clean_html
+                        elif active_feedback_type:
+                            if active_feedback_type == "correct": current_correct_feedback_html += ("<br>" if current_correct_feedback_html else "") + html
+                            elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html
+                            else: current_feedback_html += ("<br>" if current_feedback_html else "") + html
+                        elif current_stem:
+                            if not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
+                                current_stem += "<br>" + html
+                            else:
+                                current_options.append((html, text))
                 
                 if current_stem and current_options:
-                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
+                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
                     q_num += 1
 
         if not xml_questions:
@@ -257,6 +289,11 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             if has_respuesta:
                 current_stem = None
                 current_options = []
+                current_feedback_html = ""
+                current_correct_feedback_html = ""
+                current_incorrect_feedback_html = ""
+                active_feedback_type = None
+                
                 for p in paragraphs:
                     text = p.get_text(strip=True)
                     html = process_image_src(p.decode_contents(), course_id)
@@ -267,25 +304,51 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     
                     is_stem = False
                     is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
-                    if text.startswith('¿') or text.endswith('?') or text.endswith(':'):
-                        is_stem = True
-                    elif re.match(r'^\d+\.\s+', text):
-                        is_stem = True
-                    elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text):
-                        is_stem = True
+                    
+                    is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
+                    
+                    if not is_feedback_header:
+                        if text.startswith('¿') or text.endswith('?'):
+                            is_stem = True
+                        elif text.endswith(':') and not active_feedback_type:
+                            is_stem = True
+                        elif re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE):
+                            is_stem = True
+                        elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text) and not active_feedback_type:
+                            is_stem = True
                         
                     if is_stem:
                         if current_stem and current_options:
-                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
+                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
                             q_num += 1
                         current_stem = html
                         current_options = []
+                        current_feedback_html = ""
+                        current_correct_feedback_html = ""
+                        current_incorrect_feedback_html = ""
+                        active_feedback_type = None
                     else:
-                        if current_stem:
-                            current_options.append((html, text))
+                        if is_feedback_header:
+                            if "correcta" in text.lower() and "incorrecta" not in text.lower(): active_feedback_type = "correct"
+                            elif "incorrecta" in text.lower(): active_feedback_type = "incorrect"
+                            else: active_feedback_type = "general"
                             
+                            clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html).strip()
+                            if clean_html:
+                                if active_feedback_type == "correct": current_correct_feedback_html += clean_html
+                                elif active_feedback_type == "incorrect": current_incorrect_feedback_html += clean_html
+                                else: current_feedback_html += clean_html
+                        elif active_feedback_type:
+                            if active_feedback_type == "correct": current_correct_feedback_html += ("<br>" if current_correct_feedback_html else "") + html
+                            elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html
+                            else: current_feedback_html += ("<br>" if current_feedback_html else "") + html
+                        elif current_stem:
+                            if not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
+                                current_stem += "<br>" + html
+                            else:
+                                current_options.append((html, text))
                 if current_stem and current_options:
-                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False)
+                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
                     q_num += 1
 
     # FALLBACK LOGIC
@@ -298,9 +361,9 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 if not p.find_parent(["p", "li"]):
                     lines.append((text, process_image_src(p.decode_contents(), course_id)))
                     
-        # Split by 'Pregunta N:'
+        # Split by 'Pregunta N:' or 'Pregunta N.'
         lines_text = '\n'.join([t for t, h in lines])
-        questions = re.split(r'(?i)^(Pregunta\s+(\d+):?)\s*$', lines_text, flags=re.MULTILINE)
+        questions = re.split(r'(?i)^(Pregunta\s+(\d+)[\.:]?)\s*$', lines_text, flags=re.MULTILINE)
         
         if len(questions) >= 3:
             for i in range(1, len(questions), 3):
@@ -315,15 +378,47 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 if not body_lines:
                     continue
                     
-                stem_text = body_lines[0]
-                stem_html = stem_text # Fallback doesn't easily map back to html without complex indexing
-                options_lines = body_lines[1:]
+                stem_lines = []
+                options_lines = []
+                found_options = False
+                for line in body_lines:
+                    # Detect start of options or feedbacks
+                    if re.match(r'^=?[A-Ea-e][\.\)]\s*', line) or line.lower().startswith('verdadero') or line.lower().startswith('falso') or line.lower().startswith('explicaci') or line.lower().startswith('retroalimentaci'):
+                        found_options = True
+                    if found_options:
+                        options_lines.append(line)
+                    else:
+                        stem_lines.append(line)
+                
+                stem_html = "<br>".join(stem_lines)
                 
                 options = []
+                current_feedback_text = ""
+                current_correct_feedback_text = ""
+                current_incorrect_feedback_text = ""
+                active_feedback_type = None
+
                 for opt_line in options_lines:
-                    if opt_line.lower().startswith("explicación:") or opt_line.lower().startswith("explicacion:"):
-                        break
+                    is_feedback_header = opt_line.lower().startswith("explicaci") or opt_line.lower().startswith("retroalimentaci")
+                    
+                    if is_feedback_header:
+                        if "correcta" in opt_line.lower() and "incorrecta" not in opt_line.lower(): active_feedback_type = "correct"
+                        elif "incorrecta" in opt_line.lower(): active_feedback_type = "incorrect"
+                        else: active_feedback_type = "general"
                         
+                        clean_text = re.sub(r'(?i)^(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*', '', opt_line).strip()
+                        if clean_text:
+                            if active_feedback_type == "correct": current_correct_feedback_text += clean_text
+                            elif active_feedback_type == "incorrect": current_incorrect_feedback_text += clean_text
+                            else: current_feedback_text += clean_text
+                        continue
+                        
+                    if active_feedback_type:
+                        if active_feedback_type == "correct": current_correct_feedback_text += ("<br>" if current_correct_feedback_text else "") + opt_line
+                        elif active_feedback_type == "incorrect": current_incorrect_feedback_text += ("<br>" if current_incorrect_feedback_text else "") + opt_line
+                        else: current_feedback_text += ("<br>" if current_feedback_text else "") + opt_line
+                        continue
+
                     if re.search(r'\([xX]\)$', opt_line):
                         is_correct = True
                         opt_text = re.sub(r'\([xX]\)$', '', opt_line).strip()
@@ -341,7 +436,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 except ValueError:
                     q_num_padded = q_num
                     
-                add_question(q_num_padded, stem_html, options, False, False)
+                add_question(q_num_padded, stem_html, options, False, False, current_feedback_text, current_correct_feedback_text, current_incorrect_feedback_text)
                 q_num += 1
 
     # VALIDATION LOGIC

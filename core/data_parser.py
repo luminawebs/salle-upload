@@ -201,10 +201,7 @@ def run_docx_splitting_workflow(course_id: int):
                     
                     stop_conditions = [
                         re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
-                        next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA"),
-                        next_text.startswith("INFORMACIÓN PARA EL EQUIPO") or next_text.startswith("INFORMACION PARA EL EQUIPO"),
-                        next_text.startswith("EQUIPO DE PRODUCCI"),
-                        next_text.startswith("ENCUENTRO VIRTUAL")
+                        next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA")
                     ]
                     
                     if any(stop_conditions):
@@ -245,7 +242,7 @@ def run_docx_splitting_workflow(course_id: int):
                     mode = "a" if os.path.exists(mat_file) else "w"
                     with open(mat_file, mode, encoding="utf-8") as f:
                         f.write(mat_html_append)
-                    logger.info(f"  ✓ Extracted Material de referencia for '{act_title}'")
+                    logger.info(f"  ✓ SUCCESS: Extracted 'Lecturas complementarias' (Material de referencia) for '{act_title}'")
                     logger.info(f"    - Appended to: {os.path.basename(mat_file)} (Unidad {unit_num})")
                     logger.debug(f"    - Content length: {len(mat_html_append)} characters")
                 else:

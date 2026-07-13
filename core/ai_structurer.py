@@ -39,7 +39,7 @@ Raw HTML to parse:
 """
     try:
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -103,7 +103,7 @@ Focus strictly on how to improve the Selenium code (e.g., "Add an Explicit Wait 
 """
     try:
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt
         )
         return response.text.strip()

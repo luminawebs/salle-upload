@@ -140,9 +140,10 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
         
     # Set Title
     name_input = wait.until(EC.presence_of_element_located((By.ID, "id_name")))
-    name_input.clear()
-    name_input.send_keys(f"Material de referencia Unidad {unidad_num}")
-    
+    driver.execute_script("arguments[0].value = '';", name_input)
+    name_input.send_keys(f"Lecturas complementarias")
+    driver.execute_script("arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", name_input)
+
     # Build Content
     video_html = '<video class="nomediaplugin" crossorigin="anonymous" autoplay="autoplay" loop="loop" muted="true">   <source src="https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/materialesdeestudio.mp4">   RPLCMNT  </video>'
     

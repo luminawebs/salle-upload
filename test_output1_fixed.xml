@@ -8,12 +8,6 @@
     <questiontext format="html">
       <text><![CDATA[¿Cuál es la mejor lectura inicial del conflicto?]]></text>
     </questiontext>
-    <correctfeedback format="html">
-      <text><![CDATA[Correcto. Los conflictos por la tierra y el territorio deben leerse desde una perspectiva compleja, considerando actores, historia del conflicto, usos, tensiones y reglas institucionales.]]></text>
-    </correctfeedback>
-    <incorrectfeedback format="html">
-      <text><![CDATA[La lectura del conflicto de tierras exige superar una comprensión puramente privada o policiva; los conflictos agrarios involucran dimensiones históricas, sociales, institucionales y territoriales.]]></text>
-    </incorrectfeedback>
     <defaultgrade>1.0000000</defaultgrade>
     <penalty>0.3333333</penalty>
     <hidden>0</hidden>
@@ -42,12 +36,6 @@
     <questiontext format="html">
       <text><![CDATA[¿Qué revela esto sobre el conflicto de tierras?]]></text>
     </questiontext>
-    <correctfeedback format="html">
-      <text><![CDATA[Correcto. La conflictividad agraria en Colombia está ligada a procesos históricos de colonización, concentración, despojo y respuestas institucionales fallidas.]]></text>
-    </correctfeedback>
-    <incorrectfeedback format="html">
-      <text><![CDATA[La literatura sobre conflictos por la tierra muestra que no son fenómenos aislados, sino expresiones de procesos históricos persistentes.]]></text>
-    </incorrectfeedback>
     <defaultgrade>1.0000000</defaultgrade>
     <penalty>0.3333333</penalty>
     <hidden>0</hidden>
@@ -76,12 +64,6 @@
     <questiontext format="html">
       <text><![CDATA[¿Qué concepto resulta más adecuado?]]></text>
     </questiontext>
-    <correctfeedback format="html">
-      <text><![CDATA[Correcto. Se trata de un conflicto agrario y territorial, no de una simple controversia patrimonial.]]></text>
-    </correctfeedback>
-    <incorrectfeedback format="html">
-      <text><![CDATA[Cuando la disputa incluye permanencia, uso, agua, identidad y reconocimiento, ya no basta una categoría contractual o patrimonial.]]></text>
-    </incorrectfeedback>
     <defaultgrade>1.0000000</defaultgrade>
     <penalty>0.3333333</penalty>
     <hidden>0</hidden>
@@ -110,9 +92,6 @@
     <questiontext format="html">
       <text><![CDATA[<strong>Pregunta 4</strong>. ]]></text>
     </questiontext>
-    <incorrectfeedback format="html">
-      <text><![CDATA[La opción A conduce a la parálisis e ignora los mecanismos disponibles. La opción B es ilegal y contradice los principios del estado de derecho. La opción D no reconoce la posibilidad de derechos de uso como alternativa válida e inmediata.]]></text>
-    </incorrectfeedback>
     <defaultgrade>1.0000000</defaultgrade>
     <penalty>0.3333333</penalty>
     <hidden>0</hidden>
@@ -141,12 +120,6 @@
     <questiontext format="html">
       <text><![CDATA[Un investigador concluye que, para comprender un conflicto de tierras, deben analizarse eventos, escaladas, descensos, actores, regulaciones y contextos. ¿Qué enfoque está aplicando?]]></text>
     </questiontext>
-    <correctfeedback format="html">
-      <text><![CDATA[Correcto. El enfoque dinámico del conflicto permite identificar hitos, actores, regulaciones y momentos de escalamiento o transformación.<br><em>N/A.</em><br><strong>Información para el equipo de producción de la DEE</strong><br><strong>Elija la Herramienta de la plataforma virtual para el diseño de la actividad </strong>(Marque con una X): <br><strong>Lecturas complementarias </strong><br>Lozano Botache, R., González Afanador, J. M., &amp; Osma, D. M. (2009). Los derechos de propiedad sobre la tierra: reglas de juego y cambios en su institucionalidad. Revista Lebret. Recuperado de material compartido: <a href="https://dialnet.unirioja.es/servlet/articulo?codigo=5983151">https://dialnet.unirioja.es/servlet/articulo?codigo=5983151</a> <br>Jácome Rocha, A. I., Yaulema Rodríguez, M. C., Lanchi Prado, P. G., &amp; Bonilla Chango, M. J. (2025). Instituciones de Derecho Civil aplicadas a los conflictos de tierras y a las acciones posesorias: propiedad y posesión. Prometeo Conocimiento Científico, 5(1). <a href="https://doi.org/10.55204/pcc.v5i1.e105">https://doi.org/10.55204/pcc.v5i1.e105</a> <br>Hurtado, M., &amp; Pereira, C. (2011). Legitimidad empresarial, conflicto de tierras y producción palmera en Colombia. Revista de Relaciones Internacionales, Estrategia y Seguridad, 6, 91–110. <a href="https://doi.org/10.18359/ries.106">https://doi.org/10.18359/ries.106</a> ]]></text>
-    </correctfeedback>
-    <incorrectfeedback format="html">
-      <text><![CDATA[Los conflictos por la tierra requieren enfoques dinámicos que permitan captar su evolución y no solo una fotografía estática.]]></text>
-    </incorrectfeedback>
     <defaultgrade>1.0000000</defaultgrade>
     <penalty>0.3333333</penalty>
     <hidden>0</hidden>

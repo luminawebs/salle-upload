@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es la mejor lectura inicial del conflicto?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. Los conflictos por la tierra y el territorio deben leerse desde una perspectiva compleja, considerando actores, historia del conflicto, usos, tensiones y reglas institucionales.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La lectura del conflicto de tierras exige superar una comprensión puramente privada o policiva; los conflictos agrarios involucran dimensiones históricas, sociales, institucionales y territoriales.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Es exclusivamente un litigio civil entre propietarios.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. Es un conflicto agrario y territorial que exige analizar actores, trayectorias, usos y regulaciones.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Es un problema administrativo sin relevancia social.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Es una disputa que solo puede resolverse mediante policía.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué revela esto sobre el conflicto de tierras?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. La conflictividad agraria en Colombia está ligada a procesos históricos de colonización, concentración, despojo y respuestas institucionales fallidas.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La literatura sobre conflictos por la tierra muestra que no son fenómenos aislados, sino expresiones de procesos históricos persistentes.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Que los conflictos son accidentales y coyunturales.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. Que los conflictos agrarios tienen raíces estructurales e históricas.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Que la violencia no se relaciona con la tierra.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Que el derecho privado es suficiente para resolverlos.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué concepto resulta más adecuado?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. Se trata de un conflicto agrario y territorial, no de una simple controversia patrimonial.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[Cuando la disputa incluye permanencia, uso, agua, identidad y reconocimiento, ya no basta una categoría contractual o patrimonial.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Conflicto exclusivamente contractual.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Conflicto de orden público menor.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. Conflicto agrario y territorial.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Conflicto sucesoral.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>Pregunta 4</strong>. ]]></text>
+    </questiontext>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La opción A conduce a la parálisis e ignora los mecanismos disponibles. La opción B es ilegal y contradice los principios del estado de derecho. La opción D no reconoce la posibilidad de derechos de uso como alternativa válida e inmediata.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Desistir del proceso porque en zonas de conflicto armado ningún mecanismo jurídico puede garantizar la seguridad de la tenencia.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Optar por la invasión directa del predio como mecanismo de facto para luego solicitar la extinción de dominio.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. Gestionar el arrendamiento con opción de compra como derecho de uso, asegurando derechos de propiedad claros en el contrato, ambiente social seguro y acompañamiento financiero, tal como lo propone el neo-institucionalismo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Esperar a que el Estado compre y redistribuya las tierras antes de iniciar cualquier gestión privada.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 5</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un investigador concluye que, para comprender un conflicto de tierras, deben analizarse eventos, escaladas, descensos, actores, regulaciones y contextos. ¿Qué enfoque está aplicando?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. El enfoque dinámico del conflicto permite identificar hitos, actores, regulaciones y momentos de escalamiento o transformación.<br><em>N/A.</em><br><strong>Información para el equipo de producción de la DEE</strong><br><strong>Elija la Herramienta de la plataforma virtual para el diseño de la actividad </strong>(Marque con una X): <br><strong>Lecturas complementarias </strong><br>Lozano Botache, R., González Afanador, J. M., &amp; Osma, D. M. (2009). Los derechos de propiedad sobre la tierra: reglas de juego y cambios en su institucionalidad. Revista Lebret. Recuperado de material compartido: <a href="https://dialnet.unirioja.es/servlet/articulo?codigo=5983151">https://dialnet.unirioja.es/servlet/articulo?codigo=5983151</a> <br>Jácome Rocha, A. I., Yaulema Rodríguez, M. C., Lanchi Prado, P. G., &amp; Bonilla Chango, M. J. (2025). Instituciones de Derecho Civil aplicadas a los conflictos de tierras y a las acciones posesorias: propiedad y posesión. Prometeo Conocimiento Científico, 5(1). <a href="https://doi.org/10.55204/pcc.v5i1.e105">https://doi.org/10.55204/pcc.v5i1.e105</a> <br>Hurtado, M., &amp; Pereira, C. (2011). Legitimidad empresarial, conflicto de tierras y producción palmera en Colombia. Revista de Relaciones Internacionales, Estrategia y Seguridad, 6, 91–110. <a href="https://doi.org/10.18359/ries.106">https://doi.org/10.18359/ries.106</a> <br><strong>UNIDAD DIDÁCTICA 2.</strong><br><strong>Régimen jurídico de la propiedad rural, uso, tenencia y conflictos de acceso</strong><br><strong>Descripción general </strong><br>Resumen<br>Preguntas orientadoras]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[Los conflictos por la tierra requieren enfoques dinámicos que permitan captar su evolución y no solo una fotografía estática.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Un enfoque exclusivamente dogmático.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. Un enfoque dinámico de análisis del conflicto.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Un enfoque puramente registral.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Un enfoque exclusivamente económico.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 6  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 6</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una familia campesina ocupa y explota un predio rural desde hace años, pero no tiene título formal. Un tercero alega propiedad con base en documento privado reciente. ¿Qué problema jurídico central aparece?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. La controversia gira en torno a la calidad, fundamento y oponibilidad de los derechos sobre el predio rural.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[Los conflictos rurales no se agotan en la simple ausencia de título; exigen examinar la calidad del derecho alegado y la relación material con la tierra.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Solo un asunto penal.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Una controversia irrelevante porque no hay título registrado.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. Un conflicto sobre la calidad y fundamento de los derechos sobre la tierra.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Un asunto exclusivamente ambiental.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 7</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>Pregunta 2</strong>. ]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. Camacho Bonilla (2020) muestra que la identidad colectiva territorial y la protección del ecosistema rural fueron los dos pilares discursivos que cohesionaron la resistencia de la comunidad de Usme y le dieron legitimidad frente a las instituciones.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La opción A es incorrecta porque la comunidad de Los Soches no basó su defensa en títulos individuales, sino en el valor colectivo del territorio. Las opciones C y D no aparecen como argumentos centrales en el análisis de Camacho Bonilla.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. La legalidad de sus títulos de propiedad individual sobre los predios rurales de Usme.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. La identidad territorial y la protección medioambiental como discursos que estructuraron su resistencia colectiva.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. La amenaza de acudir ante instancias internacionales de derechos humanos si se ejecutaban los proyectos de expansión.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. El apoyo de partidos políticos de oposición al gobierno distrital de turno.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 8  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 8</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál afirmación es más adecuada?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. Los derechos de propiedad y la redistribución deben analizarse de manera conjunta para comprender la conflictividad rural.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La literatura reciente insiste en que no basta formalizar; importa también la calidad, distribución y sostenibilidad institucional de los derechos.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. La formalización siempre elimina la desigualdad.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. La desigualdad no guarda relación con la calidad de los derechos de propiedad.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. La calidad institucional de los derechos de propiedad y la redistribución son variables centrales.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. La tierra solo importa como activo económico privado.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 9  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 9</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>Pregunta 4</strong>. ]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. El Consejo de Estado determinó que las certificaciones del Ministerio del Interior no garantizaron una verificación real en campo del territorio tradicional y ancestral Sikuani, vulnerando el derecho a la consulta previa consagrado en el Convenio 169 de la OIT.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La opción B es incorrecta porque Ecopetrol sí contaba con licencia ambiental (Resolución 0233 de 2001). La opción C exagera el alcance constitucional: la Constitución no prohíbe la actividad extractiva, sino que exige consulta previa. La opción D es factualmente incorrecta.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. Que las certificaciones del Ministerio del Interior se basaron en revisión cartográfica sin verificación en campo, desconociendo el territorio ancestral y tradicional de la etnia Sikuani.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Que la empresa Ecopetrol no tenía licencia ambiental válida para operar en la zona del campo Rubiales.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Que la Constitución de 1991 prohíbe cualquier actividad extractiva en territorios cercanos a resguardos indígenas.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Que los Sikuani habían registrado notarialmente su derecho de propiedad sobre el área del campo Rubiales antes de 2001.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 10  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 10</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué obligación jurídica y metodológica impone el precedente del caso Rubiales (Consejo de Estado, 2016) a este funcionario, según Rebellón y Dávila (2024)?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. El Consejo de Estado (2016) estableció que las certificaciones de presencia étnica requieren verificación real en campo, con acompañamiento interinstitucional y de las comunidades, para garantizar el reconocimiento del territorio ancestral y tradicional, independientemente de la existencia de un resguardo formalmente constituido.<br>N/A<br><strong>Información para el equipo de producción de la DEE</strong><br><strong>Elija la Herramienta de la plataforma virtual para el diseño de la actividad </strong>(Marque con una X): <br><strong>Lecturas complementarias</strong><br>Lozano Botache, R., González Afanador, J. M., &amp; Osma, D. M. (2009). <a href="https://dialnet.unirioja.es/descarga/articulo/5983151.pdf">Los derechos de propiedad sobre la tierra: reglas de juego y cambios en su institucionalidad. Revista Lebret. Recuperado de material compartido</a><br>Gutiérrez-Sanín, F., Peña-Huertas, R. del P., Crosby-Jiménez, C., Triana-Ancinez, B., &amp; Valencia-Herrera, M. A. (2024). Land Property Rights and Redistribution – the Evidence from Colombia. Journal of Latin American Studies, 56(4), 632–655. Recuperado de base de datos compartida. <a href="https://www.cambridge.org/core/journals/journal-of-latin-american-studies/article/abs/land-property-rights-and-redistribution-the-evidence-from-colombia/C36B01EB0665B45CF232D802FBCB5E8A">https://www.cambridge.org/core/journals/journal-of-latin-american-studies/article/abs/land-property-rights-and-redistribution-the-evidence-from-colombia/C36B01EB0665B45CF232D802FBCB5E8A</a> <br>Arango, L., Arias Vanegas, J., Borras Jr., S. M., Coronado, S., Díaz, I., Fajardo, D., Ojeda, D., Peña-Huertas, R. del P., Rojas Herrera, I., &amp; Serrano, A. (2025). <a href="https://www.tandfonline.com/doi/full/10.1080/03066150.2025.2554822">https://www.tandfonline.com/doi/full/10.1080/03066150.2025.2554822</a><br>Camacho Bonilla, A. (2020). <a href="http://www.scielo.org.co/scielo.php?script=sci_arttext&amp;pid=S2462-91032020000200015">"No vendemos la tierra". Oposiciones y contestaciones de una zona rural frente al conflicto de expansión urbana de Bogotá</a>. Revista Ciudades, Estados y Política, 7(2), 15-30. DOI: 10.15446/cep. [Base de datos Unisalle — Revistas UNAL].<br>Rebellón Sánchez, F. A. y Dávila Cruz, C. A. (2024). Indígenas Sikuani e hidrocarburos: tensiones, conflictos, uso y tenencia de la tierra del bloque petrolífero Rubiales. Ciencia Latina, 8(1), 295-313. <a href="https://doi.org/10.37811/cl_rcm.v8i1.9421">https://doi.org/10.37811/cl_rcm.v8i1.9421</a> <br><a href="https://prometeojournal.com.ar/index.php/prometeo/es/article/view/105">Jácome Rocha, A. I., Yaulema Rodríguez, M. C., Lanchi Prado, P. G., &amp; Bonilla Chango, M. J. (2025). Instituciones de Derecho Civil aplicadas a los conflictos de tierras y a las acciones posesorias: propiedad y posesión</a>. Prometeo Conocimiento Científico, 5(1). <a href="https://doi.org/10.55204/pcc.v5i1.e105">https://doi.org/10.55204/pcc.v5i1.e105</a> <br>Villarreal Escallón, J. M. (2021). <a href="https://www.tdx.cat/bitstream/handle/10803/673131/jmve1de1.pdf?locale-attribute=es">Conflicto armado, acaparamiento de tierras y reforma agraria: análisis del caso colombiano desde la perspectiva de la ecología política de la guerra</a> [Tesis doctoral]. Universitat Autònoma de Barcelona. Recuperado de base de datos compartida<br><a href="https://revistas.javeriana.edu.co/index.php/papelpol/article/view/24686">Torres Mora, Á. G. (2020). Acumulación primitiva y acaparamiento de tierras en Colombia.</a> Papel Político, 25. Recuperado de material compartido}<br><strong>UNIDAD DIDÁCTICA 3.</strong><br><strong>Proceso administrativo y judicial de restitución de tierras</strong><br><strong>Descripción general </strong><br>Resumen<br>Preguntas orientadoras]]></text>
+    </correctfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Certificar ausencia de comunidades si no existe resguardo formalmente constituido, pues sin título colectivo no hay derecho reconocido.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. Realizar visitas de campo exhaustivas al territorio de influencia del proyecto, con acompañamiento del ICANH y de las propias comunidades, para verificar presencia, sitios de uso y territorio tradicional antes de emitir cualquier certificación.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Consultar únicamente los registros cartográficos y bases de datos del DANE para determinar si existe presencia étnica en la zona.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Delegar la verificación a la empresa interesada en el proyecto para que realice el diagnóstico de presencia étnica.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 11  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 11</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una familia afirma haber salido de su predio por amenazas de un grupo armado y busca iniciar el trámite de restitución. ¿Cuál es el primer componente clave del proceso?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. El proceso comienza con una fase administrativa de recepción, análisis y eventual inclusión en el registro correspondiente.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La restitución de tierras tiene una fase inicial de carácter administrativo antes del tránsito a la fase judicial.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. La ejecución de sentencia penal.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. La fase administrativa de inscripción y análisis del caso.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. La expropiación inmediata.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. El desalojo de ocupantes por vía policiva.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 12  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 12</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>Pregunta 2</strong>. ]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. Hurtado y Pereira (2011) muestran que la legalidad formal no es suficiente para gestionar la legitimidad en contextos con escrutinio internacional. Los clientes de Daabon —empresas con compromisos éticos— evaluaban sus acciones con criterios que van más allá del cumplimiento legal colombiano.]]></text>
+    </correctfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A. El Grupo Daabon fue declarado ilegal por los tribunales colombianos, lo que generó el rechazo internacional.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. Actuar dentro de los estándares legales locales no fue suficiente para mantener la legitimidad ante grupos de interés internacionales que evaluaban sus acciones con estándares sociales y éticos más exigentes.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. El problema fue exclusivamente de comunicación: si Daabon hubiera informado mejor a sus clientes, habría mantenido su legitimidad sin necesidad de cambiar sus prácticas.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[D. La tensión se resolvió completamente cuando el INCODER anuló el proceso de extinción de dominio en favor del Consorcio El Labrador.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 13  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 13</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En un proceso de restitución, el expediente revela no solo despojo, sino trayectorias de vulnerabilidad, exclusión y violencia. ¿Qué muestra esto sobre la restitución?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. Los expedientes de restitución son claves para reconstruir contextos de vulnerabilidad, despojo y relación con la tierra.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[Los procesos de restitución son también espacios de reconstrucción del daño y del contexto de victimización.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Que es solo un trámite registral.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Que es una forma de reparación desligada del conflicto.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. Que los expedientes judiciales permiten reconstruir contextos victimizantes complejos.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Que la historia de vida no es relevante.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 14  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 14</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un análisis sostiene que la restitución tiene potencial si se articula con objetivos de justicia social agraria. ¿Qué significa esto?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. La restitución no debe verse solo como corrección individual, sino como instrumento con potencial de justicia social agraria.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La restitución puede tener potencial transformador si se conecta con objetivos redistributivos y de justicia agraria.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Que basta con devolver formalmente un título.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B. Que la restitución puede contribuir a corregir desigualdades estructurales.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[C. Que no requiere políticas complementarias.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Que se agota en la reparación simbólica.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 15  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 15</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una mujer víctima de despojo encuentra barreras estatales para la aplicación efectiva de normas que priorizan su caso. ¿Qué evidencia esto?]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[Correcto. El caso muestra una brecha entre el mandato jurídico de protección y su materialización institucional.<br>N/A Esta actividad es autoevaluativa con retroalimentación inmediata en la plataforma.<br><strong>Información para el equipo de producción de la DEE</strong><br><strong>Elija la Herramienta de la plataforma virtual para el diseño de la actividad </strong>(Marque con una X): <br><strong>Lecturas complementarias</strong><br>Rojas-Páez, G., &amp; Guzmán-Rincón, A.-M. (2016). ¿Más allá de la justicia correctiva?: potencialidades de la restitución de tierras en la superación de los conflictos armados. Opinión Jurídica, 15(29), 21–41. Recuperado de material compartido: <a href="http://www.scielo.org.co/scielo.php?pid=S1692-25302016000100002&amp;script=sci_arttext">http://www.scielo.org.co/scielo.php?pid=S1692-25302016000100002&amp;script=sci_arttext</a> <br>Delgado Barón, M. (2015). Las víctimas del conflicto armado colombiano en la Ley de Víctimas y Restitución de Tierras: apropiación y resignificación de una categoría jurídica. Perfiles Latinoamericanos, 23(46), 121–145. <a href="https://www.scielo.org.mx/scielo.php?pid=S0188-76532015000200005&amp;script=sci_abstract&amp;tlng=pt">https://www.scielo.org.mx/scielo.php?pid=S0188-76532015000200005&amp;script=sci_abstract&amp;tlng=pt</a> <br>Peña Huertas, R. del P., &amp; Zárate Acosta, L. M. (2025). Guerra, mujeres y restitución: un análisis del impacto del conflicto armado en la relación de las mujeres con la tierra a través de los procesos de restitución en Caquetá (Colombia). Análisis Político, 110, 210–226. <a href="http://www.scielo.org.co/scielo.php?pid=S0121-47052025000100210&amp;script=sci_arttext">http://www.scielo.org.co/scielo.php?pid=S0121-47052025000100210&amp;script=sci_arttext</a> <br>Hurtado, M., &amp; Pereira, C. (2011). Legitimidad empresarial, conflicto de tierras y producción palmera en Colombia. Revista de Relaciones Internacionales, Estrategia y Seguridad, 6, 91–110. <a href="https://doi.org/10.18359/ries.106">https://doi.org/10.18359/ries.106</a> <br><strong>ACTIVIDAD 4. Evaluación final: análisis integral de caso de restitución y conflicto territorial</strong><br>Apreciado/a estudiante,<br>A través de esta actividad evaluable, de manera individual, construirá un dictamen jurídico-analítico sobre un caso de conflicto de tierras. Para iniciar, revise los materiales de las tres unidades del curso, con especial atención en: <br>Luego de haber revisado los materiales, proceda a elaborar su dictamen siguiendo estos pasos:<br>Como producto de la actividad, entrega a través de este medio un informe jurídico-analítico final con título, introducción, desarrollo, conclusiones y referencias. Recuerde aplicar normas APA vigentes.<br>El dictamen debe tener una extensión de 2.500 a 3.500 palabras, excluidas referencias bibliográficas. Entréguelo a través de esta tarea en formato PDF. Prepara tu dictamen para sustentarlo en el encuentro virtual que indique el docente. <br>Criterios de desempeño<br><strong>Puntos</strong><br>Identifica con precisión los instrumentos normativos aplicables al caso y los articula coherentemente con los hechos descritos.]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[El reconocimiento normativo de prioridades o enfoques diferenciales no asegura por sí mismo una implementación efectiva.]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A. Que el enfoque diferencial ya opera sin restricciones.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B. Que la formalidad jurídica siempre garantiza efectividad.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[C. Que persisten brechas entre reconocimiento normativo y aplicación real.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[D. Que la restitución no tiene dimensión de género.]]></text>
+    </answer>
+  </question>
+</quiz>
