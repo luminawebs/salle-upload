@@ -274,7 +274,7 @@ export default function MoodleEngineView({ setActiveTab }) {
         setStatus('Failed');
         setCurrentTaskLabel('La ejecución se ha detenido por un error.');
       }
-      
+
       if (lower.includes("proceso detenido por el usuario")) {
         localHasFailed = true;
         setStatus('Failed');
@@ -663,9 +663,9 @@ export default function MoodleEngineView({ setActiveTab }) {
                 <div ref={logsEndRef} />
               </div>
             </div>
-            
+
             <div className="flex justify-end mt-4 shrink-0">
-              <button 
+              <button
                 onClick={handleDownloadLogs}
                 className="flex items-center px-4 py-2 bg-[#1e2638] hover:bg-primary/90 text-white font-medium rounded-lg transition-colors shadow-sm text-sm border border-border hover:border-primary/50"
               >

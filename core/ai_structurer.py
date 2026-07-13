@@ -29,8 +29,8 @@ def extract_missing_questions(html_content: str) -> dict:
 You are an expert software developer and data parser.
 The following HTML contains quiz questions, but our regex/DOM parser failed to extract them.
 Your task is twofold:
-1. Extract the questions, options, and identify the correct option into the provided JSON schema.
-2. Analyze the raw HTML and provide a short, actionable explanation of why standard regex might have failed (e.g. "The correct answer has no marker, it's just bolded" or "The question number uses Roman numerals"). Suggest a specific Python Regex pattern or BeautifulSoup logic to fix our pre-LLM parser.
+1. Extract the questions, options, identify the correct option, and extract any correct/incorrect feedback (if provided) into the provided JSON schema.
+2. Analyze the raw HTML and provide a short, actionable explanation of why standard regex might have failed.
 
 Raw HTML to parse:
 ```html
@@ -52,6 +52,8 @@ Raw HTML to parse:
                                 "type": "OBJECT",
                                 "properties": {
                                     "stem_html": {"type": "STRING"},
+                                    "correct_feedback_html": {"type": "STRING", "description": "Feedback provided for the correct answer, if any."},
+                                    "incorrect_feedback_html": {"type": "STRING", "description": "Feedback provided for incorrect answers, if any."},
                                     "options": {
                                         "type": "ARRAY",
                                         "items": {

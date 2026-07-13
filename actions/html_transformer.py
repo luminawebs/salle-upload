@@ -74,7 +74,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
     xml_footer = '</quiz>\n'
     
-    def add_question(q_num, stem_html, options, is_true_false, correct_is_true, feedback_html=""):
+    def add_question(q_num, stem_html, options, is_true_false, correct_is_true, feedback_html="", correct_feedback_html="", incorrect_feedback_html=""):
         q_xml = f'<!-- question: {q_num}  -->\n'
         q_type = 'truefalse' if is_true_false else 'multichoice'
         q_xml += f'  <question type="{q_type}">\n'
@@ -82,6 +82,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{stem_html}]]></text>\n    </questiontext>\n'
         if feedback_html:
             q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{feedback_html}]]></text>\n    </generalfeedback>\n'
+        if correct_feedback_html:
+            q_xml += f'    <correctfeedback format="html">\n      <text><![CDATA[{correct_feedback_html}]]></text>\n    </correctfeedback>\n'
+        if incorrect_feedback_html:
+            q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{incorrect_feedback_html}]]></text>\n    </incorrectfeedback>\n'
         q_xml += '    <defaultgrade>1.0000000</defaultgrade>\n'
         q_xml += '    <penalty>0.3333333</penalty>\n'
         q_xml += '    <hidden>0</hidden>\n'
@@ -340,9 +344,16 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 add_question(q_num_padded, stem_html, options, False, False)
                 q_num += 1
 
+    # VALIDATION LOGIC
+    if xml_questions:
+        valid_q_count = sum(1 for q in xml_questions if 'fraction="100"' in q)
+        if valid_q_count < (len(xml_questions) / 2):
+            logger.warning(f"Parsed {len(xml_questions)} questions but only {valid_q_count} have correct answers. Discarding and invoking AI.")
+            xml_questions = []
+
     if not xml_questions:
         if "cuestionario" in html_content.lower() or "evaluemos" in html_content.lower() or "pregunta " in html_content.lower():
-            logger.info("Parsing found 0 questions but keywords indicate a questionnaire. Invoking AI Structurer fallback...")
+            logger.info("Parsing found 0 valid questions but keywords indicate a questionnaire. Invoking AI Structurer fallback...")
             try:
                 from core.ai_structurer import extract_missing_questions
                 ai_result = extract_missing_questions(html_content)
@@ -356,7 +367,9 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                         opts = []
                         for opt in q.get("options", []):
                             opts.append((opt.get("text_html", ""), opt.get("is_correct", False)))
-                        add_question(q_num_fallback, stem, opts, False, False)
+                        correct_fb = q.get("correct_feedback_html", "")
+                        incorrect_fb = q.get("incorrect_feedback_html", "")
+                        add_question(q_num_fallback, stem, opts, False, False, "", correct_fb, incorrect_fb)
                         q_num_fallback += 1
             except Exception as e:
                 logger.error(f"AI Structurer fallback failed: {e}")

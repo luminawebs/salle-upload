@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una familia afirma haber salido de su predio por amenazas de un grupo armado y busca iniciar el trámite de restitución. ¿Cuál es el primer componente clave del proceso?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La ejecución de sentencia penal.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[La fase administrativa de inscripción y análisis del caso.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La expropiación inmediata.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El desalojo de ocupantes por vía policiva.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[El Grupo Daabon es líder mundial en la producción de aceite de palma orgánico y contaba con certificaciones internacionales de sostenibilidad (ECOCERT, SA 8000, Fairtrade). Sin embargo, en 2009 su imagen internacional se deterioró gravemente por el desalojo de 123 familias campesinas de la finca Las Pavas (sur de Bolívar), lo que llevó a The Body Shop a terminar su relación comercial. ¿Cuál es la tensión central que identifica Hurtado y Pereira (2011) entre la legitimidad legal y la legitimidad social en el caso del Grupo Daabon?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El Grupo Daabon fue declarado ilegal por los tribunales colombianos, lo que generó el rechazo internacional.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Actuar dentro de los estándares legales locales no fue suficiente para mantener la legitimidad ante grupos de interés internacionales que evaluaban sus acciones con estándares sociales y éticos más exigentes.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El problema fue exclusivamente de comunicación: si Daabon hubiera informado mejor a sus clientes, habría mantenido su legitimidad sin necesidad de cambiar sus prácticas.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La tensión se resolvió completamente cuando el INCODER anuló el proceso de extinción de dominio en favor del Consorcio El Labrador.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En un proceso de restitución, el expediente revela no solo despojo, sino trayectorias de vulnerabilidad, exclusión y violencia. ¿Qué muestra esto sobre la restitución?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que es solo un trámite registral.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que es una forma de reparación desligada del conflicto.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Que los expedientes judiciales permiten reconstruir contextos victimizantes complejos.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que la historia de vida no es relevante.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un análisis sostiene que la restitución tiene potencial si se articula con objetivos de justicia social agraria. ¿Qué significa esto?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que basta con devolver formalmente un título.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Que la restitución puede contribuir a corregir desigualdades estructurales.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que no requiere políticas complementarias.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que se agota en la reparación simbólica.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 5</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una mujer víctima de despojo encuentra barreras estatales para la aplicación efectiva de normas que priorizan su caso. ¿Qué evidencia esto?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que el enfoque diferencial ya opera sin restricciones.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que la formalidad jurídica siempre garantiza efectividad.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Que persisten brechas entre reconocimiento normativo y aplicación real.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que la restitución no tiene dimensión de género.]]></text>
+    </answer>
+  </question>
+</quiz>

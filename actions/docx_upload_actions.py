@@ -398,13 +398,9 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                             content = f.read()
                             
                         # Transform the HTML
-                        from actions.html_transformer import transform_activity_html, extract_questions_from_html_to_gift, remove_questions_from_html
+                        from actions.html_transformer import transform_activity_html, remove_questions_from_html
                         
-                        gift_txt_path = os.path.join(actividades_dir, f"{activity_prefix}_questions.txt")
-                        questions_extracted = False
-                        
-                        if extract_questions_from_html_to_gift(content, gift_txt_path):
-                            content = remove_questions_from_html(content)
+                        content = remove_questions_from_html(content)
                         
                         content = transform_activity_html(content, course_id)
                             
