@@ -201,7 +201,9 @@ def run_docx_splitting_workflow(course_id: int):
                     
                     stop_conditions = [
                         re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
-                        next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA")
+                        next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA"),
+                        next_text.startswith("CUESTIONARIO"),
+                        next_text.startswith("EVALUACIÓN") or next_text.startswith("EVALUACION")
                     ]
                     
                     if any(stop_conditions):

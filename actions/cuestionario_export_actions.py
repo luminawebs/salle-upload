@@ -340,7 +340,9 @@ def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10
                 activity_prefix = f"ACTIVIDAD {act_num}"
                 
                 html_path = os.path.join(actividades_dir, filename)
-                xml_path = os.path.join(actividades_dir, f"{activity_prefix}_questions.xml")
+                questions_dir = os.path.join(base_dir, "questions")
+                os.makedirs(questions_dir, exist_ok=True)
+                xml_path = os.path.join(questions_dir, f"{activity_prefix}_questions.xml")
                 
                 # We need to extract the questions from HTML to create the XML file
                 with open(html_path, 'r', encoding='utf-8') as f:

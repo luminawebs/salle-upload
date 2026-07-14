@@ -231,7 +231,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 for li in lis:
                     text = li.get_text(strip=True)
                     html = process_image_src(li.decode_contents(), course_id)
-                    if not text: continue
+                    if not text and li.name not in ['img', 'table'] and not li.find(['img', 'table']):
+                        continue
                     
                     is_stem = False
                     is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
@@ -274,7 +275,9 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                             elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html
                             else: current_feedback_html += ("<br>" if current_feedback_html else "") + html
                         elif current_stem:
-                            if not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
+                            if not text:
+                                current_stem += "<br>" + html
+                            elif not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
                                 current_stem += "<br>" + html
                             else:
                                 current_options.append((html, text))
@@ -304,7 +307,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 for p in paragraphs:
                     text = p.get_text(strip=True)
                     html = process_image_src(p.decode_contents(), course_id)
-                    if not text: continue
+                    if not text and p.name not in ['img', 'table'] and not p.find(['img', 'table']):
+                        continue
                     
                     if len(text.split()) > 50: continue
                     if "cómo lo vamos a" in text.lower() or "qué vamos a" in text.lower(): continue
@@ -350,7 +354,9 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                             elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html
                             else: current_feedback_html += ("<br>" if current_feedback_html else "") + html
                         elif current_stem:
-                            if not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
+                            if not text:
+                                current_stem += "<br>" + html
+                            elif not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
                                 current_stem += "<br>" + html
                             else:
                                 current_options.append((html, text))
