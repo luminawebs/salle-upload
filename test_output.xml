@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>1.</strong> A class is analogous to a]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. blueprint <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. house]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. architect]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. field (or attribute)]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>2.</strong> This is a collection of programming statements that specify the attributes and methods that a particular type of object can have.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. class <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. method]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. parameter]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. instance]]></text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>3.</strong> This is a member of a class that holds data.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. method]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. instance]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. field (or attribute) <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. constructor]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>4.</strong> This key word causes an object to be created in memory.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. create]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. new <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. object]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. construct]]></text>
+    </answer>
+  </question>
+
+<!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 5</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>5.</strong> This is a method that gets a value from a class’s field (or attribute) but does not change it.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. accessor <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. constructor]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. void]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. mutator]]></text>
+    </answer>
+  </question>
+
+<!-- question: 6  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 6</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>6.</strong> This is a method that stores a value in a field (or attribute) or in some other way changes the value of a field (or attribute).]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. accessor]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. constructor]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. void]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[d. mutator <strong></strong>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 7</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>7.</strong> Two or more methods in a class may have the same name, as long as this is different.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. their return values]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. their access specifier]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. their signatures <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. their memory address]]></text>
+    </answer>
+  </question>
+
+<!-- question: 8  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 8</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>8.</strong> This key word is used to declare a named constant.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. constant]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. namedConstant]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. final <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. concrete]]></text>
+    </answer>
+  </question>
+
+<!-- question: 9  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 9</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>9.</strong> These characters mark the beginning of a multiline comment.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. //]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. /* <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. */]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. /**]]></text>
+    </answer>
+  </question>
+
+<!-- question: 10  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 10</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>10.</strong> These characters mark the beginning of a single-line comment.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. // <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. /*]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. */]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. /**]]></text>
+    </answer>
+  </question>
+
+<!-- question: 11  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 11</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>11.</strong> Which Scanner class method would you use to read a string as input?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. nextString]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. nextLine <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. readString]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. getLine]]></text>
+    </answer>
+  </question>
+
+<!-- question: 12  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 12</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>12.</strong> Which Scanner class method would you use to read a double as input?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. nextDouble <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. getDouble]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. readDouble]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. None of these; you cannot read a double with the Scanner class.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 13  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 13</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>13.</strong> You can use this class to display dialog boxes.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. JOptionPane <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Scanner]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. System]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[d. DialogBo]]></text>
+    </answer>
+  </question>
+
+<!-- question: 14  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 14</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>14.</strong> If you do not write a constructor for a class, this is automatically provided for the<br>class.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. accessor method]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. default instance]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. default constructor <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. predefined constructor]]></text>
+    </answer>
+  </question>
+
+<!-- question: 15  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 15</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>15.</strong> The if statement is an example of a]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. sequence structure]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. decision structure <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. pathway structure]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. class structure]]></text>
+    </answer>
+  </question>
+
+<!-- question: 16  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 16</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>16.</strong> &gt;, &lt;, and == are]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. relational operators <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. logical operators]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. conditional operators]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. arithmetic operators]]></text>
+    </answer>
+  </question>
+
+<!-- question: 17  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 17</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>17.</strong> &amp;&amp;, ||, and ! are]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. relational operators]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. logical operators <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. conditional operators]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. arithmetic operators]]></text>
+    </answer>
+  </question>
+
+<!-- question: 18  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 18</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>18.</strong> This section of a switch statement is branched to if none of the case values match the<br><em>testExpression</em>.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. else]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. default <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. case]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. otherwise]]></text>
+    </answer>
+  </question>
+
+<!-- question: 19  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 19</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>19.</strong> This type of loop always executes at least one time.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. while]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. do-while <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. for]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Nested loop]]></text>
+    </answer>
+  </question>
+
+<!-- question: 20  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 20</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>20.</strong> The while loop is this type of loop.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. pretest <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. posttest]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. prefi]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[d. postfi]]></text>
+    </answer>
+  </question>
+
+<!-- question: 21  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 21</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>21.</strong> Which of the following structures executes a statement or block if the expression is true, and it executes other statement or block if the expression is false?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. if else <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 22  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 22</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>22.</strong> Which of the following structures executes a statement or block if the expression is true, otherwise it does not execute anything.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. if else]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. if <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 23  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 23</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>23.</strong> Which of the following structures allows evaluating multiple expressions and only executes a statement or block for the first expression that is true. This structure is mutually exclusive.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. if else]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. if]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. if else if <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 24  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 24</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>24.</strong> Which of the following structures is a loop that evaluates its test expression before each repetition?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. while <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. do-while]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 25  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 25</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>25.</strong> This Loop at least once executes the instructions within the loop. Therefore, it evaluates its test expression after executing the loop statements.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. while]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. do-while <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 26  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 26</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>26.</strong> Which of the following structures is a loop that is controlled by a counter?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. while]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. do-while]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. for <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Nested loop]]></text>
+    </answer>
+  </question>
+
+<!-- question: 27  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 27</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>27.</strong> Which of the following structures is a loop that is inside another?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. while]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. do-while]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. for]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[d. Nested loop <strong></strong>]]></text>
+    </answer>
+  </question>
+</quiz>

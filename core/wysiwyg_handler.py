@@ -7,7 +7,7 @@ from selenium.common.exceptions import TimeoutException
 
 logger = logging.getLogger(__name__)
 
-def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, target_section: str = "descripcion") -> bool:
+def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, target_section: str = "descripcion", submit_form: bool = True) -> bool:
     """
     Injects HTML into the Moodle WYSIWYG editor (handles both TinyMCE and Atto).
     Specifically prioritized to handle sandbox_wysiwyg.html.
@@ -51,17 +51,7 @@ def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, tar
         # 3. Inject into TinyMCE if present (Sandbox uses this)
         textarea_id = textarea.get_attribute("id") if textarea else ""
         
-        try:
-            tinymce_iframe = driver.find_elements(By.CSS_SELECTOR, ".tox-edit-area__iframe")
-            if tinymce_iframe:
-                driver.switch_to.frame(tinymce_iframe[0])
-                body = driver.find_element(By.TAG_NAME, "body")
-                body.send_keys(Keys.CONTROL + "a")
-                body.send_keys(Keys.DELETE)
-                driver.switch_to.default_content()
-        except Exception:
-            driver.switch_to.default_content()
-            pass
+
             
         driver.execute_script(
             f"""
@@ -72,7 +62,7 @@ def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, tar
                     editor.setContent(arguments[0]);
                 }} else {{
                     // Fallback to first editor if specific one is not found
-                    if (tinymce.editors.length > 0) {{
+                    if (tinymce.editors && tinymce.editors.length > 0) {{
                         tinymce.editors[0].setContent(arguments[0]);
                     }}
                 }}
@@ -96,6 +86,9 @@ def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, tar
             pass
 
         time.sleep(0.5)
+
+        if not submit_form:
+            return True
 
         # 5. Submit form
         submit_btn = wait.until(
@@ -167,7 +160,7 @@ def extract_html_from_wysiwyg(driver, target_section: str = "descripcion") -> st
                 var editor = tinymce.get(editorId);
                 if (editor) {{
                     return editor.getContent();
-                }} else if (tinymce.editors.length > 0) {{
+                }} else if (tinymce.editors && tinymce.editors.length > 0) {{
                     return tinymce.editors[0].getContent();
                 }}
             }}

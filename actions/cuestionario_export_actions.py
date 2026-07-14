@@ -274,8 +274,8 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                             select_all.click()
                         except:
                             driver.execute_script("arguments[0].click();", select_all)
-                except Exception as e:
-                    logger.warning(f"[{activity_name_prefix}] Could not find or click 'Seleccionar todos': {e}")
+                except Exception:
+                    logger.warning(f"[{activity_name_prefix}] Could not find or click 'Seleccionar todos'. Proceeding with random selection.")
                     
             except Exception as e:
                 logger.warning(f"[{activity_name_prefix}] Could not select category in autocomplete: {e}")

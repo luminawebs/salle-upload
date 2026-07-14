@@ -207,10 +207,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     # FORMAT C LOGIC (Flat OL/UL or Flat P with marks)
     if not xml_questions:
         def is_correct_option(t):
-            return "(respuesta" in t.lower() or bool(re.search(r'(?i)[_\s]*x[_\s]*$', t.strip())) or t.strip().startswith('=')
+            return "(respuesta" in t.lower() or "(correct answer)" in t.lower() or bool(re.search(r'(?i)[_\s]*x[_\s]*$', t.strip())) or t.strip().startswith('=')
             
         def clean_option_html(h, t):
-            h = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', h)
+            h = re.sub(r'(?i)\s*\((respuesta(?: correcta)?|correct answer)\)', '', h)
             h = re.sub(r'(?i)[_\s]*x[_\s]*$', '', h)
             h = re.sub(r'^\s*=\s*', '', h)
             return h.strip()
@@ -284,7 +284,14 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     q_num += 1
 
         if not xml_questions:
-            paragraphs = soup.find_all(['p', 'div'])
+            elements = soup.find_all(['p', 'li', 'div', 'span', 'img', 'table'])
+            paragraphs = []
+            seen = set()
+            for el in elements:
+                if any(p in seen for p in el.parents):
+                    continue
+                seen.add(el)
+                paragraphs.append(el)
             has_respuesta = any(is_correct_option(p.get_text(strip=True)) for p in paragraphs)
             if has_respuesta:
                 current_stem = None
@@ -353,91 +360,100 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
 
     # FALLBACK LOGIC
     if not xml_questions:
-        paragraphs = soup.find_all(["p", "li", "div", "span"])
-        lines = []
-        for p in paragraphs:
-            text = p.get_text(strip=True)
-            if text:
-                if not p.find_parent(["p", "li"]):
-                    lines.append((text, process_image_src(p.decode_contents(), course_id)))
-                    
-        # Split by 'Pregunta N:' or 'Pregunta N.'
-        lines_text = '\n'.join([t for t, h in lines])
-        questions = re.split(r'(?i)^(Pregunta\s+(\d+)[\.:]?)\s*$', lines_text, flags=re.MULTILINE)
+        elements = soup.find_all(['p', 'li', 'div', 'span', 'img', 'table'])
+        nodes = []
+        seen = set()
+        for el in elements:
+            if any(p in seen for p in el.parents):
+                continue
+            seen.add(el)
+            nodes.append(el)
+            
+            
+        current_q_num = None
+        current_q_label = None
+        current_stem_html_parts = []
+        current_options = []
+        current_feedback_html = ""
+        current_correct_feedback_html = ""
+        current_incorrect_feedback_html = ""
+        active_feedback_type = None
         
-        if len(questions) >= 3:
-            for i in range(1, len(questions), 3):
-                if i + 2 >= len(questions):
-                    break
-                    
-                q_label = questions[i].strip()
-                old_q_num = questions[i+1].strip()
-                q_body = questions[i+2].strip()
-                
-                body_lines = [l.strip() for l in q_body.split('\n') if l.strip()]
-                if not body_lines:
-                    continue
-                    
-                stem_lines = []
-                options_lines = []
-                found_options = False
-                for line in body_lines:
-                    # Detect start of options or feedbacks
-                    if re.match(r'^=?[A-Ea-e][\.\)]\s*', line) or line.lower().startswith('verdadero') or line.lower().startswith('falso') or line.lower().startswith('explicaci') or line.lower().startswith('retroalimentaci'):
-                        found_options = True
-                    if found_options:
-                        options_lines.append(line)
-                    else:
-                        stem_lines.append(line)
-                
-                stem_html = "<br>".join(stem_lines)
-                
-                options = []
-                current_feedback_text = ""
-                current_correct_feedback_text = ""
-                current_incorrect_feedback_text = ""
-                active_feedback_type = None
-
-                for opt_line in options_lines:
-                    is_feedback_header = opt_line.lower().startswith("explicaci") or opt_line.lower().startswith("retroalimentaci")
-                    
-                    if is_feedback_header:
-                        if "correcta" in opt_line.lower() and "incorrecta" not in opt_line.lower(): active_feedback_type = "correct"
-                        elif "incorrecta" in opt_line.lower(): active_feedback_type = "incorrect"
-                        else: active_feedback_type = "general"
-                        
-                        clean_text = re.sub(r'(?i)^(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*', '', opt_line).strip()
-                        if clean_text:
-                            if active_feedback_type == "correct": current_correct_feedback_text += clean_text
-                            elif active_feedback_type == "incorrect": current_incorrect_feedback_text += clean_text
-                            else: current_feedback_text += clean_text
-                        continue
-                        
-                    if active_feedback_type:
-                        if active_feedback_type == "correct": current_correct_feedback_text += ("<br>" if current_correct_feedback_text else "") + opt_line
-                        elif active_feedback_type == "incorrect": current_incorrect_feedback_text += ("<br>" if current_incorrect_feedback_text else "") + opt_line
-                        else: current_feedback_text += ("<br>" if current_feedback_text else "") + opt_line
-                        continue
-
-                    if re.search(r'\([xX]\)$', opt_line):
-                        is_correct = True
-                        opt_text = re.sub(r'\([xX]\)$', '', opt_line).strip()
-                    elif opt_line.strip().startswith('='):
-                        is_correct = True
-                        opt_text = opt_line.strip()[1:].strip()
-                    else:
-                        is_correct = False
-                        opt_text = opt_line
-                        
-                    options.append((opt_text, is_correct))
-                    
+        def save_current_fallback_q():
+            nonlocal current_q_num, current_stem_html_parts, current_options, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html, xml_questions, q_num
+            if current_stem_html_parts and current_options:
+                stem_html = "<br>".join(current_stem_html_parts)
                 try:
-                    q_num_padded = int(old_q_num)
-                except ValueError:
+                    q_num_padded = int(current_q_num)
+                except (ValueError, TypeError):
                     q_num_padded = q_num
-                    
-                add_question(q_num_padded, stem_html, options, False, False, current_feedback_text, current_correct_feedback_text, current_incorrect_feedback_text)
+                add_question(q_num_padded, stem_html, current_options, False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
                 q_num += 1
+            current_stem_html_parts = []
+            current_options = []
+            current_feedback_html = ""
+            current_correct_feedback_html = ""
+            current_incorrect_feedback_html = ""
+            
+        for node in nodes:
+            text = node.get_text(strip=True)
+            html_str = process_image_src(str(node), course_id)
+            
+            # If node is empty and not an image/table, skip
+            if not text and node.name not in ['img', 'table'] and not node.find(['img', 'table']):
+                continue
+                
+            # Check for new question start
+            q_match = re.match(r'(?i)^(Pregunta\s+(\d+)[\.:]?)\s*$', text)
+            if q_match:
+                save_current_fallback_q()
+                current_q_label = q_match.group(1)
+                current_q_num = q_match.group(2)
+                active_feedback_type = None
+                continue
+                
+            if current_q_num is None:
+                continue
+                
+            # Detect options or feedback
+            is_feedback_header = text.lower().startswith("explicaci") or text.lower().startswith("retroalimentaci")
+            is_option = re.match(r'^=?[A-Ea-e][\.\)]\s*', text) or text.lower().startswith('verdadero') or text.lower().startswith('falso') or re.search(r'\([xX]\)$', text)
+            
+            if is_feedback_header:
+                if "correcta" in text.lower() and "incorrecta" not in text.lower(): active_feedback_type = "correct"
+                elif "incorrecta" in text.lower(): active_feedback_type = "incorrect"
+                else: active_feedback_type = "general"
+                
+                clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html_str).strip()
+                if clean_html:
+                    if active_feedback_type == "correct": current_correct_feedback_html += clean_html
+                    elif active_feedback_type == "incorrect": current_incorrect_feedback_html += clean_html
+                    else: current_feedback_html += clean_html
+                continue
+                
+            if active_feedback_type:
+                if active_feedback_type == "correct": current_correct_feedback_html += ("<br>" if current_correct_feedback_html else "") + html_str
+                elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html_str
+                else: current_feedback_html += ("<br>" if current_feedback_html else "") + html_str
+                continue
+                
+            if is_option:
+                is_correct = False
+                if re.search(r'\([xX]\)$', text):
+                    is_correct = True
+                    html_str = re.sub(r'\([xX]\)(?=[^>]*(?:<|$))', '', html_str).strip()
+                elif text.strip().startswith('='):
+                    is_correct = True
+                    html_str = re.sub(r'^\s*=\s*(?=[^>]*(?:<|$))', '', html_str).strip()
+                elif "(respuesta" in text.lower() or "(correct answer)" in text.lower():
+                    is_correct = True
+                    html_str = re.sub(r'(?i)\s*\((?:respuesta(?: correcta)?|correct answer)\)', '', html_str).strip()
+                
+                current_options.append((html_str, is_correct))
+            else:
+                current_stem_html_parts.append(html_str)
+                
+        save_current_fallback_q()
 
     # VALIDATION LOGIC
     if xml_questions:
@@ -526,9 +542,9 @@ def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
         a_tag.string = link_text
         
         if link_text.lower() == "(disponible aquí)":
-            existing_style = a_tag.get('style', '')
-            existing_style = re.sub(r'(?i)color\s*:[^;]+;?', '', existing_style)
-            a_tag['style'] = f"color: #0000EE; {existing_style}".strip()
+            a_tag['style'] = "color: rgb(0, 0, 238); font-size: 13px;"
+            a_tag['rel'] = "noopener"
+            a_tag['data-asw-orgfontsize'] = "13"
         
         # Clean up preceding text like "Disponible" or colon before the link
         prev_node = a_tag.previous_sibling
@@ -548,8 +564,10 @@ def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
     def repl(match):
         url = match.group(2)
         href = url if url.startswith('http') else 'https://' + url
-        style_attr = ' style="color: #0000EE;"' if link_text.lower() == "(disponible aquí)" else ''
-        return f' <a href="{href}" target="_blank" rel="noopener"{style_attr}>{link_text}</a>'
+        if link_text.lower() == "(disponible aquí)":
+            return f' <a style="color: rgb(0, 0, 238); font-size: 13px;" href="{href}" target="_blank" rel="noopener" data-asw-orgfontsize="13">{link_text}</a>'
+        else:
+            return f' <a href="{href}" target="_blank" rel="noopener">{link_text}</a>'
 
     plain_urls_converted = 0
     from bs4 import BeautifulSoup as BS  # Ensure BeautifulSoup is available
@@ -571,6 +589,21 @@ def format_urls_in_html(html_content: str, link_text: str = "(disponible aquí)"
         return html_content
     soup = BS(html_content, 'html.parser')
     format_urls_in_soup(soup, link_text)
+    return str(soup)
+
+def format_typography_in_html(html_content: str) -> str:
+    from bs4 import BeautifulSoup as BS
+    if not html_content or not html_content.strip():
+        return html_content
+    soup = BS(html_content, 'html.parser')
+    for tag in soup.find_all(["p", "li"]):
+        if tag.find("img"):
+            continue
+        if not tag.find("span", style=TEXT_SPAN_STYLE):
+            new_span = soup.new_tag("span", style=TEXT_SPAN_STYLE)
+            for child in list(tag.contents):
+                new_span.append(child.extract())
+            tag.append(new_span)
     return str(soup)
 
 def transform_activity_html(html_content: str, course_id: int = None) -> str:

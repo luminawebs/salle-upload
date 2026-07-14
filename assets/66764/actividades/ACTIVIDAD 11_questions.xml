@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>1. </strong>¿La siguiente imagen a cuál de los cuatro (4) elementos fundamentales de la programación orientada a objetos corresponde?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. Polimorfismo. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Abstracción.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Encapsulamiento.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Herencia.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>2. </strong>¿La siguiente imagen a cuál de los cuatro (4) elementos fundamentales de la programación orientada a objetos corresponde?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Polimorfismo.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. Abstracción.<strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Encapsulamiento.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Herencia.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>3. </strong>¿La siguiente imagen a cuál de los cuatro (4) elementos fundamentales de la programación orientada a objetos corresponde?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Polimorfismo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Abstracción.<strong> </strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Encapsulamiento.<strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Herencia.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>4. </strong>¿La siguiente imagen a cuál de los cuatro (4) elementos fundamentales de la programación orientada a objetos corresponde?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Polimorfismo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Abstracción.<strong> </strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Encapsulamiento.<strong> </strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[d. Herencia.<strong></strong>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 5</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>5.</strong> ¿Cuál de las siguientes descripciones define mejor el concepto <em>clase</em> en la programación orientada a objetos?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Es un concepto similar al de <em>array </em>o vector]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Es un tipo particular de variable]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Es un modelo o plantilla a partir de la cual creamos objetos <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Es una categoría de datos ordenada secuencialmente]]></text>
+    </answer>
+  </question>
+
+<!-- question: 6  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 6</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>6.</strong> ¿Qué elementos definen a un objeto?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Su nombre y tipo]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. Sus atributos y sus métodos <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. La forma en que establece comunicación e intercambia mensajes]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Su interfaz y los eventos asociados]]></text>
+    </answer>
+  </question>
+
+<!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 7</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>7.</strong> ¿Cuál es la diferencia entre clase y objeto?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Una clase es una representación imaginaria de objetos de un mismo tipo mientras que un objeto es un componente de la clase]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. Una clase es la representación abstracta de objetos de un mismo tipo mientras que un objeto es una instanciación de una clase<strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Una clase y un objeto son lo mismo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Un objeto es una representación abstracta de una clase mientras que la clase es una instanciación de un objeto.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 8  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 8</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>8.</strong> ¿Qué es el encapsulamiento?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Es el mecanismo por el cual desprotegemos la información de un objeto permitiendo su acceso de forma directa]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Es el mecanismo por el cual podemos acceder a los atributos y métodos de una clase <strong><em>A</em></strong> en una clase <strong><em>B</em></strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Es el mecanismo por el cual protegemos la información de un objeto permitiendo su acceso a través de sus métodos. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Es el mecanismo por el cual podemos heredar los atributos y métodos de una clase <strong><em>A</em></strong> en una clase <strong><em>B</em></strong>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 9  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 9</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>9.</strong> ¿Cuál es el miembro de una clase que guarda datos o información?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. método]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. instancia]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. propiedad o atributo <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. constructor]]></text>
+    </answer>
+  </question>
+
+<!-- question: 10  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 10</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>10.</strong> ¿Cuál es la palabra clave para crear un objeto en Java?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. create]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. new <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. object]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. construct]]></text>
+    </answer>
+  </question>
+
+<!-- question: 11  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 11</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>11.</strong> &gt;, &lt;, y == son]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. operadores relacionales <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. operadores lógicos]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. operadores condicionales]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. operadores aritméticos]]></text>
+    </answer>
+  </question>
+
+<!-- question: 12  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 12</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>12.</strong> &amp;&amp;, ||, y ! son]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. operadores relacionales]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. operadores lógicos <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. operadores condicionales]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. operadores aritméticos]]></text>
+    </answer>
+  </question>
+
+<!-- question: 13  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 13</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>13.</strong> Esta estructura de decisión se usa cuando se tienen múltiples condiciones.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. if else]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. if else if <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. while]]></text>
+    </answer>
+  </question>
+
+<!-- question: 14  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 14</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>14. </strong>Esta estructura de decisión se usa cuando se tienen múltiples condiciones, pero la variable a evaluar debe ser tipo entero o char.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. if else]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else if]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[d. switch <strong></strong>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 15  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 15</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>15. </strong>¿Cuál de las siguientes estructuras ejecuta un bloque de instrucciones si la expresión es verdadera, y ejecuta otro bloque de instrucciones si la expresión es falsa?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. if]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. if else <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 16  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 16</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>16. </strong>¿Cuál de las siguientes estructuras ejecuta un bloque de instrucciones si la expresión es verdadera? De lo contrario, no ejecuta nada.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. if <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. if else]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. if else if]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. switch]]></text>
+    </answer>
+  </question>
+
+<!-- question: 17  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 17</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>17. </strong>¿Cuál de las siguientes estructuras es un ciclo que evalúa su condición antes de cada repetición?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. while <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. do-while]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. for]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. for anidado]]></text>
+    </answer>
+  </question>
+
+<!-- question: 18  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 18</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>18. </strong>Esta estructura de repetición al menos una vez ejecuta las instrucciones dentro del ciclo. Por lo tanto, evalúa su condición después de ejecutar las instrucciones del ciclo.]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. while]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. do-while <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. for]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. for anidado]]></text>
+    </answer>
+  </question>
+
+<!-- question: 19  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 19</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>19. </strong>¿Cuál de las siguientes estructuras es un ciclo controlado por un contador?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. while]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. do-while]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. for <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. for anidado]]></text>
+    </answer>
+  </question>
+
+<!-- question: 20  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 20</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>20. </strong>¿Cuál de las siguientes afirmaciones corresponden a la definición de un método constructor?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. El constructor se ejecuta cuando se crea un objeto de la clase que contiene a este método. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. Su objetivo principal es inicializar los atributos de la clase. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. El nombre del constructor debe ser el nombre de la clase. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. El constructor puede retornar un valor.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 21  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 21</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>21. </strong>¿Cuál de las siguientes afirmaciones corresponden a la definición de un método mutador?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. El nombre de estos métodos usualmente comienza con la palabra <strong>set</strong>. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. El nombre de estos métodos usualmente comienza con la palabra <strong>get.</strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Su función es cambiar el valor de uno o varios atributos de la clase. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Se usan para obtener el valor de un atributo de la clase.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 22  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 22</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>22. </strong>¿Cuál de las siguientes afirmaciones corresponden a la definición de un método de acceso?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. El nombre de estos métodos usualmente comienza con la palabra <strong>set</strong>.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. El nombre de estos métodos usualmente comienza con la palabra <strong>get.</strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Se usan para obtener el valor de un atributo de la clase. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Su función es cambiar el valor de uno o varios atributos de la clase.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 23  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 23</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>23. </strong>¿Cuál de las siguientes instrucciones en Java sirve para declarar un vector que guarde 20 números enteros?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. int[ ] numeros = new int[20]; <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. double[ ] enteros = new double[20];]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. int numeros = new int[20];]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. long[ ] numeros = new long[19];]]></text>
+    </answer>
+  </question>
+
+<!-- question: 24  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 24</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>24. </strong>Teniendo en cuenta la siguiente declaración: int valores[] = {2, 6, 10, 14};<br>La siguiente instrucción ¿qué imprime en pantalla? System.out.println(null, valores[2]);]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. 10 <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. 2]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. 6]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. 14]]></text>
+    </answer>
+  </question>
+
+<!-- question: 25  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 25</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>25. </strong>Teniendo en cuenta la siguiente declaración de un vector. ¿Cuántos elementos tiene el vector?<br>int valores[] = { 4, 7, 6, 8, 2 };]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. 5 <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. 4]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. 6]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. 3]]></text>
+    </answer>
+  </question>
+
+<!-- question: 26  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 26</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>26.</strong> ¿Cuál de los siguientes algoritmos son de ordenación?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. Burbuja <strong></strong>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[b. Shell <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Newton Raphson]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Bisección]]></text>
+    </answer>
+  </question>
+
+<!-- question: 27  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 27</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>27.</strong> A las listas lineales tipo Cola también se les conoce como:]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Listas LIFO]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Listas LIFO/LIFO]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Listas FIFO <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Listas FIFO/FIFO]]></text>
+    </answer>
+  </question>
+
+<!-- question: 28  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 28</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>28.</strong> Las Pilas tienen muchas aplicaciones en la vida real y en especial en el manejo de la información. ¿Cuál de los siguientes es el uso más común de las Pilas? ]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[a. Para almacenar cualquier tipo de dato de forma permanente.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Para solucionar problemas de tipo matemático.]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[c. Para controlar datos que se requiera conocer el orden de llegada. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Para el tratamiento de algunas expresiones matemáticas.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 29  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 29</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>29.</strong> La representación en memoria de las estructuras de datos tipo Colas se lleva a cabo por medio de: ]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. Listas enlazadas y arreglos. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Arreglos.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Listas doblemente enlazadas.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Listas enlazadas.]]></text>
+    </answer>
+  </question>
+
+<!-- question: 30  -->
+  <question type="multichoice">
+    <name>
+      <text>Pregunta 30</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<strong>30.</strong> Una estructura lineal tipo Lista enlazada se puede definir como: ]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[a. Una colección de nodos o elementos en donde cada uno contiene datos y un enlace al siguiente nodo. <strong></strong>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[b. Es una colección de nodos en donde cada uno tiene un enlace que apunta a cualquier otro nodo.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[c. Un tipo de dato numérico ordenados secuencialmente unidos por un enlace.]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[d. Una colección ordenada de elementos secuencialmente.]]></text>
+    </answer>
+  </question>
+</quiz>

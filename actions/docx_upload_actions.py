@@ -145,7 +145,9 @@ def upload_introduccion_general(driver, html_path, wait_time):
                 "inicio texto presentaci" in text or 
                 "presentación del espacio" in html or 
                 "presentacion del espacio" in html or 
-                "generalidades del curso" in html):
+                "generalidades del curso" in html or
+                "introducción general" in html or
+                "introduccion general" in html):
                 return activity
         return None
         
@@ -420,33 +422,3 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                             logger.error(f"Failed to inject {filename}")
                     time.sleep(2)
 
-    # Upload Material de referencia
-    if os.path.exists(material_dir):
-        for filename in sorted(os.listdir(material_dir)):
-            if filename.endswith(".html") and filename.startswith("Material_de_referencia_U"):
-                if "course/view.php" not in driver.current_url:
-                    navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
-                    
-                match = re.search(r'U(\d+)', filename)
-                if match:
-                    u_num = match.group(1)
-                    material_prefix = f"Material de referencia Unidad {u_num}"
-                    logger.info(f"Uploading {filename} to {material_prefix}...")
-                    
-                    if click_edit_for_activity(driver, material_prefix, wait_time):
-                        wait = WebDriverWait(driver, wait_time)
-                        submit_btn_css = "#id_submitbutton, #id_submitbutton2, input[name='submitbutton'], input[name='submitbutton2'], button[name='submitbutton']"
-                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, submit_btn_css)))
-                        
-                        file_path = os.path.join(material_dir, filename)
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                            
-                        # Use contenido for Pages
-                        success = inject_html_into_wysiwyg(driver, content, wait_time, target_section="contenido")
-                        if success:
-                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-                            logger.info(f"Success: {filename}")
-                        else:
-                            logger.error(f"Failed to inject {filename}")
-                    time.sleep(2)
