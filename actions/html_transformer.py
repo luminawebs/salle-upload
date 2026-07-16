@@ -99,6 +99,16 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             q_xml += '    <answernumbering>abc</answernumbering>\n'
             for opt_html, is_correct in options:
                 fraction = "100" if is_correct else "0"
+                
+                # Remove leading enumeration like a., b., c), etc.
+                opt_soup = BeautifulSoup(opt_html, 'html.parser')
+                first_text = opt_soup.find(string=True)
+                if first_text:
+                    new_text = re.sub(r'^\s*=?\s*[a-zA-Z][\.\)]\s*', '', first_text)
+                    if new_text != first_text:
+                        first_text.replace_with(new_text)
+                        opt_html = str(opt_soup)
+
                 q_xml += f'    <answer fraction="{fraction}" format="html">\n      <text><![CDATA[{opt_html}]]></text>\n    </answer>\n'
                 
         q_xml += '  </question>\n'
@@ -534,7 +544,7 @@ def remove_questions_from_html(html_content: str) -> str:
             
     return str(soup)
 
-def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
+def format_urls_in_soup(soup, link_text: str = "(Disponible aquí)"):
     """
     Finds all URLs (both in <a> tags and plain text) in the given BeautifulSoup object
     and formats them to open in a new tab with the specified link text.
@@ -589,7 +599,7 @@ def format_urls_in_soup(soup, link_text: str = "(disponible aquí)"):
     if plain_urls_converted > 0:
         logger.info(f"Converted {plain_urls_converted} plain-text URLs to '{link_text}' anchors.")
 
-def format_urls_in_html(html_content: str, link_text: str = "(disponible aquí)") -> str:
+def format_urls_in_html(html_content: str, link_text: str = "(Disponible aquí)") -> str:
     from bs4 import BeautifulSoup as BS
     if not html_content or not html_content.strip():
         return html_content
@@ -694,7 +704,7 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                     tag["src"] = base64_data
         
     # 3. Format URLs
-    format_urls_in_soup(soup, "(disponible aquí)")
+    format_urls_in_soup(soup, "(Disponible aquí)")
             
     # 4. Apply Typography (wrap text in spans)
     for tag in soup.find_all(["p", "li"]):

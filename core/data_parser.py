@@ -224,13 +224,6 @@ def run_docx_splitting_workflow(course_id: int):
                         block_elem = block_elem.parent
                     
                     mat_parts = []
-                    # Get activity title
-                    title_tag = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and re.search(r'ACTIVIDAD\s+[\dIVXLCDM]+', t.text, re.IGNORECASE))
-                    if title_tag:
-                        act_title = title_tag.text.strip()
-                    else:
-                        act_title = f"Actividad {raw_activity_number}"
-                    mat_parts.append(f"<h4>{act_title}</h4>")
                     mat_parts.append(str(block_elem))
                     
                     for sibling in block_elem.find_next_siblings():
@@ -238,15 +231,39 @@ def run_docx_splitting_workflow(course_id: int):
                             break
                         mat_parts.append(str(sibling))
                     
-                    mat_html_append = "".join(mat_parts)
+                    new_mat_html = "".join(mat_parts)
                     unit_num = current_unit if current_unit > 0 else 1
                     mat_file = os.path.join(output_dirs["material"], f"Material_de_referencia_U{unit_num}.html")
-                    mode = "a" if os.path.exists(mat_file) else "w"
-                    with open(mat_file, mode, encoding="utf-8") as f:
-                        f.write(mat_html_append)
-                    logger.info(f"  ✓ SUCCESS: Extracted 'Lecturas complementarias' (Material de referencia) for '{act_title}'")
-                    logger.info(f"    - Appended to: {os.path.basename(mat_file)} (Unidad {unit_num})")
-                    logger.debug(f"    - Content length: {len(mat_html_append)} characters")
+                    
+                    if os.path.exists(mat_file):
+                        with open(mat_file, "r", encoding="utf-8") as f:
+                            existing_html = f.read()
+                        
+                        existing_soup = BeautifulSoup(existing_html, "html.parser")
+                        new_soup = BeautifulSoup(new_mat_html, "html.parser")
+                        
+                        existing_list = existing_soup.find(['ul', 'ol'])
+                        new_lists = new_soup.find_all(['ul', 'ol'])
+                        
+                        if existing_list and new_lists:
+                            for new_list in new_lists:
+                                for li in new_list.find_all('li', recursive=False):
+                                    existing_list.append(li)
+                        else:
+                            # If we couldn't find lists to merge, just append non-header elements
+                            for tag in new_soup.contents:
+                                if tag.name and tag.name.lower() in ['p', 'strong'] and ('lecturas complementarias' in tag.get_text().lower() or 'material de referencia' in tag.get_text().lower()):
+                                    continue
+                                existing_soup.append(tag)
+                                
+                        with open(mat_file, "w", encoding="utf-8") as f:
+                            f.write(str(existing_soup))
+                    else:
+                        with open(mat_file, "w", encoding="utf-8") as f:
+                            f.write(new_mat_html)
+                            
+                    logger.info(f"  ✓ SUCCESS: Extracted 'Lecturas complementarias' (Material de referencia) for 'Actividad {raw_activity_number}'")
+                    logger.info(f"    - Merged into: {os.path.basename(mat_file)} (Unidad {unit_num})")
                 else:
                     logger.debug(f"  - No 'Lecturas complementarias' or 'Material de referencia' found for Actividad {raw_activity_number}")
                 

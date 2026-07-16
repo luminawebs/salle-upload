@@ -86,7 +86,7 @@ Bash
 
 cd /var/www/salle_automate
 git fetch
-git pull origin salle
+git pull origin salleAI
 sudo systemctl restart salle-automate
 
 If you update the visual frontend interface code:

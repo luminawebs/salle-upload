@@ -10,7 +10,7 @@ soup = BeautifulSoup(html, 'html.parser')
 
 for a_tag in soup.find_all("a"):
     a_tag['target'] = "_blank"
-    a_tag.string = "(disponible aquí)"
+    a_tag.string = "(Disponible aquí)"
     
     prev_node = a_tag.previous_sibling
     if prev_node and isinstance(prev_node, str):

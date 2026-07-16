@@ -68,7 +68,6 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
         wait.until(EC.presence_of_element_located((By.ID, "id_submitbutton2")))
     except:
         pass
-        
     video_html = '<p><video class="nomediaplugin" crossorigin="anonymous" autoplay="autoplay" loop="loop" muted="true">   <source src="https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/materialesdeestudio.mp4">   Materiales de Estudio.  </video></p>'
     
     success = inject_html_into_wysiwyg(driver, video_html, wait_time, target_section="intro")
@@ -145,7 +144,7 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
     driver.execute_script("arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", name_input)
 
     # Build Content
-    video_html = '<video class="nomediaplugin" crossorigin="anonymous" autoplay="autoplay" loop="loop" muted="true">   <source src="https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/materialesdeestudio.mp4">   RPLCMNT  </video>'
+    video_html = '<video class="nomediaplugin" crossorigin="anonymous" autoplay="autoplay" loop="loop" muted="true">   <source src="https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/Mat_Referencia.mp4">   RPLCMNT  </video>'
     
     html_file_path = os.path.join("assets", str(course_id), "material", f"Material_de_referencia_U{unidad_num}.html")
     file_content = ""
@@ -153,7 +152,7 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
         with open(html_file_path, "r", encoding="utf-8") as f:
             file_content = f.read()
             
-        file_content = format_urls_in_html(file_content, link_text="(disponible aquí)")
+        file_content = format_urls_in_html(file_content, link_text="(Disponible aquí)")
         file_content = format_typography_in_html(file_content)
     else:
         logger.warning(f"File not found: {html_file_path}")
