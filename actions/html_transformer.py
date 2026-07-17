@@ -510,7 +510,17 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             
             ai_end_time = time.perf_counter()
             
+            # Default values for reporting
+            is_perfect = False
+            corrections = []
+            additions = []
+            removals = []
+            metadata = {}
+            token_usage = {}
+            status_text = "SUCCESS"
+            
             if "error" in ai_result:
+                status_text = f"FAILED_FALLBACK ({ai_result['error']})"
                 logger.error(f"AI QA Layer returned error or exhausted retries: {ai_result['error']}. Falling back to standard parser.")
             else:
                 is_perfect = ai_result.get("is_perfect", False)
@@ -538,8 +548,6 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 for add in additions:
                     final_questions.append(add)
                 
-                ai_q_count = len(final_questions)
-                
                 # Rebuild xml_questions
                 xml_questions.clear()
                 structured_questions.clear()
@@ -566,13 +574,14 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     
                     add_question(q_num_rebuild, stem, opts, is_tf, correct_is_true, "", correct_fb, incorrect_fb)
                     q_num_rebuild += 1
-                
-                # Format QA Validation Report
-                p_time = parser_end_time - parser_start_time
-                a_time = ai_end_time - ai_start_time
-                t_time = p_time + a_time
-                
-                report = f"""
+            
+            # Format QA Validation Report
+            p_time = parser_end_time - parser_start_time
+            a_time = ai_end_time - ai_start_time
+            t_time = p_time + a_time
+            ai_q_count = len(xml_questions)
+            
+            report = f"""
 ================= QA VALIDATION REPORT =================
 Document: {course_id} / {document_name}
 Parser Questions: {standard_q_count}
@@ -587,17 +596,17 @@ Tables Detected: {metadata.get('tables_detected', False)} | Preserved: {metadata
 Model: {token_usage.get('model', 'N/A')}
 Input: {token_usage.get('input', 0)} | Output: {token_usage.get('output', 0)} | Cached: {token_usage.get('cached', 0)} | Total: {token_usage.get('total', 0)}
 Finish Reason: {token_usage.get('finish_reason', 'N/A')}
-Status: SUCCESS
+Status: {status_text}
 
 --- Timing ---
 Parser Time: {p_time:.2f}s
 AI Time: {a_time:.2f}s
 Total Time: {t_time:.2f}s
 ========================================================"""
-                logger.info(report)
-                
-                if metadata.get("warnings"):
-                    logger.warning(f"AI QA Warning: {metadata['warnings']}")
+            logger.info(report)
+            
+            if metadata.get("warnings"):
+                logger.warning(f"AI QA Warning: {metadata['warnings']}")
 
         except Exception as e:
             logger.error(f"AI Validation workflow failed: {e}. Falling back to standard parser output.")
