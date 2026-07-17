@@ -94,7 +94,7 @@ Bash
 
 cd /var/www/salle_automate
 git fetch
-git pull origin salle
+git pull origin salleAI
 cd frontend && npm run build
 
 
