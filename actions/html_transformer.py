@@ -63,22 +63,33 @@ def process_image_src(html_str, course_id=None):
             img['style'] = "max-width: 100%; height: auto;"
     return soup.decode_contents()
 
-def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None) -> int:
+def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
     """
     Finds questions in HTML (either via <ol> DOM structures or 'Pregunta N' blocks)
     and exports them to a Moodle XML file retaining full HTML.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
     xml_questions = []
+    structured_questions = []
     
     xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
     xml_footer = '</quiz>\n'
     
+    import time
+    parser_start_time = time.perf_counter()
+    
     def add_question(q_num, stem_html, options, is_true_false, correct_is_true, feedback_html="", correct_feedback_html="", incorrect_feedback_html=""):
+        q_dict = {
+            "stem_html": stem_html,
+            "options": [],
+            "correct_feedback_html": correct_feedback_html or feedback_html,
+            "incorrect_feedback_html": incorrect_feedback_html or feedback_html
+        }
+        
         q_xml = f'<!-- question: {q_num}  -->\n'
         q_type = 'truefalse' if is_true_false else 'multichoice'
         q_xml += f'  <question type="{q_type}">\n'
-        q_xml += f'    <name>\n      <text>Pregunta {q_num}</text>\n    </name>\n'
+        q_xml += f'    <name>\n      <text><![CDATA[{course_id}_{document_name}_q{q_num}]]></text>\n    </name>\n'
         q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{stem_html}]]></text>\n    </questiontext>\n'
         if feedback_html:
             q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{feedback_html}]]></text>\n    </generalfeedback>\n'
@@ -93,6 +104,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         if is_true_false:
             q_xml += f'    <answer fraction="{"100" if correct_is_true else "0"}" format="moodle_auto_format">\n      <text>true</text>\n    </answer>\n'
             q_xml += f'    <answer fraction="{"0" if correct_is_true else "100"}" format="moodle_auto_format">\n      <text>false</text>\n    </answer>\n'
+            q_dict["options"].append({"text_html": "true", "is_correct": correct_is_true})
+            q_dict["options"].append({"text_html": "false", "is_correct": not correct_is_true})
         else:
             q_xml += '    <single>true</single>\n'
             q_xml += '    <shuffleanswers>true</shuffleanswers>\n'
@@ -109,10 +122,12 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                         first_text.replace_with(new_text)
                         opt_html = str(opt_soup)
 
+                q_dict["options"].append({"text_html": opt_html, "is_correct": is_correct})
                 q_xml += f'    <answer fraction="{fraction}" format="html">\n      <text><![CDATA[{opt_html}]]></text>\n    </answer>\n'
                 
         q_xml += '  </question>\n'
         xml_questions.append(q_xml)
+        structured_questions.append(q_dict)
 
     q_num = 1
     
@@ -471,35 +486,121 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 
         save_current_fallback_q()
 
-    # VALIDATION LOGIC
-    if xml_questions:
-        valid_q_count = sum(1 for q in xml_questions if 'fraction="100"' in q)
-        if valid_q_count < (len(xml_questions) / 2):
-            logger.warning(f"Parsed {len(xml_questions)} questions but only {valid_q_count} have correct answers. Discarding and invoking AI.")
-            xml_questions = []
+    parser_end_time = time.perf_counter()
 
-    if not xml_questions:
-        if "cuestionario" in html_content.lower() or "evaluemos" in html_content.lower() or "pregunta " in html_content.lower():
-            logger.info("Parsing found 0 valid questions but keywords indicate a questionnaire. Invoking AI Structurer fallback...")
-            try:
-                from core.ai_structurer import extract_missing_questions
-                ai_result = extract_missing_questions(html_content)
-                if ai_result and ai_result.get("extracted_questions"):
-                    logger.info(f"AI Structurer successfully extracted {len(ai_result['extracted_questions'])} questions.")
-                    logger.warning(f"\n--- AI PRE-LLM PARSER IMPROVEMENT SUGGESTION ---\n{ai_result.get('code_improvement_feedback', '')}\n----------------------------------------------\n")
+    # VALIDATION LOGIC (AI QA Layer)
+    standard_q_count = len(xml_questions)
+    should_invoke_ai = False
+    
+    if standard_q_count > 0:
+        logger.info(f"Standard parser detected {standard_q_count} questions. Starting AI Validation...")
+        should_invoke_ai = True
+    elif "cuestionario" in html_content.lower() or "evaluemos" in html_content.lower() or "pregunta " in html_content.lower():
+        logger.info("Standard parser found 0 questions but keywords indicate a questionnaire. Starting AI Validation as fallback...")
+        should_invoke_ai = True
+
+    if should_invoke_ai:
+        ai_start_time = time.perf_counter()
+        try:
+            import json
+            from core.ai_structurer import validate_and_extract_questions
+            serialized_parser_output = json.dumps(structured_questions, ensure_ascii=False)
+            
+            ai_result = validate_and_extract_questions(html_content, serialized_parser_output, parsed_q_count=standard_q_count)
+            
+            ai_end_time = time.perf_counter()
+            
+            if "error" in ai_result:
+                logger.error(f"AI QA Layer returned error or exhausted retries: {ai_result['error']}. Falling back to standard parser.")
+            else:
+                is_perfect = ai_result.get("is_perfect", False)
+                corrections = ai_result.get("corrections", [])
+                additions = ai_result.get("additions", [])
+                removals = ai_result.get("removals", [])
+                metadata = ai_result.get("metadata", {})
+                token_usage = ai_result.get("token_usage", {})
+                
+                # Apply changes to structured_questions
+                final_questions = list(structured_questions)
+                
+                # Apply Removals first (descending to avoid index shifting)
+                for idx in sorted(removals, reverse=True):
+                    if 0 <= idx < len(final_questions):
+                        del final_questions[idx]
+                        
+                # Apply Corrections
+                for corr in corrections:
+                    idx = corr.get("index")
+                    if idx is not None and 0 <= idx < len(final_questions):
+                        final_questions[idx] = corr.get("corrected_question", final_questions[idx])
+                        
+                # Apply Additions
+                for add in additions:
+                    final_questions.append(add)
+                
+                ai_q_count = len(final_questions)
+                
+                # Rebuild xml_questions
+                xml_questions.clear()
+                structured_questions.clear()
+                
+                q_num_rebuild = 1
+                for q in final_questions:
+                    stem = q.get("stem_html", "")
+                    opts = []
+                    for opt in q.get("options", []):
+                        opts.append((opt.get("text_html", ""), opt.get("is_correct", False)))
+                    correct_fb = q.get("correct_feedback_html", "")
+                    incorrect_fb = q.get("incorrect_feedback_html", "")
                     
-                    q_num_fallback = 1
-                    for q in ai_result["extracted_questions"]:
-                        stem = q.get("stem_html", "")
-                        opts = []
-                        for opt in q.get("options", []):
-                            opts.append((opt.get("text_html", ""), opt.get("is_correct", False)))
-                        correct_fb = q.get("correct_feedback_html", "")
-                        incorrect_fb = q.get("incorrect_feedback_html", "")
-                        add_question(q_num_fallback, stem, opts, False, False, "", correct_fb, incorrect_fb)
-                        q_num_fallback += 1
-            except Exception as e:
-                logger.error(f"AI Structurer fallback failed: {e}")
+                    # Determine true/false based on options
+                    is_tf = False
+                    correct_is_true = False
+                    if len(opts) == 2:
+                        opt_texts_lower = [o[0].lower() for o in opts]
+                        if any(x in o for o in opt_texts_lower for x in ['verdadero', 'true']) and any(x in o for o in opt_texts_lower for x in ['falso', 'false']):
+                            is_tf = True
+                            for opt_text, is_corr in opts:
+                                if is_corr and ('verdadero' in opt_text.lower() or 'true' in opt_text.lower()):
+                                    correct_is_true = True
+                    
+                    add_question(q_num_rebuild, stem, opts, is_tf, correct_is_true, "", correct_fb, incorrect_fb)
+                    q_num_rebuild += 1
+                
+                # Format QA Validation Report
+                p_time = parser_end_time - parser_start_time
+                a_time = ai_end_time - ai_start_time
+                t_time = p_time + a_time
+                
+                report = f"""
+================= QA VALIDATION REPORT =================
+Document: {course_id} / {document_name}
+Parser Questions: {standard_q_count}
+AI Validated Questions: {ai_q_count}
+Questions Added: {len(additions)}
+Questions Corrected: {len(corrections)}
+Questions Removed: {len(removals)}
+Images Detected: {metadata.get('images_detected', False)} | Preserved: {metadata.get('images_preserved', False)}
+Tables Detected: {metadata.get('tables_detected', False)} | Preserved: {metadata.get('tables_preserved', False)}
+
+--- Token & API Metrics ---
+Model: {token_usage.get('model', 'N/A')}
+Input: {token_usage.get('input', 0)} | Output: {token_usage.get('output', 0)} | Cached: {token_usage.get('cached', 0)} | Total: {token_usage.get('total', 0)}
+Finish Reason: {token_usage.get('finish_reason', 'N/A')}
+Status: SUCCESS
+
+--- Timing ---
+Parser Time: {p_time:.2f}s
+AI Time: {a_time:.2f}s
+Total Time: {t_time:.2f}s
+========================================================"""
+                logger.info(report)
+                
+                if metadata.get("warnings"):
+                    logger.warning(f"AI QA Warning: {metadata['warnings']}")
+
+        except Exception as e:
+            logger.error(f"AI Validation workflow failed: {e}. Falling back to standard parser output.")
 
     if not xml_questions:
         return 0
