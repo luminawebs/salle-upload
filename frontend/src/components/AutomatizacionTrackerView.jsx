@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import NavigationTabs from './NavigationTabs';
 import GlobalSettingsPanel from './GlobalSettingsPanel';
+import AutomationControls from './AutomationControls';
 import { AutomationContext } from '../context/AutomationContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -289,6 +290,9 @@ export default function AutomatizacionTrackerView({ setActiveTab }) {
               <input type="file" accept=".docx" className="hidden" onChange={handleUpload} />
             </label>
           </div>
+          
+          <AutomationControls />
+
 
           {/* Bottom Panel: Monitor de Ejecución */}
           <div className="bg-surface rounded-xl border border-border p-4 shadow-sm">

@@ -8,34 +8,12 @@ from actions.moodle_actions import MoodleAutomation, dismiss_moodle_error_overla
 from actions.format_actions import set_buttons_format
 from actions.course_format_initial_actions import set_custom_sections_format
 from actions.course_format_final_actions import set_final_buttons_format
-from actions.section_actions import (
-    enable_edit_mode,
-    rename_all_sections,
-    update_all_section_descriptions,
-)
-from actions.infografia.infografia_actions import run_infografia_export_workflow
-from actions.depositphotos_actions import run_depositphotos_workflow
-from actions.foro import run_foro_export_workflow
-from actions.actualidad_actions import run_actualidad_export_workflow
-from actions.preguntas_actions import run_preguntas_workflow
-from actions.recursos_apoyo_actions import run_recursos_apoyo_workflow
-from actions.recursos_apoyo_edit_actions import run_recursos_apoyo_edit_classes_workflow
-from actions.actividad_actions import run_actividad_export_workflow
-from actions.trabajo_actions import run_trabajo_export_workflow
-from actions.evidencia_actions import run_evidencia_export_workflow
-from actions.actividad_recursos_actions import run_actividad_recursos_workflow
-from actions.actividad_rubrica_actions import run_actividad_rubrica_workflow
-from actions.puntos_extras_actions import run_puntos_extras_workflow
-from actions.recuperacion_actions import run_recuperacion_export_workflow
+from actions.section_actions import enable_edit_mode
 from actions.docx_upload_actions import run_docx_upload_workflow
 from actions.cuestionario_export_actions import run_cuestionario_export_workflow
 from actions.unidades_intro_actions import upload_unidades_intro_for_course
 from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
-from actions.recursos_semana_actions import run_recursos_html_export_workflow
-from actions.configuracion_final_actions import run_configuracion_final_workflow
-from actions.competencias_actions import run_ajuste_competencias_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
-from actions.materiales_estudio_actions import run_materiales_estudio_workflow
 from config.settingsSALLE import ConfigSALLE as Config
 
 # Setup base logging for the application
@@ -71,20 +49,7 @@ def main():
     courses_to_process = Config.COURSES_TO_PROCESS
 
     infografia_base_url = None
-    if getattr(Config, "ENABLE_INFOGRAFIA_EXPORT", False):
-        infografia_base_url = input("Please provide the base URL for infografia images (e.g., https://contenidomoodle.s3.amazonaws.com/UNIMINUTO_VIRTUAL/pregrado/COMMARINT/): ")
-        if not infografia_base_url.endswith('/'):
-            infografia_base_url += '/'
-
     actividad_source = "local"
-    if getattr(Config, "ENABLE_ACTIVIDAD_EXPORT", False):
-        while True:
-            ans = input("Are the activities 'local' or 'remote' on VIR - ACTIVIDAD (From each week 2,4,6,8)? (local/remote): ").strip().lower()
-            if ans in ["local", "remote"]:
-                actividad_source = ans
-                break
-            print("Please enter 'local' or 'remote'.")
-
     logger.info("Initializing WebDriver...")
     driver = get_driver()
 
@@ -140,31 +105,8 @@ def main():
                     or getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
                     or getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)
                     or getattr(Config, "ENABLE_UNIDADES_INTRO_UPLOAD", False)
-                    or getattr(Config, "ENABLE_SECTION_RENAME", False)
-                    or getattr(Config, "ENABLE_GENERATE_HTML_INTRO", False)
-                    or getattr(Config, "ENABLE_GENERATE_HTML_INTRO_GENERAL", False)
-                    or getattr(Config, "ENABLE_INFOGRAFIA_EXPORT", False)
-                    or getattr(Config, "ENABLE_FORO_EXPORT", False)
-                    or getattr(Config, "ENABLE_ACTUALIDAD_EXPORT", False)
-                    or getattr(Config, "ENABLE_PREGUNTAS_EXPORT", False)
-                    or getattr(Config, "ENABLE_RECURSOS_APOYO_EXPORT", False)
-                    or getattr(Config, "ENABLE_RECURSOS_APOYO_EDIT_CLASSES", False)
-                    or getattr(Config, "ENABLE_ACTIVIDAD_EXPORT", False)
-                    or getattr(Config, "ENABLE_ACTIVIDAD_RECURSOS_EXPORT", False)
-                    or getattr(Config, "ENABLE_ACTIVIDAD_RUBRICA_EXPORT", False)
-                    or getattr(Config, "ENABLE_TRABAJO_EXPORT", False)
-                    or getattr(Config, "ENABLE_TRABAJO_RUBRICA_EXPORT", False)
-                    or getattr(Config, "ENABLE_EVIDENCIA_RUBRICA_EXPORT", False)
-                    or getattr(Config, "ENABLE_EVIDENCIA_EXPORT", False)
-                    or getattr(Config, "ENABLE_RECURSOS_HTML_EXPORT", False)
                     or getattr(Config, "ENABLE_DOCX_RUBRICA_UPLOAD", False)
-                    or getattr(Config, "ENABLE_CLEAR_PUNTOS_EXTRAS", False)
-                    or getattr(Config, "ENABLE_PUNTOS_EXTRAS_EXPORT", False)
-                    or getattr(Config, "ENABLE_RECUPERACION_EXPORT", False)
-                    or getattr(Config, "ENABLE_AJUSTE_COMPETENCIAS", False)
-                    or getattr(Config, "ENABLE_CONFIGURACION_FINAL", False)
                     or getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False)
-                    or getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False)
                 ):
                     edit_enabled = enable_edit_mode(
                         driver, wait_time=Config.EXPLICIT_WAIT_TIME
@@ -274,285 +216,6 @@ def main():
                 else:
                     logger.info("DOCX Rubrica upload workflow is disabled via config.")
 
-                if getattr(Config, "ENABLE_SECTION_RENAME", False) and edit_enabled:
-                    logger.info("Executing section rename workflow...")
-                    try:
-                        rename_all_sections(driver, wait_time=Config.EXPLICIT_WAIT_TIME)
-                    except Exception as e:
-                        import traceback
-                        logger.error(f"Error executing rename_all_sections for course {course_id}: {e}")
-                        logger.error(traceback.format_exc())
-                        try:
-                            dismiss_moodle_error_overlays(driver)
-                            logger.info(f"Navigating back to course {course_id} home after error...")
-                            moodle.navigate_to_course(course_id)
-                        except Exception:
-                            pass
-                elif not getattr(Config, "ENABLE_SECTION_RENAME", False):
-                    logger.info("Section rename workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_SECTION_DESCRIPTION_UPDATE", False) and edit_enabled:
-                    logger.info("Executing section description update workflow...")
-                
-                    descriptions_mapping = {}
-                    csv_path = os.path.join("assets", str(course_id), "Propuesta_Metodológica.csv")
-                    json_path = os.path.join("assets", str(course_id), "contenidos.json")
-                
-                    if os.path.exists(csv_path):
-                        import csv
-                        try:
-                            try:
-                                f = open(csv_path, 'r', encoding='utf-8-sig')
-                                headers = next(csv.reader(f))
-                            except UnicodeDecodeError:
-                                f = open(csv_path, 'r', encoding='cp1252')
-                                headers = next(csv.reader(f))
-                            
-                            f.seek(0)
-                            reader = csv.reader(f)
-                            headers = next(reader)
-                        
-                            nombre_idx = next((i for i, h in enumerate(headers) if 'NOMBRE DE LA SEMANA' in h), None)
-                            semana_idx = next((i for i, h in enumerate(headers) if '# SEMANA DE ESTUDIO' in h), None)
-                        
-                            if nombre_idx is not None and semana_idx is not None:
-                                for row in reader:
-                                    if len(row) > max(semana_idx, nombre_idx):
-                                        semana = row[semana_idx].strip()
-                                        nombre = row[nombre_idx].strip()
-                                        if semana.isdigit():
-                                            descriptions_mapping[f"Semana {semana}"] = nombre
-                            f.close()
-                        except Exception as e:
-                            logger.error(f"Failed to read CSV {csv_path}: {e}")
-
-                    # Fallback to json if mapping couldn't be loaded
-                    if not descriptions_mapping and os.path.exists(json_path):
-                        with open(json_path, "r", encoding="utf-8") as f:
-                            contenidos_data = json.load(f)
-                            if "nombre" in contenidos_data:
-                                logger.info(f"Nombre del curso: {contenidos_data['nombre']}")
-                            
-                            descriptions_mapping = {
-                                week: data["nombre"]
-                                for week, data in contenidos_data.items()
-                                if "nombre" in data and isinstance(data, dict)
-                            }
-
-                    if descriptions_mapping:
-                        update_all_section_descriptions(
-                            driver,
-                            course_id,
-                            descriptions_mapping,
-                            wait_time=Config.EXPLICIT_WAIT_TIME,
-                        )
-                    else:
-                        logger.warning(
-                            f"No valid mapping found for course {course_id} (checked CSV and JSON). Skipping description update."
-                        )
-                elif not getattr(Config, "ENABLE_SECTION_DESCRIPTION_UPDATE", False):
-                    logger.info(
-                        "Section description update workflow is disabled via config."
-                    )
-
-                if getattr(Config, "ENABLE_GENERATE_HTML_INTRO", False) and edit_enabled:
-                    logger.info("Executing local HTML intro generation workflow...")
-                    from actions.introduccion_actions import run_generar_introduccion_workflow
-                    run_generar_introduccion_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
-                elif not getattr(Config, "ENABLE_GENERATE_HTML_INTRO", False):
-                    logger.info("Local HTML intro generation workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_GENERATE_HTML_INTRO_GENERAL", False) and edit_enabled:
-                    logger.info("Executing general HTML intro generation workflow...")
-                    from actions.introduccion_general_actions import run_generar_introduccion_general_workflow
-                    run_generar_introduccion_general_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
-                elif not getattr(Config, "ENABLE_GENERATE_HTML_INTRO_GENERAL", False):
-                    logger.info("General HTML intro generation workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_INFOGRAFIA_EXPORT", False) and edit_enabled:
-                    logger.info("Executing infografia export workflow...")
-                    run_infografia_export_workflow(
-                        driver, course_id, infografia_base_url, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_INFOGRAFIA_EXPORT", False):
-                    logger.info("Infografia export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_FORO_EXPORT", False) and edit_enabled:
-                    logger.info("Executing foro export workflow...")
-                    try:
-                        run_foro_export_workflow(driver, course_id)
-                    except Exception as e:
-                        import traceback
-                        logger.error(f"Error executing run_foro_export_workflow for course {course_id}: {e}")
-                        logger.error(traceback.format_exc())
-                        try:
-                            dismiss_moodle_error_overlays(driver)
-                            logger.info(f"Navigating back to course {course_id} home after error...")
-                            moodle.navigate_to_course(course_id)
-                        except Exception:
-                            pass
-                elif not getattr(Config, "ENABLE_FORO_EXPORT", False):
-                    logger.info("Foro export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_ACTUALIDAD_EXPORT", False) and edit_enabled:
-                    logger.info("Executing actualidad export workflow...")
-                    run_actualidad_export_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_ACTUALIDAD_EXPORT", False):
-                    logger.info("Actualidad export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_PREGUNTAS_EXPORT", False) and edit_enabled:
-                    logger.info("Executing preguntas export workflow...")
-                    run_preguntas_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_PREGUNTAS_EXPORT", False):
-                    logger.info("Preguntas export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_RECURSOS_APOYO_EXPORT", False) and edit_enabled:
-                    logger.info("Executing recursos apoyo export workflow...")
-                    run_recursos_apoyo_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_RECURSOS_APOYO_EXPORT", False):
-                    logger.info("Recursos apoyo export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_RECURSOS_APOYO_EDIT_CLASSES", False) and edit_enabled:
-                    logger.info("Executing recursos apoyo edit classes workflow...")
-                    run_recursos_apoyo_edit_classes_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_RECURSOS_APOYO_EDIT_CLASSES", False):
-                    logger.info("Recursos apoyo edit classes workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_ACTIVIDAD_EXPORT", False) and edit_enabled:
-                    logger.info("Executing actividad export workflow...")
-                    run_actividad_export_workflow(
-                        driver, course_id, actividad_source, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_ACTIVIDAD_EXPORT", False):
-                    logger.info("Actividad export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_ACTIVIDAD_RECURSOS_EXPORT", False) and edit_enabled:
-                    logger.info("Executing actividad recursos export workflow...")
-                    run_actividad_recursos_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_ACTIVIDAD_RECURSOS_EXPORT", False):
-                    logger.info("Actividad recursos export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_ACTIVIDAD_RUBRICA_EXPORT", False) and edit_enabled:
-                    logger.info("Executing actividad rúbrica export workflow...")
-                    run_actividad_rubrica_workflow(
-                        driver, course_id, workflow_type="actividad", wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_ACTIVIDAD_RUBRICA_EXPORT", False):
-                    logger.info("Actividad rúbrica export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_TRABAJO_RUBRICA_EXPORT", False) and edit_enabled:
-                    logger.info("Executing trabajo rúbrica export workflow...")
-                    run_actividad_rubrica_workflow(
-                        driver, course_id, workflow_type="trabajo", wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_TRABAJO_RUBRICA_EXPORT", False):
-                    logger.info("Trabajo rúbrica export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_EVIDENCIA_RUBRICA_EXPORT", False) and edit_enabled:
-                    logger.info("Executing evidencia rúbrica export workflow...")
-                    run_actividad_rubrica_workflow(
-                        driver, course_id, workflow_type="evidencia", wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_EVIDENCIA_RUBRICA_EXPORT", False):
-                    logger.info("Evidencia rúbrica export workflow is disabled via config.")
-
-
-                if getattr(Config, "ENABLE_TRABAJO_EXPORT", False) and edit_enabled:
-                    logger.info("Executing trabajo final export workflow...")
-                    run_trabajo_export_workflow(
-                        driver, course_id, workflow_type="trabajo", wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_TRABAJO_EXPORT", False):
-                    logger.info("Trabajo final export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_EVIDENCIA_EXPORT", False) and edit_enabled:
-                    logger.info("Executing evidencia export workflow...")
-                    run_evidencia_export_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_EVIDENCIA_EXPORT", False):
-                    logger.info("Evidencia export workflow is disabled via config.")
-
-
-
-                if getattr(Config, "ENABLE_RECURSOS_HTML_EXPORT", False) and edit_enabled:
-                    logger.info("Executing recursos HTML export workflow...")
-                    run_recursos_html_export_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_RECURSOS_HTML_EXPORT", False):
-                    logger.info("Recursos HTML export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_CLEAR_PUNTOS_EXTRAS", False) and edit_enabled:
-                    logger.info("Executing clear puntos extras questions workflow...")
-                    from actions.puntos_extras_actions import clear_puntos_extras_questions
-                    clear_puntos_extras_questions(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_CLEAR_PUNTOS_EXTRAS", False):
-                    logger.info("Clear puntos extras questions workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_PUNTOS_EXTRAS_EXPORT", False) and edit_enabled:
-                    logger.info("Executing puntos extras export workflow...")
-                    run_puntos_extras_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_PUNTOS_EXTRAS_EXPORT", False):
-                    logger.info("Puntos extras export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_RECUPERACION_EXPORT", False) and edit_enabled:
-                    logger.info("Executing recuperacion export workflow...")
-                    run_recuperacion_export_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_RECUPERACION_EXPORT", False):
-                    logger.info("Recuperacion export workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_AJUSTE_COMPETENCIAS", False) and edit_enabled:
-                    logger.info("Executing ajuste competencias workflow...")
-                    run_ajuste_competencias_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_AJUSTE_COMPETENCIAS", False):
-                    logger.info("Ajuste competencias workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_CONFIGURACION_FINAL", False) and edit_enabled:
-                    logger.info("Executing configuracion final workflow...")
-                    run_configuracion_final_workflow(
-                        driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                    )
-                elif not getattr(Config, "ENABLE_CONFIGURACION_FINAL", False):
-                    logger.info("Configuracion final workflow is disabled via config.")
-
-                if getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False) and edit_enabled:
-                    logger.info("Executing Materiales de Estudio workflow...")
-                    try:
-                        run_materiales_estudio_workflow(
-                            driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
-                        )
-                    except Exception as e:
-                        import traceback
-                        logger.error(f"Error executing run_materiales_estudio_workflow for course {course_id}: {e}")
-                        logger.error(traceback.format_exc())
-                        try:
-                            dismiss_moodle_error_overlays(driver)
-                            logger.info(f"Navigating back to course {course_id} home after error...")
-                            moodle.navigate_to_course(course_id)
-                        except Exception:
-                            pass
-                elif not getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False):
-                    logger.info("Materiales de Estudio workflow is disabled via config.")
-
                 if getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False) and edit_enabled:
                     logger.info("Executing activity completion update workflow...")
                     from actions.activity_completion_actions import run_activity_completion_workflow
@@ -590,23 +253,6 @@ def main():
                 elif not getattr(Config, "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", False):
                     logger.info("Final course format workflow is disabled via config.")
                 dismiss_moodle_error_overlays(driver)
-                if getattr(Config, "ENABLE_DEPOSITPHOTOS_DOWNLOAD", False):
-                    logger.info("Executing Depositphotos download workflow...")
-                    try:
-                        run_depositphotos_workflow(driver, course_id)
-                    except Exception as e:
-                        import traceback
-                        logger.error(f"Error executing run_depositphotos_workflow for course {course_id}: {e}")
-                        logger.error(traceback.format_exc())
-                        try:
-                            dismiss_moodle_error_overlays(driver)
-                            logger.info(f"Navigating back to course {course_id} home after error...")
-                            moodle.navigate_to_course(course_id)
-                        except Exception:
-                            pass
-                else:
-                    logger.info("Depositphotos download workflow is disabled via config.")
-
             except Exception as e:
                 import traceback
                 logger.error(f"Error processing course {course_id}: {e}")
