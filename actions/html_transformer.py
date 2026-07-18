@@ -65,25 +65,225 @@ def process_image_src(html_str, course_id=None):
 
 def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
     """
-    Finds questions in HTML (either via <ol> DOM structures or 'Pregunta N' blocks)
-    and exports them to a Moodle XML file retaining full HTML.
+    Finds questions in HTML and exports them to a Moodle XML file retaining full HTML.
+    Uses a robust block-level state machine parser.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
-    xml_questions = []
-    structured_questions = []
     
-    xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
-    xml_footer = '</quiz>\n'
+    # --- 1. DOM FLATTENING ---
+    blocks = []
+    def traverse(node, list_level=0, list_group_id=None):
+        if isinstance(node, str):
+            text = node.strip()
+            if text:
+                blocks.append({'type': 'text', 'html': str(node), 'text': text, 'list_level': list_level, 'list_group_id': list_group_id})
+            return
+            
+        if getattr(node, 'name', None) in ['ul', 'ol']:
+            new_group_id = id(node)
+            for child in node.children:
+                traverse(child, list_level + 1, new_group_id)
+            return
+            
+        if getattr(node, 'name', None) == 'li':
+            current_html = []
+            current_text = []
+            
+            def flush_li():
+                if current_html:
+                    html_str = "".join(current_html)
+                    text_str = "".join(current_text).strip()
+                    if text_str or "img" in html_str or "table" in html_str:
+                        blocks.append({'type': 'li', 'html': html_str, 'text': text_str, 'list_level': list_level, 'list_group_id': list_group_id})
+                    current_html.clear()
+                    current_text.clear()
+
+            for child in node.children:
+                if getattr(child, 'name', None) in ['ul', 'ol']:
+                    flush_li()
+                    traverse(child, list_level + 1, id(child))
+                else:
+                    if isinstance(child, str):
+                        current_html.append(str(child))
+                        current_text.append(str(child))
+                    elif child.name == 'img':
+                        processed_img = process_image_src(str(child), course_id)
+                        current_html.append(processed_img)
+                        current_text.append("")
+                    else:
+                        processed_html = process_image_src(str(child), course_id)
+                        current_html.append(processed_html)
+                        current_text.append(child.get_text(separator=" "))
+            flush_li()
+            return
+
+        if getattr(node, 'name', None) in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']:
+            processed_html = process_image_src(str(node), course_id)
+            text = node.get_text(separator=" ", strip=True)
+            if text or "img" in processed_html or "table" in processed_html:
+                blocks.append({'type': node.name, 'html': processed_html, 'text': text, 'list_level': list_level, 'list_group_id': list_group_id})
+            return
+            
+        if getattr(node, 'name', None) == 'table':
+            processed_html = process_image_src(str(node), course_id)
+            blocks.append({'type': 'table', 'html': processed_html, 'text': node.get_text(separator=" ", strip=True), 'list_level': list_level, 'list_group_id': list_group_id})
+            return
+            
+        if getattr(node, 'name', None) == 'img':
+            processed_html = process_image_src(str(node), course_id)
+            blocks.append({'type': 'img', 'html': processed_html, 'text': '', 'list_level': list_level, 'list_group_id': list_group_id})
+            return
+            
+        # Fallback for other tags
+        if hasattr(node, 'children'):
+            for child in node.children:
+                traverse(child, list_level, list_group_id)
+
+    traverse(soup)
+
+    # --- Pre-calculate option groups ---
+    option_groups = set()
+    for block in blocks:
+        if block['list_group_id']:
+            text = block['text']
+            if re.match(r'^=?[A-Ea-e][\.\)\-]\s*', text) or text.lower().startswith('verdadero') or text.lower().startswith('falso'):
+                option_groups.add(block['list_group_id'])
+            elif "(respuesta" in text.lower() or "(correct answer)" in text.lower() or re.search(r'\([xX]\)$', text):
+                option_groups.add(block['list_group_id'])
+            elif text.strip().startswith('='):
+                option_groups.add(block['list_group_id'])
+
+    # --- 2. STATE MACHINE PARSER ---
+    questions = []
+    current_q = None
+    state = 'SEARCHING' # SEARCHING, STEM, OPTIONS, FEEDBACK
+    
+    def save_q():
+        if current_q and current_q['stem_html'] and current_q['options']:
+            questions.append(current_q)
+            
+    def create_empty_q():
+        return {
+            'stem_html': [],
+            'options': [],
+            'feedback': {'general': [], 'correct': [], 'incorrect': []},
+            'base_list_level': 0,
+            'active_fb_type': 'general'
+        }
+
+    for block in blocks:
+        text = block['text']
+        b_type = block['type']
+        html_str = block['html']
+        l_level = block['list_level']
+        l_group_id = block['list_group_id']
+
+        # Skip empty text blocks unless they have media
+        if not text and b_type not in ['img', 'table'] and "img" not in html_str and "table" not in html_str:
+            continue
+
+        # 2a. Check if Feedback
+        is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
+        if is_feedback_header:
+            if "correcta" in text.lower() and "incorrecta" not in text.lower():
+                fb_type = "correct"
+            elif "incorrecta" in text.lower():
+                fb_type = "incorrect"
+            else:
+                fb_type = "general"
+                
+            clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html_str).strip()
+            
+            if current_q:
+                state = 'FEEDBACK'
+                current_q['active_fb_type'] = fb_type
+                if clean_html:
+                    current_q['feedback'][fb_type].append(clean_html)
+            continue
+            
+        # 2b. Check if Option
+        is_option = False
+        is_correct = False
+        clean_html_opt = html_str
+        
+        if b_type != 'table' and b_type != 'img':
+            if re.match(r'^=?[A-Ea-e][\.\)\-]\s*', text) or text.lower().startswith('verdadero') or text.lower().startswith('falso'):
+                is_option = True
+            elif "(respuesta" in text.lower() or "(correct answer)" in text.lower() or re.search(r'\([xX]\)$', text):
+                is_option = True
+            elif text.strip().startswith('='):
+                is_option = True
+            # Check list group
+            elif l_group_id and l_group_id in option_groups:
+                is_option = True
+
+        if is_option and current_q:
+            if re.search(r'\([xX]\)$', text):
+                is_correct = True
+                clean_html_opt = re.sub(r'\([xX]\)(?=[^>]*(?:<|$))', '', clean_html_opt).strip()
+            elif text.strip().startswith('='):
+                is_correct = True
+                clean_html_opt = re.sub(r'^\s*=\s*(?=[^>]*(?:<|$))', '', clean_html_opt).strip()
+            elif "(respuesta" in text.lower() or "(correct answer)" in text.lower():
+                is_correct = True
+                clean_html_opt = re.sub(r'(?i)\s*\((?:respuesta(?: correcta)?|correct answer)\)', '', clean_html_opt).strip()
+                
+            if state in ['SEARCHING', 'STEM']:
+                state = 'OPTIONS'
+            current_q['options'].append({'html': clean_html_opt, 'is_correct': is_correct})
+            continue
+
+        # 2c. Check if Question Start
+        is_start = False
+        if b_type not in ['table', 'img']:
+            if re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE):
+                is_start = True
+            elif text.startswith('¿'):
+                if state in ['OPTIONS', 'FEEDBACK'] or current_q is None:
+                    is_start = True
+            elif state in ['OPTIONS', 'FEEDBACK'] and b_type in ['p', 'div'] and not is_option:
+                if len(text.split()) > 5:
+                    is_start = True
+                    
+        if is_start:
+            save_q()
+            current_q = create_empty_q()
+            current_q['base_list_level'] = l_level
+            state = 'STEM'
+            current_q['stem_html'].append(html_str)
+            continue
+            
+        # 2d. Append to current state
+        if current_q:
+            if state == 'STEM':
+                current_q['stem_html'].append(html_str)
+            elif state == 'OPTIONS':
+                if current_q['options']:
+                    current_q['options'][-1]['html'] += f"<br>{html_str}"
+                else:
+                    current_q['stem_html'].append(html_str)
+            elif state == 'FEEDBACK':
+                fb_type = current_q['active_fb_type']
+                current_q['feedback'][fb_type].append(html_str)
+
+    save_q()
     
     import time
     parser_start_time = time.perf_counter()
+    parser_end_time = time.perf_counter()
+
+    # --- 3. BUILD XML STRINGS ---
+    xml_questions = []
+    structured_questions = []
+    xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
+    xml_footer = '</quiz>\n'
     
-    def add_question(q_num, stem_html, options, is_true_false, correct_is_true, feedback_html="", correct_feedback_html="", incorrect_feedback_html=""):
+    def add_question(q_num, stem_html, options, is_true_false, correct_is_true, fb_gen="", fb_corr="", fb_inc=""):
         q_dict = {
             "stem_html": stem_html,
             "options": [],
-            "correct_feedback_html": correct_feedback_html or feedback_html,
-            "incorrect_feedback_html": incorrect_feedback_html or feedback_html
+            "correct_feedback_html": fb_corr or fb_gen,
+            "incorrect_feedback_html": fb_inc or fb_gen
         }
         
         q_xml = f'<!-- question: {q_num}  -->\n'
@@ -91,12 +291,12 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         q_xml += f'  <question type="{q_type}">\n'
         q_xml += f'    <name>\n      <text><![CDATA[{course_id}_{document_name}_q{q_num}]]></text>\n    </name>\n'
         q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{stem_html}]]></text>\n    </questiontext>\n'
-        if feedback_html:
-            q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{feedback_html}]]></text>\n    </generalfeedback>\n'
-        if correct_feedback_html:
-            q_xml += f'    <correctfeedback format="html">\n      <text><![CDATA[{correct_feedback_html}]]></text>\n    </correctfeedback>\n'
-        if incorrect_feedback_html:
-            q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{incorrect_feedback_html}]]></text>\n    </incorrectfeedback>\n'
+        if fb_gen:
+            q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{fb_gen}]]></text>\n    </generalfeedback>\n'
+        if fb_corr:
+            q_xml += f'    <correctfeedback format="html">\n      <text><![CDATA[{fb_corr}]]></text>\n    </correctfeedback>\n'
+        if fb_inc:
+            q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{fb_inc}]]></text>\n    </incorrectfeedback>\n'
         q_xml += '    <defaultgrade>1.0000000</defaultgrade>\n'
         q_xml += '    <penalty>0.3333333</penalty>\n'
         q_xml += '    <hidden>0</hidden>\n'
@@ -112,8 +312,6 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             q_xml += '    <answernumbering>abc</answernumbering>\n'
             for opt_html, is_correct in options:
                 fraction = "100" if is_correct else "0"
-                
-                # Remove leading enumeration like a., b., c), etc.
                 opt_soup = BeautifulSoup(opt_html, 'html.parser')
                 first_text = opt_soup.find(string=True)
                 if first_text:
@@ -121,7 +319,6 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     if new_text != first_text:
                         first_text.replace_with(new_text)
                         opt_html = str(opt_soup)
-
                 q_dict["options"].append({"text_html": opt_html, "is_correct": is_correct})
                 q_xml += f'    <answer fraction="{fraction}" format="html">\n      <text><![CDATA[{opt_html}]]></text>\n    </answer>\n'
                 
@@ -130,365 +327,31 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         structured_questions.append(q_dict)
 
     q_num = 1
-    
-    # FORMAT A LOGIC (DOM Based anchored on Respuesta Correcta)
-    correct_ps = soup.find_all(lambda tag: tag.name == 'p' and ('Respuesta correcta:' in tag.get_text() or 'Respuestas correctas:' in tag.get_text()))
-    for correct_p in correct_ps:
-        correct_text = correct_p.get_text(strip=True).replace("Respuesta correcta:", "").replace("Respuestas correctas:", "").strip()
-        feedback_html = ""
-        feedback_p = correct_p.find_next_sibling('p')
-        if feedback_p and ("Retroalimentación:" in feedback_p.get_text() or "Retroalimentación incorrecta:" in feedback_p.get_text()):
-            feedback_html = process_image_src(feedback_p.decode_contents().replace("Retroalimentación incorrecta:", "").replace("Retroalimentación:", "").strip(), course_id)
-        
-        prev_node = correct_p.find_previous_sibling(['ul', 'ol'])
-        if not prev_node:
-            continue
-            
-        options_tags = []
-        stem_html = ""
-        outer_lis = prev_node.find_all('li', recursive=False)
-        if outer_lis and outer_lis[-1].find(['ol', 'ul']):
-            import copy
-            outer_li_clone = copy.copy(outer_lis[-1])
-            inner_list = outer_li_clone.find(['ol', 'ul'])
-            if inner_list: inner_list.decompose()
-            stem_html = process_image_src(outer_li_clone.decode_contents(), course_id)
-            inner_lis = outer_lis[-1].find(['ol', 'ul']).find_all('li')
-            options_tags = inner_lis
-        else:
-            options_tags = [li for li in prev_node.find_all('li') if not li.find(['ol', 'ul'])]
-            
-        if not stem_html:
-            stem_p = prev_node.find_previous_sibling('p')
-            if stem_p:
-                stem_text = stem_p.get_text(strip=True)
-                if stem_text.upper() != "PREGUNTAS:" and len(stem_text) > 3 and "respuesta correcta" not in stem_text.lower() and "respuestas correctas" not in stem_text.lower():
-                    stem_html = process_image_src(stem_p.decode_contents(), course_id)
-            if not stem_html and len(options_tags) > 1:
-                stem_html = process_image_src(options_tags[0].decode_contents(), course_id)
-                options_tags = options_tags[1:]
-
+    for q in questions:
+        stem_html = "<br>".join(q['stem_html'])
+        opts = []
         is_true_false = False
-        opt_texts = [o.get_text(strip=True) for o in options_tags]
-        if len(opt_texts) == 0:
-            is_true_false = True
-        elif len(opt_texts) == 2:
-            opt_lower = [o.lower() for o in opt_texts]
-            if any("verdadero" in o or "true" in o for o in opt_lower) and any("falso" in o or "false" in o for o in opt_lower):
-                is_true_false = True
-                
-        if is_true_false or "verdadero" in correct_text.lower() or "falso" in correct_text.lower():
-            is_true = "verdadero" in correct_text.lower() or "true" in correct_text.lower()
-            add_question(q_num, stem_html, [], True, is_true, feedback_html)
-            q_num += 1
-        else:
-            final_options = []
-            for opt_tag, opt_text in zip(options_tags, opt_texts):
-                opt_norm = opt_text.lower().strip('. ')
-                correct_norm = correct_text.lower().strip('. ')
-                is_correct = (opt_norm == correct_norm)
-                if not is_correct:
-                    clean_opt = re.sub(r'^[a-ea-e][\.\)]\s*', '', opt_norm).strip()
-                    clean_correct = re.sub(r'^[a-ea-e][\.\)]\s*', '', correct_norm).strip()
-                    is_correct = (clean_opt == clean_correct)
-                if not is_correct and len(clean_opt) > 10 and len(clean_correct) > 10:
-                    is_correct = (clean_opt in clean_correct or clean_correct in clean_opt)
-                final_options.append((process_image_src(opt_tag.decode_contents(), course_id), is_correct))
-            
-            add_question(q_num, stem_html, final_options, False, False, feedback_html)
-            q_num += 1
-
-    # FORMAT B LOGIC (Nested OL/UL with (Respuesta))
-    if not xml_questions:
-        import copy
-        lists = soup.find_all(['ol', 'ul'])
-        for lst in lists:
-            lis = lst.find_all('li', recursive=False)
-            has_respuesta = any("(respuesta" in li.get_text(strip=True).lower() for li in lis)
-            is_nested = any(li.find(['ol', 'ul']) for li in lis)
-            if has_respuesta and is_nested:
-                for li in lis:
-                    inner_list = li.find(['ol', 'ul'])
-                    if not inner_list: continue
-                    
-                    li_clone = copy.copy(li)
-                    if li_clone.find(['ol', 'ul']):
-                        li_clone.find(['ol', 'ul']).decompose()
-                    stem_html = process_image_src(li_clone.decode_contents(), course_id)
-                    
-                    options = []
-                    for inner_li in inner_list.find_all('li', recursive=False):
-                        opt_html = process_image_src(inner_li.decode_contents(), course_id)
-                        is_correct = False
-                        if "(respuesta" in inner_li.get_text().lower():
-                            is_correct = True
-                            opt_html = re.sub(r'(?i)\s*\((respuesta|respuesta correcta)\)', '', opt_html).strip()
-                        options.append((opt_html, is_correct))
-                    
-                    if stem_html and options:
-                        add_question(q_num, stem_html, options, False, False)
-                        q_num += 1
-
-    # FORMAT C LOGIC (Flat OL/UL or Flat P with marks)
-    if not xml_questions:
-        def is_correct_option(t):
-            return "(respuesta" in t.lower() or "(correct answer)" in t.lower() or bool(re.search(r'(?i)[_\s]*x[_\s]*$', t.strip())) or t.strip().startswith('=')
-            
-        def clean_option_html(h, t):
-            h = re.sub(r'(?i)\s*\((respuesta(?: correcta)?|correct answer)\)', '', h)
-            h = re.sub(r'(?i)[_\s]*x[_\s]*$', '', h)
-            h = re.sub(r'^\s*=\s*', '', h)
-            return h.strip()
-
-        # Check ol/ul first
-        lists = soup.find_all(['ol', 'ul'])
-        for lst in lists:
-            lis = lst.find_all('li', recursive=False)
-            has_respuesta = any(is_correct_option(li.get_text(strip=True)) for li in lis)
-            if has_respuesta and not any(li.find(['ol', 'ul']) for li in lis):
-                current_stem = None
-                current_options = []
-                current_feedback_html = ""
-                current_correct_feedback_html = ""
-                current_incorrect_feedback_html = ""
-                active_feedback_type = None
-                
-                for li in lis:
-                    text = li.get_text(strip=True)
-                    html = process_image_src(li.decode_contents(), course_id)
-                    if not text and li.name not in ['img', 'table'] and not li.find(['img', 'table']):
-                        continue
-                    
-                    is_stem = False
-                    is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
-                    
-                    is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
-                    
-                    if not is_feedback_header:
-                        if text.startswith('¿') or text.endswith('?'):
-                            is_stem = True
-                        elif text.endswith(':') and not active_feedback_type:
-                            is_stem = True
-                        elif re.match(r'^\d+\.\s+', text):
-                            is_stem = True
-                        elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text) and not active_feedback_type:
-                            is_stem = True
-                        
-                    if is_stem:
-                        if current_stem and current_options:
-                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
-                            q_num += 1
-                        current_stem = html
-                        current_options = []
-                        current_feedback_html = ""
-                        current_correct_feedback_html = ""
-                        current_incorrect_feedback_html = ""
-                        active_feedback_type = None
-                    else:
-                        if is_feedback_header:
-                            if "correcta" in text.lower() and "incorrecta" not in text.lower(): active_feedback_type = "correct"
-                            elif "incorrecta" in text.lower(): active_feedback_type = "incorrect"
-                            else: active_feedback_type = "general"
-                            
-                            clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html).strip()
-                            if clean_html:
-                                if active_feedback_type == "correct": current_correct_feedback_html += clean_html
-                                elif active_feedback_type == "incorrect": current_incorrect_feedback_html += clean_html
-                                else: current_feedback_html += clean_html
-                        elif active_feedback_type:
-                            if active_feedback_type == "correct": current_correct_feedback_html += ("<br>" if current_correct_feedback_html else "") + html
-                            elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html
-                            else: current_feedback_html += ("<br>" if current_feedback_html else "") + html
-                        elif current_stem:
-                            if not text:
-                                current_stem += "<br>" + html
-                            elif not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
-                                current_stem += "<br>" + html
-                            else:
-                                current_options.append((html, text))
-                
-                if current_stem and current_options:
-                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
-                    q_num += 1
-
-        if not xml_questions:
-            elements = soup.find_all(['p', 'li', 'div', 'span', 'img', 'table'])
-            paragraphs = []
-            seen = set()
-            for el in elements:
-                if any(p in seen for p in el.parents):
-                    continue
-                seen.add(el)
-                paragraphs.append(el)
-            has_respuesta = any(is_correct_option(p.get_text(strip=True)) for p in paragraphs)
-            if has_respuesta:
-                current_stem = None
-                current_options = []
-                current_feedback_html = ""
-                current_correct_feedback_html = ""
-                current_incorrect_feedback_html = ""
-                active_feedback_type = None
-                
-                for p in paragraphs:
-                    text = p.get_text(strip=True)
-                    html = process_image_src(p.decode_contents(), course_id)
-                    if not text and p.name not in ['img', 'table'] and not p.find(['img', 'table']):
-                        continue
-                    
-                    if len(text.split()) > 50: continue
-                    if "cómo lo vamos a" in text.lower() or "qué vamos a" in text.lower(): continue
-                    
-                    is_stem = False
-                    is_tf = current_options and any('verdadero' in o[1].lower() for o in current_options) and any('falso' in o[1].lower() for o in current_options)
-                    
-                    is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
-                    
-                    if not is_feedback_header:
-                        if text.startswith('¿') or text.endswith('?'):
-                            is_stem = True
-                        elif text.endswith(':') and not active_feedback_type:
-                            is_stem = True
-                        elif re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE):
-                            is_stem = True
-                        elif current_stem and (len(current_options) >= 4 or is_tf) and not is_correct_option(text) and not active_feedback_type:
-                            is_stem = True
-                        
-                    if is_stem:
-                        if current_stem and current_options:
-                            add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
-                            q_num += 1
-                        current_stem = html
-                        current_options = []
-                        current_feedback_html = ""
-                        current_correct_feedback_html = ""
-                        current_incorrect_feedback_html = ""
-                        active_feedback_type = None
-                    else:
-                        if is_feedback_header:
-                            if "correcta" in text.lower() and "incorrecta" not in text.lower(): active_feedback_type = "correct"
-                            elif "incorrecta" in text.lower(): active_feedback_type = "incorrect"
-                            else: active_feedback_type = "general"
-                            
-                            clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html).strip()
-                            if clean_html:
-                                if active_feedback_type == "correct": current_correct_feedback_html += clean_html
-                                elif active_feedback_type == "incorrect": current_incorrect_feedback_html += clean_html
-                                else: current_feedback_html += clean_html
-                        elif active_feedback_type:
-                            if active_feedback_type == "correct": current_correct_feedback_html += ("<br>" if current_correct_feedback_html else "") + html
-                            elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html
-                            else: current_feedback_html += ("<br>" if current_feedback_html else "") + html
-                        elif current_stem:
-                            if not text:
-                                current_stem += "<br>" + html
-                            elif not current_options and not re.match(r'^=?[A-Ea-e][\.\)]\s*', text) and not text.lower().startswith('verdadero') and not text.lower().startswith('falso'):
-                                current_stem += "<br>" + html
-                            else:
-                                current_options.append((html, text))
-                if current_stem and current_options:
-                    add_question(q_num, current_stem, [(clean_option_html(h, t), is_correct_option(t)) for h, t in current_options], False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
-                    q_num += 1
-
-    # FALLBACK LOGIC
-    if not xml_questions:
-        elements = soup.find_all(['p', 'li', 'div', 'span', 'img', 'table'])
-        nodes = []
-        seen = set()
-        for el in elements:
-            if any(p in seen for p in el.parents):
-                continue
-            seen.add(el)
-            nodes.append(el)
-            
-            
-        current_q_num = None
-        current_q_label = None
-        current_stem_html_parts = []
-        current_options = []
-        current_feedback_html = ""
-        current_correct_feedback_html = ""
-        current_incorrect_feedback_html = ""
-        active_feedback_type = None
+        correct_is_true = False
         
-        def save_current_fallback_q():
-            nonlocal current_q_num, current_stem_html_parts, current_options, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html, xml_questions, q_num
-            if current_stem_html_parts and current_options:
-                stem_html = "<br>".join(current_stem_html_parts)
-                try:
-                    q_num_padded = int(current_q_num)
-                except (ValueError, TypeError):
-                    q_num_padded = q_num
-                add_question(q_num_padded, stem_html, current_options, False, False, current_feedback_html, current_correct_feedback_html, current_incorrect_feedback_html)
-                q_num += 1
-            current_stem_html_parts = []
-            current_options = []
-            current_feedback_html = ""
-            current_correct_feedback_html = ""
-            current_incorrect_feedback_html = ""
+        for o in q['options']:
+            opts.append((o['html'], o['is_correct']))
             
-        for node in nodes:
-            text = node.get_text(strip=True)
-            html_str = process_image_src(str(node), course_id)
-            
-            # If node is empty and not an image/table, skip
-            if not text and node.name not in ['img', 'table'] and not node.find(['img', 'table']):
-                continue
-                
-            # Check for new question start
-            q_match = re.match(r'(?i)^(Pregunta\s+(\d+)[\.:]?)\s*$', text)
-            if q_match:
-                save_current_fallback_q()
-                current_q_label = q_match.group(1)
-                current_q_num = q_match.group(2)
-                active_feedback_type = None
-                continue
-                
-            if current_q_num is None:
-                continue
-                
-            # Detect options or feedback
-            is_feedback_header = text.lower().startswith("explicaci") or text.lower().startswith("retroalimentaci")
-            is_option = re.match(r'^=?[A-Ea-e][\.\)]\s*', text) or text.lower().startswith('verdadero') or text.lower().startswith('falso') or re.search(r'\([xX]\)$', text)
-            
-            if is_feedback_header:
-                if "correcta" in text.lower() and "incorrecta" not in text.lower(): active_feedback_type = "correct"
-                elif "incorrecta" in text.lower(): active_feedback_type = "incorrect"
-                else: active_feedback_type = "general"
-                
-                clean_html = re.sub(r'(?i)^(?:<[^>]+>)*\s*(?:retroalimentaci[^:]*:|explicaci[^:]*:)\s*(?:</[^>]+>)*', '', html_str).strip()
-                if clean_html:
-                    if active_feedback_type == "correct": current_correct_feedback_html += clean_html
-                    elif active_feedback_type == "incorrect": current_incorrect_feedback_html += clean_html
-                    else: current_feedback_html += clean_html
-                continue
-                
-            if active_feedback_type:
-                if active_feedback_type == "correct": current_correct_feedback_html += ("<br>" if current_correct_feedback_html else "") + html_str
-                elif active_feedback_type == "incorrect": current_incorrect_feedback_html += ("<br>" if current_incorrect_feedback_html else "") + html_str
-                else: current_feedback_html += ("<br>" if current_feedback_html else "") + html_str
-                continue
-                
-            if is_option:
-                is_correct = False
-                if re.search(r'\([xX]\)$', text):
-                    is_correct = True
-                    html_str = re.sub(r'\([xX]\)(?=[^>]*(?:<|$))', '', html_str).strip()
-                elif text.strip().startswith('='):
-                    is_correct = True
-                    html_str = re.sub(r'^\s*=\s*(?=[^>]*(?:<|$))', '', html_str).strip()
-                elif "(respuesta" in text.lower() or "(correct answer)" in text.lower():
-                    is_correct = True
-                    html_str = re.sub(r'(?i)\s*\((?:respuesta(?: correcta)?|correct answer)\)', '', html_str).strip()
-                
-                current_options.append((html_str, is_correct))
-            else:
-                current_stem_html_parts.append(html_str)
-                
-        save_current_fallback_q()
+        opt_texts = [BeautifulSoup(o[0], 'html.parser').get_text(strip=True).lower() for o in opts]
+        if len(opt_texts) == 2:
+            if any(x in txt for txt in opt_texts for x in ['verdadero', 'true']) and any(x in txt for txt in opt_texts for x in ['falso', 'false']):
+                is_true_false = True
+                for o_html, is_corr in opts:
+                    if is_corr and any(x in o_html.lower() for x in ['verdadero', 'true']):
+                        correct_is_true = True
+                        
+        fb_gen = "<br>".join(q['feedback']['general'])
+        fb_corr = "<br>".join(q['feedback']['correct'])
+        fb_inc = "<br>".join(q['feedback']['incorrect'])
+        
+        add_question(q_num, stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc)
+        q_num += 1
 
-    parser_end_time = time.perf_counter()
-
-    # VALIDATION LOGIC (AI QA Layer)
+    # --- 4. VALIDATION LOGIC (AI QA Layer) ---
     standard_q_count = len(xml_questions)
     should_invoke_ai = False
     
@@ -507,10 +370,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             serialized_parser_output = json.dumps(structured_questions, ensure_ascii=False)
             
             ai_result = validate_and_extract_questions(html_content, serialized_parser_output, parsed_q_count=standard_q_count)
-            
             ai_end_time = time.perf_counter()
             
-            # Default values for reporting
             is_perfect = False
             corrections = []
             additions = []
@@ -530,25 +391,20 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 metadata = ai_result.get("metadata", {})
                 token_usage = ai_result.get("token_usage", {})
                 
-                # Apply changes to structured_questions
                 final_questions = list(structured_questions)
                 
-                # Apply Removals first (descending to avoid index shifting)
                 for idx in sorted(removals, reverse=True):
                     if 0 <= idx < len(final_questions):
                         del final_questions[idx]
                         
-                # Apply Corrections
                 for corr in corrections:
                     idx = corr.get("index")
                     if idx is not None and 0 <= idx < len(final_questions):
                         final_questions[idx] = corr.get("corrected_question", final_questions[idx])
                         
-                # Apply Additions
                 for add in additions:
                     final_questions.append(add)
                 
-                # Rebuild xml_questions
                 xml_questions.clear()
                 structured_questions.clear()
                 
@@ -561,7 +417,6 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     correct_fb = q.get("correct_feedback_html", "")
                     incorrect_fb = q.get("incorrect_feedback_html", "")
                     
-                    # Determine true/false based on options
                     is_tf = False
                     correct_is_true = False
                     if len(opts) == 2:
@@ -575,7 +430,6 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     add_question(q_num_rebuild, stem, opts, is_tf, correct_is_true, "", correct_fb, incorrect_fb)
                     q_num_rebuild += 1
             
-            # Format QA Validation Report
             p_time = parser_end_time - parser_start_time
             a_time = ai_end_time - ai_start_time
             t_time = p_time + a_time
@@ -604,10 +458,8 @@ AI Time: {a_time:.2f}s
 Total Time: {t_time:.2f}s
 ========================================================"""
             logger.info(report)
-            
             if metadata.get("warnings"):
                 logger.warning(f"AI QA Warning: {metadata['warnings']}")
-
         except Exception as e:
             logger.error(f"AI Validation workflow failed: {e}. Falling back to standard parser output.")
 
@@ -623,7 +475,6 @@ Total Time: {t_time:.2f}s
             logger.error(f"Failed to write XML file {output_xml_path}: {e}")
             
     return len(xml_questions)
-
 
 def remove_questions_from_html(html_content: str) -> str:
     """

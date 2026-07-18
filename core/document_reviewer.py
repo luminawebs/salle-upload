@@ -157,19 +157,13 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
                 report["unidades"][current_unidad]["material_referencia"]["detalles"] = "Encontrado"
 
     # Second pass: Use extracted HTML files to get exact questions and clean up
-    from actions.html_transformer import extract_questions_from_html_to_gift
+    # As requested by the user, we skip AI validation here to save quota and speed up parsing on UI drop.
     for u_num, u_data in report["unidades"].items():
         if u_data.get("actividades"):
             for act_num, act_data in u_data["actividades"].items():
                 if act_data["tipo"] == "Cuestionario":
-                    act_html_path = os.path.join(base_dir, "actividades", f"actividad{act_num}.html")
-                    if os.path.exists(act_html_path):
-                        with open(act_html_path, "r", encoding="utf-8") as act_f:
-                            act_html_content = act_f.read()
-                        
-                        # Use the exact same parser as Automatización
-                        exact_count = extract_questions_from_html_to_gift(act_html_content, None)
-                        act_data["cantidad_preguntas"] = exact_count
+                    # We just keep it 0 as the UI only cares about the type of activity right now.
+                    act_data["cantidad_preguntas"] = 0
                         
     # Clean up temporary split folders
     for folder in ["actividades", "material", "introduccion"]:

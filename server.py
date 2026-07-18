@@ -93,7 +93,21 @@ async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
     file_location = os.path.join(course_dir, f"{course_id}.docx")
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
-    return {"info": f"archivo '{file.filename}' guardado exitosamente y entorno reiniciado"}
+        
+    # Generate HTML and review the document to extract activities
+    try:
+        html_content = parse_docx_to_html(file_location, course_id)
+        if html_content:
+            output_html_path = os.path.join(course_dir, "raw_docx_extracted.html")
+            with open(output_html_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
+                
+        report = review_document(course_id, generate_json=False, generate_text=False)
+    except Exception as e:
+        print(f"Error reviewing document during upload: {e}")
+        report = None
+        
+    return {"info": f"archivo '{file.filename}' guardado exitosamente y entorno reiniciado", "report": report}
 
 @app.post("/api/review")
 async def api_review(file: UploadFile = File(...)):

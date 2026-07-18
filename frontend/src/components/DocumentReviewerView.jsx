@@ -148,8 +148,8 @@ export default function DocumentReviewerView({ setActiveTab }) {
           <img src="/logo.png" alt="La Salle" className="h-8 object-contain" />
           <div className="h-6 w-px bg-border"></div>
           <h1 className="text-lg font-bold tracking-tight text-white flex items-center">
-            Revisor de Documentos
-            <span className="ml-3 px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">Validador</span>
+            Moodle Automation Engine
+            {/* <span className="ml-3 px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">Validador</span> */}
           </h1>
           <div className="h-6 w-px bg-border ml-4 mr-2"></div>
           <NavigationTabs activeTab="reviewer" setActiveTab={setActiveTab} />

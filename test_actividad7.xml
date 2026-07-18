@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q1]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>1. Una empresa de comercio electrónico desea analizar la eficiencia de su sistema de distribución. Para ello registra el tiempo de entrega (en minutos) de 12 pedidos realizados durante un mismo día.</p><br><table><tr><td><p><strong>Pedido</strong></p></td><td><p><strong>Tiempo</strong></p></td></tr><tr><td><p>1</p></td><td><p>42</p></td></tr><tr><td><p>2</p></td><td><p>45</p></td></tr><tr><td><p>3</p></td><td><p>47</p></td></tr><tr><td><p>4</p></td><td><p>40</p></td></tr><tr><td><p>5</p></td><td><p>44</p></td></tr><tr><td><p>6</p></td><td><p>46</p></td></tr><tr><td><p>7</p></td><td><p>43</p></td></tr><tr><td><p>8</p></td><td><p>48</p></td></tr><tr><td><p>9</p></td><td><p>41</p></td></tr><tr><td><p>10</p></td><td><p>44</p></td></tr><tr><td><p>11</p></td><td><p>45</p></td></tr><tr><td><p>12</p></td><td><p>47</p></td></tr></table><br>El gerente de operaciones quiere estimar el tiempo promedio de entrega para evaluar el desempeño del sistema logístico. ¿Cuál es la media del tiempo de entrega?]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[43.5 minutos]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[44.5 minutos]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[45.0 minutos]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[46.2 minutos]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q2]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>2. Un centro de investigación educativa analiza el número de estudiantes que utilizan una plataforma virtual durante 10 días consecutivos.</p><br><table><tr><td><p><strong>Día</strong></p></td><td><p><strong>Estudiantes</strong></p></td></tr><tr><td><p>1</p></td><td><p>120</p></td></tr><tr><td><p>2</p></td><td><p>130</p></td></tr><tr><td><p>3</p></td><td><p>125</p></td></tr><tr><td><p>4</p></td><td><p>140</p></td></tr><tr><td><p>5</p></td><td><p>135</p></td></tr><tr><td><p>6</p></td><td><p>128</p></td></tr><tr><td><p>7</p></td><td><p>132</p></td></tr><tr><td><p>8</p></td><td><p>138</p></td></tr><tr><td><p>9</p></td><td><p>142</p></td></tr><tr><td><p>10</p></td><td><p>126</p></td></tr></table><br><p>El coordinador académico desea conocer el valor central que divide los datos en dos partes iguales.</p><br><p>¿Cuál es la mediana del número de estudiantes?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[130]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[131]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[132]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[133]]></text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q3]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>3. Una empresa de transporte analiza el número de entregas realizadas por 8 conductores durante una jornada.</p><br><table><tr><td><p><strong>Conductor</strong></p></td><td><p><strong>Entregas</strong></p></td></tr><tr><td><p>A</p></td><td><p>25</p></td></tr><tr><td><p>B</p></td><td><p>28</p></td></tr><tr><td><p>C</p></td><td><p>30</p></td></tr><tr><td><p>D</p></td><td><p>27</p></td></tr><tr><td><p>E</p></td><td><p>35</p></td></tr><tr><td><p>F</p></td><td><p>33</p></td></tr><tr><td><p>G</p></td><td><p>29</p></td></tr><tr><td><p>H</p></td><td><p>31</p></td></tr></table><br><p>El gerente desea identificar la diferencia entre el valor máximo y el valor mínimo de entregas realizadas.</p><br><p>¿Cuál es el <strong>rango de entregas</strong>?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[8]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[9]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[10]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[11]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q4]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>4. Un científico de datos analiza el rendimiento de un algoritmo de predicción. Para ello registra el <strong>tiempo de ejecución (segundos)</strong> en 9 pruebas diferentes.</p><br><table><tr><td><p><strong>Prueba</strong></p></td><td><p><strong>Tiempo</strong></p></td></tr><tr><td><p>1</p></td><td><p>12</p></td></tr><tr><td><p>2</p></td><td><p>13</p></td></tr><tr><td><p>3</p></td><td><p>14</p></td></tr><tr><td><p>4</p></td><td><p>15</p></td></tr><tr><td><p>5</p></td><td><p>13</p></td></tr><tr><td><p>6</p></td><td><p>12</p></td></tr><tr><td><p>7</p></td><td><p>14</p></td></tr><tr><td><p>8</p></td><td><p>13</p></td></tr><tr><td><p>9</p></td><td><p>30</p></td></tr></table><br><p>Durante el análisis exploratorio, el investigador sospecha que existe un valor atípico.</p><br><p>¿Cuál observación probablemente representa un outlier?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[15]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[14]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[13]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[30]]></text>
+    </answer>
+  </question>
+
+<!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q5]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>5. Un investigador en ciencias sociales toma una muestra de 36 personas para estudiar el ingreso mensual promedio.</p><br><p>Se obtienen los siguientes resultados estadísticos:</p><br><p><strong>Media =</strong> 2.400.000 pesos<br/><strong>Desviación estándar =</strong> 600.000 pesos</p><br><p>El investigador desea calcular el error estándar de la media.</p><br><p>¿Cuál es su valor aproximado?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[50.000]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[75.000]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[100.000]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[120.000]]></text>
+    </answer>
+  </question>
+
+<!-- question: 6  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q6]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>6. Una analista de talento humano desea estudiar la relación entre las horas de capacitación recibidas por los empleados y su puntaje en una prueba de desempeño. Ambas variables son cuantitativas.</p><br><p>¿Cuál es la representación gráfica más adecuada para iniciar el análisis de la relación entre estas dos variables?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Histograma]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Gráfico circular]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Diagrama de dispersión]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de barras]]></text>
+    </answer>
+  </question>
+
+<!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q7]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>7. En una base de datos de estudiantes universitarios se registran las siguientes variables:</p><br>Programa académico<br>Edad<br>Promedio acumulado<br>Ciudad de procedencia<br><p>Un docente desea seleccionar únicamente las variables cuantitativas para calcular medidas como media y desviación estándar.</p><br><p>¿Cuál combinación contiene solamente variables cuantitativas?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Programa académico y ciudad de procedencia]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Edad y promedio acumulado]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Programa académico y edad]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Ciudad de procedencia y promedio acumulado]]></text>
+    </answer>
+  </question>
+
+<!-- question: 8  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q8]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>8. Un laboratorio farmacéutico desea estimar el peso promedio de cierto tipo de tabletas. Para ello toma una muestra aleatoria de tabletas y construye un intervalo de confianza del 95% para la media poblacional.</p><br><p>La interpretación correcta de ese intervalo es:</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El 95% de las tabletas pesa exactamente dentro de ese intervalo]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Hay un 95% de confianza en que la media poblacional está dentro del intervalo calculado]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La media muestral cambia cada vez que se observa el intervalo]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El 95% de la población tiene el mismo peso que la muestra]]></text>
+    </answer>
+  </question>
+
+<!-- question: 9  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q9]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>9. Una investigadora desea evaluar si el tiempo promedio que tardan los estudiantes en resolver una prueba virtual es diferente de 50 minutos. Para ello formula las hipótesis:</p><br><p><img src="data:image/png;base64,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" style="max-width: 100%; height: auto;"/></p><br><p>El tipo de contraste planteado es:</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Unilateral a la derecha]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Unilateral a la izquierda]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Bilateral]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[No paramétrico]]></text>
+    </answer>
+  </question>
+
+<!-- question: 10  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q10]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>10. Un analista de calidad quiere verificar si la proporción de productos defectuosos en una línea de producción es mayor al 3%. Después de realizar la prueba estadística obtiene un valor p = 0.012 y trabaja con un nivel de significancia de 0.05.</p><br><p>¿Cuál es la decisión estadística correcta?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[No rechazar la hipótesis nula, porque 0.012 es un valor pequeño]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Rechazar la hipótesis nula, porque el valor p es menor que 0.05]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Aceptar la hipótesis nula, porque el error es del 1.2%]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Repetir el estudio, porque el valor p debe ser exactamente 0.05]]></text>
+    </answer>
+  </question>
+
+<!-- question: 11  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q11]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>11. En una investigación educativa se comparan los puntajes promedio de matemáticas entre dos grupos independientes de estudiantes. Antes del análisis, el investigador verifica que los datos cumplen aproximadamente el supuesto de normalidad.</p><br><p>¿Cuál es la prueba más adecuada para comparar los promedios de ambos grupos?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Prueba t para dos muestras independientes]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Wilcoxon para una muestra]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Kruskal–Wallis]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Mann–Whitney por defecto, sin revisar supuestos]]></text>
+    </answer>
+  </question>
+
+<!-- question: 12  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q12]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>12. Un equipo de analítica de datos compara el tiempo promedio de entrega entre dos centros logísticos independientes de una empresa.</p><br><p>Antes del análisis se verifica que los datos siguen una distribución aproximadamente normal.</p><br><p>El objetivo es comparar las medias de ambos centros de distribución.</p><br><p>¿Cuál es la prueba estadística más apropiada?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Prueba t para dos muestras independientes]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Wilcoxon]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Kruskal–Wallis]]></text>
+    </answer>
+  </question>
+
+<!-- question: 13  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q13]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>13. Una empresa compara el nivel de satisfacción de clientes entre dos sedes independientes, pero los datos recolectados en escala ordinal no cumplen normalidad.</p><br><p>¿Cuál es la prueba estadística más adecuada?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba t de Student]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Análisis de varianza]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Correlación de Pearson]]></text>
+    </answer>
+  </question>
+
+<!-- question: 14  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q14]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>14. Un investigador desea comparar el nivel de respuesta de tres tratamientos independientes aplicados a tres grupos de pacientes. Los datos no cumplen el supuesto de normalidad.</p><br><p>¿Cuál es la prueba más adecuada para este análisis?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Wilcoxon]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Kruskal–Wallis]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Prueba z para proporciones]]></text>
+    </answer>
+  </question>
+
+<!-- question: 15  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q15]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>15. En un estudio clínico se mide el dolor de un mismo grupo de pacientes antes y después de una intervención. La variable es ordinal y no se asume normalidad.</p><br><p>¿Cuál es la prueba más adecuada para comparar ambas mediciones?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Wilcoxon para muestras relacionadas]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Kruskal–Wallis]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba t para dos muestras independientes]]></text>
+    </answer>
+  </question>
+
+<!-- question: 16  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q16]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>16. Un equipo de ciencia de datos analiza la variable “ingreso mensual” y obtiene los siguientes estadísticos:</p><br><strong>media =</strong> 3.8 millones<br><strong>mediana =</strong> 3.1 millones<br><strong>moda =</strong> 2.7 millones<br><p>Con base en estos resultados, la distribución de los ingresos probablemente presenta:</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Asimetría negativa, porque la media es menor que la mediana]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Simetría perfecta, porque las tres medidas son diferentes]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Asimetría positiva, porque la media es mayor que la mediana]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Ausencia de dispersión, porque existe una moda definida]]></text>
+    </answer>
+  </question>
+
+<!-- question: 17  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q17]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>17. Una coordinadora académica analiza los resultados de un curso y encuentra que la nota promedio de los estudiantes fue 3.6, con una desviación estándar de 0.2. En otro curso, la nota promedio también fue 3.6, pero con una desviación estándar de 0.9.</p><br><p>¿Cuál interpretación es correcta?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Ambos cursos tienen la misma variabilidad porque poseen la misma media]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[El segundo curso presenta mayor dispersión en las notas]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El primer curso presenta mayor dispersión por tener menor desviación estándar]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[No se puede comparar la variabilidad entre cursos]]></text>
+    </answer>
+  </question>
+
+<!-- question: 18  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q18]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>18. Un docente de estadística diseña una estrategia de análisis para una base de datos real. Primero identifica tipos de variables, revisa gráficos, calcula medidas descriptivas y detecta posibles valores atípicos. Después, con base en esos resultados, decide qué prueba inferencial aplicar.</p><br><p>La razón principal por la que el docente inicia con el análisis exploratorio de datos es que este permite:</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Reemplazar completamente las pruebas de hipótesis]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Garantizar que siempre se usen métodos paramétricos]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Comprender la estructura de los datos antes de tomar decisiones inferenciales]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Calcular automáticamente el valor p de cualquier prueba]]></text>
+    </answer>
+  </question>
+
+<!-- question: 19  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q19]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>19. Un analista de datos estudia la distribución de ingresos de una población y obtiene los siguientes resultados:</p><br><p><strong>Media =</strong> 85<br/><strong>Mediana =</strong> 75<br/><strong>Moda =</strong> 60</p><br><p>Con base en esta información, el analista concluye que la distribución presenta:</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Simetría perfecta]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Asimetría positiva]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Asimetría negativa]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Distribución uniforme]]></text>
+    </answer>
+  </question>
+
+<!-- question: 20  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q20]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>5, 6, 7, 6, 5, 6, 7</p><br><p>El analista de datos observa que las calificaciones corresponden a datos ordinales y que no se puede asumir normalidad en las distribuciones.</p><br><p>Con base en la naturaleza de los datos y el objetivo del estudio, ¿cuál es la prueba estadística más apropiada para comparar ambos grupos?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba t para dos muestras independientes]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Wilcoxon para muestras relacionadas]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Prueba de Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Kruskal–Wallis]]></text>
+    </answer>
+  </question>
+
+<!-- question: 21  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q21]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>21 Un investigador en educación analiza el impacto de una nueva metodología de enseñanza en el desempeño de 8 estudiantes. Para ello se registran los puntajes obtenidos por los mismos estudiantes antes y después de aplicar la metodología.</p><br><table><tr><td><p><strong>Estudiante</strong></p></td><td><p><strong>Antes</strong></p></td><td><p><strong>Después</strong></p></td></tr><tr><td><p>1</p></td><td><p>65</p></td><td><p>72</p></td></tr><tr><td><p>2</p></td><td><p>70</p></td><td><p>75</p></td></tr><tr><td><p>3</p></td><td><p>68</p></td><td><p>74</p></td></tr><tr><td><p>4</p></td><td><p>72</p></td><td><p>78</p></td></tr><tr><td><p>5</p></td><td><p>66</p></td><td><p>71</p></td></tr><tr><td><p>6</p></td><td><p>69</p></td><td><p>76</p></td></tr><tr><td><p>7</p></td><td><p>71</p></td><td><p>77</p></td></tr><tr><td><p>8</p></td><td><p>67</p></td><td><p>73</p></td></tr></table><br><p>El investigador considera que los datos no cumplen el supuesto de normalidad y que las mediciones corresponden a los mismos estudiantes evaluados en dos momentos.</p><br><p>¿Cuál es la prueba estadística más adecuada para evaluar el cambio en los puntajes?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba t para muestras independientes]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Prueba de Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Prueba de Wilcoxon para muestras relacionadas]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Prueba de Kruskal–Wallis]]></text>
+    </answer>
+  </question>
+
+<!-- question: 22  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[70801_actividad7_q22]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>8, 9, 8, 9, 7, 8</p><br><p>El investigador determina que los datos no siguen una distribución normal y desea comparar si existen diferencias entre los tres grupos.</p><br><p>¿Cuál es la prueba estadística más apropiada para realizar el análisis?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba t para muestras independientes]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[ Prueba de Mann–Whitney]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Prueba de Wilcoxon]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Prueba de Kruskal–Wallis<br><p><strong>Pedido</strong></p><br><p><strong>Tiempo</strong></p>]]></text>
+    </answer>
+  </question>
+</quiz>

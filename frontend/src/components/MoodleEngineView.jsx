@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   Upload, Play, Save, Check, Terminal, Activity, FileText,
   FolderTree, BookOpen, Settings, CheckCircle2, Circle, Clock,
   AlertTriangle, XCircle, ChevronDown, ChevronUp, RefreshCw, Download
 } from 'lucide-react';
 import NavigationTabs from './NavigationTabs';
+import GlobalSettingsPanel from './GlobalSettingsPanel';
+import { AutomationContext } from '../context/AutomationContext';
 
 // const API_BASE = "http://127.0.0.1:8000";
 // const API_BASE = "http://157.230.50.37:8000";
@@ -101,50 +103,18 @@ const CircularProgress = ({ percentage }) => {
 };
 
 export default function MoodleEngineView({ setActiveTab }) {
-  const [settings, setSettings] = useState({
-    HEADLESS_MODE: 'False',
-    ENABLE_DOCX_PARSING: 'False',
-    ENABLE_DOCX_SPLITTING_HTML: 'False',
-    ENABLE_UNIDADES_INTRO_SPLIT: 'False',
-    ENABLE_COURSE_FORMAT_CHANGE: 'True',
-    ENABLE_COURSE_STRUCTURE_CREATION: 'False',
-    ENABLE_UNIDADES_INTRO_UPLOAD: 'False',
-    ENABLE_DOCX_UPLOAD_HTML: 'False',
-    ENABLE_DOCX_RUBRICA_UPLOAD: 'False',
-    ENABLE_CUESTIONARIO_EXPORT: 'False',
-    ENABLE_CUESTIONARIO_GRADE_UPDATE: 'False',
-    ENABLE_ACTIVITY_COMPLETION_UPDATE: 'True',
-    ENABLE_FINAL_COURSE_FORMAT_BUTTONS: 'False',
-    COURSES_TO_PROCESS: '9'
-  });
+  const {
+    settings,
+    logs, status, progress, currentTaskLabel,
+    elapsedSeconds, activeLogTab, setActiveLogTab, courseName, setCourseName, setLogs,
+    handleRun, handleStop
+  } = useContext(AutomationContext);
 
-  const [courseName, setCourseName] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, done, error
   const [isDragging, setIsDragging] = useState(false);
 
-  const [logs, setLogs] = useState([]);
-  const [status, setStatus] = useState('Ready'); // Ready, Running, Completed, Failed
-  const [isSaved, setIsSaved] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentTaskLabel, setCurrentTaskLabel] = useState('Esperando para iniciar...');
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [activeLogTab, setActiveLogTab] = useState(0);
-
   const logsEndRef = useRef(null);
-  const currentLogPhase = useRef(0);
-
-  useEffect(() => {
-    let interval = null;
-    if (status === 'Running') {
-      interval = setInterval(() => {
-        setElapsedSeconds(prev => prev + 1);
-      }, 1000);
-    } else {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [status]);
 
   const formatTime = (totalSeconds) => {
     const m = Math.floor(totalSeconds / 60);
@@ -153,37 +123,8 @@ export default function MoodleEngineView({ setActiveTab }) {
   };
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/settings`)
-      .then(res => res.json())
-      .then(data => setSettings(prev => ({ ...prev, ...data })))
-      .catch(err => console.error("Error fetching settings:", err));
-  }, []);
-
-  useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
-
-  const handleToggle = (key) => {
-    if (status === 'Running') return;
-    setSettings(prev => ({
-      ...prev,
-      [key]: prev[key] === 'True' ? 'False' : 'True'
-    }));
-  };
-
-  const handleSaveSettings = async () => {
-    try {
-      await fetch(`${API_BASE}/api/settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 2000);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const handleDownloadLogs = () => {
     if (!logs || logs.length === 0) return;
@@ -250,161 +191,28 @@ export default function MoodleEngineView({ setActiveTab }) {
     }
   };
 
-  const handleRun = async () => {
-    await handleSaveSettings();
-    setStatus('Running');
-    setProgress(5);
-    setElapsedSeconds(0);
-    setActiveLogTab(0);
-    currentLogPhase.current = 0;
-    setCurrentTaskLabel('Iniciando entorno Moodle...');
-    setLogs([{ text: "[Sistema] Conectando con el proceso de automatización...", phase: 0, timeStr: new Date().toLocaleTimeString() }]);
-
-    let localHasFailed = false;
-
-    const eventSource = new EventSource(`${API_BASE}/api/logs`);
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const msg = data.message;
-      const lower = msg.toLowerCase();
-
-      // Check for errors before advancing phases
-      if (lower.includes("error al iniciar el proceso") || (lower.includes("código de salida") && !lower.includes("código de salida 0"))) {
-        localHasFailed = true;
-        setStatus('Failed');
-        setCurrentTaskLabel('La ejecución se ha detenido por un error.');
-      }
-
-      if (lower.includes("proceso detenido por el usuario")) {
-        localHasFailed = true;
-        setStatus('Failed');
-      }
-
-      let newPhase = currentLogPhase.current;
-
-      // Solo avanzar de fase si no ha ocurrido un error
-      if (!localHasFailed) {
-        // Phase Transitions based on log content
-        if (lower.includes("course structure") || lower.includes("section rename") || lower.includes("uploading") || lower.includes("subiendo recursos")) {
-          newPhase = 1;
-          setProgress(35);
-          setCurrentTaskLabel("Estructurando Moodle");
-        }
-        if (lower.includes("cuestionario") || lower.includes("actividad") || lower.includes("foro") || lower.includes("quiz") || lower.includes("exporting questions")) {
-          newPhase = 2;
-          setProgress(65);
-          setCurrentTaskLabel("Configurando Evaluaciones");
-        }
-        if (lower.includes("competencias") || lower.includes("configuracion final") || lower.includes("limpieza") || lower.includes("activity completion") || lower.includes("criterios de finalización")) {
-          newPhase = 3;
-          setProgress(90);
-          setCurrentTaskLabel("Finalizando automatización");
-        }
-
-        currentLogPhase.current = newPhase;
-        setActiveLogTab(newPhase);
-      }
-
-      const timeStr = new Date().toLocaleTimeString('es-ES', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setLogs(prev => [...prev, { text: msg, phase: newPhase, timeStr }]);
-
-      // Extract course name dynamically if logged by Python script
-      const lowerMsg = msg.toLowerCase();
-      if (lowerMsg.includes("nombre del curso:") || lowerMsg.includes("course name:")) {
-        const parts = msg.split(/nombre del curso:|course name:/i);
-        if (parts.length > 1) {
-          setCourseName(parts[1].trim());
-        }
-      }
-
-      if (msg.includes("La tarea finalizó") || msg.includes("Limpieza completada")) {
-        // Only mark as completed if we see the final exit log, and it wasn't a hard error code
-        if (!localHasFailed) {
-          setStatus('Completed');
-          setProgress(100);
-          setCurrentTaskLabel('Flujo completado exitosamente.');
-        }
-      }
-    };
-
-    try {
-      await fetch(`${API_BASE}/api/run`, { method: 'POST' });
-    } catch (err) {
-      console.error(err);
-      setStatus('Failed');
-    }
-  };
-
-  const handleStop = async () => {
-    try {
-      await fetch(`${API_BASE}/api/stop`, { method: 'POST' });
-      setStatus('Failed');
-      setCurrentTaskLabel('Tarea cancelada por el usuario.');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const allTaskKeys = WORKFLOW_PHASES.flatMap(phase => phase.tasks.map(t => t.key));
-  const areAllSelected = allTaskKeys.every(key => settings[key] === 'True');
-
-  const handleSelectAll = () => {
-    if (status === 'Running') return;
-    const newSettings = { ...settings };
-    allTaskKeys.forEach(key => {
-      newSettings[key] = areAllSelected ? 'False' : 'True';
-    });
-    setSettings(newSettings);
-  };
-
   return (
     <div className="h-screen bg-background text-gray-200 font-sans flex flex-col overflow-hidden">
-      {/* Header */}
       <header className="h-16 bg-surface border-b border-border flex items-center justify-between px-6 sticky top-0 z-10">
         <div className="flex items-center space-x-6">
           <img src="/logo.png" alt="La Salle" className="h-8 object-contain" />
           <div className="h-6 w-px bg-border"></div>
           <h1 className="text-lg font-bold tracking-tight text-white flex items-center">
             Moodle Automation Engine
-            <span className="ml-3 px-2 py-0.5 rounded text-xs font-semibold bg-primary/20 text-primary border border-primary/30">Producción</span>
+            {/* <span className="ml-3 px-2 py-0.5 rounded text-xs font-semibold bg-primary/20 text-primary border border-primary/30">Producción</span> */}
           </h1>
           <div className="h-6 w-px bg-border ml-4 mr-2"></div>
           <NavigationTabs activeTab="moodle" setActiveTab={setActiveTab} />
         </div>
-
       </header>
 
       {/* Main Layout: 3 Columns */}
       <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1600px] mx-auto w-full min-h-0 h-full">
 
-        {/* Left Panel: Inputs */}
-        <div className="xl:col-span-3 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar h-full">
-
-          <div className="bg-surface rounded-xl border border-border p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-5 flex items-center">
-              <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
-              Paso 1: Información
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Moodle Course ID</label>
-                <input
-                  type="text"
-                  value={settings.COURSES_TO_PROCESS}
-                  onChange={(e) => setSettings({ ...settings, COURSES_TO_PROCESS: e.target.value })}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition"
-                />
-              </div>
-              <div className="bg-background border border-border rounded-lg px-3 py-2 flex flex-col justify-center min-h-[42px]">
-                <label className="block text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-0.5">Nombre del Curso Detectado</label>
-                <span className="text-sm text-white font-medium truncate">
-                  {status === 'Ready' ? 'Esperando inicio...' : courseName || 'Extrayendo del documento...'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-surface rounded-xl border border-border p-5 shadow-sm">
+        {/* First Column */}
+        <div className="xl:col-span-3 flex flex-col gap-6 h-full min-h-[600px]">
+          {/* Top Panel: Source Document (Fixed height) */}
+          <div className="bg-surface rounded-xl border border-border p-5 shadow-sm shrink-0">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-5 flex items-center">
               <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
               Documento Fuente
@@ -440,156 +248,38 @@ export default function MoodleEngineView({ setActiveTab }) {
             </label>
           </div>
 
-          {/* Status Card */}
+          {/* Bottom Panel: Monitor de Ejecución */}
           <div className="bg-surface rounded-xl border border-border p-4 shadow-sm">
             <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center">
-              <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
-              Monitor de Ejecución
+              <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>Monitor de Ejecución
             </h2>
-
             <div className="flex flex-col items-center justify-center mb-3 py-2">
-              <h3 className="text-lg font-bold text-success mb-1">
-                {status === 'Ready' && 'Listo para ejecutar'}
-                {status === 'Running' && 'Ejecutando'}
-                {status === 'Completed' && 'Completado'}
-                {status === 'Failed' && 'Ejecución Incompleta'}
+              <h3 className={`text-lg font-bold mb-1 ${status === 'running' ? 'text-primary' : status === 'done' ? 'text-success' : 'text-gray-300'}`}>
+                {status === 'running' ? 'En ejecución' : status === 'done' ? 'Finalizado' : 'Listo para ejecutar'}
               </h3>
               <p className="text-xs text-gray-400 mb-4 text-center">
-                {status === 'Ready' && 'Todo en orden. Presiona ejecutar para iniciar.'}
-                {status === 'Running' && currentTaskLabel}
-                {status === 'Completed' && 'El proceso ha finalizado exitosamente.'}
-                {status === 'Failed' && 'La ejecución se ha detenido por un error.'}
+                {status === 'running' ? 'Procesando tareas automáticas...' : status === 'done' ? 'Flujo completado exitosamente.' : 'Todo en orden. Presiona ejecutar para iniciar.'}
               </p>
+              
               <CircularProgress percentage={progress} />
-
+              
               <div className="mt-4 flex flex-col items-center">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tiempo de ejecución</p>
                 <p className="text-xl font-bold text-primary mt-0.5">{formatTime(elapsedSeconds)}</p>
               </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-1 items-center">
-            {/* Start/Stop Actions */}
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={handleRun}
-                disabled={status === 'Running'}
-                className={`flex-1 py-3 px-4 rounded-lg font-semibold flex items-center justify-center transition-all ${status === 'Running'
-                  ? 'bg-primary/50 text-white cursor-not-allowed'
-                  : 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5'
-                  }`}
-              >
-                <svg className={`w-5 h-5 mr-2 ${status === 'Running' ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  {status === 'Running' ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  )}
-                </svg>
-                {status === 'Running' ? "Procesando..." : "Iniciar Automatización"}
-              </button>
-              {status === 'Running' && (
-                <button
-                  onClick={handleStop}
-                  className="py-3 px-6 rounded-lg font-semibold flex items-center justify-center transition-all bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/20 hover:shadow-red-500/40 hover:-translate-y-0.5"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                  </svg>
-                  Detener
-                </button>
-              )}
-            </div>
-            <button
-              onClick={handleSaveSettings}
-              className="flex items-center  py-4 hover:bg-gray-800 rounded-lg transition text-sm justify-center w-full font-medium border border-transparent hover:border-border"
-            >
-              {isSaved ? <Check className="w-4 h-4 mr-2 text-success" /> : <Save className="w-4 h-4 mr-2 text-gray-400" />}
-              {isSaved ? "Guardado" : "Guardar Configuración"}
-            </button>
-
-          </div>
-
         </div>
 
-        {/* Center Panel: Pipeline */}
-        <div className="xl:col-span-5 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar h-full">
-          <div className="bg-surface rounded-xl border border-border p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center">
-                <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
-                Paso 2: Configuración del Pipeline
-              </h2>
-              <button
-                onClick={handleSelectAll}
-                disabled={status === 'Running'}
-                className="text-xs px-3 py-1.5 bg-background border border-border hover:border-gray-500 rounded-md text-gray-300 transition hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {areAllSelected ? "Deseleccionar Todo" : "Seleccionar Todo"}
-              </button>
-            </div>
-
-            <div className="relative pl-6 space-y-8">
-              {/* Vertical line indicator */}
-              <div className="absolute left-[-1px] top-6 bottom-6 w-0.5 bg-border rounded-full">
-                {status === 'Running' && <div className="w-full bg-primary transition-all duration-1000 rounded-full" style={{ height: `${progress}%` }}></div>}
-              </div>
-
-              {WORKFLOW_PHASES.map((phase, idx) => (
-                <div key={phase.id} className="relative">
-                  <div className={`absolute -left-9 mt-1 w-6 h-6 rounded-full flex items-center justify-center border-2 ${status === 'Running' && progress >= (idx * 25) ? 'bg-primary border-primary' : 'bg-surface border-border'}`}>
-                    {status === 'Running' && progress >= (idx * 25 + 25) ? <Check className="w-3 h-3 text-white" /> : <div className="w-2 h-2 rounded-full bg-gray-500"></div>}
-                  </div>
-
-                  <div className="bg-background border border-border rounded-xl p-4 transition-all hover:border-gray-700">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-surface rounded-lg text-primary border border-border">
-                          {phase.icon}
-                        </div>
-                        <div>
-                          <h3 className="text-base font-semibold text-white">{phase.title}</h3>
-                          <div className="flex items-center text-xs text-gray-400 mt-0.5">
-                            <Clock className="w-3 h-3 mr-1" /> Est. {phase.estimatedMins} min
-                            <span className="mx-2">•</span>
-                            {phase.tasks.filter(t => settings[t.key] === 'True').length} de {phase.tasks.length} activas
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 mt-4 pt-4 border-t border-border">
-                      {phase.tasks.map(task => {
-                        const isActive = settings[task.key] === 'True';
-                        return (
-                          <label key={task.key} className={`flex items-center p-2.5 rounded-lg cursor-pointer transition border ${isActive ? 'bg-primary/5 border-primary/30' : 'bg-surface/50 border-transparent hover:bg-surface'}`}>
-                            <div className={`w-5 h-5 rounded border flex items-center justify-center mr-3 ${isActive ? 'bg-primary border-primary' : 'bg-surface border-gray-600'}`}>
-                              {isActive && <Check className="w-3.5 h-3.5 text-white" />}
-                            </div>
-                            <span className={`text-sm ${isActive ? 'text-white' : 'text-gray-400'}`}>{task.label}</span>
-                            <input
-                              type="checkbox"
-                              className="hidden"
-                              checked={isActive}
-                              onChange={() => handleToggle(task.key)}
-                              disabled={status === 'Running'}
-                            />
-                          </label>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            </div>
+        {/* Second Column: Global Settings Panel */}
+        <div className="xl:col-span-3 flex flex-col gap-6 h-full">
+          <div className="flex-1 min-h-[400px]">
+            <GlobalSettingsPanel />
           </div>
         </div>
 
-        {/* Right Panel: Monitor */}
-        <div className="xl:col-span-4 flex flex-col space-y-6 min-h-0 h-full">
+        {/* Third Panel: Monitor (col-span-6) */}
+        <div className="xl:col-span-6 flex flex-col space-y-6 min-h-0 h-full">
 
 
 
