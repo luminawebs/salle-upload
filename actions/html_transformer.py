@@ -496,6 +496,8 @@ def remove_questions_from_html(html_content: str) -> str:
             elements_to_delete.append(el)
             
     for el in elements_to_delete:
+        if el.find("table") or el.name == "table":
+            continue
         el.decompose()
         
     # Remove text indicating questions origin
@@ -754,12 +756,18 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                                 if txt.isdigit():
                                     for t_node in inner_p.find_all(string=True):
                                         t_node.replace_with(t_node.replace(txt, f"{txt},0"))
+            
+            # Validate the last row contains "Total" and "5"
+            if len(rows) > 0:
+                last_row_text = rows[-1].get_text(strip=True).lower()
+                if "total" not in last_row_text or "5" not in last_row_text:
+                    logger.warning("VALIDATION ERROR: The 'Criterios de desempeño' table does not have 'Total' and '5' in the last row!")
                                         
     # The trailing duplicated rubric text fix is now handled by step 2.5
 
     # Also clean up empty <p><strong></strong></p> after replacements
     for p in soup.find_all("p"):
-        if not p.get_text(strip=True) and not p.find("img"):
+        if not p.get_text(strip=True) and not p.find("img") and not p.find("table"):
             p.decompose()
             
     return str(soup)
