@@ -11,7 +11,7 @@ def run_unidades_intro_splitting_workflow(course_id: int):
     for each Unidad and saves them to styled HTML fragments.
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    assets_dir = os.path.join(base_dir, "assets", str(course_id))
+    assets_dir = os.path.join(base_dir, "workspace", str(course_id))
     raw_html_path = os.path.join(assets_dir, "raw_docx_extracted.html")
     intro_dir = os.path.join(assets_dir, "introduccion")
 

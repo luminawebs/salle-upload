@@ -26,7 +26,7 @@ class Config:
     # Toggle specific processes
 
     # --------------------------------------------------- FASE 00 --------------------------------------------------------------------------------------------------------------------------------------------
-    # Extrae el contenido de 8.docx a un archivo HTML (assets/COURSEID/raw_docx_extracted.html) para validación.
+    # Extrae el contenido de 8.docx a un archivo HTML (workspace/COURSEID/raw_docx_extracted.html) para validación.
     ENABLE_DOCX_PARSING = os.getenv("ENABLE_DOCX_PARSING", "True").lower() in (
         "true",
         "1",
@@ -51,7 +51,7 @@ class Config:
     )
     # Actualiza la descripción de las secciones
     # descargar propuesta metodologica, pasar a drive (limpiar), descargar como .csv
-    # loads week-by-week summaries from 'assets/COURSEID/contenidos.json'.
+    # loads week-by-week summaries from 'workspace/COURSEID/contenidos.json'.
     ENABLE_SECTION_DESCRIPTION_UPDATE = os.getenv(
         "ENABLE_SECTION_DESCRIPTION_UPDATE", "False"
     ).lower() in ("true", "1", "t")
@@ -140,7 +140,7 @@ class Config:
     )
 
     # Exporta y sube trabajos finales (S3, S6, S8) a Moodle
-    # Fuente: assets/COURSEID/actividades-trabajo-final/SX_Trabajo.html
+    # Fuente: workspace/COURSEID/actividades-trabajo-final/SX_Trabajo.html
     # Destino: actividad Moodle "SX | Trabajo"
     ENABLE_TRABAJO_EXPORT = os.getenv("ENABLE_TRABAJO_EXPORT", "False").lower() in (
         "true",
@@ -161,7 +161,7 @@ class Config:
     )
 
     # Exporta y sube evidencias de aprendizaje (S8) a Moodle
-    # Fuente: assets/COURSEID/actividades-trabajo-final/SX_Evidencia.html
+    # Fuente: workspace/COURSEID/actividades-trabajo-final/SX_Evidencia.html
     # Destino: actividad Moodle "SX | Evidencia"
     ENABLE_EVIDENCIA_EXPORT = os.getenv("ENABLE_EVIDENCIA_EXPORT", "False").lower() in (
         "true",
@@ -205,7 +205,7 @@ class Config:
 
     # Convierte archivos DOCX a GIFT y los sube a los Puntos Extras en Moodle.
     # info se encuentra en items de evalacion/examenes
-    # Dejar archivos en assets/ID_CURSO/evaluacion/Puntos extra_S*.docx
+    # Dejar archivos en workspace/ID_CURSO/evaluacion/Puntos extra_S*.docx
     ENABLE_PUNTOS_EXTRAS_EXPORT = os.getenv(
         "ENABLE_PUNTOS_EXTRAS_EXPORT", "False"
     ).lower() in (
@@ -215,7 +215,7 @@ class Config:
     )
 
     # Convierte archivos DOCX a GIFT y los sube al Examen de recuperación en Moodle.
-    # Dejar archivos en assets/ID_CURSO/evaluacion/recuperacion/ExamenRecuperación_S*.docx
+    # Dejar archivos en workspace/ID_CURSO/evaluacion/recuperacion/ExamenRecuperación_S*.docx
     ENABLE_RECUPERACION_EXPORT = os.getenv(
         "ENABLE_RECUPERACION_EXPORT", "False"
     ).lower() in (

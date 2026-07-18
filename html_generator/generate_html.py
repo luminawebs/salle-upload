@@ -220,7 +220,7 @@ if __name__ == "__main__":
     # Point this to the root directory where the numbered folders are.
     # We will assume the script is in 'html_generator' and the folders are in 'assets'
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    assets_dir = os.path.join(os.path.dirname(current_dir), "assets")
+    assets_dir = os.path.join(os.path.dirname(current_dir), "workspace")
     
     print(f"Looking for 'contenidos.json' files inside numbered folders in {assets_dir}")
     process_contenidos(assets_dir)

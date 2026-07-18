@@ -7,6 +7,9 @@ load_dotenv()
 
 class ConfigSALLE:
     """Central configuration management for the LA SALLE project."""
+    
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    WORKSPACE_DIR = os.path.join(BASE_DIR, "workspace")
 
     MOODLE_URL = os.getenv("MOODLE_URL", "https://moodle.example.com").rstrip("/")
     MOODLE_USERNAME = os.getenv("MOODLE_USERNAME")
@@ -18,7 +21,7 @@ class ConfigSALLE:
     # Toggle specific processes
 
     # --------------------------------------------------- FASE 00 --------------------------------------------------------------------------------------------------------------------------------------------
-    # Extrae el contenido de COURSEID.docx a un archivo HTML (assets/COURSEID/raw_docx_extracted.html) para validación.
+    # Extrae el contenido de COURSEID.docx a un archivo HTML (workspace/COURSEID/raw_docx_extracted.html) para validación.
     ENABLE_DOCX_PARSING = os.getenv("ENABLE_DOCX_PARSING", "True").lower() in (
         "true",
         "1",

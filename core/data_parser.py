@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 def parse_docx_to_html(docx_path: str, course_id: int) -> str:
     """
     Parses a docx file using mammoth and returns the raw HTML string.
-    Images are extracted and saved to assets/<course_id>/imgs/
+    Images are extracted and saved to workspace/<course_id>/imgs/
     """
     if not os.path.exists(docx_path):
         logger.warning(f"DOCX file not found: {docx_path}")
@@ -17,7 +17,7 @@ def parse_docx_to_html(docx_path: str, course_id: int) -> str:
 
     import hashlib
 
-    img_dir = os.path.join("assets", str(course_id), "imgs")
+    img_dir = os.path.join("workspace", str(course_id), "imgs")
     os.makedirs(img_dir, exist_ok=True)
 
     def convert_image(image):
@@ -86,7 +86,7 @@ def run_docx_parsing_workflow(course_id: int):
     to assets/<course_id>/raw_docx_extracted.html so the user can validate it.
     """
     logger.info(f"Executing DOCX parsing workflow for course {course_id}...")
-    base_dir = os.path.join("assets", str(course_id))
+    base_dir = os.path.join("workspace", str(course_id))
     # Assuming docx is named as course_id.docx
     docx_path = os.path.join(base_dir, f"{course_id}.docx")
     output_path = os.path.join(base_dir, "raw_docx_extracted.html")
@@ -102,11 +102,11 @@ def run_docx_parsing_workflow(course_id: int):
 
 def run_docx_splitting_workflow(course_id: int):
     """
-    Reads assets/<course_id>/raw_docx_extracted.html and splits it into the necessary
+    Reads workspace/<course_id>/raw_docx_extracted.html and splits it into the necessary
     HTML fragments (actividades, material de referencia, etc.).
     """
     logger.info(f"Executing DOCX splitting workflow for course {course_id}...")
-    base_dir = os.path.join("assets", str(course_id))
+    base_dir = os.path.join("workspace", str(course_id))
     raw_html_path = os.path.join(base_dir, "raw_docx_extracted.html")
 
     if not os.path.exists(raw_html_path):

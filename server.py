@@ -25,7 +25,7 @@ app.add_middleware(
 log_queue = asyncio.Queue()
 
 # Ensure assets directory exists
-os.makedirs("assets", exist_ok=True)
+os.makedirs("workspace", exist_ok=True)
 
 @app.get("/api/settings")
 def get_settings():
@@ -80,7 +80,7 @@ async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
     await log_queue.put("[Sistema] Nueva subida de archivo detectada. Tareas anteriores canceladas y registros limpiados.")
 
     # 3. Clean up the course directory aggressively to remove all previous tempfiles
-    course_dir = os.path.join("assets", course_id)
+    course_dir = os.path.join("workspace", course_id)
     if os.path.exists(course_dir):
         try:
             shutil.rmtree(course_dir)
@@ -115,7 +115,7 @@ async def api_review(file: UploadFile = File(...)):
         return JSONResponse(status_code=400, content={"error": "El archivo debe ser un .docx."})
 
     TEMP_COURSE_ID = "temp_upload"
-    TEMP_ASSETS_DIR = os.path.join("assets", TEMP_COURSE_ID)
+    TEMP_ASSETS_DIR = os.path.join("workspace", TEMP_COURSE_ID)
 
     if os.path.exists(TEMP_ASSETS_DIR):
         try:
@@ -245,13 +245,13 @@ async def run_automation():
                         courses = [c.strip() for c in line.split("=", 1)[1].split(",") if c.strip()]
         
         for cid in courses:
-            target_docx = os.path.join("assets", cid, f"{cid}.docx")
+            target_docx = os.path.join("workspace", cid, f"{cid}.docx")
             if os.path.exists(target_docx):
                 os.remove(target_docx)
                 
         # Also clean up any loose files in the root assets dir just in case
-        for filename in os.listdir("assets"):
-            file_path = os.path.join("assets", filename)
+        for filename in os.listdir("workspace"):
+            file_path = os.path.join("workspace", filename)
             if os.path.isfile(file_path) and (filename.endswith(".docx") or filename.endswith(".html")):
                 os.remove(file_path)
                 

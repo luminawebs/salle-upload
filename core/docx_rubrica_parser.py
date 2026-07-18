@@ -57,7 +57,7 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
     }
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    html_path = os.path.join(base_dir, "assets", str(course_id), "raw_docx_extracted.html")
+    html_path = os.path.join(base_dir, "workspace", str(course_id), "raw_docx_extracted.html")
     
     if not os.path.exists(html_path):
         logger.warning(f"No raw_docx_extracted.html found at {html_path}. Cannot parse rubrics.")
