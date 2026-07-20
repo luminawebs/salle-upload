@@ -358,7 +358,7 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         return False
 
 def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
-    base_dir = os.path.join("assets", str(course_id))
+    base_dir = os.path.join("workspace", str(course_id))
     actividades_dir = os.path.join(base_dir, "actividades")
     material_dir = os.path.join(base_dir, "material")
     introduccion_dir = os.path.join(base_dir, "introduccion")

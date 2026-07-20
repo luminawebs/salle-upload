@@ -298,8 +298,8 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                 time.sleep(1)
                 
                 html_markers = "<p><span>-- Inicio texto presentación --</span></p><p><span>-- Fin texto de presentación --</span></p>"
-                template_path = os.path.join("assets", "example_course", "GENERALIDADES DEL CURSO.html")
-                course_dir = os.path.join("assets", str(course_id)) if course_id else "assets"
+                template_path = os.path.join("workspace", "example_course", "GENERALIDADES DEL CURSO.html")
+                course_dir = os.path.join("workspace", str(course_id)) if course_id else "workspace"
                 extracted_path = os.path.join(course_dir, "raw_docx_extracted.html")
                 if os.path.exists(template_path) and os.path.exists(extracted_path):
                     from actions.html_transformer import generate_dynamic_generalidades_html
@@ -312,6 +312,8 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                 elif os.path.exists(template_path):
                     with open(template_path, "r", encoding="utf-8") as f:
                         html_markers = f.read()
+                else:
+                    logger.error(f"Template path does not exist: {template_path}. Falling back to default markers.")
                         
                 # Fix Moodle "File does not exist" error caused by leftover draftfile.php URLs
                 # Extract filename and try to embed it as Base64 like html_transformer does
@@ -328,7 +330,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                     filename = full_url.split('/')[-1].split('?')[0].split('#')[0]
                     
                     if filename.lower() in ["profesor.jpg", "docente.jpg"] and course_id:
-                        raw_doc_path = os.path.join("assets", str(course_id), "raw_docx_extracted.html")
+                        raw_doc_path = os.path.join("workspace", str(course_id), "raw_docx_extracted.html")
                         if os.path.exists(raw_doc_path):
                             from bs4 import BeautifulSoup
                             with open(raw_doc_path, "r", encoding="utf-8") as rf:
@@ -340,7 +342,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                                             img = next_td.find("img")
                                             if img and img.has_attr("src"):
                                                 docx_img_src = img["src"]
-                                                docx_img_path = os.path.join("assets", str(course_id), docx_img_src)
+                                                docx_img_path = os.path.join("workspace", str(course_id), docx_img_src)
                                                 if os.path.exists(docx_img_path):
                                                     import base64
                                                     with open(docx_img_path, "rb") as img_file:
@@ -364,7 +366,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                     flags=re.IGNORECASE
                 )
                         
-                inject_html_into_wysiwyg(driver, html_markers, wait_time, target_section="intro")
+                inject_html_into_wysiwyg(driver, html_markers, wait_time, target_section="intro", submit_form=False)
             except Exception as e:
                 logger.error(f"Failed to inject markers for Label: {e}")
         else:
@@ -373,7 +375,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
             
             # Remove the checks on habilitar, on all actividades
             try:
-                from actions.actividad_actions import _configure_actividad_availability, _configure_actividad_grading
+                from actions.deprecated.actividad_actions import _configure_actividad_availability, _configure_actividad_grading
                 _configure_actividad_availability(driver)
                 _configure_actividad_grading(driver)
             except Exception as e:
@@ -408,8 +410,53 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
 def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
     logger.info(f"--- Executing Course Structure Creation Workflow for Course {course_id} ---")
     
-    raw_doc_path = os.path.join("assets", str(course_id), "raw_docx_extracted.html")
+    raw_doc_path = os.path.join("workspace", str(course_id), "raw_docx_extracted.html")
     sections = parse_raw_document(raw_doc_path)
+    
+    # --- PHASE 2 INTEGRATION: Silently run AI validation in parallel ---
+    try:
+        from core.parser_validator import run_validation
+        import threading
+        import json
+        
+        def run_ai_silently():
+            logger.info(f"[{course_id}] Starting silent AI parallel validation...")
+            try:
+                report = run_validation(course_id)
+                if not report:
+                    return
+                
+                metrics_path = "ai_fallback_metrics.json"
+                metrics = []
+                if os.path.exists(metrics_path):
+                    try:
+                        with open(metrics_path, "r", encoding="utf-8") as f:
+                            metrics = json.load(f)
+                    except json.JSONDecodeError:
+                        pass
+                
+                metrics.append({
+                    "course_id": course_id,
+                    "timestamp": time.time(),
+                    "legacy_count": report.get("legacy_activities_count", 0),
+                    "ai_count": report.get("ai_activities_count", 0),
+                    "warnings": report.get("warnings", []),
+                    "comparisons": report.get("comparisons", [])
+                })
+                
+                with open(metrics_path, "w", encoding="utf-8") as f:
+                    json.dump(metrics, f, indent=2, ensure_ascii=False)
+                    
+                logger.info(f"[{course_id}] AI fallback metrics updated.")
+            except Exception as e:
+                logger.error(f"[{course_id}] Silent AI validation failed: {e}")
+        
+        ai_thread = threading.Thread(target=run_ai_silently)
+        ai_thread.start()
+        
+    except ImportError:
+        logger.warning("AI parser validator not found, skipping parallel validation.")
+    # -----------------------------------------------------------------
     
     if not sections:
         logger.warning(f"No sections found in {raw_doc_path} or file missing.")

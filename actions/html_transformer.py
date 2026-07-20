@@ -12,21 +12,22 @@ RUBRIC_HEADER_STYLE = "background-color: #e7b917;"
 def get_image_base64(image_filename: str, course_id: int = None) -> str:
     image_path = None
     
-    # Try course specific images first
+    # 1. First, check if the image is in the specific course's img folder
     if course_id:
-        course_img = os.path.join("assets", str(course_id), "imgs", image_filename)
+        course_img = os.path.join("workspace", str(course_id), "imgs", image_filename)
         if os.path.exists(course_img):
             image_path = course_img
 
     if not image_path:
-        # Try shared assets
-        shared_img = os.path.join("assets", "shared", image_filename)
+        # 2. If not, check if it's a shared global asset
+        # Try shared workspace
+        shared_img = os.path.join("workspace", "shared", image_filename)
         if os.path.exists(shared_img):
             image_path = shared_img
             
     if not image_path:
-        # Fallback to example_course
-        example_img = os.path.join("assets", "example_course", image_filename)
+        # 3. Fallback: check the example course folder (for testing/development)
+        example_img = os.path.join("workspace", "example_course", image_filename)
         if os.path.exists(example_img):
             image_path = example_img
             
@@ -159,7 +160,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     state = 'SEARCHING' # SEARCHING, STEM, OPTIONS, FEEDBACK
     
     def save_q():
-        if current_q and current_q['stem_html'] and current_q['options']:
+        if current_q and current_q['stem_html']:
             questions.append(current_q)
             
     def create_empty_q():
@@ -287,26 +288,28 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         }
         
         q_xml = f'<!-- question: {q_num}  -->\n'
-        q_type = 'truefalse' if is_true_false else 'multichoice'
+        q_type = 'truefalse' if is_true_false else ('multichoice' if options else 'description')
         q_xml += f'  <question type="{q_type}">\n'
         q_xml += f'    <name>\n      <text><![CDATA[{course_id}_{document_name}_q{q_num}]]></text>\n    </name>\n'
         q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{stem_html}]]></text>\n    </questiontext>\n'
         if fb_gen:
             q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{fb_gen}]]></text>\n    </generalfeedback>\n'
-        if fb_corr:
-            q_xml += f'    <correctfeedback format="html">\n      <text><![CDATA[{fb_corr}]]></text>\n    </correctfeedback>\n'
-        if fb_inc:
-            q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{fb_inc}]]></text>\n    </incorrectfeedback>\n'
-        q_xml += '    <defaultgrade>1.0000000</defaultgrade>\n'
-        q_xml += '    <penalty>0.3333333</penalty>\n'
-        q_xml += '    <hidden>0</hidden>\n'
+            
+        if q_type != 'description':
+            if fb_corr:
+                q_xml += f'    <correctfeedback format="html">\n      <text><![CDATA[{fb_corr}]]></text>\n    </correctfeedback>\n'
+            if fb_inc:
+                q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{fb_inc}]]></text>\n    </incorrectfeedback>\n'
+            q_xml += '    <defaultgrade>1.0000000</defaultgrade>\n'
+            q_xml += '    <penalty>0.3333333</penalty>\n'
+            q_xml += '    <hidden>0</hidden>\n'
         
-        if is_true_false:
+        if q_type == 'truefalse':
             q_xml += f'    <answer fraction="{"100" if correct_is_true else "0"}" format="moodle_auto_format">\n      <text>true</text>\n    </answer>\n'
             q_xml += f'    <answer fraction="{"0" if correct_is_true else "100"}" format="moodle_auto_format">\n      <text>false</text>\n    </answer>\n'
             q_dict["options"].append({"text_html": "true", "is_correct": correct_is_true})
             q_dict["options"].append({"text_html": "false", "is_correct": not correct_is_true})
-        else:
+        elif q_type == 'multichoice':
             q_xml += '    <single>true</single>\n'
             q_xml += '    <shuffleanswers>true</shuffleanswers>\n'
             q_xml += '    <answernumbering>abc</answernumbering>\n'

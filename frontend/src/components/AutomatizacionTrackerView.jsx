@@ -290,7 +290,7 @@ export default function AutomatizacionTrackerView({ setActiveTab }) {
               <input type="file" accept=".docx" className="hidden" onChange={handleUpload} />
             </label>
           </div>
-          
+
           <AutomationControls />
 
 
@@ -385,7 +385,7 @@ export default function AutomatizacionTrackerView({ setActiveTab }) {
 
               return (
                 <div key={phase.id} className={`bg-surface rounded-xl border ${phaseBorder} p-5 shadow-sm transition-all`}>
-                  <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-lg border ${theme.iconBg} ${theme.iconText} ${theme.iconBorder}`}>
                         {phase.icon}

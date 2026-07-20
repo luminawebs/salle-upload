@@ -22,7 +22,7 @@ from google.genai.errors import APIError
 
 def get_ai_config():
     return {
-        "model_name": os.environ.get("GEMINI_MODEL_NAME", "gemini-2.0-flash"),
+        "model_name": os.environ.get("GEMINI_MODEL_NAME", "gemini-3.5-flash"),
         "retry_count": int(os.environ.get("AI_RETRY_COUNT", "5")),
         "initial_delay": float(os.environ.get("AI_RETRY_INITIAL_DELAY", "2")),
         "max_delay": float(os.environ.get("AI_RETRY_MAX_DELAY", "32")),
@@ -70,6 +70,7 @@ Instructions:
 - In `removals`, provide the indices (0-based) of items that are not actually questions and should be deleted.
 - If the parser found 0 questions but the HTML contains valid questions, extract all of them into `additions`.
 - If the parser found 0 questions and there truly are none, set `is_perfect` to true and leave arrays empty.
+- For drag-and-drop or fill-in-the-blank questions that don't have standard multiple-choice options, leave their `options` array empty. They will be imported as 'description' type questions.
 """
 
     schema = {
@@ -221,7 +222,7 @@ Focus strictly on how to improve the Selenium code (e.g., "Add an Explicit Wait 
 """
     try:
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model='gemini-3.5-flash',
             contents=prompt
         )
         return response.text.strip()

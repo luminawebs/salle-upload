@@ -7,3 +7,4 @@ lxml
 fastapi
 uvicorn
 python-multipart
+google-genai

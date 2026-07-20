@@ -291,9 +291,19 @@ def run_docx_splitting_workflow(course_id: int):
                 
                 act_html_transformed = str(act_soup)
                 
-                with open(os.path.join(output_dirs["actividades"], f"actividad{current_activity}.html"), "w", encoding="utf-8") as f:
+                base_act_name = f"actividad{current_activity}"
+                act_file_name = f"{base_act_name}.html"
+                act_file_path = os.path.join(output_dirs["actividades"], act_file_name)
+                
+                counter = 1
+                while os.path.exists(act_file_path):
+                    act_file_name = f"{base_act_name}_{counter}.html"
+                    act_file_path = os.path.join(output_dirs["actividades"], act_file_name)
+                    counter += 1
+                
+                with open(act_file_path, "w", encoding="utf-8") as f:
                     f.write(act_html_transformed)
-                logger.info(f"  ✓ Extracted actividad{current_activity}.html")
+                logger.info(f"  ✓ Extracted {act_file_name}")
         else:
             # Not a unit, not an activity.
             pass

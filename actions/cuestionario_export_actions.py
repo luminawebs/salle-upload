@@ -10,7 +10,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from config.settingsSALLE import ConfigSALLE as Config
 from actions.moodle_actions import navigate_to_course
 from actions.html_transformer import extract_questions_from_html_to_moodle_xml
-from actions.puntos_extras_actions import _get_cmid_for_activity
+from actions.deprecated.puntos_extras_actions import _get_cmid_for_activity
 from actions.cuestionario_grade_actions import update_quiz_grades
 
 logger = logging.getLogger(__name__)
@@ -325,7 +325,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
 
 def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10):
     logger.info(f"Starting Cuestionario Export workflow for course {course_id}...")
-    base_dir = os.path.join("assets", str(course_id))
+    base_dir = os.path.join("workspace", str(course_id))
     actividades_dir = os.path.join(base_dir, "actividades")
     
     if not os.path.exists(actividades_dir):

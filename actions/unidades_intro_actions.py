@@ -72,7 +72,7 @@ def upload_unidades_intro_for_course(driver, course_id: int, wait_time: int = 15
     Uploads the generated introduccion_unidad_N.html fragments to the Moodle section summaries.
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    intro_dir = os.path.join(base_dir, "assets", str(course_id), "introduccion")
+    intro_dir = os.path.join(base_dir, "workspace", str(course_id), "introduccion")
 
     if not os.path.exists(intro_dir):
         logger.warning(f"No introduccion directory found for course {course_id}. Skipping Unidades Intro upload.")

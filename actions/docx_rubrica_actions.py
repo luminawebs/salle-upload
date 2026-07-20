@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
 from actions.moodle_actions import MoodleAutomation, navigate_to_course
-from actions.actividad_rubrica_actions import _navigate_to_rubric_editor, fill_rubric
+from actions.deprecated.actividad_rubrica_actions import _navigate_to_rubric_editor, fill_rubric
 from core.docx_rubrica_parser import parse_rubricas_from_docx
 from config.settingsSALLE import ConfigSALLE
 

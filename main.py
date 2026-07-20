@@ -14,6 +14,7 @@ from actions.cuestionario_export_actions import run_cuestionario_export_workflow
 from actions.unidades_intro_actions import upload_unidades_intro_for_course
 from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
+from actions.materiales_estudio_actions import run_materiales_estudio_workflow
 from config.settingsSALLE import ConfigSALLE as Config
 
 # Setup base logging for the application
@@ -164,6 +165,24 @@ def main():
                             pass
                 else:
                     logger.info("DOCX HTML upload workflow is disabled via config.")
+
+                if getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False) and edit_enabled:
+                    logger.info("Executing Materiales de Estudio workflow...")
+                    try:
+                        run_materiales_estudio_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                    except Exception as e:
+                        import traceback
+                        logger.error(f"Error executing run_materiales_estudio_workflow for course {course_id}: {e}")
+                        logger.error(traceback.format_exc())
+                        try:
+                            dismiss_moodle_error_overlays(driver)
+                            logger.info(f"Navigating back to course {course_id} home after error...")
+                            moodle.navigate_to_course(course_id)
+                        except Exception:
+                            pass
+                elif not getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False):
+                    logger.info("Materiales de Estudio workflow is disabled via config.")
+
 
                 if (getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False) or getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)) and edit_enabled:
                     logger.info("Executing Cuestionario export/grade workflow...")
