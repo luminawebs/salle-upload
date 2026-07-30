@@ -4,6 +4,13 @@ import { Settings, Save, Check, ChevronDown, ChevronRight, Play } from 'lucide-r
 
 const CATEGORIES = [
   {
+    id: 'ai',
+    title: 'Inteligencia Artificial',
+    flags: [
+      { key: 'ENABLE_AI_FEATURES', label: 'Habilitar Funciones de IA' }
+    ]
+  },
+  {
     id: 'parsing',
     title: '1. Procesamiento de Documentos',
     flags: [

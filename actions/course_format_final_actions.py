@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-from config.settingsSALLE import ConfigSALLE as Config
+from config.settings import Config
 
 logger = logging.getLogger(__name__)
 

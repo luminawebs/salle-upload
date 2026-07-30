@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
 from actions.moodle_actions import navigate_to_course
-from config.settingsSALLE import ConfigSALLE
+from config.settings import Config
 from core.wysiwyg_handler import inject_html_into_wysiwyg
 from actions.html_transformer import format_urls_in_html, format_typography_in_html
 

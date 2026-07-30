@@ -4,12 +4,17 @@ import logging
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+from config.settings import Config
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 def get_gemini_client():
+    if not getattr(Config, "ENABLE_AI_FEATURES", True):
+        logger.info("AI features are disabled via configuration.")
+        return None
+        
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         logger.error("GEMINI_API_KEY environment variable not found. AI fallback disabled.")

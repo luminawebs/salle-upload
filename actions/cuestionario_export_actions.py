@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-from config.settingsSALLE import ConfigSALLE as Config
+from config.settings import Config
 from actions.moodle_actions import navigate_to_course
 from actions.html_transformer import extract_questions_from_html_to_moodle_xml
 from actions.deprecated.puntos_extras_actions import _get_cmid_for_activity

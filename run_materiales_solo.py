@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from core.moodle_handler import MoodleHandler
-from config.settingsSALLE import ConfigSALLE as Config
+from config.settings import Config
 from actions.materiales_estudio_actions import run_materiales_estudio_workflow
 from actions.section_actions import enable_edit_mode
 

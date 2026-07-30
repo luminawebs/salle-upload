@@ -15,7 +15,7 @@ from actions.unidades_intro_actions import upload_unidades_intro_for_course
 from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
 from actions.materiales_estudio_actions import run_materiales_estudio_workflow
-from config.settingsSALLE import ConfigSALLE as Config
+from config.settings import Config
 
 # Setup base logging for the application
 logging.basicConfig(

@@ -4,6 +4,7 @@ import logging
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+from config.settings import Config
 
 load_dotenv()
 
@@ -14,6 +15,19 @@ def parse_chunk_with_ai(chunk_html: str) -> dict:
     Sends an HTML chunk to Gemini to extract activities, rubrics, etc.
     Requires the exact original HTML fragments to be returned.
     """
+    if not getattr(Config, "ENABLE_AI_FEATURES", True):
+        logger.info("AI features are disabled via configuration.")
+        return {
+            "metadata": {
+                "confidence": 0.0,
+                "warnings": ["AI disabled via configuration"],
+                "parser_version": "1.0",
+                "model": "gemini-3.5-flash",
+                "schema_version": "1.0"
+            },
+            "activities": []
+        }
+        
     client = genai.Client()
     
     # We define the JSON schema dictionary manually for the new SDK

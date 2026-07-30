@@ -96,7 +96,7 @@ def upload_unidades_intro_for_course(driver, course_id: int, wait_time: int = 15
 
         # Failsafe: Ensure we are on the course page before finding the section
         if "course/view.php" not in driver.current_url:
-            from config.settingsSALLE import ConfigSALLE
+            from config.settings import Config
             logger.info("  Not on course view page, navigating back...")
             course_url = f"{ConfigSALLE.MOODLE_URL}/course/view.php?id={course_id}"
             driver.get(course_url)

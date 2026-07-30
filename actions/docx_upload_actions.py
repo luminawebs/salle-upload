@@ -9,7 +9,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from actions.moodle_actions import navigate_to_course
 from core.wysiwyg_handler import inject_html_into_wysiwyg, extract_html_from_wysiwyg
-from config.settingsSALLE import ConfigSALLE as Config
+from config.settings import Config
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def click_edit_for_activity(driver, activity_name_prefix, wait_time):
     wait = WebDriverWait(driver, wait_time)
     if "course/view.php" not in driver.current_url:
         from actions.moodle_actions import navigate_to_course
-        from config.settingsSALLE import ConfigSALLE as Config
+        from config.settings import Config
         # Extract course ID from URL if possible or assume it's the current one... 
         # Better yet, pass course_id into click_edit_for_activity
         pass # We'll handle this in the main loop instead
