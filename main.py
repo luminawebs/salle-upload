@@ -16,6 +16,7 @@ from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
 from actions.materiales_estudio_actions import run_materiales_estudio_workflow
 from config.settings import Config
+from core.debug_utils import capture_debug_state
 
 # Setup base logging for the application
 logging.basicConfig(
@@ -64,8 +65,15 @@ def main():
             logger.error("Aborting process since login failed.")
             return
 
-        # Step 2: Iterate through all target courses
         for course_id in courses_to_process:
+            course_log_dir = os.path.join(Config.WORKSPACE_DIR, str(course_id), "logs")
+            os.makedirs(course_log_dir, exist_ok=True)
+            log_file_path = os.path.join(course_log_dir, "execution.log")
+            
+            file_handler = logging.FileHandler(log_file_path, mode='a', encoding='utf-8')
+            file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+            logging.getLogger().addHandler(file_handler)
+
             try:
                 logger.info(f"--- Processing Course ID: {course_id} ---")
                 logger.info(f"Nombre del curso: Curso {course_id}")
@@ -119,9 +127,11 @@ def main():
                     logger.info("Switching course format to 'Secciones personalizadas'...")
                     try:
                         set_custom_sections_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+                        capture_debug_state(driver, course_id, 'set_custom_sections_format', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing set_custom_sections_format for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'set_custom_sections_format_error', is_error=True)
+                        logger.error(f\"Error executing set_custom_sections_format for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -136,9 +146,11 @@ def main():
                     logger.info("Executing course structure creation workflow...")
                     try:
                         run_course_structure_creation_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+                        capture_debug_state(driver, course_id, 'course_structure_creation', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing run_course_structure_creation_workflow for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'course_structure_creation_error', is_error=True)
+                        logger.error(f\"Error executing run_course_structure_creation_workflow for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -153,9 +165,11 @@ def main():
                     logger.info("Executing DOCX HTML upload workflow...")
                     try:
                         run_docx_upload_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        capture_debug_state(driver, course_id, 'docx_upload', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing run_docx_upload_workflow for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'docx_upload_error', is_error=True)
+                        logger.error(f\"Error executing run_docx_upload_workflow for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -170,9 +184,11 @@ def main():
                     logger.info("Executing Materiales de Estudio workflow...")
                     try:
                         run_materiales_estudio_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        capture_debug_state(driver, course_id, 'materiales_estudio', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing run_materiales_estudio_workflow for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'materiales_estudio_error', is_error=True)
+                        logger.error(f\"Error executing run_materiales_estudio_workflow for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -188,9 +204,11 @@ def main():
                     logger.info("Executing Cuestionario export/grade workflow...")
                     try:
                         run_cuestionario_export_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        capture_debug_state(driver, course_id, 'cuestionario_export', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing run_cuestionario_export_workflow for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'cuestionario_export_error', is_error=True)
+                        logger.error(f\"Error executing run_cuestionario_export_workflow for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -205,9 +223,11 @@ def main():
                     logger.info("Executing Unidades Intro upload workflow...")
                     try:
                         upload_unidades_intro_for_course(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+                        capture_debug_state(driver, course_id, 'unidades_intro_upload', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing upload_unidades_intro_for_course for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'unidades_intro_upload_error', is_error=True)
+                        logger.error(f\"Error executing upload_unidades_intro_for_course for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -222,9 +242,11 @@ def main():
                     logger.info("Executing DOCX Rubrica upload workflow...")
                     try:
                         run_docx_rubrica_upload_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+                        capture_debug_state(driver, course_id, 'docx_rubrica_upload', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing run_docx_rubrica_upload_workflow for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'docx_rubrica_upload_error', is_error=True)
+                        logger.error(f\"Error executing run_docx_rubrica_upload_workflow for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -241,6 +263,7 @@ def main():
                     run_activity_completion_workflow(
                         driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
                     )
+                    capture_debug_state(driver, course_id, 'activity_completion', is_error=False)
                 elif not getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False):
                     logger.info("Activity completion update workflow is disabled via config.")
 
@@ -248,9 +271,11 @@ def main():
                     logger.info("Reverting course format back to 'Formato de botones'...")
                     try:
                         set_buttons_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+                        capture_debug_state(driver, course_id, 'set_buttons_format', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing set_buttons_format for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'set_buttons_format_error', is_error=True)
+                        logger.error(f\"Error executing set_buttons_format for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -265,15 +290,18 @@ def main():
                     logger.info("Setting final course format to 'Formato de botones'...")
                     try:
                         set_final_buttons_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
+                        capture_debug_state(driver, course_id, 'set_final_buttons_format', is_error=False)
                     except Exception as e:
                         import traceback
-                        logger.error(f"Error executing set_final_buttons_format for course {course_id}: {e}")
+                        capture_debug_state(driver, course_id, 'set_final_buttons_format_error', is_error=True)
+                        logger.error(f\"Error executing set_final_buttons_format for course {course_id}: {e}\")
                         logger.error(traceback.format_exc())
                 elif not getattr(Config, "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", False):
                     logger.info("Final course format workflow is disabled via config.")
                 dismiss_moodle_error_overlays(driver)
             except Exception as e:
                 import traceback
+                capture_debug_state(driver, course_id, 'general_course_error', is_error=True)
                 logger.error(f"Error processing course {course_id}: {e}")
                 logger.error(traceback.format_exc())
                 try:
@@ -283,7 +311,13 @@ def main():
                 except Exception:
                     pass
                 finally:
+                    logging.getLogger().removeHandler(file_handler)
+                    file_handler.close()
                     continue
+
+            # Ensure the handler is removed if the try block completes successfully
+            logging.getLogger().removeHandler(file_handler)
+            file_handler.close()
 
     except Exception as e:
         import traceback

@@ -98,7 +98,7 @@ def upload_unidades_intro_for_course(driver, course_id: int, wait_time: int = 15
         if "course/view.php" not in driver.current_url:
             from config.settings import Config
             logger.info("  Not on course view page, navigating back...")
-            course_url = f"{ConfigSALLE.MOODLE_URL}/course/view.php?id={course_id}"
+            course_url = f"{Config.MOODLE_URL}/course/view.php?id={course_id}"
             driver.get(course_url)
             try:
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view, #region-main")))

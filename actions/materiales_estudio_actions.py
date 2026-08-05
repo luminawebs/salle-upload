@@ -201,7 +201,7 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
     
     # Ensure we are on the course homepage
     logger.info("Navigating to course homepage to find sections...")
-    navigate_to_course(driver, ConfigSALLE.MOODLE_URL, course_id, wait_time)
+    navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
     time.sleep(2)
     
     unidad_num = 1

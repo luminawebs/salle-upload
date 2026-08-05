@@ -12,12 +12,19 @@ class Config:
     # --------------------------------- ACTIVE SETTINGS ------------------------------------------------
     # ==================================================================================================
     ENABLE_AI_FEATURES = os.getenv("ENABLE_AI_FEATURES", "True").lower() in ("true", "1", "t")
+    TESTING_MODE = os.getenv("TESTING_MODE", "False").lower() in ("true", "1", "t")
 
     
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     WORKSPACE_DIR = os.path.join(BASE_DIR, "workspace")
 
-    MOODLE_URL = os.getenv("MOODLE_URL", "https://moodle.example.com").rstrip("/")
+    USE_TESTING_ENV = os.getenv("USE_TESTING_ENV", "False").lower() in ("true", "1", "t")
+
+    if USE_TESTING_ENV:
+        MOODLE_URL = os.getenv("MOODLE_TESTING_URL", "https://testing.moodle.example.com").rstrip("/")
+    else:
+        MOODLE_URL = os.getenv("MOODLE_URL", "https://moodle.example.com").rstrip("/")
+        
     MOODLE_USERNAME = os.getenv("MOODLE_USERNAME")
     MOODLE_PASSWORD = os.getenv("MOODLE_PASSWORD")
 
