@@ -11,7 +11,7 @@ class Config:
     # ==================================================================================================
     # --------------------------------- ACTIVE SETTINGS ------------------------------------------------
     # ==================================================================================================
-    ENABLE_AI_FEATURES = os.getenv("ENABLE_AI_FEATURES", "True").lower() in ("true", "1", "t")
+    ENABLE_AI_FEATURES = os.getenv("ENABLE_AI_FEATURES", "False").lower() in ("true", "1", "t")
     TESTING_MODE = os.getenv("TESTING_MODE", "False").lower() in ("true", "1", "t")
 
     

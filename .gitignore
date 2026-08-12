@@ -40,3 +40,6 @@ dist-ssr
 
 # Workspace directory for dynamic content
 workspace/
+
+__pycache__/
+*.py[cod]

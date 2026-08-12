@@ -19,7 +19,7 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
     Searches across all sections.
     """
     if "course/view.php" not in driver.current_url:
-        navigate_to_course(driver, ConfigSALLE.MOODLE_URL, course_id, wait_time)
+        navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
 
     # Wait for the course content to be fully loaded
     try:
@@ -77,7 +77,7 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
                                 href = link.get_attribute("href") or ""
                                 if "mod/assign" in href or "mod/forum" in href:
                                     if href.startswith("/"):
-                                        base = re.match(r"(https?://[^/]+)", ConfigSALLE.MOODLE_URL).group(1)
+                                        base = re.match(r"(https?://[^/]+)", Config.MOODLE_URL).group(1)
                                         href = base + href
                                     logger.info(f"  ✓ Found URL for '{activity_name}' as '{name_text}': {href}")
                                     return href, name_text

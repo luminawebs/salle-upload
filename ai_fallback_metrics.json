@@ -760,5 +760,269 @@
         "reasoning": "Title 'Introducción General' not found in AI extraction."
       }
     ]
+  },
+  {
+    "course_id": 70801,
+    "timestamp": 1785964851.2801473,
+    "legacy_count": 8,
+    "ai_count": 22,
+    "warnings": [
+      "Integrity Check Failed in UNIDAD 3 - ACTIVIDAD 3. Cuestionario. Restitución de tierras y justicia transicional for description_html: ['Unexpected attribute value found: href=https://www.scielo.org.mx/scielo.php?pid=S0188-76532015000200005&script=sci_abstract', 'Unexpected attribute value found: href=http://www.scielo.org.co/scielo.php?pid=S1692-25302016000100002&script=sci_arttext']",
+      "Integrity Check Failed in UNIDAD 3 - ACTIVIDAD 4. Evaluación final: análisis integral de caso de restitución y conflicto territorial for description_html: ['Unexpected attribute value found: href=http://www.scielo.org.co/scielo.php?pid=S1909-30632011000200005&script=sci_arttext']"
+    ],
+    "comparisons": [
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 1. Introducción al curso",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 1. Introducción al curso</strong></p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 1. Introducción al curso' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 2. Historia agraria",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 2. Historia agraria</strong></p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 2. Historia agraria' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 3. Tipologías de conflicto",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 3. Tipologías de conflicto</strong></p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 3. Tipologías de conflicto' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 4. Discusión guiada",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 4. Discusión guiada</strong></p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 4. Discusión guiada' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Foro 1. Cartografía inicial del conflicto de tierras",
+          "type": "Foro",
+          "description_html": "<p><strong>Foro 1. Cartografía inicial del conflicto de tierras</strong></p><p><strong>¿Qué vamos a lograr?</strong></p><p>Identificar las causas estructurales, actores, tensiones y formas de escalamiento de los conflictos de tierras a partir del análisis de casos reales del contexto colombiano.</p><p><strong>¿Cómo lo vamos a lograr?</strong></p><p>Apreciado estudiante, </p><p>A través de esta actividad no evaluable, de manera individual, vamos a preparar el análisis del caso-problema de aula sobre conflictos de tierras en Colombia. Para iniciar, revisa atentamente los siguientes materiales:</p><ul><li>Guía de contenido de la unidad 1, disponible en el material de estudio de la unidad.</li><li>Los elementos trabajados en el encuentro virtual 1 y 2.</li><li><strong>Material 1:</strong> Caminos hacia la transformación: análisis de los abordajes de las comunidades y el Estado sobre 5 casos de conflictos por la tierra y el territorio: <a href=\"https://repositorio.unicartagena.edu.co/entities/publication/8b5cb5fc-959e-41c7-a0d3-219703066cbd\">https://repositorio.unicartagena.edu.co/entities/publication/8b5cb5fc-959e-41c7-a0d3-219703066cbd</a> </li><li><strong>Material 2:</strong> Conflicto de teorías sobre la propiedad de la tierra en Colombia: <a href=\"https://www.jstor.org/stable/3538142?seq=1\">https://www.jstor.org/stable/3538142?seq=1</a> </li></ul><p>Luego de haber revisado los materiales, selecciona uno de los casos presentados en los materiales de la unidad: Serranía del Perijá, Playones de Sincerín, Bajo Sinú, La Macarena o Caquetá. Procede a participar en el foro a partir de una primera intervención de 250 a 400 palabras en la que describas:</p><ul><li>¿Cuál es el núcleo del conflicto?</li><li>¿Qué actores participan?</li><li>¿Qué intereses están en disputa?</li><li>¿Qué factores históricos explican su persistencia?</li><li>¿Se trata solo de un conflicto de propiedad o de una disputa más amplia por territorio, permanencia, uso, poder y reconocimiento?</li></ul><p>Comenta al menos dos intervenciones de compañeros, señalando coincidencias, diferencias o factores no identificados en su lectura del caso. Evita respuestas meramente descriptivas: tu participación debe tener una mirada analítica y argumentada.</p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Foro 1. Cartografía inicial del conflicto de tierras' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present in both",
+        "ai_activity": {
+          "title": "ACTIVIDAD 1. Cuestionario: conflicto agrario, propiedad y territorialidad",
+          "type": "Cuestionario",
+          "description_html": "<p><strong>ACTIVIDAD 1. Cuestionario: conflicto agrario, propiedad y territorialidad</strong></p><p><strong>¿Qué vamos a lograr?</strong></p><p>Analizar situaciones problemáticas sobre conflicto de tierras mediante la aplicación de categorías históricas, territoriales y jurídicas básicas.</p><p><strong>¿Cómo lo vamos a lograr?</strong></p><p>Apreciado estudiante,</p><p>A través de esta actividad evaluable, de manera individual, vamos a resolver un conjunto de casos a través de preguntas de análisis. Para iniciar, retoma atentamente los siguientes materiales:</p><ul><li>Guía de contenido de la unidad 1, disponible en el material de estudio de la unidad.</li><li>Los elementos trabajados en el encuentro virtual 1 y 2.</li><li><strong>Material 1:</strong> Caminos hacia la transformación: análisis de los abordajes de las comunidades y el Estado sobre 5 casos de conflictos por la tierra y el territorio: <a href=\"https://repositorio.unicartagena.edu.co/entities/publication/8b5cb5fc-959e-41c7-a0d3-219703066cbd\">https://repositorio.unicartagena.edu.co/entities/publication/8b5cb5fc-959e-41c7-a0d3-219703066cbd</a> </li><li><strong>Material 2:</strong> Conflicto de teorías sobre la propiedad de la tierra en Colombia: <a href=\"https://revistamexicanadesociologia.unam.mx/index.php/rms/article/download/58925/52114\">https://revistamexicanadesociologia.unam.mx/index.php/rms/article/download/58925/52114</a> </li></ul><p>Luego de haber revisado los materiales, procede a resolver las siguientes preguntas:</p>",
+          "rubric_html": "<p><strong>¿Cómo lo vamos a evaluar?</strong></p><p><em>N/A.</em></p>",
+          "questionnaire_html": "<p><strong>Pregunta 1</strong>. </p><p>En una zona rural, dos comunidades afirman tener derecho sobre un mismo espacio: una porque lo ocupa históricamente como territorio de vida y producción, y otra porque cuenta con títulos que considera suficientes para hacerlo valer.</p><p>¿Cuál es la mejor lectura inicial del conflicto?</p><p>A. Es exclusivamente un litigio civil entre propietarios.</p><p>=B. Es un conflicto agrario y territorial que exige analizar actores, trayectorias, usos y regulaciones.</p><p>C. Es un problema administrativo sin relevancia social.</p><p>D. Es una disputa que solo puede resolverse mediante policía.</p><p>Retroalimentación para respuestas incorrectas:</p><p>La lectura del conflicto de tierras exige superar una comprensión puramente privada o policiva; los conflictos agrarios involucran dimensiones históricas, sociales, institucionales y territoriales.</p><p>Retroalimentación para respuesta correcta:</p><p>Correcto. Los conflictos por la tierra y el territorio deben leerse desde una perspectiva compleja, considerando actores, historia del conflicto, usos, tensiones y reglas institucionales.</p><p><strong>Pregunta 2</strong>. </p><p>Un análisis histórico muestra colonización campesina, expansión de frontera agrícola, despojo y posterior contrarreforma violenta.</p><p>¿Qué revela esto sobre el conflicto de tierras?</p><p>A. Que los conflictos son accidentales y coyunturales.</p><p>=B. Que los conflictos agrarios tienen raíces estructurales e históricas.</p><p>C. Que la violencia no se relaciona con la tierra.</p><p>D. Que el derecho privado es suficiente para resolverlos.</p><p>Retroalimentación para respuestas incorrectas: La literatura sobre conflictos por la tierra muestra que no son fenómenos aislados, sino expresiones de procesos históricos persistentes.</p><p>Retroalimentación para respuesta correcta: Correcto. La conflictividad agraria en Colombia está ligada a procesos históricos de colonización, concentración, despojo y respuestas institucionales fallidas.</p><p><strong>Pregunta 3</strong>. </p><p>Una comunidad plantea que el problema no es solo la tierra, sino la permanencia, el agua, el reconocimiento y la supervivencia económica.</p><p>¿Qué concepto resulta más adecuado?</p><p>A. Conflicto exclusivamente contractual.</p><p>B. Conflicto de orden público menor.</p><p>=C. Conflicto agrario y territorial.</p><p>D. Conflicto sucesoral.</p><p>Retroalimentación para respuestas incorrectas: Cuando la disputa incluye permanencia, uso, agua, identidad y reconocimiento, ya no basta una categoría contractual o patrimonial.</p><p>Retroalimentación para respuesta correcta: Correcto. Se trata de un conflicto agrario y territorial, no de una simple controversia patrimonial.</p><p><strong>Pregunta 4</strong>. </p><p>Un abogado especialista en derecho agrario debe asesorar a una cooperativa campesina que quiere acceder a la tierra mediante un esquema de arrendamiento con opción de compra, en una zona con presencia histórica de conflicto armado. Con base en los planteamientos de Lozano et al. (2009) sobre los derechos de uso como alternativa a los derechos de propiedad, ¿cuál es la recomendación más fundamentada?</p><p>A. Desistir del proceso porque en zonas de conflicto armado ningún mecanismo jurídico puede garantizar la seguridad de la tenencia.</p><p>B. Optar por la invasión directa del predio como mecanismo de facto para luego solicitar la extinción de dominio.</p><p>=C. Gestionar el arrendamiento con opción de compra como derecho de uso, asegurando derechos de propiedad claros en el contrato, ambiente social seguro y acompañamiento financiero, tal como lo propone el neo-institucionalismo.</p><p>D. Esperar a que el Estado compre y redistribuya las tierras antes de iniciar cualquier gestión privada.</p><p>Retroalimentación para respuestas incorrectas: La opción A conduce a la parálisis e ignora los mecanismos disponibles. La opción B es ilegal y contradice los principios del estado de derecho. La opción D no reconoce la posibilidad de derechos de uso como alternativa válida e inmediata.</p><p>Retroalimentación para respuesta correcta: Correcto. Lozano et al. (2009), siguiendo a De Janvry et al. (2002), proponen que los mercados de arrendamiento y los derechos de uso son alternativas reales siempre que existan: derechos de propiedad claramente definidos en el contrato, un ambiente social que inspire confianza entre los agentes y recursos de financiación básicos para los arrendatarios.</p><p><strong>Pregunta 5</strong>. </p><p>Un investigador concluye que, para comprender un conflicto de tierras, deben analizarse eventos, escaladas, descensos, actores, regulaciones y contextos. ¿Qué enfoque está aplicando?</p><p>A. Un enfoque exclusivamente dogmático.</p><p>=B. Un enfoque dinámico de análisis del conflicto.</p><p>C. Un enfoque puramente registral.</p><p>D. Un enfoque exclusivamente económico.</p><p>Retroalimentación para respuestas incorrectas: Los conflictos por la tierra requieren enfoques dinámicos que permitan captar su evolución y no solo una fotografía estática.</p><p>Retroalimentación para respuesta correcta: Correcto. El enfoque dinámico del conflicto permite identificar hitos, actores, regulaciones y momentos de escalamiento o transformación.</p>"
+        },
+        "legacy_activity": {
+          "name": "ACTIVIDAD 1. Cuestionario: conflicto agrario, propiedad y territorialidad",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Exact title and type match"
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 5. Propiedad rural",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 5</strong>. Propiedad rural </p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 5. Propiedad rural' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 6. Régimen constitucional",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 6</strong>. Régimen constitucional  </p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 6. Régimen constitucional' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 7. Función social y ecológica de la propiedad rural",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 7</strong>. Función social y ecológica de la propiedad rural </p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 7. Función social y ecológica de la propiedad rural' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Foro 2. ¿Propiedad, posesión o justicia territorial?",
+          "type": "Foro",
+          "description_html": "<p><strong>¿Qué vamos a lograr?</strong></p><p>Diferenciar categorías jurídicas centrales de la tierra rural y problematizar sus límites frente a conflictos reales de acceso, uso y redistribución.</p><p><strong>¿Cómo lo vamos a lograr?</strong></p><p>Apreciado estudiante,</p><p>A través de esta actividad no evaluable, de manera individual, vamos a preparar la discusión sobre el régimen jurídico de la propiedad rural y sus tensiones con la realidad territorial. Para iniciar, revisa atentamente los siguientes materiales:</p><ul><li>Guía de contenido de la unidad 2, disponible en el material de estudio de la unidad.</li><li>Los elementos trabajados en el encuentro virtual 5, 6 y 7.</li><li><strong>Material 1:</strong> Los derechos de propiedad sobre la tierra: reglas de juego y cambios en su institucionalidad: <a href=\"https://dialnet.unirioja.es/servlet/articulo?codigo=5983151\">https://dialnet.unirioja.es/servlet/articulo?codigo=5983151</a> </li><li><strong>Material 2:</strong> Land grabbing, land dispossession, land rush: what can we learn from Colombia? <a href=\"https://www.cambridge.org/core/journals/journal-of-latin-american-studies/article/abs/land-property-rights-and-redistribution-the-evidence-from-colombia/C36B01EB0665B45CF232D802FBCB5E8A\">https://www.cambridge.org/core/journals/journal-of-latin-american-studies/article/abs/land-property-rights-and-redistribution-the-evidence-from-colombia/C36B01EB0665B45CF232D802FBCB5E8A</a> </li></ul><p>Luego de haber revisado los materiales, procede a participar en el foro siguiendo estas orientaciones:</p><ul><li>Explica brevemente la diferencia entre propiedad, posesión, ocupación y tenencia en contexto rural.</li><li>Responde a la pregunta detonante: ¿La formalización de la propiedad basta para resolver la conflictividad rural o se requieren medidas redistributivas, territoriales e institucionales más amplias?</li><li>Relaciona tu respuesta con un caso de acaparamiento, despojo, restitución o concentración de tierras.</li><li>Comenta al menos dos aportes de tus compañeros, señalando si su análisis privilegia una mirada civil, agraria, constitucional o territorial.</li></ul>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Foro 2. ¿Propiedad, posesión o justicia territorial?' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present in both",
+        "ai_activity": {
+          "title": "ACTIVIDAD 2. Cuestionario: propiedad rural, acceso y redistribución",
+          "type": "Cuestionario",
+          "description_html": "<p><strong>¿Qué vamos a lograr?</strong></p><p>Aplicar categorías jurídicas e institucionales sobre propiedad rural a casos de acceso, posesión, despojo, concentración y redistribución.</p><p><strong>¿Cómo lo vamos a lograr?</strong></p><p>Apreciado estudiante,</p><p>A través de esta actividad evaluable, de manera individual, vamos a resolver un conjunto de casos a través de preguntas de análisis. Para iniciar, revisa atentamente los siguientes materiales:</p><ul><li>Retoma la guía de contenido de la unidad 2.</li><li>Los elementos trabajados en el encuentro virtual 5, 6 y 7.</li><li><strong>Material 1:</strong> <a href=\"https://prometeojournal.com.ar/index.php/prometeo/es/article/view/105\">Instituciones de Derecho Civil aplicadas a los conflictos de tierras y a las acciones posesorias</a> (revisar lecturas complementarias)</li><li><strong>Material 2:</strong> <a href=\"https://pure.urosario.edu.co/es/publications/desigualdad-y-calidad-de-los-derechos-de-propiedad-un-an%C3%A1lisis-de/\">Desigualdad y calidad de los derechos de propiedad</a> / base de datos compartida</li></ul><p>Luego de haber revisado los materiales, procede a resolver las siguientes preguntas:</p>",
+          "rubric_html": "",
+          "questionnaire_html": "<p><strong>Pregunta 1</strong>. </p><p>Una familia campesina ocupa y explota un predio rural desde hace años, pero no tiene título formal. Un tercero alega propiedad con base en documento privado reciente. ¿Qué problema jurídico central aparece?</p><p>A. Solo un asunto penal.</p><p>B. Una controversia irrelevante porque no hay título registrado.</p><p>=C. Un conflicto sobre la calidad y fundamento de los derechos sobre la tierra.</p><p>D. Un asunto exclusivamente ambiental.</p><p>Retroalimentación para respuestas incorrectas: Los conflictos rurales no se agotan en la simple ausencia de título; exigen examinar la calidad del derecho alegado y la relación material con la tierra.</p><p>Retroalimentación para respuesta correcta: Correcto. La controversia gira en torno a la calidad, fundamento y oponibilidad de los derechos sobre el predio rural.</p><p><strong>Pregunta 2</strong>. </p><p>La comunidad campesina de Los Soches (Usme, Bogotá) se organizó desde 1993 para oponerse a los proyectos de expansión urbana de la ciudad. Una de sus primeras acciones fue crear el Agroparque Los Soches e invitar al Concejo de Bogotá a observar el modo de vida campesino. ¿Cuál fue el argumento central de legitimación que utilizó esta comunidad para defender su territorio, según Camacho Bonilla (2020)?</p><p>A. La legalidad de sus títulos de propiedad individual sobre los predios rurales de Usme.</p><p>=B. La identidad territorial y la protección medioambiental como discursos que estructuraron su resistencia colectiva.</p><p>C. La amenaza de acudir ante instancias internacionales de derechos humanos si se ejecutaban los proyectos de expansión.</p><p>D. El apoyo de partidos políticos de oposición al gobierno distrital de turno.</p><p>Retroalimentación para respuestas incorrectas: La opción A es incorrecta porque la comunidad de Los Soches no basó su defensa en títulos individuales, sino en el valor colectivo del territorio. Las opciones C y D no aparecen como argumentos centrales en el análisis de Camacho Bonilla.</p><p>Retroalimentación para respuesta correcta: Correcto. Camacho Bonilla (2020) muestra que la identidad colectiva territorial y la protección del ecosistema rural fueron los dos pilares discursivos que cohesionaron la resistencia de la comunidad de Usme y le dieron legitimidad frente a las instituciones.</p><p><strong>Pregunta 3</strong>. </p><p>En una región se observa formalización incompleta, concentración de la tierra y desigualdad persistente.</p><p>¿Cuál afirmación es más adecuada?</p><p>A. La formalización siempre elimina la desigualdad.</p><p>B. La desigualdad no guarda relación con la calidad de los derechos de propiedad.</p><p>=C. La calidad institucional de los derechos de propiedad y la redistribución son variables centrales.</p><p>D. La tierra solo importa como activo económico privado.</p><p>Retroalimentación para respuestas incorrectas:</p><p>La literatura reciente insiste en que no basta formalizar; importa también la calidad, distribución y sostenibilidad institucional de los derechos.</p><p>Retroalimentación para respuesta correcta:</p><p>Correcto. Los derechos de propiedad y la redistribución deben analizarse de manera conjunta para comprender la conflictividad rural.</p><p><strong>Pregunta 4</strong>. </p><p>El Resguardo Indígena Alto Unuma interpuso una acción de tutela para exigir el derecho a la consulta previa, libre e informada, luego de que el Ministerio del Interior expidiera cuatro certificaciones afirmando que no había presencia indígena en el área del campo petrolero Rubiales. ¿Cuál fue el principal argumento que utilizó el Consejo de Estado para fallar a favor del Resguardo Alto Unuma, según Rebellón y Dávila (2024)?</p><p>=A. Que las certificaciones del Ministerio del Interior se basaron en revisión cartográfica sin verificación en campo, desconociendo el territorio ancestral y tradicional de la etnia Sikuani.</p><p>B. Que la empresa Ecopetrol no tenía licencia ambiental válida para operar en la zona del campo Rubiales.</p><p>C. Que la Constitución de 1991 prohíbe cualquier actividad extractiva en territorios cercanos a resguardos indígenas.</p><p>D. Que los Sikuani habían registrado notarialmente su derecho de propiedad sobre el área del campo Rubiales antes de 2001.</p><p>Retroalimentación para respuestas incorrectas: La opción B es incorrecta porque Ecopetrol sí contaba con licencia ambiental (Resolución 0233 de 2001). La opción C exagera el alcance constitucional: la Constitución no prohíbe la actividad extractiva, sino que exige consulta previa. La opción D es factualmente incorrecta.</p><p>Retroalimentación para respuesta correcta: Correcto. El Consejo de Estado determinó que las certificaciones del Ministerio del Interior no garantizaron una verificación real en campo del territorio tradicional y ancestral Sikuani, vulnerando el derecho a la consulta previa consagrado en el Convenio 169 de la OIT.</p><p><strong>Pregunta 5</strong>. </p><p>Un funcionario del Ministerio del Interior debe certificar si existe presencia de comunidades étnicas en un área donde se proyecta un gasoducto. El área se superpone parcialmente con el territorio tradicional de una comunidad indígena nómada que no tiene resguardo formalmente constituido.</p><p>¿Qué obligación jurídica y metodológica impone el precedente del caso Rubiales (Consejo de Estado, 2016) a este funcionario, según Rebellón y Dávila (2024)?</p><p>A. Certificar ausencia de comunidades si no existe resguardo formalmente constituido, pues sin título colectivo no hay derecho reconocido.</p><p>=B. Realizar visitas de campo exhaustivas al territorio de influencia del proyecto, con acompañamiento del ICANH y de las propias comunidades, para verificar presencia, sitios de uso y territorio tradicional antes de emitir cualquier certificación.</p><p>C. Consultar únicamente los registros cartográficos y bases de datos del DANE para determinar si existe presencia étnica en la zona.</p><p>D. Delegar la verificación a la empresa interesada en el proyecto para que realice el diagnóstico de presencia étnica.</p><p>Retroalimentación para respuestas incorrectas: La opción A desconoce que el territorio tradicional va más allá del resguardo formalmente constituido, como lo establece la jurisprudencia citada (Sentencia T-693 de 2011). La opción C reproduce exactamente el error que el Consejo de Estado criticó en las certificaciones previas. La opción D generaría un conflicto de interés evidente.</p><p>Retroalimentación para respuesta correcta: Correcto. El Consejo de Estado (2016) estableció que las certificaciones de presencia étnica requieren verificación real en campo, con acompañamiento interinstitucional y de las comunidades, para garantizar el reconocimiento del territorio ancestral y tradicional, independientemente de la existencia de un resguardo formalmente constituido.</p>"
+        },
+        "legacy_activity": {
+          "name": "ACTIVIDAD 2. Cuestionario: propiedad rural, acceso y redistribución",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Exact title and type match"
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 8. Jurisdicción agraria",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 8</strong>. Jurisdicción agraria </p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 8. Jurisdicción agraria' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 9. Reforma rural",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 9</strong>. Reforma rural </p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 9. Reforma rural' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Actividad 3. Cuestionario: restitución de tierras y justicia transicional",
+          "type": "Actividad",
+          "description_html": "<p><strong>Actividad 3</strong>. <strong>Cuestionario: restitución de tierras y justicia transicional</strong></p><p><strong>Producto: </strong>cuestionario basado en casos sobre temáticas de la unidad.</p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Actividad 3. Cuestionario: restitución de tierras y justicia transicional' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present in both",
+        "ai_activity": {
+          "title": "ACTIVIDAD 4. Evaluación final: análisis integral de caso de restitución y conflicto territorial",
+          "type": "Tarea",
+          "description_html": "<p><strong>¿Qué vamos a lograr?</strong></p><ul><li>Elaborar un análisis jurídico y social integrado de un conflicto de tierras real o simulado en Colombia, aplicando los marcos normativos, conceptos neo-institucionales y perspectivas de análisis trabajados a lo largo del curso.</li><li>Proponer una ruta de análisis y resolución jurídica integral para un caso de conflicto de tierras, articulando conflicto agrario, derechos de propiedad, enfoque territorial y restitución.</li></ul><p><strong>¿Cómo lo vamos a lograr?</strong></p><p>Apreciado/a estudiante,</p><p>A través de esta actividad evaluable, de manera individual, construirá un dictamen jurídico-analítico sobre un caso de conflicto de tierras. Para iniciar, revise los materiales de las tres unidades del curso, con especial atención en: </p><ul><li>Los artículos académicos trabajados en el curso (todos los mencionados en Unidades 1, 2 y 3)</li><li>Los elementos conceptuales del encuentro virtual final.</li><li>Hurtado, M. y Pereira, C. (2011). Legitimidad empresarial, conflicto de tierras y producción palmera en Colombia. Revista de Relaciones Internacionales, Estrategia y Seguridad, 6(2), 91-110. [Disponible en base de datos Unisalle — Revistas UMNG]: <a href=\"http://www.scielo.org.co/scielo.php?pid=S1909-30632011000200005&amp;script=sci_arttext\">http://www.scielo.org.co/scielo.php?pid=S1909-30632011000200005&amp;script=sci_arttext</a> </li><li>Lázaro Feo, A. L. (2020). Preparación del patrimonio cultural de la Tierra para el riesgo de un conflicto armado: documentación y registro para su protección. I Simposio ICOMOS España, 51-56. <a href=\"https://doi.org/10.4995/icomos2019.2020.11447\">https://doi.org/10.4995/icomos2019.2020.11447</a> </li></ul><p>Luego de haber revisado los materiales, proceda a elaborar su dictamen siguiendo estos pasos:</p><ol><li><strong>SELECCIÓN DEL CASO:</strong> Escoja un caso de conflicto de tierras real ocurrido en Colombia (puede ser uno de los estudiados en el curso u otro documentado públicamente). Justifique su elección en máximo un párrafo.</li><li><strong>DESCRIPCIÓN DEL CASO:</strong> Presente los hechos relevantes del conflicto: actores involucrados, tipo de derechos en disputa, contexto territorial y antecedentes históricos.</li><li><strong>ANÁLISIS JURÍDICO-INSTITUCIONAL:</strong> Identifique y aplique al caso al menos tres instrumentos normativos relevantes (nacionales e internacionales). Analice qué reglas de juego —formales e informales— configuraron el conflicto (perspectiva neo-institucional). Incorporar al menos cinco fuentes académicas y dos fuentes normativas o jurisprudenciales. </li><li><strong>DIMENSIÓN SOCIAL Y CULTURAL:</strong> Analice el impacto del conflicto sobre las comunidades afectadas (campesinas, indígenas o étnicas), incluyendo las dimensiones de identidad, territorio y patrimonio cultural. </li><li><strong>LEGITIMIDAD Y RESPONSABILIDAD:</strong> Si hay actores empresariales o institucionales involucrados, evalúe cómo gestionaron —o debieron gestionar— su legitimidad. </li><li><strong>PROPUESTA DE RESOLUCIÓN:</strong> Formule al menos dos recomendaciones jurídicas y/o de política pública para la resolución del conflicto, argumentadas desde los marcos teóricos del curso. </li></ol><p>Como producto de la actividad, entrega a través de este medio un informe jurídico-analítico final con título, introducción, desarrollo, conclusiones y referencias. Recuerde aplicar normas APA vigentes.</p><p>El dictamen debe tener una extensión de 2.500 a 3.500 palabras, excluidas referencias bibliográficas. Entréguelo a través de esta tarea en formato PDF. Prepara tu dictamen para sustentarlo en el encuentro virtual que indique el docente. </p>",
+          "rubric_html": "<table><tr><td><p>Criterios de desempeño</p></td><td><p><strong>Puntos</strong></p></td></tr><tr><td><p>Identifica con precisión los instrumentos normativos aplicables al caso y los articula coherentemente con los hechos descritos.</p></td><td><p>1</p></td></tr><tr><td><p>Aplica el marco neo-institucional para analizar las reglas de juego formales e informales que configuraron el conflicto, con referencia a los autores del curso.</p></td><td><p>1.5</p></td></tr><tr><td><p>Analiza la dimensión social, cultural y territorial del conflicto, reconociendo los impactos sobre comunidades rurales o étnicas.</p></td><td><p>1</p></td></tr><tr><td><p>Formula propuestas de resolución jurídica fundamentadas, coherentes con el análisis previo y debidamente argumentadas.</p></td><td><p>1</p></td></tr><tr><td><p>Organiza el dictamen con estructura clara, referencia adecuadamente las fuentes consultadas usando normas APA 7.ª edición.</p></td><td><p>0.5</p></td></tr><tr><td><p><strong>TOTAL</strong></p></td><td><p><strong>5</strong></p></td></tr></table>",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": {
+          "name": "ACTIVIDAD 4. Evaluación final: análisis integral de caso de restitución y conflicto territorial",
+          "type": "Tarea"
+        },
+        "reasoning": "Exact title and type match"
+      },
+      {
+        "classification": "Present only in AI",
+        "ai_activity": {
+          "title": "Encuentro virtual 10",
+          "type": "Encuentro virtual",
+          "description_html": "<p><strong>Encuentro virtual 10</strong></p>",
+          "rubric_html": "",
+          "questionnaire_html": ""
+        },
+        "legacy_activity": null,
+        "reasoning": "Title 'Encuentro virtual 10' not found in Legacy parser output. This is an extra activity caught by AI."
+      },
+      {
+        "classification": "Present in both",
+        "ai_activity": {
+          "title": "ACTIVIDAD 3. Cuestionario. Restitución de tierras y justicia transicional",
+          "type": "Cuestionario",
+          "description_html": "<p><strong>¿Qué vamos a lograr?</strong></p><p>Comprender y aplicar las fases administrativa y judicial del proceso de restitución de tierras a casos concretos de despojo y abandono forzado.</p><p><strong>¿Cómo lo vamos a lograr?</strong></p><p>Apreciado estudiante,</p><p>A través de esta actividad evaluable, de manera individual, vamos a resolver un conjunto de casos a través de preguntas de análisis. Para iniciar, revisa atentamente los siguientes materiales: </p><ul><li>Retoma la guía de contenido de la unidad 3.</li><li>Los elementos trabajados en el encuentro virtual 8 y 9.</li><li><strong>Material 1:</strong> <a href=\"https://www.scielo.org.mx/scielo.php?pid=S0188-76532015000200005&amp;script=sci_abstract\">Texto sobre víctimas, restitución y resignificación de la categoría jurídica de víctima</a></li><li><strong>Material 2:</strong> ¿Más allá de la justicia correctiva?: potencialidades de la restitución de tierras: <a href=\"http://www.scielo.org.co/scielo.php?pid=S1692-25302016000100002&amp;script=sci_arttext\">http://www.scielo.org.co/scielo.php?pid=S1692-25302016000100002&amp;script=sci_arttext</a> </li></ul><p>Luego de haber revisado los materiales, procede a resolver las siguientes preguntas:</p>",
+          "rubric_html": "",
+          "questionnaire_html": "<p><strong>Pregunta 1</strong></p><p>Una familia afirma haber salido de su predio por amenazas de un grupo armado y busca iniciar el trámite de restitución. ¿Cuál es el primer componente clave del proceso?</p><p>A. La ejecución de sentencia penal.</p><p>=B. La fase administrativa de inscripción y análisis del caso.</p><p>C. La expropiación inmediata.</p><p>D. El desalojo de ocupantes por vía policiva.</p><p>Retroalimentación para respuestas incorrectas:</p><p>La restitución de tierras tiene una fase inicial de carácter administrativo antes del tránsito a la fase judicial.</p><p>Retroalimentación para respuesta correcta:</p><p>Correcto. El proceso comienza con una fase administrativa de recepción, análisis y eventual inclusión en el registro correspondiente.</p><p><strong>Pregunta 2</strong>. </p><p>El Grupo Daabon es líder mundial en la producción de aceite de palma orgánico y contaba con certificaciones internacionales de sostenibilidad (ECOCERT, SA 8000, Fairtrade). Sin embargo, en 2009 su imagen internacional se deterioró gravemente por el desalojo de 123 familias campesinas de la finca Las Pavas (sur de Bolívar), lo que llevó a The Body Shop a terminar su relación comercial. ¿Cuál es la tensión central que identifica Hurtado y Pereira (2011) entre la legitimidad legal y la legitimidad social en el caso del Grupo Daabon?</p><p>=A. El Grupo Daabon fue declarado ilegal por los tribunales colombianos, lo que generó el rechazo internacional.</p><p>=B. Actuar dentro de los estándares legales locales no fue suficiente para mantener la legitimidad ante grupos de interés internacionales que evaluaban sus acciones con estándares sociales y éticos más exigentes.</p><p>=C. El problema fue exclusivamente de comunicación: si Daabon hubiera informado mejor a sus clientes, habría mantenido su legitimidad sin necesidad de cambiar sus prácticas.</p><p>=D. La tensión se resolvió completamente cuando el INCODER anuló el proceso de extinción de dominio en favor del Consorcio El Labrador.</p><p>Retroalimentación para respuestas incorrectas: La opción A es incorrecta: los tribunales colombianos fallaron inicialmente a favor del Consorcio El Labrador. La opción C ignora que el problema de fondo era sustantivo y no solo comunicacional. La opción D es incorrecta: la Corte Constitucional revocó ese fallo en 2011 y la legitimidad del Grupo Daabon ya estaba afectada.</p><p>Retroalimentación para respuesta correcta: Correcto. Hurtado y Pereira (2011) muestran que la legalidad formal no es suficiente para gestionar la legitimidad en contextos con escrutinio internacional. Los clientes de Daabon —empresas con compromisos éticos— evaluaban sus acciones con criterios que van más allá del cumplimiento legal colombiano.</p><p><strong>Pregunta 3</strong>. </p><p>En un proceso de restitución, el expediente revela no solo despojo, sino trayectorias de vulnerabilidad, exclusión y violencia. ¿Qué muestra esto sobre la restitución?</p><p>A. Que es solo un trámite registral.</p><p>B. Que es una forma de reparación desligada del conflicto.</p><p>=C. Que los expedientes judiciales permiten reconstruir contextos victimizantes complejos.</p><p>D. Que la historia de vida no es relevante.</p><p>Retroalimentación para respuestas incorrectas: Los procesos de restitución son también espacios de reconstrucción del daño y del contexto de victimización.</p><p>Retroalimentación para respuesta correcta: Correcto. Los expedientes de restitución son claves para reconstruir contextos de vulnerabilidad, despojo y relación con la tierra.</p><p><strong>Pregunta 4</strong>. </p><p>Un análisis sostiene que la restitución tiene potencial si se articula con objetivos de justicia social agraria. ¿Qué significa esto?</p><p>A. Que basta con devolver formalmente un título.</p><p>=B. Que la restitución puede contribuir a corregir desigualdades estructurales.</p><p>C. Que no requiere políticas complementarias.</p><p>D. Que se agota en la reparación simbólica.</p><p>Retroalimentación para respuestas incorrectas: La restitución puede tener potencial transformador si se conecta con objetivos redistributivos y de justicia agraria.</p><p>Retroalimentación para respuesta correcta: Correcto. La restitución no debe verse solo como corrección individual, sino como instrumento con potencial de justicia social agraria.</p><p><strong>Pregunta 5. </strong></p><p>Una mujer víctima de despojo encuentra barreras estatales para la aplicación efectiva de normas que priorizan su caso. ¿Qué evidencia esto?</p><p>A. Que el enfoque diferencial ya opera sin restricciones.</p><p>B. Que la formalidad jurídica siempre garantiza efectividad.</p><p>=C. Que persisten brechas entre reconocimiento normativo y aplicación real.</p><p>D. Que la restitución no tiene dimensión de género.</p><p>Retroalimentación para respuestas incorrectas:</p><p>El reconocimiento normativo de prioridades o enfoques diferenciales no asegura por sí mismo una implementación efectiva.</p><p>Retroalimentación para respuesta correcta:</p><p>Correcto. El caso muestra una brecha entre el mandato jurídico de protección y su materialización institucional.</p>"
+        },
+        "legacy_activity": {
+          "name": "ACTIVIDAD 3. Cuestionario. Restitución de tierras y justicia transicional",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Exact title and type match"
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Avisos",
+          "type": "Foro"
+        },
+        "reasoning": "Title 'Avisos' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Foro permanente de dudas",
+          "type": "Foro"
+        },
+        "reasoning": "Title 'Foro permanente de dudas' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Encuentros virtuales",
+          "type": "Herramienta externa"
+        },
+        "reasoning": "Title 'Encuentros virtuales' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Introducción General",
+          "type": "Área de texto y medios"
+        },
+        "reasoning": "Title 'Introducción General' not found in AI extraction."
+      }
+    ]
   }
 ]

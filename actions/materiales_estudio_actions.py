@@ -209,7 +209,7 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
         logger.info(f"Processing Unidad {unidad_num}")
         
         # Navigate to course homepage at the start of each iteration to ensure all sections are visible
-        navigate_to_course(driver, ConfigSALLE.MOODLE_URL, course_id, wait_time)
+        navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
         time.sleep(2)
         
         try:

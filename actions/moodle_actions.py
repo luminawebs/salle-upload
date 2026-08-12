@@ -30,9 +30,9 @@ def login(driver, username, password, login_url, wait_time=10):
     wait = WebDriverWait(driver, wait_time)
     logger.info("Navigating to Moodle login page...")
 
-    # Retry mechanism for network issues like ERR_NETWORK_CHANGED
+    # Retry mechanism for network issues like ERR_NETWORK_CHANGED or ERR_NAME_NOT_RESOLVED
     login_page_ready = False
-    for attempt in range(4):
+    for attempt in range(10):
         try:
             logger.info(f"  Loading login page (attempt {attempt + 1})...")
             driver.get(login_url)
@@ -71,12 +71,13 @@ def login(driver, username, password, login_url, wait_time=10):
 
         except Exception as e:
             logger.warning(f"  Exception loading login page on attempt {attempt + 1}: {e}")
-            if attempt >= 3:
+            if attempt >= 9:
                 raise
-            time.sleep(4)
+            # Incremental backoff: 4s, 7s, 10s, 13s, etc.
+            time.sleep(4 + (attempt * 3))
 
     if not login_page_ready:
-        logger.error("  Could not load the Moodle login page after 4 attempts.")
+        logger.error("  Could not load the Moodle login page after 10 attempts.")
         driver.save_screenshot("login_error.png")
         return False
 

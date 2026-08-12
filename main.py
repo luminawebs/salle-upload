@@ -131,7 +131,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'set_custom_sections_format_error', is_error=True)
-                        logger.error(f\"Error executing set_custom_sections_format for course {course_id}: {e}\")
+                        logger.error(f"Error executing set_custom_sections_format for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -150,7 +150,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'course_structure_creation_error', is_error=True)
-                        logger.error(f\"Error executing run_course_structure_creation_workflow for course {course_id}: {e}\")
+                        logger.error(f"Error executing run_course_structure_creation_workflow for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -169,7 +169,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'docx_upload_error', is_error=True)
-                        logger.error(f\"Error executing run_docx_upload_workflow for course {course_id}: {e}\")
+                        logger.error(f"Error executing run_docx_upload_workflow for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -188,7 +188,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'materiales_estudio_error', is_error=True)
-                        logger.error(f\"Error executing run_materiales_estudio_workflow for course {course_id}: {e}\")
+                        logger.error(f"Error executing run_materiales_estudio_workflow for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -208,7 +208,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'cuestionario_export_error', is_error=True)
-                        logger.error(f\"Error executing run_cuestionario_export_workflow for course {course_id}: {e}\")
+                        logger.error(f"Error executing run_cuestionario_export_workflow for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -227,7 +227,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'unidades_intro_upload_error', is_error=True)
-                        logger.error(f\"Error executing upload_unidades_intro_for_course for course {course_id}: {e}\")
+                        logger.error(f"Error executing upload_unidades_intro_for_course for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -246,7 +246,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'docx_rubrica_upload_error', is_error=True)
-                        logger.error(f\"Error executing run_docx_rubrica_upload_workflow for course {course_id}: {e}\")
+                        logger.error(f"Error executing run_docx_rubrica_upload_workflow for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -275,7 +275,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'set_buttons_format_error', is_error=True)
-                        logger.error(f\"Error executing set_buttons_format for course {course_id}: {e}\")
+                        logger.error(f"Error executing set_buttons_format for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                         try:
                             dismiss_moodle_error_overlays(driver)
@@ -294,7 +294,7 @@ def main():
                     except Exception as e:
                         import traceback
                         capture_debug_state(driver, course_id, 'set_final_buttons_format_error', is_error=True)
-                        logger.error(f\"Error executing set_final_buttons_format for course {course_id}: {e}\")
+                        logger.error(f"Error executing set_final_buttons_format for course {course_id}: {e}")
                         logger.error(traceback.format_exc())
                 elif not getattr(Config, "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", False):
                     logger.info("Final course format workflow is disabled via config.")
