@@ -235,7 +235,7 @@ def run_docx_splitting_workflow(course_id: int):
                 current_activity = parse_activity_number(raw_activity_number)
                 act_html_parts = []
                 # Include the current row's td contents
-                for td in tr.find_all('td'):
+                for td in tr.find_all(['td', 'th'], recursive=False):
                     act_html_parts.append(td.decode_contents())
                 
                 # Look ahead for following rows belonging to this activity
@@ -255,14 +255,14 @@ def run_docx_splitting_workflow(course_id: int):
                         # Reached the end of this activity, step back one so the outer loop processes it
                         i -= 1
                         break
-                    for td in next_tr.find_all('td'):
+                    for td in next_tr.find_all(['td', 'th'], recursive=False):
                         act_html_parts.append(td.decode_contents())
                     i += 1
                 act_html = "".join(act_html_parts)
                 
                 # Extract Lecturas complementarias / Material de referencia from the activity HTML
                 act_soup_mat = BeautifulSoup(act_html, "html.parser")
-                header_mat = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and ('lecturas complementarias' in t.text.lower() or 'material de referencia' in t.text.lower()))
+                header_mat = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and any(kw in t.text.lower() for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia', 'material bibliográfico', 'básica:', 'complementaria:']))
                 if header_mat:
                     block_elem = header_mat
                     while block_elem.parent and block_elem.parent.name not in ['td', 'body', 'div', 'tr', '[document]']:
@@ -297,7 +297,7 @@ def run_docx_splitting_workflow(course_id: int):
                         else:
                             # If we couldn't find lists to merge, just append non-header elements
                             for tag in new_soup.contents:
-                                if tag.name and tag.name.lower() in ['p', 'strong'] and ('lecturas complementarias' in tag.get_text().lower() or 'material de referencia' in tag.get_text().lower()):
+                                if tag.name and tag.name.lower() in ['p', 'strong'] and any(kw in tag.get_text().lower() for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia', 'material bibliográfico', 'básica:', 'complementaria:']):
                                     continue
                                 existing_soup.append(tag)
                                 
