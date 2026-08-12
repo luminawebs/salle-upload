@@ -13,6 +13,7 @@ export const AutomationProvider = ({ children }) => {
     ENABLE_COURSE_FORMAT_CHANGE: 'True',
     ENABLE_COURSE_STRUCTURE_CREATION: 'False',
     ENABLE_DOCX_UPLOAD_HTML: 'False',
+    ENABLE_GLOSARIO_UPLOAD: 'False',
     ENABLE_CUESTIONARIO_EXPORT: 'False',
     ENABLE_CUESTIONARIO_GRADE_UPDATE: 'False',
     ENABLE_UNIDADES_INTRO_UPLOAD: 'False',

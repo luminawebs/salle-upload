@@ -15,6 +15,7 @@ from actions.unidades_intro_actions import upload_unidades_intro_for_course
 from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
 from actions.materiales_estudio_actions import run_materiales_estudio_workflow
+from actions.glosario_actions import create_glosario_activity
 from config.settings import Config
 from core.debug_utils import capture_debug_state
 
@@ -179,6 +180,26 @@ def main():
                             pass
                 else:
                     logger.info("DOCX HTML upload workflow is disabled via config.")
+
+                if getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False) and edit_enabled:
+                    logger.info("Executing Glosario creation workflow...")
+                    try:
+                        glosario_xml_path = os.path.join(Config.WORKSPACE_DIR, str(course_id), "glosario", "glosario_import.xml")
+                        create_glosario_activity(driver, course_id, glosario_xml_path, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        capture_debug_state(driver, course_id, 'glosario_upload', is_error=False)
+                    except Exception as e:
+                        import traceback
+                        capture_debug_state(driver, course_id, 'glosario_upload_error', is_error=True)
+                        logger.error(f"Error executing create_glosario_activity for course {course_id}: {e}")
+                        logger.error(traceback.format_exc())
+                        try:
+                            dismiss_moodle_error_overlays(driver)
+                            logger.info(f"Navigating back to course {course_id} home after error...")
+                            moodle.navigate_to_course(course_id)
+                        except Exception:
+                            pass
+                elif not getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False):
+                    logger.info("Glosario creation workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False) and edit_enabled:
                     logger.info("Executing Materiales de Estudio workflow...")

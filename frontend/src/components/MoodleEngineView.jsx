@@ -37,7 +37,8 @@ const WORKFLOW_PHASES = [
       { key: 'ENABLE_COURSE_FORMAT_CHANGE', label: 'Cambiar formato a Secciones personalizadas' },
       { key: 'ENABLE_COURSE_STRUCTURE_CREATION', label: 'Crear Estructura del Curso' },
       { key: 'ENABLE_UNIDADES_INTRO_UPLOAD', label: 'Subir Introducciones' },
-      { key: 'ENABLE_DOCX_UPLOAD_HTML', label: 'Subir Recursos HTML' }
+      { key: 'ENABLE_DOCX_UPLOAD_HTML', label: 'Subir Recursos HTML' },
+      { key: 'ENABLE_GLOSARIO_UPLOAD', label: 'Crear y Subir Glosario' }
     ]
   },
   {

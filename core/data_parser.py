@@ -3,6 +3,8 @@ import logging
 import mammoth
 import re
 from bs4 import BeautifulSoup
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +129,7 @@ def run_docx_splitting_workflow(course_id: int):
         "actividades": os.path.join(base_dir, "actividades"),
         "material": os.path.join(base_dir, "material"),
         "introduccion": os.path.join(base_dir, "introduccion"),
+        "glosario": os.path.join(base_dir, "glosario"),
     }
     for d in output_dirs.values():
         os.makedirs(d, exist_ok=True)
@@ -154,6 +157,48 @@ def run_docx_splitting_workflow(course_id: int):
                     f.write(intro_html)
                 logger.info("  ✓ Extracted introduccion_general.html")
             break
+
+    # 1.5 Extract Glosario
+    glosario_found = False
+    for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'td']):
+        if "GLOSARIO" in p.get_text().upper().strip():
+            # The glosario is typically in the following elements. We can try to look for the table next to it.
+            # Or if it's already inside a table, we can extract the rows.
+            table = p.find_next('table')
+            if not table and p.find_parent('table'):
+                table = p.find_parent('table')
+                
+            if table and not glosario_found:
+                glosario_found = True
+                glosario_root = ET.Element("GLOSARIO")
+                info = ET.SubElement(glosario_root, "INFO")
+                ET.SubElement(info, "NAME").text = "Glosario"
+                ET.SubElement(info, "INTRO").text = ""
+                entries = ET.SubElement(glosario_root, "ENTRIES")
+                
+                # Iterate rows
+                for row in table.find_all('tr'):
+                    cells = row.find_all('td')
+                    if not cells: continue
+                    text = row.get_text().strip()
+                    if ":" in text:
+                        concept, definition = text.split(":", 1)
+                        entry = ET.SubElement(entries, "ENTRY")
+                        ET.SubElement(entry, "CONCEPT").text = concept.strip()
+                        ET.SubElement(entry, "DEFINITION").text = definition.strip()
+                        ET.SubElement(entry, "FORMAT").text = "1"
+                        
+                # Format XML
+                xml_str = ET.tostring(glosario_root, 'utf-8')
+                reparsed = minidom.parseString(xml_str)
+                pretty_xml = reparsed.toprettyxml(indent="  ")
+                
+                xml_path = os.path.join(output_dirs["glosario"], "glosario_import.xml")
+                with open(xml_path, "w", encoding="utf-8") as f:
+                    f.write(pretty_xml)
+                logger.info(f"  ✓ Extracted glosario_import.xml with {len(entries)} entries")
+                break
+
 
     def parse_activity_number(val):
         if val.isdigit():

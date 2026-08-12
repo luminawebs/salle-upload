@@ -27,6 +27,7 @@ const CATEGORIES = [
       { key: 'ENABLE_COURSE_STRUCTURE_CREATION', label: 'Crear Estructura de Secciones' },
       { key: 'ENABLE_UNIDADES_INTRO_UPLOAD', label: 'Subir Introducciones' },
       { key: 'ENABLE_DOCX_UPLOAD_HTML', label: 'Subir Recursos HTML (Actividades)' },
+      { key: 'ENABLE_GLOSARIO_UPLOAD', label: 'Crear Glosario y Subir Entradas' },
     ]
   },
   {

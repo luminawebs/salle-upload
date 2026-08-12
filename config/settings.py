@@ -94,6 +94,14 @@ class Config:
         "t",
     )
 
+    ENABLE_GLOSARIO_UPLOAD = os.getenv(
+        "ENABLE_GLOSARIO_UPLOAD", "True"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
+
     # Sube las rúbricas de calificación desde el DOCX
     ENABLE_DOCX_RUBRICA_UPLOAD = os.getenv(
         "ENABLE_DOCX_RUBRICA_UPLOAD", "True"
