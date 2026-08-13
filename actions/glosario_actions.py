@@ -27,13 +27,18 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
         # Find section 0 add activity button
         section_0 = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li#section-0, li[data-sectionnum='0'], div#section-0")))
         
-        # Click the add activity button inside section 0
+        # Click the add activity button inside section 0 (use the LAST one to append at the end)
         try:
-            add_btn = section_0.find_element(By.CSS_SELECTOR, ".section-modchooser-link, [data-action='open-chooser']")
+            add_btns = section_0.find_elements(By.CSS_SELECTOR, ".section-modchooser-link, [data-action='open-chooser']")
+            if not add_btns:
+                logger.error("Could not find Add Activity button. Is editing turned on?")
+                return False
+            add_btn = add_btns[-1]
+            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", add_btn)
+            time.sleep(0.5)
             driver.execute_script("arguments[0].click();", add_btn)
-        except NoSuchElementException:
-            # Maybe editing is not turned on? Try turning it on if possible, but assume it's on for now
-            logger.error("Could not find Add Activity button. Is editing turned on?")
+        except Exception as e:
+            logger.error(f"Error finding Add Activity button: {e}")
             return False
             
         # Wait for the modchooser dialog
