@@ -52,22 +52,41 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
         
         # Click the Glosario option
         logger.info("Clicking Glosario option...")
+        href = None
+        original_window = driver.current_window_handle
+        
         try:
             # We target the anchor tag inside the option div that has data-internal="glossary"
             # Or the anchor tag that has href containing 'add=glossary'
             css = ".option[data-internal='glossary'] a, a[href*='add=glossary'], .option[data-name='glossary'], .modtype_glossary a"
             glosario_option = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, css)))
-            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
-            time.sleep(0.5)
-            driver.execute_script("arguments[0].click();", glosario_option)
+            href = glosario_option.get_attribute("href")
+            
+            if href:
+                logger.info(f"[Tab Manager] Opening Glosario settings in a NEW TAB (href: {href})...")
+                driver.execute_script(f"window.open('{href}', '_blank');")
+                driver.switch_to.window(driver.window_handles[-1])
+            else:
+                logger.info("[Tab Manager] No href found. Clicking Glosario option in SAME tab...")
+                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
+                time.sleep(0.5)
+                driver.execute_script("arguments[0].click();", glosario_option)
         except TimeoutException:
             # Fallback for Moodle 3.x / 4.x text search
             logger.info("CSS selectors failed, trying XPath fallback...")
             xpath = ".//div[contains(@class, 'optionname') and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'glosario')]/ancestor::a"
             glosario_option = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
-            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
-            time.sleep(0.5)
-            driver.execute_script("arguments[0].click();", glosario_option)
+            href = glosario_option.get_attribute("href")
+            
+            if href:
+                logger.info(f"[Tab Manager] Opening Glosario settings in a NEW TAB (href: {href})...")
+                driver.execute_script(f"window.open('{href}', '_blank');")
+                driver.switch_to.window(driver.window_handles[-1])
+            else:
+                logger.info("[Tab Manager] No href found. Clicking Glosario option in SAME tab...")
+                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
+                time.sleep(0.5)
+                driver.execute_script("arguments[0].click();", glosario_option)
         
         # Wait for the settings page to load
         logger.info("Waiting for Glosario settings page...")
@@ -88,10 +107,22 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
         time.sleep(3)
         
         # Now import entries
-        return import_glosario_entries(driver, xml_path, wait_time)
+        success = import_glosario_entries(driver, xml_path, wait_time)
+        
+        if href and len(driver.window_handles) > 1:
+            logger.info("[Tab Manager] Closing new tab and switching back to original window...")
+            driver.close()
+            driver.switch_to.window(original_window)
+            
+        return success
         
     except Exception as e:
         logger.error(f"Error creating Glosario activity: {e}")
+        # Make sure we don't strand the user in a broken tab
+        if 'original_window' in locals() and len(driver.window_handles) > 1 and driver.current_window_handle != original_window:
+            logger.warning("[Tab Manager] Error occurred. Closing current tab to recover state...")
+            driver.close()
+            driver.switch_to.window(original_window)
         return False
 
 def import_glosario_entries(driver, xml_path, wait_time=10):
@@ -145,6 +176,16 @@ def import_glosario_entries(driver, xml_path, wait_time=10):
         driver.execute_script("arguments[0].click();", submit_import_btn)
         time.sleep(3)
         
+        # Check for Moodle import result messages
+        try:
+            result_elements = driver.find_elements(By.CSS_SELECTOR, ".box.generalbox p, .notifyproblem, .notifysuccess, .alert")
+            for res in result_elements:
+                text = res.text.strip()
+                if text:
+                    logger.info(f"Moodle import result: {text}")
+        except Exception:
+            pass
+            
         # Optionally click 'Continuar'
         try:
             logger.info("Looking for 'Continuar' button...")

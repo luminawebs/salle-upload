@@ -169,11 +169,11 @@ def run_docx_splitting_workflow(course_id: int):
                 
             if table:
                 glosario_found = True
-                glosario_root = ET.Element("GLOSARIO")
+                glosario_root = ET.Element("GLOSSARY")
                 info = ET.SubElement(glosario_root, "INFO")
                 ET.SubElement(info, "NAME").text = "Glosario"
                 ET.SubElement(info, "INTRO").text = ""
-                entries = ET.SubElement(glosario_root, "ENTRIES")
+                entries = ET.SubElement(info, "ENTRIES")
                 
                 entry_texts = []
                 lis = table.find_all('li')
@@ -203,11 +203,11 @@ def run_docx_splitting_workflow(course_id: int):
                 # Format XML
                 xml_str = ET.tostring(glosario_root, 'utf-8')
                 reparsed = minidom.parseString(xml_str)
-                pretty_xml = reparsed.toprettyxml(indent="  ")
+                pretty_xml_bytes = reparsed.toprettyxml(indent="  ", encoding="UTF-8")
                 
                 xml_path = os.path.join(output_dirs["glosario"], "glosario_import.xml")
-                with open(xml_path, "w", encoding="utf-8") as f:
-                    f.write(pretty_xml)
+                with open(xml_path, "wb") as f:
+                    f.write(pretty_xml_bytes)
                 logger.info(f"  ✓ Extracted glosario_import.xml with {len(entries)} entries")
                 break
 
