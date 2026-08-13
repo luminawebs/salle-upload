@@ -24,7 +24,7 @@ def parse_activity_number(val):
             res += roman.get(val[i], 0)
     return res
 
-def click_edit_for_activity(driver, activity_name_prefix, wait_time):
+def get_edit_url_for_activity(driver, activity_name_prefix, wait_time):
     """
     Finds an activity by prefix name and clicks 'Editar ajustes'.
     """
@@ -33,7 +33,7 @@ def click_edit_for_activity(driver, activity_name_prefix, wait_time):
         from actions.moodle_actions import navigate_to_course
         from config.settings import Config
         # Extract course ID from URL if possible or assume it's the current one... 
-        # Better yet, pass course_id into click_edit_for_activity
+        # Better yet, pass course_id into get_edit_url_for_activity
         pass # We'll handle this in the main loop instead
         
     # Attempt to expand all sections if they are collapsed (Moodle 4.x)
@@ -117,21 +117,23 @@ def click_edit_for_activity(driver, activity_name_prefix, wait_time):
             
         time.sleep(1)
         
+        
         # Click 'Editar ajustes'
         edit_option_xpath = ".//a[contains(@class, 'dropdown-item') and (contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'editar ajustes') or contains(@href, 'modedit.php'))]"
         edit_settings_option = wait.until(lambda d: target_activity.find_element(By.XPATH, edit_option_xpath))
         
-        try:
-            edit_settings_option.click()
-        except:
-            driver.execute_script("arguments[0].click();", edit_settings_option)
+        href = edit_settings_option.get_attribute('href')
+        if not href:
+            # Try to get it from onclick or similar if href is missing, but usually it's in href
+            logger.error(f"Found edit option for '{activity_name_prefix}' but it has no href.")
+            return None
             
-        return True
+        return href
     except Exception as e:
-        logger.error(f"Failed to click edit for '{activity_name_prefix}': {e}")
-        return False
+        logger.error(f"Failed to extract edit URL for '{activity_name_prefix}': {e}")
+        return None
 
-def upload_introduccion_general(driver, html_path, wait_time):
+def get_edit_url_for_introduccion_general(driver, wait_time):
     wait = WebDriverWait(driver, wait_time)
     
     # The Introduccion General is inside a label that contains "-- Inicio texto presentación --"
@@ -185,10 +187,20 @@ def upload_introduccion_general(driver, html_path, wait_time):
         
         edit_option_xpath = ".//a[contains(@class, 'dropdown-item') and (contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'editar ajustes') or contains(@href, 'modedit.php'))]"
         edit_settings = wait.until(lambda d: target_label.find_element(By.XPATH, edit_option_xpath))
-        try:
-            edit_settings.click()
-        except:
-            driver.execute_script("arguments[0].click();", edit_settings)
+        
+        href = edit_settings.get_attribute('href')
+        if not href:
+            logger.error("Found edit option for Introducción General but it has no href.")
+            return None
+        return href
+        
+    except Exception as e:
+        logger.error(f"Error finding Introducción General edit URL: {e}")
+        return None
+
+def upload_introduccion_general_to_editor(driver, html_path, wait_time):
+    wait = WebDriverWait(driver, wait_time)
+    try:
             
         # Wait for editor to load
         submit_btn_css = "#id_submitbutton, #id_submitbutton2, input[name='submitbutton'], input[name='submitbutton2'], button[name='submitbutton']"
@@ -229,14 +241,15 @@ def upload_introduccion_general(driver, html_path, wait_time):
             success = inject_html_into_wysiwyg(driver, updated_html, wait_time, target_section="descripcion")
             if success:
                 logger.info("Successfully updated Introducción General.")
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
                 return True
         else:
             logger.error("Regex markers for Introducción General not found in current HTML.")
             # Fallback cancel
-            cancel_btn = driver.find_element(By.CSS_SELECTOR, "input[name='cancel'], button[name='cancel'], #id_cancel")
-            driver.execute_script("arguments[0].click();", cancel_btn)
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
+            try:
+                cancel_btn = driver.find_element(By.CSS_SELECTOR, "input[name='cancel'], button[name='cancel'], #id_cancel")
+                driver.execute_script("arguments[0].click();", cancel_btn)
+            except:
+                pass
             return False
             
     except Exception as e:
@@ -369,19 +382,25 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
     # Upload Introduccion General
     intro_path = os.path.join(introduccion_dir, "introduccion_general.html")
     if os.path.exists(intro_path):
-        if "course/view.php" not in driver.current_url:
-            navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
-            
         logger.info(f"Uploading Introducción General for course {course_id}...")
-        upload_introduccion_general(driver, intro_path, wait_time)
-        time.sleep(2)
+        edit_url = get_edit_url_for_introduccion_general(driver, wait_time)
+        if edit_url:
+            original_window = driver.current_window_handle
+            driver.execute_script(f"window.open('{edit_url}', '_blank');")
+            driver.switch_to.window(driver.window_handles[-1])
+            try:
+                upload_introduccion_general_to_editor(driver, intro_path, wait_time)
+                time.sleep(2)
+            finally:
+                driver.close()
+                driver.switch_to.window(original_window)
+        else:
+            logger.error("Could not extract edit URL for Introducción General.")
         
     # Upload Actividades
     if os.path.exists(actividades_dir):
         for filename in sorted(os.listdir(actividades_dir)):
             if filename.endswith(".html") and filename.startswith("actividad"):
-                if "course/view.php" not in driver.current_url:
-                    navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
                     
                 # extract number, e.g. actividad1.html -> 1
                 match = re.search(r'\d+', filename)
@@ -390,35 +409,40 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                     activity_prefix = f"ACTIVIDAD {act_num}"
                     logger.info(f"Uploading {filename} to {activity_prefix}...")
                     
-                    if click_edit_for_activity(driver, activity_prefix, wait_time):
-                        wait = WebDriverWait(driver, wait_time)
-                        submit_btn_css = "#id_submitbutton, #id_submitbutton2, input[name='submitbutton'], input[name='submitbutton2'], button[name='submitbutton']"
-                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, submit_btn_css)))
+                    edit_url = get_edit_url_for_activity(driver, activity_prefix, wait_time)
+                    if edit_url:
+                        original_window = driver.current_window_handle
+                        driver.execute_script(f"window.open('{edit_url}', '_blank');")
+                        driver.switch_to.window(driver.window_handles[-1])
                         
-                        file_path = os.path.join(actividades_dir, filename)
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
+                        try:
+                            wait = WebDriverWait(driver, wait_time)
+                            submit_btn_css = "#id_submitbutton, #id_submitbutton2, input[name='submitbutton'], input[name='submitbutton2'], button[name='submitbutton']"
+                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, submit_btn_css)))
                             
-                        # Transform the HTML
-                        from actions.html_transformer import transform_activity_html, remove_questions_from_html
-                        
-                        content = remove_questions_from_html(content)
-                        
-                        content = transform_activity_html(content, course_id)
+                            file_path = os.path.join(actividades_dir, filename)
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                                
+                            # Transform the HTML
+                            from actions.html_transformer import transform_activity_html, remove_questions_from_html
                             
-                        # Use descripcion for tasks
-                        success = inject_html_into_wysiwyg(driver, content, wait_time, target_section="descripcion")
-                        if success:
-                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-                            logger.info(f"Success: {filename}")
-                            
-                            # Navigate to filters and configure
-                            disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)
-                            
-                            # Navigate back to course view
-                            if "course/view.php" not in driver.current_url:
-                                navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
-                        else:
-                            logger.error(f"Failed to inject {filename}")
-                    time.sleep(2)
+                            content = remove_questions_from_html(content)
+                            content = transform_activity_html(content, course_id)
+                                
+                            # Use descripcion for tasks
+                            success = inject_html_into_wysiwyg(driver, content, wait_time, target_section="descripcion")
+                            if success:
+                                # Wait until we are redirected back to the course view (or whatever page) in the new tab
+                                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
+                                logger.info(f"Success: {filename}")
+                                
+                                # Navigate to filters and configure (it will do this inside the new tab!)
+                                disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)
+                            else:
+                                logger.error(f"Failed to inject {filename}")
+                            time.sleep(2)
+                        finally:
+                            driver.close()
+                            driver.switch_to.window(original_window)
 

@@ -37,28 +37,52 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
             return False
             
         # Wait for the modchooser dialog
+        logger.info("Waiting for modchooser dialog...")
         time.sleep(2)
         
-        # Search for Glosario
-        search_box = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input.search-input, input[placeholder*='Buscar']")))
-        search_box.clear()
-        search_box.send_keys("Glosario")
-        time.sleep(1)
+        # Search for Glosario (Optional, Moodle 4.x feature)
+        logger.info("Searching for Glosario in modchooser (if search box exists)...")
+        try:
+            search_box = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input.search-input, input[placeholder*='Buscar']")))
+            search_box.clear()
+            search_box.send_keys("Glosario")
+            time.sleep(1)
+        except TimeoutException:
+            logger.info("Search box not found. Proceeding to find Glosario directly...")
         
         # Click the Glosario option
-        glosario_option = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".option[data-name='glossary'], .option[title='Glosario'], .modicon_glossary, .modtype_glossary a")))
-        driver.execute_script("arguments[0].click();", glosario_option)
+        logger.info("Clicking Glosario option...")
+        try:
+            # We target the anchor tag inside the option div that has data-internal="glossary"
+            # Or the anchor tag that has href containing 'add=glossary'
+            css = ".option[data-internal='glossary'] a, a[href*='add=glossary'], .option[data-name='glossary'], .modtype_glossary a"
+            glosario_option = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, css)))
+            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
+            time.sleep(0.5)
+            driver.execute_script("arguments[0].click();", glosario_option)
+        except TimeoutException:
+            # Fallback for Moodle 3.x / 4.x text search
+            logger.info("CSS selectors failed, trying XPath fallback...")
+            xpath = ".//div[contains(@class, 'optionname') and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'glosario')]/ancestor::a"
+            glosario_option = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
+            time.sleep(0.5)
+            driver.execute_script("arguments[0].click();", glosario_option)
         
         # Wait for the settings page to load
-        name_input = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input#id_name")))
+        logger.info("Waiting for Glosario settings page...")
+        name_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input#id_name")))
+        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", name_input)
+        time.sleep(0.5)
         name_input.clear()
         name_input.send_keys("GLOSARIO")
         
         # Click "Guardar cambios y mostrar"
+        logger.info("Saving Glosario activity...")
         submit_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton, input[name='submitbutton']")
-        driver.execute_script("arguments[0].scrollIntoView();", submit_btn)
+        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", submit_btn)
         time.sleep(1)
-        submit_btn.click()
+        driver.execute_script("arguments[0].click();", submit_btn)
         
         # Wait for the glosario page to load by waiting for the import entries button or admin menu
         time.sleep(3)
@@ -74,8 +98,7 @@ def import_glosario_entries(driver, xml_path, wait_time=10):
     wait = WebDriverWait(driver, wait_time)
     try:
         # Find the "Importar entradas" form/button
-        # The user provided: <button type="submit" class="btn btn-secondary">Importar entradas</button>
-        # in a form to mod/glossary/import.php
+        logger.info("Looking for 'Importar entradas' button...")
         import_btn = wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'Importar entradas')] | //a[contains(@href, 'import.php')]")))
         driver.execute_script("arguments[0].click();", import_btn)
         
@@ -88,20 +111,28 @@ def import_glosario_entries(driver, xml_path, wait_time=10):
         driver.execute_script("arguments[0].style.opacity = '1';", file_input)
         
         # Send keys to the input
+        logger.info("Uploading XML file...")
         file_input.send_keys(os.path.abspath(xml_path))
         time.sleep(1)
         
         # Submit the import
+        logger.info("Submitting glosario import form...")
         submit_import_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#id_submitbutton, input[type='submit']")))
-        submit_import_btn.click()
+        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", submit_import_btn)
+        time.sleep(1)
+        driver.execute_script("arguments[0].click();", submit_import_btn)
         time.sleep(3)
         
         # Optionally click 'Continuar'
         try:
+            logger.info("Looking for 'Continuar' button...")
             continue_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Continuar')]")
-            continue_btn.click()
+            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", continue_btn)
+            time.sleep(1)
+            driver.execute_script("arguments[0].click();", continue_btn)
             time.sleep(2)
         except NoSuchElementException:
+            logger.info("'Continuar' button not found, assuming success.")
             pass
             
         logger.info(f"Successfully imported Glosario entries from {xml_path}")
