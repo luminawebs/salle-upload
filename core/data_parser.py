@@ -161,14 +161,13 @@ def run_docx_splitting_workflow(course_id: int):
     # 1.5 Extract Glosario
     glosario_found = False
     for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'td']):
-        if "GLOSARIO" in p.get_text().upper().strip():
-            # The glosario is typically in the following elements. We can try to look for the table next to it.
-            # Or if it's already inside a table, we can extract the rows.
+        text_upper = p.get_text().upper().strip()
+        if "GLOSARIO" in text_upper and "HERRAMIENTAS DE LA PLATAFORMA" not in text_upper and not glosario_found:
             table = p.find_next('table')
             if not table and p.find_parent('table'):
                 table = p.find_parent('table')
                 
-            if table and not glosario_found:
+            if table:
                 glosario_found = True
                 glosario_root = ET.Element("GLOSARIO")
                 info = ET.SubElement(glosario_root, "INFO")
@@ -176,17 +175,30 @@ def run_docx_splitting_workflow(course_id: int):
                 ET.SubElement(info, "INTRO").text = ""
                 entries = ET.SubElement(glosario_root, "ENTRIES")
                 
-                # Iterate rows
-                for row in table.find_all('tr'):
-                    cells = row.find_all('td')
-                    if not cells: continue
-                    text = row.get_text().strip()
+                entry_texts = []
+                lis = table.find_all('li')
+                if lis:
+                    for li in lis:
+                        entry_texts.append(li.get_text().strip())
+                else:
+                    for row in table.find_all('tr'):
+                        cells = row.find_all('td')
+                        if not cells: continue
+                        ps = row.find_all('p')
+                        if len(ps) > 1:
+                            for par in ps:
+                                entry_texts.append(par.get_text().strip())
+                        else:
+                            entry_texts.append(row.get_text().strip())
+                            
+                for text in entry_texts:
                     if ":" in text:
                         concept, definition = text.split(":", 1)
-                        entry = ET.SubElement(entries, "ENTRY")
-                        ET.SubElement(entry, "CONCEPT").text = concept.strip()
-                        ET.SubElement(entry, "DEFINITION").text = definition.strip()
-                        ET.SubElement(entry, "FORMAT").text = "1"
+                        if len(concept.strip()) < 100 and len(concept.strip()) > 0:
+                            entry = ET.SubElement(entries, "ENTRY")
+                            ET.SubElement(entry, "CONCEPT").text = concept.strip()
+                            ET.SubElement(entry, "DEFINITION").text = definition.strip()
+                            ET.SubElement(entry, "FORMAT").text = "1"
                         
                 # Format XML
                 xml_str = ET.tostring(glosario_root, 'utf-8')

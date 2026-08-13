@@ -102,18 +102,40 @@ def import_glosario_entries(driver, xml_path, wait_time=10):
         import_btn = wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'Importar entradas')] | //a[contains(@href, 'import.php')]")))
         driver.execute_script("arguments[0].click();", import_btn)
         
-        # Wait for the file picker
-        file_input = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file'][name*='file']")))
+        # Wait for the Moodle file picker choose button
+        logger.info("Opening Moodle file picker...")
+        choose_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".fp-btn-choose")))
+        driver.execute_script("arguments[0].click();", choose_btn)
         
-        # Unhide the file input if Moodle hides it
+        # Wait for dialog to open
+        time.sleep(2)
+        
+        # Ensure we are on the "Subir un archivo" (Upload a file) tab
+        try:
+            upload_tab = driver.find_element(By.XPATH, "//a[contains(., 'Subir un archivo') or contains(., 'Upload a file')]")
+            driver.execute_script("arguments[0].click();", upload_tab)
+            time.sleep(1)
+        except NoSuchElementException:
+            pass
+            
+        # Find the actual file input in the dialog
+        file_input = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file'][name='repo_upload_file']")))
+        
+        # Unhide if necessary
         driver.execute_script("arguments[0].style.display = 'block';", file_input)
-        driver.execute_script("arguments[0].style.visibility = 'visible';", file_input)
-        driver.execute_script("arguments[0].style.opacity = '1';", file_input)
         
         # Send keys to the input
         logger.info("Uploading XML file...")
         file_input.send_keys(os.path.abspath(xml_path))
         time.sleep(1)
+        
+        # Click "Subir este archivo" (Upload this file)
+        logger.info("Clicking upload button in dialog...")
+        upload_btn = wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'fp-upload-btn')] | //button[contains(text(), 'Subir este archivo')]")))
+        driver.execute_script("arguments[0].click();", upload_btn)
+        
+        # Wait for the file to upload and dialog to close
+        time.sleep(4)
         
         # Submit the import
         logger.info("Submitting glosario import form...")
