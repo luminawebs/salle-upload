@@ -3,6 +3,7 @@ import re
 import base64
 import logging
 from bs4 import BeautifulSoup
+from core.question_types import MultichoiceQuestion, ClozeQuestion, DragDropQuestion
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +170,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             'options': [],
             'feedback': {'general': [], 'correct': [], 'incorrect': []},
             'base_list_level': 0,
-            'active_fb_type': 'general'
+            'active_fb_type': 'general',
+            'q_type': 'multichoice'
         }
 
     for block in blocks:
@@ -183,7 +185,19 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         if not text and b_type not in ['img', 'table'] and "img" not in html_str and "table" not in html_str:
             continue
 
-        # 2a. Check if Feedback
+        # 2a. Check if Type header
+        if re.match(r'(?i)^Tipo:\s*(.*)', text):
+            type_val = re.match(r'(?i)^Tipo:\s*(.*)', text).group(1).lower().strip()
+            if current_q and state in ['SEARCHING', 'STEM']:
+                if 'completar' in type_val or 'cloze' in type_val:
+                    current_q['q_type'] = 'cloze'
+                elif 'arrastrar' in type_val or 'drag' in type_val:
+                    current_q['q_type'] = 'drag_drop'
+                elif 'verdadero' in type_val:
+                    current_q['q_type'] = 'truefalse'
+            continue
+
+        # 2b. Check if Feedback
         is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
         if is_feedback_header:
             if "correcta" in text.lower() and "incorrecta" not in text.lower():
@@ -202,7 +216,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     current_q['feedback'][fb_type].append(clean_html)
             continue
             
-        # 2b. Check if Option
+        # 2c. Check if Option
         is_option = False
         is_correct = False
         clean_html_opt = html_str
@@ -217,6 +231,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             # Check list group
             elif l_group_id and l_group_id in option_groups:
                 is_option = True
+            elif current_q and current_q.get('q_type') == 'drag_drop' and state == 'OPTIONS':
+                # Distractors in drag & drop might not have a marker
+                if len(text.split()) < 15 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
+                    is_option = True
 
         if is_option and current_q:
             if re.search(r'\([xX]\)$', text):
@@ -235,7 +253,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             current_q['options'].append({'html': clean_html_opt, 'is_correct': is_correct})
             continue
 
-        # 2c. Check if Question Start
+        # 2d. Check if Question Start
         is_start = False
         if b_type not in ['table', 'img']:
             if re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE):
@@ -255,7 +273,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             current_q['stem_html'].append(html_str)
             continue
             
-        # 2d. Append to current state
+        # 2e. Append to current state
         if current_q:
             if state == 'STEM':
                 current_q['stem_html'].append(html_str)
@@ -279,56 +297,6 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     structured_questions = []
     xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
     xml_footer = '</quiz>\n'
-    
-    def add_question(q_num, stem_html, options, is_true_false, correct_is_true, fb_gen="", fb_corr="", fb_inc=""):
-        q_dict = {
-            "stem_html": stem_html,
-            "options": [],
-            "correct_feedback_html": fb_corr or fb_gen,
-            "incorrect_feedback_html": fb_inc or fb_gen
-        }
-        
-        q_xml = f'<!-- question: {q_num}  -->\n'
-        q_type = 'truefalse' if is_true_false else ('multichoice' if options else 'description')
-        q_xml += f'  <question type="{q_type}">\n'
-        q_xml += f'    <name>\n      <text><![CDATA[{course_id}_{document_name}_q{q_num}]]></text>\n    </name>\n'
-        q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{stem_html}]]></text>\n    </questiontext>\n'
-        if fb_gen:
-            q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{fb_gen}]]></text>\n    </generalfeedback>\n'
-            
-        if q_type != 'description':
-            if fb_corr:
-                q_xml += f'    <correctfeedback format="html">\n      <text><![CDATA[{fb_corr}]]></text>\n    </correctfeedback>\n'
-            if fb_inc:
-                q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{fb_inc}]]></text>\n    </incorrectfeedback>\n'
-            q_xml += '    <defaultgrade>1.0000000</defaultgrade>\n'
-            q_xml += '    <penalty>0.3333333</penalty>\n'
-            q_xml += '    <hidden>0</hidden>\n'
-        
-        if q_type == 'truefalse':
-            q_xml += f'    <answer fraction="{"100" if correct_is_true else "0"}" format="moodle_auto_format">\n      <text>true</text>\n    </answer>\n'
-            q_xml += f'    <answer fraction="{"0" if correct_is_true else "100"}" format="moodle_auto_format">\n      <text>false</text>\n    </answer>\n'
-            q_dict["options"].append({"text_html": "true", "is_correct": correct_is_true})
-            q_dict["options"].append({"text_html": "false", "is_correct": not correct_is_true})
-        elif q_type == 'multichoice':
-            q_xml += '    <single>true</single>\n'
-            q_xml += '    <shuffleanswers>true</shuffleanswers>\n'
-            q_xml += '    <answernumbering>abc</answernumbering>\n'
-            for opt_html, is_correct in options:
-                fraction = "100" if is_correct else "0"
-                opt_soup = BeautifulSoup(opt_html, 'html.parser')
-                first_text = opt_soup.find(string=True)
-                if first_text:
-                    new_text = re.sub(r'^\s*=?\s*[a-zA-Z][\.\)]\s*', '', first_text)
-                    if new_text != first_text:
-                        first_text.replace_with(new_text)
-                        opt_html = str(opt_soup)
-                q_dict["options"].append({"text_html": opt_html, "is_correct": is_correct})
-                q_xml += f'    <answer fraction="{fraction}" format="html">\n      <text><![CDATA[{opt_html}]]></text>\n    </answer>\n'
-                
-        q_xml += '  </question>\n'
-        xml_questions.append(q_xml)
-        structured_questions.append(q_dict)
 
     q_num = 1
     for q in questions:
@@ -340,19 +308,58 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         for o in q['options']:
             opts.append((o['html'], o['is_correct']))
             
-        opt_texts = [BeautifulSoup(o[0], 'html.parser').get_text(strip=True).lower() for o in opts]
-        if len(opt_texts) == 2:
-            if any(x in txt for txt in opt_texts for x in ['verdadero', 'true']) and any(x in txt for txt in opt_texts for x in ['falso', 'false']):
-                is_true_false = True
-                for o_html, is_corr in opts:
-                    if is_corr and any(x in o_html.lower() for x in ['verdadero', 'true']):
-                        correct_is_true = True
-                        
+        # Detect true/false heuristically if not set explicitly
+        if q['q_type'] == 'multichoice':
+            opt_texts = [BeautifulSoup(o[0], 'html.parser').get_text(strip=True).lower() for o in opts]
+            if len(opt_texts) == 2:
+                if any(x in txt for txt in opt_texts for x in ['verdadero', 'true']) and any(x in txt for txt in opt_texts for x in ['falso', 'false']):
+                    is_true_false = True
+                    q['q_type'] = 'truefalse'
+                    for o_html, is_corr in opts:
+                        if is_corr and any(x in o_html.lower() for x in ['verdadero', 'true']):
+                            correct_is_true = True
+                            
+        if q['q_type'] == 'truefalse':
+            is_true_false = True
+            
         fb_gen = "<br>".join(q['feedback']['general'])
         fb_corr = "<br>".join(q['feedback']['correct'])
         fb_inc = "<br>".join(q['feedback']['incorrect'])
         
-        add_question(q_num, stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc)
+        if q['q_type'] in ['multichoice', 'truefalse']:
+            q_handler = MultichoiceQuestion(
+                q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name,
+                is_true_false=is_true_false, correct_is_true=correct_is_true
+            )
+        elif q['q_type'] == 'cloze':
+            q_handler = ClozeQuestion(
+                q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
+            )
+        elif q['q_type'] == 'drag_drop':
+            q_handler = DragDropQuestion(
+                q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
+            )
+        else:
+            q_handler = MultichoiceQuestion(q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name)
+            
+        xml_questions.append(q_handler.to_moodle_xml())
+        
+        # Build structured output for AI QA
+        q_dict = {
+            "stem_html": stem_html,
+            "options": [],
+            "correct_feedback_html": fb_corr or fb_gen,
+            "incorrect_feedback_html": fb_inc or fb_gen
+        }
+        
+        if q['q_type'] == 'truefalse':
+            q_dict["options"].append({"text_html": "true", "is_correct": correct_is_true})
+            q_dict["options"].append({"text_html": "false", "is_correct": not correct_is_true})
+        else:
+            for opt_html, is_correct in opts:
+                q_dict["options"].append({"text_html": opt_html, "is_correct": is_correct})
+                
+        structured_questions.append(q_dict)
         q_num += 1
 
     # --- 4. VALIDATION LOGIC (AI QA Layer) ---

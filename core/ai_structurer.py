@@ -73,9 +73,9 @@ Instructions:
 - In `corrections`, provide the index (0-based) of the parser output you are fixing, and the fully corrected question object.
 - In `additions`, provide any completely new questions that were missed.
 - In `removals`, provide the indices (0-based) of items that are not actually questions and should be deleted.
-- If the parser found 0 questions but the HTML contains valid questions, extract all of them into `additions`.
-- If the parser found 0 questions and there truly are none, set `is_perfect` to true and leave arrays empty.
-- For drag-and-drop or fill-in-the-blank questions that don't have standard multiple-choice options, leave their `options` array empty. They will be imported as 'description' type questions.
+- CRITICAL: For "Tipo: completar" questions, ensure the gap markers like `[respuesta]` are preserved in the stem_html.
+- CRITICAL: For "Tipo: arrastrar_soltar" questions, ensure the gap markers like `[[1]]` are preserved in the stem_html, and options are extracted correctly.
+- For questions that truly have no standard multiple-choice options, leave their `options` array empty.
 """
 
     schema = {

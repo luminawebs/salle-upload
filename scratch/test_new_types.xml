@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="cloze">
+    <name>
+      <text><![CDATA[999_test_doc_q1]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 1:</p><br><p>La capital de Colombia es {1:SHORTANSWER:=Bogotá}.</p>]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[¡Muy bien!</p>]]></text>
+    </correctfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+  </question>
+
+<!-- question: 2  -->
+  <question type="ddwtos">
+    <name>
+      <text><![CDATA[999_test_doc_q2]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 2:</p><br><p>El planeta más grande es [[1]] y el planeta rojo es [[2]].</p><br><p>Opciones:</p>]]></text>
+    </questiontext>
+    <shuffleanswers>1</shuffleanswers>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <dragboxes>
+      <dragbox>
+        <text><![CDATA[Júpiter]]></text>
+        <group>1</group>
+      </dragbox>
+      <dragbox>
+        <text><![CDATA[Marte]]></text>
+        <group>1</group>
+      </dragbox>
+      <dragbox>
+        <text><![CDATA[Venus]]></text>
+        <group>1</group>
+      </dragbox>
+    </dragboxes>
+  </question>
+</quiz>
