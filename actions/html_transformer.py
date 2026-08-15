@@ -224,7 +224,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 clean_html_opt = re.sub(r'\([xX]\)(?=[^>]*(?:<|$))', '', clean_html_opt).strip()
             elif text.strip().startswith('='):
                 is_correct = True
-                clean_html_opt = re.sub(r'^\s*=\s*(?=[^>]*(?:<|$))', '', clean_html_opt).strip()
+                # Use regex to remove '=' even if it's right after an opening tag
+                clean_html_opt = re.sub(r'(>|^)\s*=\s*', r'\1', clean_html_opt, count=1).strip()
             elif "(respuesta" in text.lower() or "(correct answer)" in text.lower():
                 is_correct = True
                 clean_html_opt = re.sub(r'(?i)\s*\((?:respuesta(?: correcta)?|correct answer)\)', '', clean_html_opt).strip()
