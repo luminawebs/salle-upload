@@ -80,22 +80,26 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
             curr = tr
             while curr:
                 text = curr.get_text()
-                if 'Criterios de desempeño' in text and 'Puntos' in text:
+                if 'Criterios de desempe' in text and 'Puntos' in text:
                     table = curr.find('table')
                     if not table and curr.parent.name == 'table':
                         table = curr.find_next('table')
-                    if table and 'Criterios de desempeño' in table.get_text():
+                    if table and 'Criterios de desempe' in table.get_text():
                         next_criterios_table = table
                         break
                 curr = curr.find_next_sibling('tr')
-                if curr and re.search(r'ACTIVIDAD\s*\d+', curr.get_text().upper()) and "ACTIVIDADES DE APRENDIZAJE" not in curr.get_text().upper():
-                    break
+                if curr:
+                    text_upper = curr.get_text().upper()
+                    if 'CRITERIOS DE DESEMPE' not in text_upper and re.search(r'ACTIVIDAD\s*\d+', text_upper) and "ACTIVIDADES DE APRENDIZAJE" not in text_upper:
+                        break
                     
             if next_criterios_table:
                 criteria_list = []
                 rows = next_criterios_table.find_all('tr', recursive=False)
                 if not rows and next_criterios_table.tbody:
                     rows = next_criterios_table.tbody.find_all('tr', recursive=False)
+                if not rows and next_criterios_table.thead:
+                    rows = next_criterios_table.thead.find_all('tr', recursive=False)
                 
                 for i, row in enumerate(rows):
                     if i == 0:

@@ -61,37 +61,44 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
         original_window = driver.current_window_handle
         
         try:
-            # We target the anchor tag inside the option div that has data-internal="glossary"
-            # Or the anchor tag that has href containing 'add=glossary'
-            css = ".option[data-internal='glossary'] a, a[href*='add=glossary'], .option[data-name='glossary'], .modtype_glossary a"
-            glosario_option = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, css)))
-            href = glosario_option.get_attribute("href")
+            # Robust selection similar to structure_actions.py
+            chooser = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".modchooser, .modal-dialog, .modal-content, [data-region='chooserdialogue']")))
+            options = chooser.find_elements(By.CSS_SELECTOR, ".option a, .option button, .option label, .modchooser-item, .option")
             
-            if href:
-                logger.info(f"[Tab Manager] Opening Glosario settings in a NEW TAB (href: {href})...")
-                driver.execute_script(f"window.open('{href}', '_blank');")
-                driver.switch_to.window(driver.window_handles[-1])
-            else:
-                logger.info("[Tab Manager] No href found. Clicking Glosario option in SAME tab...")
-                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
-                time.sleep(0.5)
-                driver.execute_script("arguments[0].click();", glosario_option)
+            keywords = ["glossary", "glosario"]
+            found_glosario = False
+            
+            for option in options:
+                text = option.text.lower()
+                opt_href = option.get_attribute("href") or ""
+                data_name = option.get_attribute("data-name") or ""
+                
+                if any(k in text for k in keywords) or any(k in opt_href for k in keywords) or any(k in data_name.lower() for k in keywords):
+                    href = opt_href
+                    if href and "javascript" not in href.lower():
+                        logger.info(f"[Tab Manager] Opening Glosario settings in a NEW TAB (href: {href})...")
+                        driver.execute_script(f"window.open('{href}', '_blank');")
+                        driver.switch_to.window(driver.window_handles[-1])
+                        found_glosario = True
+                        break
+                    else:
+                        logger.info("[Tab Manager] No href found. Clicking Glosario option in SAME tab...")
+                        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", option)
+                        time.sleep(0.5)
+                        try:
+                            option.click()
+                        except Exception:
+                            driver.execute_script("arguments[0].click();", option)
+                        found_glosario = True
+                        break
+            
+            if not found_glosario:
+                logger.error("Could not find Glosario activity type in the chooser.")
+                raise TimeoutException("Glosario option not found in modchooser.")
+                
         except TimeoutException:
-            # Fallback for Moodle 3.x / 4.x text search
-            logger.info("CSS selectors failed, trying XPath fallback...")
-            xpath = ".//div[contains(@class, 'optionname') and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'glosario')]/ancestor::a"
-            glosario_option = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
-            href = glosario_option.get_attribute("href")
-            
-            if href:
-                logger.info(f"[Tab Manager] Opening Glosario settings in a NEW TAB (href: {href})...")
-                driver.execute_script(f"window.open('{href}', '_blank');")
-                driver.switch_to.window(driver.window_handles[-1])
-            else:
-                logger.info("[Tab Manager] No href found. Clicking Glosario option in SAME tab...")
-                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", glosario_option)
-                time.sleep(0.5)
-                driver.execute_script("arguments[0].click();", glosario_option)
+            logger.error("Timeout waiting for modchooser options or Glosario not found.")
+            raise
         
         # Wait for the settings page to load
         logger.info("Waiting for Glosario settings page...")
