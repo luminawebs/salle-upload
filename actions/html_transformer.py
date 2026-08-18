@@ -72,6 +72,13 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     """
     soup = BeautifulSoup(html_content, 'html.parser')
     
+    # --- 0. PRE-PROCESS TABLES FOR QUESTIONS ---
+    for table in soup.find_all('table'):
+        table['style'] = (table.get('style', '') + '; border: 1px solid black; border-collapse: collapse;').strip('; ')
+        table['border'] = "1"
+        for td in table.find_all(['td', 'th']):
+            td['style'] = (td.get('style', '') + '; border: 1px solid black;').strip('; ')
+            
     # --- 1. DOM FLATTENING ---
     blocks = []
     def traverse(node, list_level=0, list_group_id=None):
@@ -197,6 +204,12 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                     current_q['q_type'] = 'truefalse'
             continue
 
+        # 2a.5. Check if Opciones header
+        if text.strip().lower() in ['opciones:', 'opciones']:
+            if current_q and state in ['SEARCHING', 'STEM']:
+                state = 'OPTIONS'
+            continue
+
         # 2b. Check if Feedback
         is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
         if is_feedback_header:
@@ -228,11 +241,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 is_option = True
             elif text.strip().startswith('='):
                 is_option = True
-            # Check list group
             elif l_group_id and l_group_id in option_groups:
                 is_option = True
-            elif current_q and current_q.get('q_type') == 'drag_drop' and state == 'OPTIONS':
-                # Distractors in drag & drop might not have a marker
+            elif current_q and state == 'OPTIONS':
+                # Distractors without a marker (e.g. in plain text format)
                 if len(text.split()) < 15 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
                     is_option = True
 

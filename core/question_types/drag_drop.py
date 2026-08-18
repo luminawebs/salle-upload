@@ -16,8 +16,6 @@ class DragDropQuestion(BaseQuestion):
         if self.feedback_incorrect:
             q_xml += f'    <incorrectfeedback format="html">\n      <text><![CDATA[{self.feedback_incorrect}]]></text>\n    </incorrectfeedback>\n'
             
-        q_xml += '    <dragboxes>\n'
-        
         # Options are the draggable texts
         for idx, (opt_html, is_correct) in enumerate(self.options, 1):
             opt_soup = BeautifulSoup(opt_html, 'html.parser')
@@ -26,11 +24,10 @@ class DragDropQuestion(BaseQuestion):
             # Clean up letters like A. B. C. if present, though typically they won't be
             new_text = re.sub(r'^\s*=?\s*[a-zA-Z][\.\)]\s*', '', opt_text)
             
-            q_xml += '      <dragbox>\n'
-            q_xml += f'        <text><![CDATA[{new_text}]]></text>\n'
-            q_xml += '        <group>1</group>\n'
-            q_xml += '      </dragbox>\n'
+            q_xml += '    <dragbox>\n'
+            q_xml += f'      <text><![CDATA[{new_text}]]></text>\n'
+            q_xml += '      <group>1</group>\n'
+            q_xml += '    </dragbox>\n'
             
-        q_xml += '    </dragboxes>\n'
         q_xml += self._get_common_footer()
         return q_xml

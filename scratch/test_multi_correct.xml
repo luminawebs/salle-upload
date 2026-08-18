@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[999_test_doc_q1]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>PREGUNTA 5 (Opción Múltiple con múltiples correctas)</p><br><p>Enunciado: ¿Cuáles de los siguientes son gases nobles?</p><br><p>Opciones:</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="16.66667" format="html">
+      <text><![CDATA[<p>Helio</p>]]></text>
+    </answer>
+    <answer fraction="16.66667" format="html">
+      <text><![CDATA[<p>Neón</p>]]></text>
+    </answer>
+    <answer fraction="16.66667" format="html">
+      <text><![CDATA[<p>Argón</p>]]></text>
+    </answer>
+    <answer fraction="16.66667" format="html">
+      <text><![CDATA[<p>Kríptón</p>]]></text>
+    </answer>
+    <answer fraction="16.66667" format="html">
+      <text><![CDATA[<p>Xenón</p>]]></text>
+    </answer>
+    <answer fraction="16.66667" format="html">
+      <text><![CDATA[<p>Radón</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Oxígeno</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Nitrógeno</p>]]></text>
+    </answer>
+  </question>
+</quiz>
