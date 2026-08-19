@@ -78,7 +78,14 @@ class Config:
 
     # --------------------------------------------------- FASE 02 (Legacy Intros/Descriptions) --------------------------------------------------------------------------------------------------------------------------------------------
 
-    # Sube las introducciones de las unidades a Moodle
+    ENABLE_GENERALIDADES_ACCORDION_UPLOAD = os.getenv(
+        "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", "True"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
+
     ENABLE_UNIDADES_INTRO_UPLOAD = os.getenv(
         "ENABLE_UNIDADES_INTRO_UPLOAD", "True"
     ).lower() in (

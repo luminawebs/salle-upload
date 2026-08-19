@@ -16,6 +16,7 @@ from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
 from actions.structure_actions import run_course_structure_creation_workflow
 from actions.materiales_estudio_actions import run_materiales_estudio_workflow
 from actions.glosario_actions import create_glosario_activity
+from actions.generalidades_accordion_actions import run_generalidades_accordion_upload_workflow
 from config.settings import Config
 from core.debug_utils import capture_debug_state
 
@@ -111,6 +112,7 @@ def main():
                 edit_enabled = False
                 if (
                     getattr(Config, "ENABLE_COURSE_STRUCTURE_CREATION", False)
+                    or getattr(Config, "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", False)
                     or getattr(Config, "ENABLE_DOCX_UPLOAD_HTML", False)
                     or getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
                     or getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)
@@ -161,6 +163,25 @@ def main():
                             pass
                 elif not getattr(Config, "ENABLE_COURSE_STRUCTURE_CREATION", False):
                     logger.info("Course structure creation workflow is disabled via config.")
+                if getattr(Config, "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", False) and edit_enabled:
+                    logger.info("Executing Generalidades Accordion upload workflow...")
+                    try:
+                        run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        capture_debug_state(driver, course_id, 'generalidades_accordion_upload', is_error=False)
+                    except Exception as e:
+                        import traceback
+                        capture_debug_state(driver, course_id, 'generalidades_accordion_upload_error', is_error=True)
+                        logger.error(f"Error executing run_generalidades_accordion_upload_workflow for course {course_id}: {e}")
+                        logger.error(traceback.format_exc())
+                        try:
+                            dismiss_moodle_error_overlays(driver)
+                            logger.info(f"Navigating back to course {course_id} home after error...")
+                            moodle.navigate_to_course(course_id)
+                        except Exception:
+                            pass
+                elif not getattr(Config, "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", False):
+                    logger.info("Generalidades Accordion upload workflow is disabled via config.")
+
                 if getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False) and edit_enabled:
                     logger.info("Executing Glosario creation workflow...")
                     try:

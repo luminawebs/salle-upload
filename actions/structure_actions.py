@@ -297,74 +297,9 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".tox-edit-area__iframe, .editor_atto_content, textarea[name='introeditor[text]']")))
                 time.sleep(1)
                 
+                # Simply inject default markers for all labels during structure creation.
+                # The actual Accordion template (if applicable) will be uploaded in its own workflow.
                 html_markers = "<p><span>-- Inicio texto presentación --</span></p><p><span>-- Fin texto de presentación --</span></p>"
-                template_path = os.path.join("workspace", "example_course", "GENERALIDADES DEL CURSO.html")
-                course_dir = os.path.join("workspace", str(course_id)) if course_id else "workspace"
-                extracted_path = os.path.join(course_dir, "raw_docx_extracted.html")
-                if os.path.exists(template_path) and os.path.exists(extracted_path):
-                    from actions.html_transformer import generate_dynamic_generalidades_html
-                    try:
-                        html_markers = generate_dynamic_generalidades_html(extracted_path, template_path)
-                    except Exception as e:
-                        logger.error(f"Error generating dynamic generalidades: {e}")
-                        with open(template_path, "r", encoding="utf-8") as f:
-                            html_markers = f.read()
-                elif os.path.exists(template_path):
-                    with open(template_path, "r", encoding="utf-8") as f:
-                        html_markers = f.read()
-                else:
-                    logger.error(f"Template path does not exist: {template_path}. Falling back to default markers.")
-                        
-                # Fix Moodle "File does not exist" error caused by leftover draftfile.php URLs
-                # Extract filename and try to embed it as Base64 like html_transformer does
-                import re
-                from actions.html_transformer import get_image_base64
-                
-                def replace_draft_image_tag(match):
-                    full_tag = match.group(0)
-                    src_match = re.search(r'src=["\']([^"\']*)["\']', full_tag)
-                    if not src_match:
-                        return full_tag
-                        
-                    full_url = src_match.group(1)
-                    filename = full_url.split('/')[-1].split('?')[0].split('#')[0]
-                    
-                    if filename.lower() in ["profesor.jpg", "docente.jpg"] and course_id:
-                        raw_doc_path = os.path.join("workspace", str(course_id), "raw_docx_extracted.html")
-                        if os.path.exists(raw_doc_path):
-                            from bs4 import BeautifulSoup
-                            with open(raw_doc_path, "r", encoding="utf-8") as rf:
-                                raw_soup = BeautifulSoup(rf.read(), "html.parser")
-                                for td in raw_soup.find_all("td"):
-                                    if "Foto del perfil" in td.get_text():
-                                        next_td = td.find_next_sibling("td")
-                                        if next_td:
-                                            img = next_td.find("img")
-                                            if img and img.has_attr("src"):
-                                                docx_img_src = img["src"]
-                                                docx_img_path = os.path.join("workspace", str(course_id), docx_img_src)
-                                                if os.path.exists(docx_img_path):
-                                                    import base64
-                                                    with open(docx_img_path, "rb") as img_file:
-                                                        encoded_string = base64.b64encode(img_file.read()).decode('utf-8')
-                                                    ext = os.path.splitext(docx_img_path)[1].lower().replace('.', '')
-                                                    mime_type = f"image/{ext}" if ext in ['png', 'jpg', 'jpeg', 'gif'] else "image/png"
-                                                    new_src = f"data:{mime_type};base64,{encoded_string}"
-                                                    return full_tag.replace(full_url, new_src)
-                                                    
-                    base64_data = get_image_base64(filename)
-                    if base64_data:
-                        return full_tag.replace(full_url, base64_data)
-                    
-                    logger.warning(f"Imagen del Docente no encontrada ({filename}). No se agregará imagen en Generalidades.")
-                    return ""
-
-                html_markers = re.sub(
-                    r'<img[^>]*src=["\'][^"\']*draftfile\.php[^"\']*["\'][^>]*>', 
-                    replace_draft_image_tag, 
-                    html_markers,
-                    flags=re.IGNORECASE
-                )
                         
                 inject_html_into_wysiwyg(driver, html_markers, wait_time, target_section="intro", submit_form=False)
             except Exception as e:
