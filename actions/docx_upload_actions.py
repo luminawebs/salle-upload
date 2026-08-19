@@ -230,8 +230,9 @@ def upload_introduccion_general_to_editor(driver, html_path, wait_time):
             new_intro_html = f.read()
             
         # Regex replacement between markers
-        # We look for the closing </p> after the start marker and the opening <p before the end marker
-        pattern = r'(-- Inicio texto presentaci[oó]n --.*?<\/span><\/p>)(.*?)(<p[^>]*><span[^>]*>-- Fin texto de presentaci[oó]n --)'
+        # We look for the closing </p> after the start marker and the opening <p before the end marker.
+        # This regex is robust against missing <span> tags or extra whitespace.
+        pattern = r'(--\s*Inicio texto presentaci[oó]n\s*--.*?<\/p>)(.*?)(<p[^>]*>.*?--\s*Fin texto de presentaci[oó]n\s*--)'
         
         def repl(m):
             return m.group(1) + "\n" + new_intro_html + "\n" + m.group(3)
@@ -244,6 +245,8 @@ def upload_introduccion_general_to_editor(driver, html_path, wait_time):
                 return True
         else:
             logger.error("Regex markers for Introducción General not found in current HTML.")
+            # Log the first 500 characters of the HTML to help debug
+            logger.debug(f"Current HTML preview: {current_html[:500]}...")
             # Fallback cancel
             try:
                 cancel_btn = driver.find_element(By.CSS_SELECTOR, "input[name='cancel'], button[name='cancel'], #id_cancel")

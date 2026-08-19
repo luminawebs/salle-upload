@@ -30,26 +30,29 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
         
         # Click the add activity button inside section 0
         try:
+            add_btn_selector = "button.activity-add, a.section-modchooser-link:not([data-action='addSection']), button.section-modchooser-link, [data-action='open-chooser']"
+            
             # Wait until at least one button is present within section 0 to avoid race conditions
-            wait.until(lambda d: len(d.find_element(By.CSS_SELECTOR, section_0_selector).find_elements(By.CSS_SELECTOR, ".section-modchooser-link, [data-action='open-chooser']")) > 0)
+            wait.until(lambda d: len(d.find_element(By.CSS_SELECTOR, section_0_selector).find_elements(By.CSS_SELECTOR, add_btn_selector)) > 0)
             
             # Re-fetch to avoid stale elements
             section_0 = driver.find_element(By.CSS_SELECTOR, section_0_selector)
-            add_btns = section_0.find_elements(By.CSS_SELECTOR, ".section-modchooser-link, [data-action='open-chooser']")
+            add_btns = section_0.find_elements(By.CSS_SELECTOR, add_btn_selector)
             
             if not add_btns:
                 logger.error("Could not find Add Activity button. Is editing turned on?")
                 return False
                 
-            # Prefer the button that doesn't have 'data-beforemod' (which appends to the end of the section)
-            main_add_btns = [btn for btn in add_btns if not btn.get_attribute("data-beforemod")]
-            add_btn = main_add_btns[-1] if main_add_btns else add_btns[-1]
+            add_btn = add_btns[-1] # ALWAYS click the LAST one to append to the bottom!
             
             driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", add_btn)
             time.sleep(1)
             
+            # Log what button we are clicking
+            logger.info(f"Found Add Activity button in Section 0: {add_btn.text.strip() or 'No Text'} (HTML: {add_btn.get_attribute('outerHTML')[:100]}...)")
+            
             try:
-                add_btn.click()
+                wait.until(EC.element_to_be_clickable(add_btn)).click()
             except Exception:
                 driver.execute_script("arguments[0].click();", add_btn)
                 
