@@ -63,15 +63,25 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
         try:
             # Robust selection similar to structure_actions.py
             chooser = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".modchooser, .modal-dialog, .modal-content, [data-region='chooserdialogue']")))
+            time.sleep(1) # Wait for AJAX/JS to populate the options
+            
+            try:
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".modchooser .option, .modchooser .modchooser-item, .modal-dialog .option, .modal-dialog .modchooser-item, [data-region='chooserdialogue'] .option")))
+            except TimeoutException:
+                pass
+                
             options = chooser.find_elements(By.CSS_SELECTOR, ".option a, .option button, .option label, .modchooser-item, .option")
             
             keywords = ["glossary", "glosario"]
             found_glosario = False
+            found_options_debug = []
             
             for option in options:
                 text = option.text.lower()
                 opt_href = option.get_attribute("href") or ""
                 data_name = option.get_attribute("data-name") or ""
+                
+                found_options_debug.append(f"text='{text}', href='{opt_href}', data-name='{data_name}'")
                 
                 if any(k in text for k in keywords) or any(k in opt_href for k in keywords) or any(k in data_name.lower() for k in keywords):
                     href = opt_href
@@ -94,6 +104,11 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
             
             if not found_glosario:
                 logger.error("Could not find Glosario activity type in the chooser.")
+                logger.debug(f"Available options in chooser: {found_options_debug[:10]}")
+                try:
+                    chooser.find_element(By.CSS_SELECTOR, ".close, button[data-action='hide']").click()
+                except:
+                    pass
                 raise TimeoutException("Glosario option not found in modchooser.")
                 
         except TimeoutException:

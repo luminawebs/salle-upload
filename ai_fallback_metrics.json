@@ -1600,5 +1600,149 @@
         "reasoning": "Title 'ACTIVIDAD 11: Aplicando nuestros conocimientos en listas, pilas y colas' not found in AI extraction."
       }
     ]
+  },
+  {
+    "course_id": 70801,
+    "timestamp": 1787076287.4331572,
+    "legacy_count": 15,
+    "ai_count": 0,
+    "warnings": [],
+    "comparisons": [
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Avisos",
+          "type": "Foro"
+        },
+        "reasoning": "Title 'Avisos' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Foro permanente de dudas",
+          "type": "Foro"
+        },
+        "reasoning": "Title 'Foro permanente de dudas' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Encuentros virtuales",
+          "type": "Herramienta externa"
+        },
+        "reasoning": "Title 'Encuentros virtuales' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "Introducción General",
+          "type": "Área de texto y medios"
+        },
+        "reasoning": "Title 'Introducción General' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 1: ¿Qué tanto conozco sobre programación orientada a objetos?",
+          "type": null
+        },
+        "reasoning": "Title 'ACTIVIDAD 1: ¿Qué tanto conozco sobre programación orientada a objetos?' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 2: ¿Qué tan claro tengo los conceptos de miembros estáticos y agregación de clases?",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Title 'ACTIVIDAD 2: ¿Qué tan claro tengo los conceptos de miembros estáticos y agregación de clases?' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 3: Evaluemos lo aprendido",
+          "type": "Tarea"
+        },
+        "reasoning": "Title 'ACTIVIDAD 3: Evaluemos lo aprendido' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 4: ¡Usemos nuestra creatividad!",
+          "type": "Tarea"
+        },
+        "reasoning": "Title 'ACTIVIDAD 4: ¡Usemos nuestra creatividad!' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 5: ¿Qué tanto conozco sobre herencia y polimorfismo?",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Title 'ACTIVIDAD 5: ¿Qué tanto conozco sobre herencia y polimorfismo?' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 6: ¿Cuáles son los miembros estáticos en programación orientada a objetos?",
+          "type": null
+        },
+        "reasoning": "Title 'ACTIVIDAD 6: ¿Cuáles son los miembros estáticos en programación orientada a objetos?' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 7: ¿Qué tan claro tengo los conceptos de miembros estáticos y agregación de clases?",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Title 'ACTIVIDAD 7: ¿Qué tan claro tengo los conceptos de miembros estáticos y agregación de clases?' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 8: Evaluemos lo aprendido",
+          "type": "Tarea"
+        },
+        "reasoning": "Title 'ACTIVIDAD 8: Evaluemos lo aprendido' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 9: ¡Usemos nuestra creatividad!",
+          "type": "Tarea"
+        },
+        "reasoning": "Title 'ACTIVIDAD 9: ¡Usemos nuestra creatividad!' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 10: ¿Qué tanto conozco sobre herencia y polimorfismo?",
+          "type": "Cuestionario"
+        },
+        "reasoning": "Title 'ACTIVIDAD 10: ¿Qué tanto conozco sobre herencia y polimorfismo?' not found in AI extraction."
+      },
+      {
+        "classification": "Present only in legacy",
+        "ai_activity": null,
+        "legacy_activity": {
+          "name": "ACTIVIDAD 11: Aplicando nuestros conocimientos en listas, pilas y colas",
+          "type": "Foro"
+        },
+        "reasoning": "Title 'ACTIVIDAD 11: Aplicando nuestros conocimientos en listas, pilas y colas' not found in AI extraction."
+      }
+    ]
   }
 ]

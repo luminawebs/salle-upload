@@ -161,6 +161,25 @@ def main():
                             pass
                 elif not getattr(Config, "ENABLE_COURSE_STRUCTURE_CREATION", False):
                     logger.info("Course structure creation workflow is disabled via config.")
+                if getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False) and edit_enabled:
+                    logger.info("Executing Glosario creation workflow...")
+                    try:
+                        glosario_xml_path = os.path.join(Config.WORKSPACE_DIR, str(course_id), "glosario", "glosario_import.xml")
+                        create_glosario_activity(driver, course_id, glosario_xml_path, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        capture_debug_state(driver, course_id, 'glosario_upload', is_error=False)
+                    except Exception as e:
+                        import traceback
+                        capture_debug_state(driver, course_id, 'glosario_upload_error', is_error=True)
+                        logger.error(f"Error executing create_glosario_activity for course {course_id}: {e}")
+                        logger.error(traceback.format_exc())
+                        try:
+                            dismiss_moodle_error_overlays(driver)
+                            logger.info(f"Navigating back to course {course_id} home after error...")
+                            moodle.navigate_to_course(course_id)
+                        except Exception:
+                            pass
+                elif not getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False):
+                    logger.info("Glosario creation workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_DOCX_UPLOAD_HTML", False):
                     logger.info("Executing DOCX HTML upload workflow...")
@@ -181,25 +200,7 @@ def main():
                 else:
                     logger.info("DOCX HTML upload workflow is disabled via config.")
 
-                if getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False) and edit_enabled:
-                    logger.info("Executing Glosario creation workflow...")
-                    try:
-                        glosario_xml_path = os.path.join(Config.WORKSPACE_DIR, str(course_id), "glosario", "glosario_import.xml")
-                        create_glosario_activity(driver, course_id, glosario_xml_path, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
-                        capture_debug_state(driver, course_id, 'glosario_upload', is_error=False)
-                    except Exception as e:
-                        import traceback
-                        capture_debug_state(driver, course_id, 'glosario_upload_error', is_error=True)
-                        logger.error(f"Error executing create_glosario_activity for course {course_id}: {e}")
-                        logger.error(traceback.format_exc())
-                        try:
-                            dismiss_moodle_error_overlays(driver)
-                            logger.info(f"Navigating back to course {course_id} home after error...")
-                            moodle.navigate_to_course(course_id)
-                        except Exception:
-                            pass
-                elif not getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False):
-                    logger.info("Glosario creation workflow is disabled via config.")
+
 
                 if getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False) and edit_enabled:
                     logger.info("Executing Materiales de Estudio workflow...")

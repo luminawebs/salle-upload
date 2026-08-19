@@ -659,6 +659,17 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
         if tag.name == "p" and tag.get("data-section"):
             current_section = tag.get("data-section")
             
+        elif tag.name == "table":
+            if current_section == "¿Cómo lo vamos a lograr?":
+                if "Criterios de desempeño" not in tag.get_text():
+                    existing_style = tag.get("style", "")
+                    # The user requested marking (margin) 20px, padding 20px, border 1px solid grey, background white
+                    tag["style"] = existing_style + ("; " if existing_style and not existing_style.endswith(";") else "") + "border: 1px solid grey; background-color: white; margin: 20px; padding: 20px; border-collapse: collapse;"
+                    tag["border"] = "1"
+                    for cell in tag.find_all(["td", "th"]):
+                        cell_style = cell.get("style", "")
+                        cell["style"] = cell_style + ("; " if cell_style and not cell_style.endswith(";") else "") + "border: 1px solid grey; padding: 20px;"
+
         elif tag.name == "img":
             # Skip the actual header images
             if tag.parent and tag.parent.name == "p" and tag.parent.get("data-section"):
