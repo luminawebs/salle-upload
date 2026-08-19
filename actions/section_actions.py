@@ -24,20 +24,28 @@ def enable_edit_mode(driver, wait_time=10):
             logger.info("Editing mode is already active.")
             return True
             
-        # Locate the switch toggle
-        toggle = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='setmode']")))
-        
-        # Check if the input itself is checked
-        if toggle.get_attribute("checked"):
-            logger.info("Edit toggle is already checked.")
-            return True
+        # Locate the switch toggle and click it robustly, catching stale references
+        try:
+            toggle = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='setmode']")))
+            if toggle.get_attribute("checked"):
+                logger.info("Edit toggle is already checked.")
+                return True
+        except Exception as e:
+            # If the element goes stale while checking the attribute, just pass and try clicking it
+            pass
 
         # Try to click it. Sometimes it's hidden under a label wrapper
         try:
             wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[name='setmode']"))).click()
         except WebDriverException:
-            # Fallback to JS click if element is obscured or not interactable
-            driver.execute_script("arguments[0].click();", toggle)
+            # Fallback to JS click if element is obscured, not interactable, or timed out.
+            # We re-fetch the toggle just in case the original went stale.
+            try:
+                fresh_toggle = driver.find_element(By.CSS_SELECTOR, "input[name='setmode']")
+                driver.execute_script("arguments[0].click();", fresh_toggle)
+            except Exception as e:
+                logger.warning(f"Could not perform fallback JS click: {e}")
+                pass
 
         # Wait for UI to update (either body gets 'editing' class or page reloads)
         wait.until(lambda d: "editing" in d.find_element(By.TAG_NAME, "body").get_attribute("class").split())
