@@ -24,21 +24,37 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
     # The caller must ensure we are logged in and on the course page.
     
     try:
-        # Find section 0 add activity button
-        section_0 = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li#section-0, li[data-sectionnum='0'], div#section-0")))
+        # Wait for section 0 to be present
+        section_0_selector = "li#section-0, li[data-sectionnum='0'], div#section-0"
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, section_0_selector)))
         
-        # Click the add activity button inside section 0 (use the LAST one to append at the end)
+        # Click the add activity button inside section 0
         try:
+            # Wait until at least one button is present within section 0 to avoid race conditions
+            wait.until(lambda d: len(d.find_element(By.CSS_SELECTOR, section_0_selector).find_elements(By.CSS_SELECTOR, ".section-modchooser-link, [data-action='open-chooser']")) > 0)
+            
+            # Re-fetch to avoid stale elements
+            section_0 = driver.find_element(By.CSS_SELECTOR, section_0_selector)
             add_btns = section_0.find_elements(By.CSS_SELECTOR, ".section-modchooser-link, [data-action='open-chooser']")
+            
             if not add_btns:
                 logger.error("Could not find Add Activity button. Is editing turned on?")
                 return False
-            add_btn = add_btns[-1]
+                
+            # Prefer the button that doesn't have 'data-beforemod' (which appends to the end of the section)
+            main_add_btns = [btn for btn in add_btns if not btn.get_attribute("data-beforemod")]
+            add_btn = main_add_btns[-1] if main_add_btns else add_btns[-1]
+            
             driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", add_btn)
-            time.sleep(0.5)
-            driver.execute_script("arguments[0].click();", add_btn)
+            time.sleep(1)
+            
+            try:
+                add_btn.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", add_btn)
+                
         except Exception as e:
-            logger.error(f"Error finding Add Activity button: {e}")
+            logger.error(f"Error finding/clicking Add Activity button: {e}")
             return False
             
         # Wait for the modchooser dialog
