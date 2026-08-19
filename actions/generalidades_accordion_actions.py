@@ -1,8 +1,9 @@
 import os
 import logging
 import re
+import time
 from selenium.webdriver.support.ui import WebDriverWait
-from actions.docx_upload_actions import get_edit_url_for_activity
+from actions.docx_upload_actions import get_edit_url_for_introduccion_general
 from core.wysiwyg_handler import inject_html_into_wysiwyg
 from actions.html_transformer import generate_dynamic_generalidades_html, get_image_base64
 
@@ -12,9 +13,23 @@ def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10)
     logger.info("Executing Generalidades Accordion Upload workflow...")
     
     # 1. Find the "Introducción General" label and edit it
-    success = get_edit_url_for_activity(driver, "Introducción General", wait_time)
-    if not success:
+    edit_url = get_edit_url_for_introduccion_general(driver, wait_time)
+    if not edit_url:
         logger.error("Could not find 'Introducción General' activity to upload accordion.")
+        return False
+        
+    # Navigate to the edit page
+    driver.get(edit_url)
+    
+    # Wait for editor to load
+    try:
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support import expected_conditions as EC
+        editor_ready_css = ".tox-edit-area__iframe, .editor_atto_content, textarea[name='introeditor[text]']"
+        WebDriverWait(driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, editor_ready_css)))
+        time.sleep(1) # Extra buffer for tinymce content to populate
+    except Exception as e:
+        logger.error(f"Editor did not load for Introducción General accordion: {e}")
         return False
         
     # 2. Get the template and raw_docx to generate the accordion HTML
