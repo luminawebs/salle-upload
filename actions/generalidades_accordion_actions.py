@@ -59,6 +59,13 @@ def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10)
         with open(template_path, "r", encoding="utf-8") as f:
             html_markers = f.read()
             
+    # Save the generated raw HTML to workspace for validation
+    output_path = os.path.join(course_dir, "introduccion", "generalidades_accordion_generated.html")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_markers)
+    logger.info(f"Saved generated Accordion HTML to {output_path}")
+
     # 3. Replace the images
     def replace_draft_image_tag(match):
         full_tag = match.group(0)

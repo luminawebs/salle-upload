@@ -200,11 +200,24 @@ def rename_section_by_element(driver, section_element, new_name, wait_time=10):
 def get_existing_activities(section_element):
     activities = []
     try:
+        # Get normal activities
         activity_elements = section_element.find_elements(By.CSS_SELECTOR, ".activity-name-area, .instancename")
         for el in activity_elements:
             text = el.text.strip().split('\n')[0]
             if text:
                 activities.append(text)
+                
+        # Get labels (which don't have instancename) by checking their text content
+        label_elements = section_element.find_elements(By.CSS_SELECTOR, "li.activity.label, li.activity.text")
+        for el in label_elements:
+            html = el.get_attribute("innerHTML").lower()
+            text = el.text.lower()
+            if ("inicio texto presentaci" in html or 
+                "inicio texto presentaci" in text or 
+                "generalidades del curso" in html or
+                "introducción general" in html or
+                "introduccion general" in html):
+                activities.append("Introducción General")
     except:
         pass
     return activities

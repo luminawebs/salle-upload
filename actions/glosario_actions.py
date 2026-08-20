@@ -26,8 +26,18 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
     try:
         # Wait for section 0 to be present
         section_0_selector = "li#section-0, li[data-sectionnum='0'], div#section-0"
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, section_0_selector)))
+        section_0 = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, section_0_selector)))
         
+        # Check if Glosario already exists in section 0
+        try:
+            activities = section_0.find_elements(By.CSS_SELECTOR, ".activity-name-area, .instancename")
+            for act in activities:
+                if "glosario" in act.text.lower():
+                    logger.info("Glosario activity already exists in Section 0. Skipping creation.")
+                    return True
+        except:
+            pass
+            
         # Click the add activity button inside section 0
         try:
             add_btn_selector = "button.activity-add, a.section-modchooser-link:not([data-action='addSection']), button.section-modchooser-link, [data-action='open-chooser']"

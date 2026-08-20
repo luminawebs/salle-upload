@@ -879,16 +879,16 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
         for tr in table.find_all('tr'):
             text = tr.get_text(separator=' ', strip=True).lower()
             if 'nombres y apellidos' in text:
-                tds = tr.find_all('td')
+                tds = tr.find_all(['td', 'th'])
                 if len(tds) > 1: nombres = tds[1].get_text(strip=True)
             elif 'perfil profesional' in text:
-                tds = tr.find_all('td')
+                tds = tr.find_all(['td', 'th'])
                 if len(tds) > 1: perfil = tds[1].get_text(strip=True)
             elif 'correo electr' in text:
-                tds = tr.find_all('td')
+                tds = tr.find_all(['td', 'th'])
                 if len(tds) > 1: correo = tds[1].get_text(strip=True)
             elif 'foto' in text:
-                tds = tr.find_all('td')
+                tds = tr.find_all(['td', 'th'])
                 if len(tds) > 1:
                     img = tds[1].find('img')
                     if img and img.get('src'):
