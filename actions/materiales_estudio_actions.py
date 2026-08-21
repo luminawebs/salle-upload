@@ -159,6 +159,12 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
     
     full_content = video_html + file_content
     
+    # Save output to a local file
+    output_path = os.path.join("workspace", str(course_id), "material", f"Lecturas_complementarias_output_U{unidad_num}.html")
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(full_content)
+    logger.info(f"Saved Lecturas complementarias output to {output_path}")
+    
     # Inject a space into Description (intro) without submitting, in case Moodle requires it
     inject_html_into_wysiwyg(driver, " ", wait_time, target_section="intro", submit_form=False)
     
@@ -249,8 +255,12 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
                         break
                         
             logger.info(f"Successfully added Etiqueta. Now adding 'Página' for Unidad {unidad_num}...")
-            add_pagina_materiales(driver, target_section, course_id, unidad_num, wait_time)
-            time.sleep(2)
+            
+            if getattr(Config, "ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD", True):
+                add_pagina_materiales(driver, target_section, course_id, unidad_num, wait_time)
+                time.sleep(2)
+            else:
+                logger.info("Skipping 'Página' (Lecturas complementarias) because ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD is False.")
             
         except Exception as e:
             logger.error(f"Error processing Unidad {unidad_num}: {e}")

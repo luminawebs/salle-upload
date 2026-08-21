@@ -134,6 +134,15 @@ class Config:
         "1",
         "t",
     )
+    
+    # Manejar subida de lecturas complementarias
+    ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD = os.getenv(
+        "ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD", "True"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
 
     # Actualiza la calificación máxima a 5.00 y distribuye el peso de las preguntas
     ENABLE_CUESTIONARIO_GRADE_UPDATE = os.getenv(
