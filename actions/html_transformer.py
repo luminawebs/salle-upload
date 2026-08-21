@@ -192,6 +192,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         if not text and b_type not in ['img', 'table'] and "img" not in html_str and "table" not in html_str:
             continue
 
+        # Stop parsing questions when reaching standard activity footers
+        if re.match(r'^(?:Informaci.n para el equipo de producci.n|Lista de herramientas|Lecturas para desarrollar|Glosario)', text, re.IGNORECASE):
+            break
+
         # 2a. Check if Type header
         if re.match(r'(?i)^Tipo:\s*(.*)', text):
             type_val = re.match(r'(?i)^Tipo:\s*(.*)', text).group(1).lower().strip()
@@ -270,7 +274,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         if b_type not in ['table', 'img']:
             if re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE):
                 is_start = True
-            elif text.startswith('¿'):
+            elif text.startswith('¿') and not re.match(r'^¿(?:qu.|c.mo)\s+(?:lo\s+)?vamos\s+a\s+(?:lograr|evaluar|hacer)\?', text, re.IGNORECASE):
                 if state in ['OPTIONS', 'FEEDBACK'] or current_q is None:
                     is_start = True
             elif state in ['OPTIONS', 'FEEDBACK'] and b_type in ['p', 'div'] and not is_option:
