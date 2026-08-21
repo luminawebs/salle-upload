@@ -113,6 +113,16 @@ def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10)
         flags=re.IGNORECASE
     )
     
+    # Set the title for the course index (Moodle 4.x "Título en índice del curso")
+    try:
+        from selenium.webdriver.common.by import By
+        name_input = driver.find_element(By.CSS_SELECTOR, "input[name='name'], #id_name")
+        if name_input.is_displayed():
+            name_input.clear()
+            name_input.send_keys("Presentación")
+    except Exception as e:
+        logger.warning(f"Could not update label name to 'Presentación': {e}")
+
     # 4. Inject the accordion HTML completely overriding the existing wysiwyg content
     # Note: target_section for Labels is 'intro' because the whole label is just an introeditor.
     success = inject_html_into_wysiwyg(driver, html_markers, wait_time, target_section="intro", submit_form=True)
