@@ -152,6 +152,16 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
         with open(html_file_path, "r", encoding="utf-8") as f:
             file_content = f.read()
             
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(file_content, "html.parser")
+        for p in soup.find_all('p'):
+            text = p.get_text().strip().lower()
+            # Handle possible encoding anomalies for Básica and Complementaria headers
+            if any(text == t for t in ['básica:', 'bǭsica:', 'bsica:', 'bsica:', 'complementaria:', 'complementaria (opcional):']):
+                p.decompose()
+                
+        file_content = "<p><strong>Lecturas complementarias</strong></p>" + str(soup)
+            
         file_content = format_urls_in_html(file_content, link_text="(Disponible aquí)")
         file_content = format_typography_in_html(file_content)
     else:
