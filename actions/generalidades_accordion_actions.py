@@ -33,7 +33,7 @@ def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10)
         return False
         
     # 2. Get the template and raw_docx to generate the accordion HTML
-    template_path = os.path.join("workspace", "example_course", "GENERALIDADES DEL CURSO.html")
+    template_path = os.path.join("assets", "course-review", "assets", "example_course", "GENERALIDADES DEL CURSO.html")
     course_dir = os.path.join("workspace", str(course_id)) if course_id else "workspace"
     extracted_path = os.path.join(course_dir, "raw_docx_extracted.html")
     

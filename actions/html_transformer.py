@@ -127,6 +127,17 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             return
 
         if getattr(node, 'name', None) in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']:
+            br_tags = node.find_all('br')
+            if br_tags:
+                html_fragments = re.split(r'<br\s*/?>', str(node), flags=re.IGNORECASE)
+                for frag in html_fragments:
+                    frag_soup = BeautifulSoup(frag, 'html.parser')
+                    processed_html = process_image_src(str(frag_soup), course_id)
+                    text_frag = frag_soup.get_text(separator=" ", strip=True)
+                    if text_frag or "img" in processed_html or "table" in processed_html:
+                        blocks.append({'type': node.name, 'html': processed_html, 'text': text_frag, 'list_level': list_level, 'list_group_id': list_group_id})
+                return
+            
             processed_html = process_image_src(str(node), course_id)
             text = node.get_text(separator=" ", strip=True)
             if text or "img" in processed_html or "table" in processed_html:
@@ -213,6 +224,13 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             if current_q and state in ['SEARCHING', 'STEM']:
                 state = 'OPTIONS'
             continue
+            
+        # 2a.6 Auto-detect Cloze / Drag-Drop from stem tokens
+        if current_q and state in ['SEARCHING', 'STEM']:
+            if re.search(r'\[=\s*[^\]]+\]', text):
+                current_q['q_type'] = 'cloze'
+            elif re.search(r'\[\[\d+\]\]', text):
+                current_q['q_type'] = 'drag_drop'
 
         # 2b. Check if Feedback
         is_feedback_header = text.lower().startswith('retroalimentaci') or text.lower().startswith('explicaci')
@@ -250,7 +268,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             elif current_q and state == 'OPTIONS':
                 # Distractors without a marker (e.g. in plain text format)
                 if len(text.split()) < 15 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
-                    is_option = True
+                    if not re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE) and not text.lower().startswith('enunciado:'):
+                        is_option = True
 
         if is_option and current_q:
             if re.search(r'\([xX]\)$', text):
@@ -260,6 +279,18 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 is_correct = True
                 # Use regex to remove '=' even if it's right after an opening tag
                 clean_html_opt = re.sub(r'(>|^)\s*=\s*', r'\1', clean_html_opt, count=1).strip()
+                # Move any unmarked distractors from the stem into options
+                if state == 'STEM':
+                    while current_q['stem_html']:
+                        last_stem_html = current_q['stem_html'][-1]
+                        last_stem_text = BeautifulSoup(last_stem_html, 'html.parser').get_text(strip=True)
+                        if len(last_stem_text.split()) < 15 and not last_stem_text.lower().startswith('enunciado:') and not last_stem_text.lower().startswith('pregunta'):
+                            popped_html = current_q['stem_html'].pop()
+                            # Clean leading list markers like - or * from unmarked distractors
+                            clean_popped = re.sub(r'(>|^)\s*[\-\*]\s*', r'\1', popped_html, count=1).strip()
+                            current_q['options'].insert(0, {'html': clean_popped, 'is_correct': False})
+                        else:
+                            break
             elif "(respuesta" in text.lower() or "(correct answer)" in text.lower():
                 is_correct = True
                 clean_html_opt = re.sub(r'(?i)\s*\((?:respuesta(?: correcta)?|correct answer)\)', '', clean_html_opt).strip()
@@ -287,6 +318,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             current_q['base_list_level'] = l_level
             state = 'STEM'
             current_q['stem_html'].append(html_str)
+            if re.search(r'\[=\s*[^\]]+\]', text):
+                current_q['q_type'] = 'cloze'
+            elif re.search(r'\[\[\d+\]\]', text):
+                current_q['q_type'] = 'drag_drop'
             continue
             
         # 2e. Append to current state
