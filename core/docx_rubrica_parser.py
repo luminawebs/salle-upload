@@ -71,7 +71,7 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
 
     for tr in soup.find_all("tr"):
         tr_text = tr.get_text(strip=True).upper()
-        actividad_match = re.search(r'ACTIVIDAD\s*(\d+)', tr_text)
+        actividad_match = re.search(r'^ACTIVIDAD\s*(\d+)', tr_text)
         if actividad_match and "ACTIVIDADES DE APRENDIZAJE" not in tr_text:
             act_num = int(actividad_match.group(1))
             
@@ -90,7 +90,7 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
                 curr = curr.find_next_sibling('tr')
                 if curr:
                     text_upper = curr.get_text().upper()
-                    if 'CRITERIOS DE DESEMPE' not in text_upper and re.search(r'ACTIVIDAD\s*\d+', text_upper) and "ACTIVIDADES DE APRENDIZAJE" not in text_upper:
+                    if 'CRITERIOS DE DESEMPE' not in text_upper and re.search(r'^ACTIVIDAD\s*\d+', text_upper) and "ACTIVIDADES DE APRENDIZAJE" not in text_upper:
                         break
                     
             if next_criterios_table:
