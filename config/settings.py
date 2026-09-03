@@ -168,6 +168,14 @@ class Config:
         "1",
         "t",
     )
+
+    ENABLE_FORO_ACTIVITY_COMPLETION_UPDATE = os.getenv(
+        "ENABLE_FORO_ACTIVITY_COMPLETION_UPDATE", "True"
+    ).lower() in (
+        "true",
+        "1",
+        "t",
+    )
     
     ENABLE_FINAL_COURSE_FORMAT_BUTTONS = os.getenv(
         "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", "True"
