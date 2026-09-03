@@ -100,7 +100,9 @@ def run_docx_parsing_workflow(course_id: int):
             f.write(html_content)
         logger.info(f"  ✓ DOCX successfully extracted and saved to {output_path}")
     else:
-        logger.warning(f"  Failed to extract DOCX or file not found at {docx_path}")
+        error_msg = f"No se encontró el documento en formato DOCX para el curso {course_id}. Por favor, vuelva a subir el documento."
+        logger.warning(f"  {error_msg}")
+        raise FileNotFoundError(error_msg)
 
 def run_docx_splitting_workflow(course_id: int):
     """
@@ -112,8 +114,9 @@ def run_docx_splitting_workflow(course_id: int):
     raw_html_path = os.path.join(base_dir, "raw_docx_extracted.html")
 
     if not os.path.exists(raw_html_path):
-        logger.warning(f"  raw_docx_extracted.html not found for course {course_id}. Run DOCX parsing first.")
-        return
+        error_msg = f"No se encontró el archivo HTML procesado para el curso {course_id}. La extracción del DOCX falló o se omitió."
+        logger.warning(f"  {error_msg}")
+        raise FileNotFoundError(error_msg)
 
     with open(raw_html_path, "r", encoding="utf-8") as f:
         full_html = f.read()
