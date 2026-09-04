@@ -19,10 +19,13 @@ def enable_edit_mode(driver, wait_time=10):
     
     try:
         # Check if already in editing mode via body class 'editing'
-        body = driver.find_element(By.TAG_NAME, "body")
-        if "editing" in body.get_attribute("class").split():
-            logger.info("Editing mode is already active.")
-            return True
+        try:
+            body = driver.find_element(By.TAG_NAME, "body")
+            if "editing" in body.get_attribute("class").split():
+                logger.info("Editing mode is already active.")
+                return True
+        except Exception:
+            pass # Ignore stale element or other errors during initial check
             
         # Locate the switch toggle and click it robustly, catching stale references
         try:
@@ -48,7 +51,13 @@ def enable_edit_mode(driver, wait_time=10):
                 pass
 
         # Wait for UI to update (either body gets 'editing' class or page reloads)
-        wait.until(lambda d: "editing" in d.find_element(By.TAG_NAME, "body").get_attribute("class").split())
+        def is_editing_active(d):
+            try:
+                return "editing" in d.find_element(By.TAG_NAME, "body").get_attribute("class").split()
+            except Exception:
+                return False
+                
+        wait.until(is_editing_active)
         logger.info("Successfully enabled editing mode.")
         return True
 
