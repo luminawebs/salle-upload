@@ -315,8 +315,10 @@ def run_docx_splitting_workflow(course_id: int):
                         else:
                             # If we couldn't find lists to merge, just append non-header elements
                             for tag in new_soup.contents:
-                                if tag.name and tag.name.lower() in ['p', 'strong'] and any(kw in tag.get_text().lower() for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']):
-                                    continue
+                                if tag.name and tag.name.lower() in ['p', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'span', 'div']:
+                                    normalized_text = " ".join(tag.get_text().lower().split())
+                                    if any(kw in normalized_text for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']) and len(normalized_text) < 100:
+                                        continue
                                 existing_soup.append(tag)
                                 
                         with open(mat_file, "w", encoding="utf-8") as f:
