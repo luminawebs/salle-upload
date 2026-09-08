@@ -15,7 +15,10 @@ export default function GlobalPopupModal() {
         <p className="text-gray-700 mb-6">{popupMessage}</p>
         <div className="flex justify-end">
           <button 
-            onClick={() => setPopupMessage(null)}
+            onClick={() => {
+              setPopupMessage(null);
+              window.location.reload();
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors"
           >
             Entendido
