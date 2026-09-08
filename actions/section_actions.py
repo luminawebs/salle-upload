@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def enable_edit_mode(driver, wait_time=10):
     """
     Enables Moodle editing mode if it's not already active.
-    It targets the toggle input 'input[name="setmode"]' typically found in Moodle 4+.
+    It robustly targets various types of edit buttons/toggles found across different Moodle themes.
     """
     wait = WebDriverWait(driver, wait_time)
     logger.info("Checking editing mode status...")
@@ -27,25 +27,44 @@ def enable_edit_mode(driver, wait_time=10):
         except Exception:
             pass # Ignore stale element or other errors during initial check
             
-        # Locate the switch toggle and click it robustly, catching stale references
-        try:
-            toggle = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='setmode']")))
-            if toggle.get_attribute("checked"):
+        # Possible selectors for "Turn editing on" across different themes
+        selectors = [
+            "input[name='setmode']",             # Moodle 4+ toggle
+            "a[href*='edit=on']",                # Older Moodle / basic themes link
+            "form button[type='submit'][id*='edit']", # Older Moodle button
+            ".editmode-switch-form input[type='checkbox']" # Alternative toggle wrappers
+        ]
+        
+        edit_element = None
+        for selector in selectors:
+            try:
+                # Fast check to see if the element exists in the DOM
+                edit_element = driver.find_element(By.CSS_SELECTOR, selector)
+                if edit_element:
+                    break
+            except Exception:
+                continue
+
+        if not edit_element:
+            logger.warning("Could not find any edit mode toggle or button ('interruptor de modo de edición'). "
+                           "The user might not have editing permissions for this course, or the theme uses a non-standard selector.")
+            return False
+
+        # If it's a checkbox/toggle, verify if it's already checked
+        if edit_element.tag_name.lower() == 'input' and edit_element.get_attribute('type') == 'checkbox':
+            if edit_element.get_attribute("checked"):
                 logger.info("Edit toggle is already checked.")
                 return True
-        except Exception as e:
-            # If the element goes stale while checking the attribute, just pass and try clicking it
-            pass
 
         # Try to click it. Sometimes it's hidden under a label wrapper
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[name='setmode']"))).click()
+            wait.until(EC.element_to_be_clickable(edit_element)).click()
         except WebDriverException:
             # Fallback to JS click if element is obscured, not interactable, or timed out.
-            # We re-fetch the toggle just in case the original went stale.
             try:
-                fresh_toggle = driver.find_element(By.CSS_SELECTOR, "input[name='setmode']")
-                driver.execute_script("arguments[0].click();", fresh_toggle)
+                # Re-fetch to avoid stale element reference
+                fresh_element = driver.find_element(By.CSS_SELECTOR, selector)
+                driver.execute_script("arguments[0].click();", fresh_element)
             except Exception as e:
                 logger.warning(f"Could not perform fallback JS click: {e}")
                 pass

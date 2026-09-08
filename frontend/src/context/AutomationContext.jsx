@@ -65,6 +65,8 @@ export const AutomationProvider = ({ children }) => {
     finalization: false
   });
 
+  const [popupMessage, setPopupMessage] = useState(null);
+
   const toggleCategory = (id) => {
     setExpandedCategories(prev => ({
       ...prev,
@@ -193,6 +195,14 @@ export const AutomationProvider = ({ children }) => {
         }
       }
 
+      // Check for specific errors that should trigger a popup
+      if (lowerMsg.includes("could not find any edit mode toggle") || lowerMsg.includes("interruptor de modo de edición")) {
+        setPopupMessage("No se encontró ningún botón o interruptor de modo de edición. Es posible que el usuario no tenga permisos de edición para este curso.");
+      }
+      if (lowerMsg.includes("no se encontró el documento en formato docx") || lowerMsg.includes("vuelva a subir el documento")) {
+        setPopupMessage(msg); // Use the original message as it contains the course ID
+      }
+
       if (msg.includes("La tarea finalizó") || msg.includes("Limpieza completada")) {
         if (!localHasFailed) {
           setStatus('Completed');
@@ -236,6 +246,7 @@ export const AutomationProvider = ({ children }) => {
       activeLogTab, setActiveLogTab,
       courseName, setCourseName,
       expandedCategories, toggleCategory,
+      popupMessage, setPopupMessage,
       handleRun, handleStop
     }}>
       {children}

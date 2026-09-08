@@ -3,6 +3,7 @@ import MoodleEngineView from './components/MoodleEngineView';
 import DocumentReviewerView from './components/DocumentReviewerView';
 import AutomatizacionTrackerView from './components/AutomatizacionTrackerView';
 import { AutomationProvider } from './context/AutomationContext';
+import GlobalPopupModal from './components/GlobalPopupModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tracker');
@@ -18,6 +19,7 @@ export default function App() {
       <div style={{ display: activeTab === 'reviewer' ? 'block' : 'none', height: '100%' }}>
         <DocumentReviewerView setActiveTab={setActiveTab} />
       </div>
+      <GlobalPopupModal />
     </AutomationProvider>
   );
 }

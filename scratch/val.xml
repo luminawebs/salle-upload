@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[None_doc_q1]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 1</p><br><p>Un grafo no dirigido se caracteriza porque:</p>]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[¡Correcto!</p>]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[La respuesta no es correcta.</p>]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Las aristas tienen dirección.</p>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Las aristas no tienen dirección.</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>No tiene vértices.</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Solo tiene un nodo inicial.</p>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 2  -->
+  <question type="truefalse">
+    <name>
+      <text><![CDATA[None_doc_q2]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 2</p><br><p>En un grafo dirigido, los vértices siempre están conectados en ambas direcciones.</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[Incorrecto.</p><br>¡Correcto!</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <answer fraction="0" format="moodle_auto_format">
+      <text>true</text>
+    </answer>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>false</text>
+    </answer>
+  </question>
+
+<!-- question: 3  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[None_doc_q3]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 3</p><br><p>¿Cuál de las siguientes estructuras puede tener ciclos?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Árbol</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Grafo dirigido</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Grafo no dirigido</p>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>b y c</p>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 4  -->
+  <question type="cloze">
+    <name>
+      <text><![CDATA[None_doc_q4]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 4</p><br><p>El río más largo del mundo es el {1:SHORTANSWER:=Amazonas} y el segundo más largo es el {1:SHORTANSWER:=Nilo}.</p>]]></text>
+    </questiontext>
+    <correctfeedback format="html">
+      <text><![CDATA[¡Excelente! El Amazonas (7,062 km) es ligeramente más largo que el Nilo (6,650 km).</p>]]></text>
+    </correctfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[Revisa la ubicación y longitud de los principales ríos del mundo.</p>]]></text>
+    </incorrectfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+  </question>
+
+<!-- question: 5  -->
+  <question type="ddwtos">
+    <name>
+      <text><![CDATA[None_doc_q5]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 5</p><br><p>Relaciona el algoritmo con su característica principal:</p><br><p>Usa un pivote para dividir el arreglo. [[1]]</p><br><p>Divide y combina subarreglos ordenados. [[2]]</p><br><p>Inserta cada elemento en su posición correcta. [[3]]</p>]]></text>
+    </questiontext>
+    <shuffleanswers>1</shuffleanswers>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <dragbox>
+      <text><![CDATA[Quick Sort]]></text>
+      <group>1</group>
+    </dragbox>
+    <dragbox>
+      <text><![CDATA[Merge Sort]]></text>
+      <group>1</group>
+    </dragbox>
+    <dragbox>
+      <text><![CDATA[Insertion Sort]]></text>
+      <group>1</group>
+    </dragbox>
+  </question>
+
+<!-- question: 6  -->
+  <question type="ddwtos">
+    <name>
+      <text><![CDATA[None_doc_q6]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 6</p><br><p>Un algoritmo de ordenamiento eficiente busca minimizar el número de [[1]] y ______.</p>]]></text>
+    </questiontext>
+    <shuffleanswers>1</shuffleanswers>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <dragbox>
+      <text><![CDATA[comparaciones y movimientos]]></text>
+      <group>1</group>
+    </dragbox>
+    <dragbox>
+      <text><![CDATA[entradas y salidas]]></text>
+      <group>1</group>
+    </dragbox>
+    <dragbox>
+      <text><![CDATA[bucles y funciones]]></text>
+      <group>1</group>
+    </dragbox>
+  </question>
+
+<!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[None_doc_q7]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 7</p><br><p>Which relationship is shown in the following image?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Polymorphism.</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Inheritance.</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Aggregation.</p>]]></text>
+    </answer>
+  </question>
+
+<!-- question: 8  -->
+  <question type="multichoice">
+    <name>
+      <text><![CDATA[None_doc_q8]]></text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Pregunta 8</p><br><p>¿La siguiente imagen a cuál de los cuatro (4) elementos fundamentales de la programación orientada a objetos</p><br><p>corresponde?</p>]]></text>
+    </questiontext>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Polimorfismo.</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Abstracción.</p>]]></text>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Encapsulamiento.</p>]]></text>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[<p>Herencia.</p>]]></text>
+    </answer>
+  </question>
+</quiz>

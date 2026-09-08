@@ -100,7 +100,7 @@ def run_docx_parsing_workflow(course_id: int):
             f.write(html_content)
         logger.info(f"  ✓ DOCX successfully extracted and saved to {output_path}")
     else:
-        error_msg = f"No se encontró el documento en formato DOCX para el curso {course_id}. Por favor, vuelva a subir el documento."
+        error_msg = f"No se encontró el documento en formato DOCX para el curso {course_id}. Por favor recarga la página, vuelve a subir el documento."
         logger.warning(f"  {error_msg}")
         raise FileNotFoundError(error_msg)
 
