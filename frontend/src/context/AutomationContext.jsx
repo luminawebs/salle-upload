@@ -202,6 +202,9 @@ export const AutomationProvider = ({ children }) => {
       if (lowerMsg.includes("no se encontró el documento en formato docx") || lowerMsg.includes("vuelva a subir el documento")) {
         setPopupMessage(msg); // Use the original message as it contains the course ID
       }
+      if (lowerMsg.includes("not a valid course view page") || lowerMsg.includes("could not load course")) {
+        setPopupMessage("No se pudo cargar el curso. Esto generalmente ocurre cuando el correo electrónico utilizado no está vinculado al curso.");
+      }
 
       if (msg.includes("La tarea finalizó") || msg.includes("Limpieza completada")) {
         if (!localHasFailed) {
