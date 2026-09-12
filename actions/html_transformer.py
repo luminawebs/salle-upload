@@ -267,7 +267,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 is_option = True
             elif current_q and state == 'OPTIONS':
                 # Distractors without a marker (e.g. in plain text format)
-                if len(text.split()) < 15 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
+                if len(text.split()) < 50 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
                     if not re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE) and not text.lower().startswith('enunciado:'):
                         is_option = True
 
@@ -317,7 +317,14 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             current_q = create_empty_q()
             current_q['base_list_level'] = l_level
             state = 'STEM'
-            current_q['stem_html'].append(html_str)
+            
+            clean_html = html_str
+            if text.lower().strip().startswith('enunciado:'):
+                clean_html = re.sub(r'(?i)Enunciado:\s*', '', html_str, count=1)
+            
+            if clean_html.strip():
+                current_q['stem_html'].append(clean_html)
+                
             if re.search(r'\[=\s*[^\]]+\]', text):
                 current_q['q_type'] = 'cloze'
             elif re.search(r'\[\[\d+\]\]', text):
@@ -327,12 +334,20 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         # 2e. Append to current state
         if current_q:
             if state == 'STEM':
-                current_q['stem_html'].append(html_str)
+                clean_html = html_str
+                if text.lower().strip().startswith('enunciado:'):
+                    clean_html = re.sub(r'(?i)Enunciado:\s*', '', html_str, count=1)
+                if clean_html.strip():
+                    current_q['stem_html'].append(clean_html)
             elif state == 'OPTIONS':
                 if current_q['options']:
                     current_q['options'][-1]['html'] += f"<br>{html_str}"
                 else:
-                    current_q['stem_html'].append(html_str)
+                    clean_html = html_str
+                    if text.lower().strip().startswith('enunciado:'):
+                        clean_html = re.sub(r'(?i)Enunciado:\s*', '', html_str, count=1)
+                    if clean_html.strip():
+                        current_q['stem_html'].append(clean_html)
             elif state == 'FEEDBACK':
                 fb_type = current_q['active_fb_type']
                 current_q['feedback'][fb_type].append(html_str)

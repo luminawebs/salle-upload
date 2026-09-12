@@ -14,7 +14,7 @@ class BaseQuestion(abc.ABC):
     def _get_common_header(self, q_type: str) -> str:
         q_xml = f'<!-- question: {self.q_num}  -->\n'
         q_xml += f'  <question type="{q_type}">\n'
-        q_xml += f'    <name>\n      <text><![CDATA[{self.course_id}_{self.document_name}_q{self.q_num}]]></text>\n    </name>\n'
+        q_xml += f'    <name>\n      <text><![CDATA[Pregunta {self.q_num}]]></text>\n    </name>\n'
         q_xml += f'    <questiontext format="html">\n      <text><![CDATA[{self.stem_html}]]></text>\n    </questiontext>\n'
         if self.feedback_general:
             q_xml += f'    <generalfeedback format="html">\n      <text><![CDATA[{self.feedback_general}]]></text>\n    </generalfeedback>\n'
