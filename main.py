@@ -87,23 +87,20 @@ def main():
                     )
                     continue
 
-                if getattr(Config, "ENABLE_DOCX_PARSING", False):
-                    logger.info("Executing DOCX extraction workflow...")
-                    run_docx_parsing_workflow(course_id)
-                else:
-                    logger.info("DOCX extraction workflow is disabled via config.")
+                # Document processing (extraction, splitting, unidades intro
+                # split) always runs — every later step depends on its
+                # output, so it's not a togglable feature flag. This used to
+                # be gated behind ENABLE_DOCX_PARSING/ENABLE_DOCX_SPLITTING_HTML/
+                # ENABLE_UNIDADES_INTRO_SPLIT, which meant a stale or
+                # accidentally-saved .env value could silently skip it.
+                logger.info("Executing DOCX extraction workflow...")
+                run_docx_parsing_workflow(course_id)
 
-                if getattr(Config, "ENABLE_DOCX_SPLITTING_HTML", False):
-                    logger.info("Executing DOCX splitting workflow...")
-                    run_docx_splitting_workflow(course_id)
-                else:
-                    logger.info("DOCX splitting workflow is disabled via config.")
+                logger.info("Executing DOCX splitting workflow...")
+                run_docx_splitting_workflow(course_id)
 
-                if getattr(Config, "ENABLE_UNIDADES_INTRO_SPLIT", False):
-                    logger.info("Executing Unidades Intro splitting workflow...")
-                    run_unidades_intro_splitting_workflow(course_id)
-                else:
-                    logger.info("Unidades Intro splitting workflow is disabled via config.")
+                logger.info("Executing Unidades Intro splitting workflow...")
+                run_unidades_intro_splitting_workflow(course_id)
 
                 # Upload workflow moved to after edit mode
 

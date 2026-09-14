@@ -34,31 +34,12 @@ class Config:
     # Toggle specific processes
 
     # --------------------------------------------------- FASE 00 --------------------------------------------------------------------------------------------------------------------------------------------
-    # Extrae el contenido de COURSEID.docx a un archivo HTML (workspace/COURSEID/raw_docx_extracted.html) para validación.
-    ENABLE_DOCX_PARSING = os.getenv("ENABLE_DOCX_PARSING", "True").lower() in (
-        "true",
-        "1",
-        "t",
-    )
-
-    # Divide el archivo raw_docx_extracted.html en fragmentos HTML individuales (actividad1.html, Material_de_referencia_U1.html, etc.)
-    ENABLE_DOCX_SPLITTING_HTML = os.getenv(
-        "ENABLE_DOCX_SPLITTING_HTML", "True"
-    ).lower() in (
-        "true",
-        "1",
-        "t",
-    )
+    # Document processing (DOCX extraction/splitting, unidades intro split)
+    # always runs in main.py — every later step depends on its output, so
+    # it's not a togglable feature flag. (Formerly ENABLE_DOCX_PARSING /
+    # ENABLE_DOCX_SPLITTING_HTML / ENABLE_UNIDADES_INTRO_SPLIT.)
 
     # --------------------------------------------------- FASE 01 --------------------------------------------------------------------------------------------------------------------------------------------
-
-    ENABLE_UNIDADES_INTRO_SPLIT = os.getenv(
-        "ENABLE_UNIDADES_INTRO_SPLIT", "True"
-    ).lower() in (
-        "true",
-        "1",
-        "t",
-    )
 
     ENABLE_COURSE_FORMAT_CHANGE = os.getenv(
         "ENABLE_COURSE_FORMAT_CHANGE", "True"

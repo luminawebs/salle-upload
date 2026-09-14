@@ -7,17 +7,23 @@ const API_BASE = import.meta.env.VITE_API_BASE || "";
 export const AutomationProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     HEADLESS_MODE: 'False',
-    ENABLE_DOCX_PARSING: 'False',
-    ENABLE_DOCX_SPLITTING_HTML: 'False',
-    ENABLE_UNIDADES_INTRO_SPLIT: 'False',
     ENABLE_COURSE_FORMAT_CHANGE: 'True',
-    ENABLE_COURSE_STRUCTURE_CREATION: 'False',
-    ENABLE_DOCX_UPLOAD_HTML: 'False',
-    ENABLE_GLOSARIO_UPLOAD: 'False',
-    ENABLE_CUESTIONARIO_EXPORT: 'False',
-    ENABLE_CUESTIONARIO_GRADE_UPDATE: 'False',
-    ENABLE_UNIDADES_INTRO_UPLOAD: 'False',
-    ENABLE_DOCX_RUBRICA_UPLOAD: 'False',
+    // The nine flags below default to True in config/settings.py — they
+    // must match here. AutomationContext's state is the initial UI state
+    // before /api/settings resolves, but it's also exactly what gets
+    // POSTed back on "Guardar Cambios". If a value here disagreed with the
+    // real backend default and .env didn't yet have that key set
+    // explicitly, saving anything (even an unrelated field) would silently
+    // write the wrong value into .env and disable that step from then on.
+    ENABLE_COURSE_STRUCTURE_CREATION: 'True',
+    ENABLE_DOCX_UPLOAD_HTML: 'True',
+    ENABLE_GLOSARIO_UPLOAD: 'True',
+    ENABLE_CUESTIONARIO_EXPORT: 'True',
+    ENABLE_CUESTIONARIO_GRADE_UPDATE: 'True',
+    ENABLE_UNIDADES_INTRO_UPLOAD: 'True',
+    ENABLE_DOCX_RUBRICA_UPLOAD: 'True',
+    ENABLE_MATERIALES_ESTUDIO_EXPORT: 'True',
+    ENABLE_FINAL_COURSE_FORMAT_BUTTONS: 'True',
     ENABLE_SECTION_RENAME: 'False',
     ENABLE_SECTION_DESCRIPTION_UPDATE: 'False',
     ENABLE_GENERATE_HTML_INTRO: 'False',
@@ -41,9 +47,7 @@ export const AutomationProvider = ({ children }) => {
     ENABLE_RECUPERACION_EXPORT: 'False',
     ENABLE_AJUSTE_COMPETENCIAS: 'False',
     ENABLE_CONFIGURACION_FINAL: 'False',
-    ENABLE_MATERIALES_ESTUDIO_EXPORT: 'False',
     ENABLE_ACTIVITY_COMPLETION_UPDATE: 'True',
-    ENABLE_FINAL_COURSE_FORMAT_BUTTONS: 'False',
     COURSES_TO_PROCESS: '9'
   });
 

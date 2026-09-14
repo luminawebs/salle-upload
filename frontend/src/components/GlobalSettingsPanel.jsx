@@ -11,17 +11,8 @@ const CATEGORIES = [
     ]
   },
   {
-    id: 'parsing',
-    title: '1. Procesamiento de Documentos',
-    flags: [
-      { key: 'ENABLE_DOCX_PARSING', label: 'Extraer contenido de DOCX' },
-      { key: 'ENABLE_DOCX_SPLITTING_HTML', label: 'Generar Fragmentos HTML' },
-      { key: 'ENABLE_UNIDADES_INTRO_SPLIT', label: 'Dividir Introducción de Unidades' }
-    ]
-  },
-  {
     id: 'structure',
-    title: '2. Estructura en Moodle',
+    title: '1. Estructura en Moodle',
     flags: [
       { key: 'ENABLE_COURSE_FORMAT_CHANGE', label: 'Cambiar a formato Secciones (Temporal)' },
       { key: 'ENABLE_COURSE_STRUCTURE_CREATION', label: 'Crear Estructura de Secciones' },
@@ -32,7 +23,7 @@ const CATEGORIES = [
   },
   {
     id: 'assessments',
-    title: '3. Evaluaciones y Cuestionarios',
+    title: '2. Evaluaciones y Cuestionarios',
     flags: [
       { key: 'ENABLE_DOCX_RUBRICA_UPLOAD', label: 'Subir Rúbricas' },
       { key: 'ENABLE_CUESTIONARIO_EXPORT', label: 'Crear Banco de Preguntas' },
@@ -41,7 +32,7 @@ const CATEGORIES = [
   },
   {
     id: 'finalization',
-    title: '4. Finalización',
+    title: '3. Finalización',
     flags: [
       { key: 'ENABLE_ACTIVITY_COMPLETION_UPDATE', label: 'Actualizar Criterios de Finalización' },
       { key: 'ENABLE_FINAL_COURSE_FORMAT_BUTTONS', label: 'Cambiar a Formato Botones (Definitivo)' }
