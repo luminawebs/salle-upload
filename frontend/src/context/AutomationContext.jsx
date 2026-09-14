@@ -80,6 +80,7 @@ export const AutomationProvider = ({ children }) => {
   };
 
   const currentLogPhase = useRef(0);
+  const runStartTimeRef = useRef(null);
   const eventSourceRef = useRef(null);
 
   useEffect(() => {
@@ -119,10 +120,22 @@ export const AutomationProvider = ({ children }) => {
   useEffect(() => {
     let interval = null;
     if (status === 'Running') {
-      interval = setInterval(() => {
-        setElapsedSeconds(prev => prev + 1);
-      }, 1000);
+      // Anchor to a real timestamp rather than counting ticks. setInterval
+      // ticks aren't guaranteed to land exactly 1s apart — browsers throttle
+      // timers in background/inactive tabs — so a "+1 per tick" counter
+      // permanently falls behind real elapsed time once a tick is delayed.
+      // Recomputing from Date.now() each tick means a late tick just catches
+      // straight back up to the correct value instead of drifting forever.
+      if (runStartTimeRef.current === null) {
+        runStartTimeRef.current = Date.now();
+      }
+      const tick = () => {
+        setElapsedSeconds(Math.floor((Date.now() - runStartTimeRef.current) / 1000));
+      };
+      tick();
+      interval = setInterval(tick, 1000);
     } else {
+      runStartTimeRef.current = null;
       clearInterval(interval);
     }
     return () => clearInterval(interval);
