@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { AutomationContext } from '../context/AutomationContext';
-import { Settings, Save, Check, Play } from 'lucide-react';
+import { Settings, Save, Check, Play, AlertTriangle } from 'lucide-react';
 
 export default function AutomationControls() {
   const {
@@ -9,11 +9,16 @@ export default function AutomationControls() {
     handleSaveSettings,
     isSaved,
     status,
+    uploadedCourseId,
     handleRun,
     handleStop
   } = useContext(AutomationContext);
 
   const isRunning = status === 'Running';
+  const typedCourseId = (settings.COURSES_TO_PROCESS || '').trim();
+  const hasMatchingUpload = uploadedCourseId !== null
+    && typedCourseId !== ''
+    && typedCourseId === String(uploadedCourseId).trim();
 
   return (
     <div className="bg-surface rounded-xl border border-border shadow-sm p-5">
@@ -42,13 +47,25 @@ export default function AutomationControls() {
 
         <div className="flex flex-col gap-2">
           {!isRunning ? (
-            <button
-              onClick={() => handleRun(handleSaveSettings)}
-              className="w-full py-2.5 px-4 rounded-lg font-semibold flex items-center justify-center transition-all bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 text-sm"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Iniciar Automatización
-            </button>
+            <>
+              <button
+                onClick={() => handleRun(handleSaveSettings)}
+                disabled={!hasMatchingUpload}
+                title={!hasMatchingUpload ? 'Sube un documento .docx para este Curso ID antes de iniciar.' : undefined}
+                className="w-full py-2.5 px-4 rounded-lg font-semibold flex items-center justify-center transition-all bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-primary/20"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Iniciar Automatización
+              </button>
+              {!hasMatchingUpload && (
+                <p className="flex items-start text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg px-3 py-2">
+                  <AlertTriangle className="w-3.5 h-3.5 mr-1.5 mt-0.5 flex-shrink-0" />
+                  {uploadedCourseId
+                    ? `El documento subido corresponde al curso ${uploadedCourseId}, no a "${typedCourseId}". Sube el documento correcto o corrige el ID.`
+                    : 'Sube un documento .docx para este Curso ID antes de iniciar.'}
+                </p>
+              )}
+            </>
           ) : (
             <button
               onClick={handleStop}

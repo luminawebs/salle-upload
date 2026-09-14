@@ -55,6 +55,11 @@ export const AutomationProvider = ({ children }) => {
   const [activeLogTab, setActiveLogTab] = useState(0);
   const [courseName, setCourseName] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  // Course ID that the currently-loaded parsed report actually belongs to
+  // (i.e. the ID that was set at the moment a .docx was last uploaded/parsed
+  // successfully). Used to warn/block "Run" if the ID field has since changed
+  // and no longer matches what was actually analyzed.
+  const [uploadedCourseId, setUploadedCourseId] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({
     parsing: true,
     structure: true,
@@ -248,6 +253,7 @@ export const AutomationProvider = ({ children }) => {
       elapsedSeconds, setElapsedSeconds,
       activeLogTab, setActiveLogTab,
       courseName, setCourseName,
+      uploadedCourseId, setUploadedCourseId,
       expandedCategories, toggleCategory,
       popupMessage, setPopupMessage,
       handleRun, handleStop

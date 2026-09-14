@@ -106,6 +106,7 @@ export default function AutomatizacionTrackerView({ setActiveTab }) {
     settings,
     logs, status, progress, currentTaskLabel,
     elapsedSeconds, activeLogTab, courseName, setCourseName, setLogs,
+    uploadedCourseId, setUploadedCourseId,
     handleRun, handleStop
   } = useContext(AutomationContext);
 
@@ -137,10 +138,14 @@ export default function AutomatizacionTrackerView({ setActiveTab }) {
 
     setUploadedFile({ name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB' });
     setUploadStatus('uploading');
+    // The report we're about to get back only describes THIS course id —
+    // pin it down now, before the user has a chance to change the field.
+    setUploadedCourseId(null);
+    const targetCourseId = settings.COURSES_TO_PROCESS;
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("course_id", settings.COURSES_TO_PROCESS);
+    formData.append("course_id", targetCourseId);
 
     try {
       const res = await fetch(`${API_BASE}/api/upload`, {
@@ -197,6 +202,7 @@ export default function AutomatizacionTrackerView({ setActiveTab }) {
       }
 
       setUploadStatus('done');
+      setUploadedCourseId(targetCourseId);
       setLogs(prev => [...prev, `[Sistema] Archivo ${file.name} subido correctamente.`]);
     } catch (err) {
       console.error(err);
