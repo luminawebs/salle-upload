@@ -132,7 +132,7 @@ function FragmentViewer({ target, title, courseId, onClose }) {
 
 export default function AutomationView() {
   const {
-    settings, handleSetSetting, handleSaveSettings,
+    settings,
     status: runStatus, uploadedCourseId, setUploadedCourseId,
     logs, progress, activeLogTab, elapsedSeconds
   } = useContext(AutomationContext);
@@ -311,18 +311,6 @@ export default function AutomationView() {
               <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
               Documento Fuente
             </h2>
-
-            <div className="flex flex-col space-y-1 mb-4">
-              <label className="text-xs font-semibold text-gray-300 uppercase tracking-wide">ID de Curso</label>
-              <input
-                type="text"
-                value={settings.COURSES_TO_PROCESS}
-                onChange={(e) => handleSetSetting('COURSES_TO_PROCESS', e.target.value)}
-                disabled={runStatus === 'Running'}
-                className="w-full bg-surface/50 border border-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
-                placeholder="Ej: 70801"
-              />
-            </div>
 
             {uploadStatus === 'done' && fileInfo ? (
               <div className="w-full border-2 border-success/40 bg-success/5 rounded-xl p-4 flex flex-col items-center text-center">
