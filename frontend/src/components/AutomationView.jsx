@@ -380,19 +380,30 @@ export default function AutomationView() {
 
         {/* Column 3: Documento parseado <-> Terminal */}
         <div className="xl:col-span-6 flex flex-col gap-4 h-full min-h-0">
-          <div className="flex bg-surface rounded-xl border border-border p-1 shrink-0 w-fit">
+          <div className="flex items-center justify-between shrink-0">
+            <div className="flex bg-surface rounded-xl border border-border p-1 w-fit">
+              <button
+                onClick={() => setViewMode('document')}
+                className={`flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === 'document' ? 'bg-primary text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              >
+                <FileText className="w-3.5 h-3.5 mr-1.5" /> Documento
+              </button>
+              <button
+                onClick={() => setViewMode('terminal')}
+                className={`flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === 'terminal' ? 'bg-primary text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              >
+                <Terminal className="w-3.5 h-3.5 mr-1.5" /> Terminal
+                {runStatus === 'Running' && <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-success animate-pulse" />}
+              </button>
+            </div>
+
             <button
-              onClick={() => setViewMode('document')}
-              className={`flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === 'document' ? 'bg-primary text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              onClick={handleDownloadLogs}
+              disabled={!logs || logs.length === 0}
+              className="flex items-center px-3 py-1.5 bg-surface hover:bg-[#1e2638] text-gray-300 hover:text-white font-medium rounded-lg transition-colors shadow-sm text-xs border border-border hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:text-gray-300"
             >
-              <FileText className="w-3.5 h-3.5 mr-1.5" /> Documento
-            </button>
-            <button
-              onClick={() => setViewMode('terminal')}
-              className={`flex items-center px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === 'terminal' ? 'bg-primary text-white shadow' : 'text-gray-400 hover:text-white'}`}
-            >
-              <Terminal className="w-3.5 h-3.5 mr-1.5" /> Terminal
-              {runStatus === 'Running' && <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-success animate-pulse" />}
+              <Download className="w-3.5 h-3.5 mr-1.5" />
+              Descargar todos los registros (.txt)
             </button>
           </div>
 
@@ -607,16 +618,6 @@ export default function AutomationView() {
                   )}
                   <div ref={logsEndRef} />
                 </div>
-              </div>
-
-              <div className="flex justify-end mt-3 shrink-0">
-                <button
-                  onClick={handleDownloadLogs}
-                  className="flex items-center px-4 py-2 bg-[#1e2638] hover:bg-primary/90 text-white font-medium rounded-lg transition-colors shadow-sm text-sm border border-border hover:border-primary/50"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Descargar todos los registros (.txt)
-                </button>
               </div>
             </div>
           )}
