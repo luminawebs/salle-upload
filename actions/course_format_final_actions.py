@@ -62,13 +62,13 @@ def set_final_buttons_format(driver, course_id, wait_time=10):
         # Wait for the redirect/save to process
         try:
             wait.until(EC.staleness_of(save_btn))
-        except:
+        except Exception:
             pass
         
         # Wait until we are redirected back to the course view
         try:
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-        except:
+        except Exception:
             pass
             
         logger.info("Successfully set course format to 'Formato de botones' and saved.")

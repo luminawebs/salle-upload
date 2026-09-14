@@ -9,9 +9,19 @@ from core.data_parser import parse_docx_to_html
 from core.document_reviewer import review_document
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+import re
 import subprocess
 import shutil
 app = FastAPI()
+
+# Real course IDs are always simple identifiers (numbers today). Anything else
+# in a path built from user input (e.g. "../../something") could point outside
+# the workspace directory, so reject it before touching the filesystem.
+COURSE_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+def is_safe_course_id(course_id: str) -> bool:
+    return bool(course_id) and bool(COURSE_ID_RE.match(course_id))
 
 app.add_middleware(
     CORSMiddleware,
@@ -62,6 +72,9 @@ async def save_settings(request: Request):
 
 @app.post("/api/upload")
 async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+
     global current_process
     # 1. Stop any currently running task
     if current_process is not None and current_process.returncode is None:

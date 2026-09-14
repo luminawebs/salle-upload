@@ -29,7 +29,7 @@ def update_quiz_grades(driver, activity_name_prefix: str, wait_time: int = 10) -
         save_btn = driver.find_element(By.CSS_SELECTOR, "input[name='savechanges']")
         try:
             save_btn.click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", save_btn)
         time.sleep(2)
         
@@ -75,7 +75,7 @@ def update_quiz_grades(driver, activity_name_prefix: str, wait_time: int = 10) -
             time.sleep(0.5)
             try:
                 current_edit.click()
-            except:
+            except Exception:
                 driver.execute_script("arguments[0].click();", current_edit)
                 
             # Wait for inline input to appear and handle StaleElementReferenceException

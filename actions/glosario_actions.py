@@ -35,7 +35,7 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
                 if "glosario" in act.text.lower():
                     logger.info("Glosario activity already exists in Section 0. Skipping creation.")
                     return True
-        except:
+        except Exception:
             pass
             
         # Click the add activity button inside section 0
@@ -136,7 +136,7 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
                 logger.debug(f"Available options in chooser: {found_options_debug[:10]}")
                 try:
                     chooser.find_element(By.CSS_SELECTOR, ".close, button[data-action='hide']").click()
-                except:
+                except Exception:
                     pass
                 raise TimeoutException("Glosario option not found in modchooser.")
                 

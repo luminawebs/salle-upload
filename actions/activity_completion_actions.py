@@ -68,7 +68,7 @@ def update_activity_completion(driver, course_id: int, wait_time: int = 10):
                 
                 try:
                     dropdown_toggle.click()
-                except:
+                except Exception:
                     driver.execute_script("arguments[0].click();", dropdown_toggle)
                     
                 # Click 'Editar ajustes'
@@ -77,7 +77,7 @@ def update_activity_completion(driver, course_id: int, wait_time: int = 10):
                 
                 try:
                     wait.until(EC.element_to_be_clickable(edit_option)).click()
-                except:
+                except Exception:
                     driver.execute_script("arguments[0].click();", edit_option)
                     
                 # Wait for the settings page to load

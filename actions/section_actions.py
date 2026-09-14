@@ -86,7 +86,7 @@ def enable_edit_mode(driver, wait_time=10):
         try:
             if "editing" in driver.find_element(By.TAG_NAME, "body").get_attribute("class").split():
                 return True
-        except:
+        except Exception:
             pass
         return False
     except Exception as e:

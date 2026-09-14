@@ -150,7 +150,7 @@ def check_and_create_sections(driver, required_sections_count, wait_time=10):
                     add_btn = wait.until(EC.presence_of_element_located((By.XPATH, xpath_selector)))
                     try:
                         add_btn.click()
-                    except:
+                    except Exception:
                         driver.execute_script("arguments[0].click();", add_btn)
                     time.sleep(2)
                 except Exception as e:
@@ -170,7 +170,7 @@ def rename_section_by_element(driver, section_element, new_name, wait_time=10):
     try:
         try:
             current_name_element = section_element.find_element(By.CSS_SELECTOR, ".sectionname, h3.sectionname, h3, h4, a.course-section-header")
-        except:
+        except Exception:
             current_name_element = section_element
             
         if new_name.lower() in current_name_element.text.lower():
@@ -218,7 +218,7 @@ def get_existing_activities(section_element):
                 "introducción general" in html or
                 "introduccion general" in html):
                 activities.append("Introducción General")
-    except:
+    except Exception:
         pass
     return activities
 
@@ -298,7 +298,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
             logger.debug(f"Available options in chooser: {found_options_debug[:10]}")
             try:
                 chooser.find_element(By.CSS_SELECTOR, ".close, button[data-action='hide']").click()
-            except:
+            except Exception:
                 pass
             return False
             

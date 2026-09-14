@@ -40,9 +40,9 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
                         try:
                             driver.execute_script("arguments[0].click();", btn)
                             time.sleep(1)
-                        except:
+                        except Exception:
                             pass
-            except:
+            except Exception:
                 pass
                 
             # Get ALL activities in the course

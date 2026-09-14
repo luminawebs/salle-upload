@@ -44,7 +44,7 @@ def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, tar
         if textarea:
             try:
                 textarea.clear()
-            except:
+            except Exception:
                 pass
             driver.execute_script("arguments[0].value = arguments[1];", textarea, html_content)
 
@@ -107,7 +107,7 @@ def inject_html_into_wysiwyg(driver, html_content: str, wait_time: int = 10, tar
         )
         try:
             submit_btn.click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", submit_btn)
 
         try:

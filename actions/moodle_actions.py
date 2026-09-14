@@ -338,7 +338,7 @@ def upload_moodle_wysiwyg(driver, course_id, week_name, resource_name, html_cont
                 alert = driver.switch_to.alert
                 logger.warning(f"Unexpected alert found: {alert.text}. Dismissing.")
                 alert.dismiss()
-            except:
+            except Exception:
                 pass
 
             quick_wait = WebDriverWait(driver, 5)
@@ -360,7 +360,7 @@ def upload_moodle_wysiwyg(driver, course_id, week_name, resource_name, html_cont
         dropdown_toggle = activity_li.find_element(By.CSS_SELECTOR, "a.dropdown-toggle[title='Editar'], a[aria-label='Editar']")
         try:
             wait.until(EC.element_to_be_clickable(dropdown_toggle)).click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", dropdown_toggle)
             
         edit_option_xpath = ".//a[contains(@class, 'dropdown-item') and (contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'editar ajustes') or contains(@href, 'modedit.php'))]"
@@ -379,7 +379,7 @@ def upload_moodle_wysiwyg(driver, course_id, week_name, resource_name, html_cont
         else:
             try:
                 wait.until(EC.element_to_be_clickable(edit_option)).click()
-            except:
+            except Exception:
                 driver.execute_script("arguments[0].click();", edit_option)
             
         logger.info("Waiting for resource settings page to load...")
@@ -520,7 +520,7 @@ def ensure_section_visible(driver, target_section_name, wait_time=10):
             button = wait.until(EC.element_to_be_clickable((By.XPATH, buttons_xpath)))
             try:
                 button.click()
-            except:
+            except Exception:
                 driver.execute_script("arguments[0].click();", button)
                 
             time.sleep(1) # Wait for section to appear (JS effect)

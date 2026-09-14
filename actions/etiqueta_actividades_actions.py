@@ -81,14 +81,14 @@ def add_etiqueta_actividades_to_section(driver, section_element, wait_time=10):
             try:
                 close_btn = driver.find_element(By.CSS_SELECTOR, "[data-action='close']")
                 driver.execute_script("arguments[0].click();", close_btn)
-            except:
+            except Exception:
                 pass
             return False
 
         # 4. Wait for page to load
         try:
             wait.until(EC.presence_of_element_located((By.ID, "id_submitbutton2")))
-        except:
+        except Exception:
             pass
             
         # 5. Inject HTML
@@ -104,7 +104,7 @@ def add_etiqueta_actividades_to_section(driver, section_element, wait_time=10):
         # Wait for redirect back to course view
         try:
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-        except:
+        except Exception:
             # Check if still on edit page due to validation
             if "modedit.php" in driver.current_url:
                 logger.error("  Failed to save video label: Form validation error.")

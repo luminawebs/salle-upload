@@ -58,7 +58,7 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
             if search_txt in opt_text:
                 try:
                     sel.select_by_value(opt.get_attribute("value"))
-                except:
+                except Exception:
                     driver.execute_script("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", category_select, opt.get_attribute("value"))
                 found_option = True
                 break
@@ -73,7 +73,7 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
                 if fallback_search in opt_text:
                     try:
                         sel.select_by_value(opt.get_attribute("value"))
-                    except:
+                    except Exception:
                         driver.execute_script("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", category_select, opt.get_attribute("value"))
                     found_option = True
                     break
@@ -91,7 +91,7 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
             upload_menu = wait.until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Subir un archivo') or contains(text(), 'Upload a file')]")))
             driver.execute_script("arguments[0].click();", upload_menu)
             time.sleep(1)
-        except:
+        except Exception:
             pass # Might already be selected
             
         logger.info(f"[{activity_name_prefix}] Step 4c: Choosing file...")
@@ -191,7 +191,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
             time.sleep(0.5)
             try:
                 add_menus[-1].click()
-            except:
+            except Exception:
                 driver.execute_script("arguments[0].click();", add_menus[-1])
             time.sleep(1)
             
@@ -209,7 +209,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                 time.sleep(0.5)
                 try:
                     visible_random_btn.click()
-                except:
+                except Exception:
                     driver.execute_script("arguments[0].click();", visible_random_btn)
             else:
                 logger.warning(f"[{activity_name_prefix}] Could not find visible 'una pregunta aleatoria' button.")
@@ -233,7 +233,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                         time.sleep(0.5)
                         try:
                             li.click()
-                        except:
+                        except Exception:
                             driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));", li)
                         found = True
                         break
@@ -246,7 +246,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                             time.sleep(0.5)
                             try:
                                 li.click()
-                            except:
+                            except Exception:
                                 driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));", li)
                             found = True
                             break
@@ -259,7 +259,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                     time.sleep(0.5)
                     try:
                         apply_btn.click()
-                    except:
+                    except Exception:
                         driver.execute_script("arguments[0].click();", apply_btn)
                             
                 time.sleep(2) # Give it time to load the questions table after selecting category
@@ -272,7 +272,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                     if not select_all.is_selected():
                         try:
                             select_all.click()
-                        except:
+                        except Exception:
                             driver.execute_script("arguments[0].click();", select_all)
                 except Exception:
                     logger.warning(f"[{activity_name_prefix}] Could not find or click 'Seleccionar todos'. Proceeding with random selection.")
@@ -299,7 +299,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                 time.sleep(0.5)
                 try:
                     add_random_btn.click()
-                except:
+                except Exception:
                     driver.execute_script("arguments[0].click();", add_random_btn)
                 time.sleep(2)
             except Exception as e:

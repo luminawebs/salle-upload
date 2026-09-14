@@ -44,7 +44,7 @@ def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10)
             from selenium.webdriver.common.by import By
             cancel_btn = driver.find_element(By.CSS_SELECTOR, "input[name='cancel'], button[name='cancel'], #id_cancel")
             driver.execute_script("arguments[0].click();", cancel_btn)
-        except:
+        except Exception:
             pass
         return False
         

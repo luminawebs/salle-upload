@@ -185,9 +185,10 @@ class Config:
         "t",
     )
 
-    # Depositphotos Credentials
-    DEPOSITPHOTOS_USER = os.getenv("DEPOSITPHOTOS_USER", "maurizioroca@hotmail.com")
-    DEPOSITPHOTOS_PASS = os.getenv("DEPOSITPHOTOS_PASS", "Ye:mW9&#hY&768z")
+    # Depositphotos Credentials (must be set via .env — no hardcoded fallback;
+    # the previous default was a real, now-exposed password)
+    DEPOSITPHOTOS_USER = os.getenv("DEPOSITPHOTOS_USER")
+    DEPOSITPHOTOS_PASS = os.getenv("DEPOSITPHOTOS_PASS")
 
     # Global explicit wait timeout in seconds
     EXPLICIT_WAIT_TIME = 10

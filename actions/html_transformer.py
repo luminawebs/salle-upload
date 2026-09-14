@@ -920,7 +920,7 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
         dirname = os.path.basename(os.path.dirname(extracted_html_path))
         if dirname.isdigit():
             course_id = int(dirname)
-    except:
+    except Exception:
         pass
 
     # Extract Equipo Docente

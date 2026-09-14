@@ -66,7 +66,7 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
         
     try:
         wait.until(EC.presence_of_element_located((By.ID, "id_submitbutton2")))
-    except:
+    except Exception:
         pass
     video_html = '<p><video class="nomediaplugin" crossorigin="anonymous" autoplay="autoplay" loop="loop" muted="true">   <source src="https://unisallevirtual.lasalle.edu.co/multimedia/etiquetas/materialesdeestudio.mp4">   Materiales de Estudio.  </video></p>'
     
@@ -76,7 +76,7 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
     # Wait for redirect back to course view
     try:
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-    except:
+    except Exception:
         pass
         
     return True
@@ -134,7 +134,7 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
         
     try:
         wait.until(EC.presence_of_element_located((By.ID, "id_name")))
-    except:
+    except Exception:
         pass
         
     # Set Title
@@ -189,7 +189,7 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
         submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "id_submitbutton2")))
         try:
             submit_btn.click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", submit_btn)
             
         try:
@@ -207,7 +207,7 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
     # Wait for redirect back to course view
     try:
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-    except:
+    except Exception:
         pass
         
     return True
@@ -238,7 +238,7 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
                     if f"UNIDAD {unidad_num}" in title_elem.text.upper():
                         target_section = sec
                         break
-                except:
+                except Exception:
                     if f"UNIDAD {unidad_num}" in sec.text.upper():
                         target_section = sec
                         break
@@ -259,7 +259,7 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
                     if f"UNIDAD {unidad_num}" in title_elem.text.upper():
                         target_section = sec
                         break
-                except:
+                except Exception:
                     if f"UNIDAD {unidad_num}" in sec.text.upper():
                         target_section = sec
                         break

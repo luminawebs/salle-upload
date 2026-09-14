@@ -44,9 +44,9 @@ def get_edit_url_for_activity(driver, activity_name_prefix, wait_time):
                 try:
                     driver.execute_script("arguments[0].click();", btn)
                     time.sleep(1)
-                except:
+                except Exception:
                     pass
-    except:
+    except Exception:
         pass
         
     def find_target_in_current_dom():
@@ -97,7 +97,7 @@ def get_edit_url_for_activity(driver, activity_name_prefix, wait_time):
                     if target_activity:
                         logger.info("Activity found after scanning buttons.")
                         break
-                except:
+                except Exception:
                     pass
             
     if not target_activity:
@@ -112,7 +112,7 @@ def get_edit_url_for_activity(driver, activity_name_prefix, wait_time):
         
         try:
             wait.until(EC.element_to_be_clickable(dropdown_toggle)).click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", dropdown_toggle)
             
         time.sleep(1)
@@ -168,7 +168,7 @@ def get_edit_url_for_introduccion_general(driver, wait_time):
                     target_label = find_target_label()
                     if target_label:
                         break
-                except:
+                except Exception:
                     pass
             
     if not target_label:
@@ -181,7 +181,7 @@ def get_edit_url_for_introduccion_general(driver, wait_time):
         time.sleep(0.5)
         try:
             wait.until(EC.element_to_be_clickable(dropdown_toggle)).click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", dropdown_toggle)
         time.sleep(1)
         
@@ -251,7 +251,7 @@ def upload_introduccion_general_to_editor(driver, html_path, wait_time):
             try:
                 cancel_btn = driver.find_element(By.CSS_SELECTOR, "input[name='cancel'], button[name='cancel'], #id_cancel")
                 driver.execute_script("arguments[0].click();", cancel_btn)
-            except:
+            except Exception:
                 pass
             return False
             
@@ -306,7 +306,7 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         
         try:
             activity_link.click()
-        except:
+        except Exception:
             driver.execute_script("arguments[0].click();", activity_link)
             
         # Wait until we are on the activity view page (no longer on course view)
@@ -354,12 +354,12 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
             
             try:
                 wait.until(EC.element_to_be_clickable((By.XPATH, save_xpath))).click()
-            except:
+            except Exception:
                 driver.execute_script("arguments[0].click();", save_btn)
                 
             try:
                 wait.until(EC.staleness_of(save_btn))
-            except:
+            except Exception:
                 pass
             time.sleep(1)
         except Exception as e:
@@ -438,7 +438,7 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                                 body = driver.find_element(By.TAG_NAME, "body")
                                 if "path-mod-forum" in (body.get_attribute("class") or ""):
                                     is_forum = True
-                            except:
+                            except Exception:
                                 pass
 
                             submit = not (is_forum and getattr(Config, "ENABLE_FORO_ACTIVITY_COMPLETION_UPDATE", True))
@@ -488,7 +488,7 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                                         submit_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton, #id_submitbutton2, input[name='submitbutton2'], input[name='submitbutton']")
                                         try:
                                             submit_btn.click()
-                                        except:
+                                        except Exception:
                                             driver.execute_script("arguments[0].click();", submit_btn)
                                     except Exception as e:
                                         logger.error(f"Failed to submit form for {filename}: {e}")
