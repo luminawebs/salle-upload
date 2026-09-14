@@ -115,12 +115,46 @@ async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
             with open(output_html_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
                 
-        report = review_document(course_id, generate_json=False, generate_text=False)
+        # cleanup_fragments=False: keep the per-item HTML/XML fragments on disk
+        # so the UI can show exactly how each activity/glosario/etc. was parsed.
+        report = review_document(course_id, generate_json=False, generate_text=False, cleanup_fragments=False)
     except Exception as e:
         print(f"Error reviewing document during upload: {e}")
         report = None
         
     return {"info": f"archivo '{file.filename}' guardado exitosamente y entorno reiniciado", "report": report}
+
+
+# Whitelist of split-output subfolders a client is allowed to read fragments
+# from. Keeps /api/parsed-fragment from being turned into a generic file
+# reader over the rest of the course's workspace folder.
+PARSED_FRAGMENT_CATEGORIES = {"actividades", "material", "introduccion", "glosario"}
+
+
+@app.get("/api/parsed-fragment")
+async def get_parsed_fragment(course_id: str, category: str, filename: str):
+    """
+    Returns the raw HTML/XML content of one fragment produced by the DOCX
+    splitting workflow (e.g. workspace/<course_id>/actividades/actividad3.html),
+    so the UI can show exactly how that item was parsed.
+    """
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    if category not in PARSED_FRAGMENT_CATEGORIES:
+        return JSONResponse(status_code=400, content={"error": "Categoría inválida."})
+    # filename must be a bare file name — no path separators, no "..".
+    if filename != os.path.basename(filename) or filename in ("", ".", ".."):
+        return JSONResponse(status_code=400, content={"error": "Nombre de archivo inválido."})
+
+    fragment_path = os.path.join("workspace", course_id, category, filename)
+    if not os.path.isfile(fragment_path):
+        return JSONResponse(status_code=404, content={"error": "No se encontró ese fragmento. Vuelve a subir el documento."})
+
+    with open(fragment_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    return {"course_id": course_id, "category": category, "filename": filename, "content": content}
+
 
 @app.post("/api/review")
 async def api_review(file: UploadFile = File(...)):

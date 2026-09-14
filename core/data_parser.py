@@ -126,7 +126,15 @@ def run_docx_splitting_workflow(course_id: int):
     # Trackers
     current_unit = 0
     current_activity = 0
-    
+
+    # Structured record of every activity actually extracted, keyed by
+    # unit -> activity number. This is returned so callers (e.g. the
+    # document review report) can build their view of "what activities
+    # exist and what type they are" from the exact same detection this
+    # function already did, instead of re-parsing the document a second
+    # time with separate logic that can silently drift out of sync.
+    activity_manifest = {}
+
     # Output directories
     output_dirs = {
         "actividades": os.path.join(base_dir, "actividades"),
@@ -277,7 +285,31 @@ def run_docx_splitting_workflow(course_id: int):
                         act_html_parts.append(td.decode_contents())
                     i += 1
                 act_html = "".join(act_html_parts)
-                
+
+                # Detect the activity "tipo" (Foro/Tarea/Cuestionario/etc.)
+                # from within this activity's own bounded HTML block. Doing
+                # it here — scoped to content we've already confirmed
+                # belongs to this exact activity number — means it can't be
+                # hijacked by a stray "Actividad N" mention inside someone
+                # else's body text, the way a whole-document row scan can.
+                act_text_upper = BeautifulSoup(act_html, "html.parser").get_text(" ").upper()
+                tipo_actividad = "Desconocido"
+                if "HERRAMIENTA" in act_text_upper and "PLATAFORMA VIRTUAL" in act_text_upper:
+                    if re.search(r'FORO[_\s]*X', act_text_upper):
+                        tipo_actividad = "Foro"
+                    elif re.search(r'TAREA[_\s]*X', act_text_upper):
+                        tipo_actividad = "Tarea"
+                    elif re.search(r'CUESTIONARIO[_\s]*X', act_text_upper):
+                        tipo_actividad = "Cuestionario"
+                    elif re.search(r'NO SABE[_\s]*X', act_text_upper):
+                        tipo_actividad = "No sabe"
+                    elif re.search(r'OTRA[_\s¿A-Z\?]*X', act_text_upper):
+                        tipo_actividad = "Otra"
+                activity_manifest.setdefault(str(current_unit), {})[str(current_activity)] = {
+                    "tipo": tipo_actividad,
+                    "raw_number": raw_activity_number,
+                }
+
                 # Extract Lecturas complementarias / Material de referencia from the activity HTML
                 act_soup_mat = BeautifulSoup(act_html, "html.parser")
                 header_mat = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and any(kw in t.text.lower() for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']))
@@ -369,9 +401,11 @@ def run_docx_splitting_workflow(course_id: int):
                 with open(act_file_path, "w", encoding="utf-8") as f:
                     f.write(act_html_transformed)
                 logger.info(f"  ✓ Extracted {act_file_name}")
+                activity_manifest[str(current_unit)][str(current_activity)]["file"] = act_file_name
         else:
             # Not a unit, not an activity.
             pass
         i += 1
 
     logger.info("  ✓ DOCX splitting workflow completed.")
+    return activity_manifest

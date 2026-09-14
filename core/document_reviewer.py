@@ -8,11 +8,17 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def review_document(course_id: int, generate_json=True, generate_text=True):
+def review_document(course_id: int, generate_json=True, generate_text=True, cleanup_fragments=True):
     """
     Reviews the raw_docx_extracted.html for a given course ID to ensure all
     expected structural elements are present. Logs the results in Spanish.
     Optionally saves the results to a JSON and/or text file in the course's assets folder.
+
+    cleanup_fragments: when True (default, unchanged behavior), the per-item
+    HTML/XML fragments written by run_docx_splitting_workflow (actividades/,
+    material/, introduccion/) are deleted once the report is built. Pass
+    False to keep them on disk so a UI can show exactly how each item was
+    parsed (e.g. workspace/<course_id>/actividades/actividad3.html).
     """
     logger.info(f"Iniciando revisión de documento para el curso {course_id}...")
     base_dir = os.path.join(PROJECT_ROOT, "workspace", str(course_id))
@@ -32,10 +38,17 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
         _save_reports(base_dir, report, generate_json, generate_text)
         return
 
-    # Ensure splits are generated for exact parsing (just like Automatizacion)
+    # Run the *real* splitter used by the actual automation pipeline, and
+    # keep its returned manifest as the single source of truth for which
+    # activities exist and what type each is. This report used to detect
+    # units/activities/types itself with a second, separate implementation —
+    # the two could (and did) drift apart, e.g. a body paragraph mentioning
+    # a previous activity in prose could hijack this report's detection
+    # while the real splitter, scoped correctly per activity, stayed right.
+    activity_manifest = {}
     try:
         from core.data_parser import run_docx_splitting_workflow
-        run_docx_splitting_workflow(course_id)
+        activity_manifest = run_docx_splitting_workflow(course_id) or {}
     except Exception as e:
         logger.error(f"Error executing DOCX splitting workflow: {e}")
 
@@ -74,17 +87,21 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
     for tr in soup.find_all("tr"):
         text = tr.get_text(strip=True).upper()
         
-        # Detect Unit
+        # Detect Unit. Requires "DID\u00c1CTICA" \u2014 same requirement the real
+        # splitter uses (core/data_parser.py checks for "UNIDAD DID\u00c1CTICA")
+        # \u2014 so this report can't pick up a bare "UNIDAD 1" mention (e.g. in
+        # a course-overview summary table) as a real unit boundary when the
+        # actual pipeline wouldn't have treated it as one either.
         match_unidad = None
         for element in tr.find_all(['td', 'p', 'h1', 'h2', 'h3', 'strong', 'b']):
             element_text = element.get_text(strip=True).upper()
-            m = re.match(r'^UNIDAD\s*(?:DID\u00c1CTICA)?\s*(\d+)', element_text)
+            m = re.match(r'^UNIDAD\s*DID\u00c1CTICA\s*(\d+)', element_text)
             if m:
                 match_unidad = m
                 break
-                
+
         if not match_unidad:
-            match_unidad = re.match(r'^UNIDAD\s*(?:DID\u00c1CTICA)?\s*(\d+)', text)
+            match_unidad = re.match(r'^UNIDAD\s*DID\u00c1CTICA\s*(\d+)', text)
 
         if match_unidad:
             current_unidad = match_unidad.group(1)
@@ -119,60 +136,47 @@ def review_document(course_id: int, generate_json=True, generate_text=True):
                         num_questions = target_td.get_text().count("?")
                     report["unidades"][current_unidad]["preguntas_orientadoras"]["cantidad"] = num_questions
             
-            # Actividades
-            match_actividad = re.search(r'ACTIVIDAD\s+(\d+)\s*[:\.]', text)
-            if match_actividad:
-                act_num = match_actividad.group(1)
-                current_actividad = act_num
-                if act_num not in report["unidades"][current_unidad]["actividades"]:
-                    report["unidades"][current_unidad]["actividades"][act_num] = {
-                        "tipo": "Desconocido",
-                        "cantidad_preguntas": 0
-                    }
-            
-            # Count preguntas logic moved to the second pass to use exact DOM-based extraction
-            pass
-
-            # Detectar tipo de actividad
-            if "HERRAMIENTA" in text and "PLATAFORMA VIRTUAL" in text:
-                if 'current_actividad' in locals() and current_actividad and current_actividad in report["unidades"][current_unidad]["actividades"]:
-                    raw_text = tr.get_text().upper()
-                    tipo_actividad = "Desconocido"
-                    if re.search(r'FORO[_\s]*X', raw_text):
-                        tipo_actividad = "Foro"
-                    elif re.search(r'TAREA[_\s]*X', raw_text):
-                        tipo_actividad = "Tarea"
-                    elif re.search(r'CUESTIONARIO[_\s]*X', raw_text):
-                        tipo_actividad = "Cuestionario"
-                    elif re.search(r'NO SABE[_\s]*X', raw_text):
-                        tipo_actividad = "No sabe"
-                    elif re.search(r'OTRA[_\s¿A-Z\?]*X', raw_text):
-                        tipo_actividad = "Otra"
-                    
-                    report["unidades"][current_unidad]["actividades"][current_actividad]["tipo"] = tipo_actividad
+            # Note: activities and their "tipo" are no longer detected here.
+            # They're folded in below from activity_manifest — the exact
+            # structure the real splitter (core/data_parser.py) produced —
+            # instead of a second, independent detection pass that could
+            # disagree with it.
 
             # Material de Referencia / Lecturas Complementarias
             if "LECTURAS COMPLEMENTARIAS" in text or "MATERIAL DE REFERENCIA" in text or "LECTURAS DE REFERENCIA" in text:
                 report["unidades"][current_unidad]["material_referencia"]["encontrado"] = True
                 report["unidades"][current_unidad]["material_referencia"]["detalles"] = "Encontrado"
 
-    # Second pass: Use extracted HTML files to get exact questions and clean up
-    # As requested by the user, we skip AI validation here to save quota and speed up parsing on UI drop.
-    for u_num, u_data in report["unidades"].items():
-        if u_data.get("actividades"):
-            for act_num, act_data in u_data["actividades"].items():
-                if act_data["tipo"] == "Cuestionario":
-                    # We just keep it 0 as the UI only cares about the type of activity right now.
-                    act_data["cantidad_preguntas"] = 0
-                        
-    # Clean up temporary split folders
-    for folder in ["actividades", "material", "introduccion"]:
-        folder_path = os.path.join(base_dir, folder)
-        if os.path.exists(folder_path):
-            try:
-                shutil.rmtree(folder_path)
-            except Exception as e:
-                logger.error(f"Error al eliminar la carpeta {folder_path}: {e}")
+    # Fold in the activities exactly as the real splitter detected them, so
+    # this report can never show a different activity count/number/type
+    # than what the actual automation pipeline will act on.
+    for unit_key, unit_activities in activity_manifest.items():
+        if unit_key not in report["unidades"]:
+            # The splitter found a "UNIDAD DIDÁCTICA n" this report's own
+            # (lighter) heading scan missed — surface its activities anyway
+            # instead of silently dropping them.
+            report["unidades"][unit_key] = {
+                "resumen": {"encontrado": False, "detalles": "No se encontró el resumen"},
+                "preguntas_orientadoras": {"encontrado": False, "detalles": "No se encontraron preguntas orientadoras", "cantidad": 0},
+                "actividades": {},
+                "material_referencia": {"encontrado": False, "detalles": "No se encontró material de referencia o lecturas complementarias"}
+            }
+        for act_num, act_info in unit_activities.items():
+            report["unidades"][unit_key]["actividades"][act_num] = {
+                "tipo": act_info["tipo"],
+                "cantidad_preguntas": 0
+            }
+
+    # Clean up temporary split folders (unless the caller wants to keep them
+    # around, e.g. to let a UI show exactly how each item was parsed)
+    if cleanup_fragments:
+        for folder in ["actividades", "material", "introduccion"]:
+            folder_path = os.path.join(base_dir, folder)
+            if os.path.exists(folder_path):
+                try:
+                    shutil.rmtree(folder_path)
+                except Exception as e:
+                    logger.error(f"Error al eliminar la carpeta {folder_path}: {e}")
 
     # Log results for units
     if not report["unidades"]:
