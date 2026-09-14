@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from actions.moodle_actions import navigate_to_course
 from core.wysiwyg_handler import inject_html_into_wysiwyg, extract_html_from_wysiwyg
+from core.activity_selection import get_skipped_activities
 from config.settings import Config
 
 logger = logging.getLogger(__name__)
@@ -401,14 +402,18 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
             logger.error("Could not extract edit URL for Introducción General.")
         
     # Upload Actividades
+    skipped_activities = get_skipped_activities(course_id)
     if os.path.exists(actividades_dir):
         for filename in sorted(os.listdir(actividades_dir)):
             if filename.endswith(".html") and filename.startswith("actividad"):
-                    
+
                 # extract number, e.g. actividad1.html -> 1
                 match = re.search(r'\d+', filename)
                 if match:
                     act_num = match.group()
+                    if act_num in skipped_activities:
+                        logger.info(f"Actividad {act_num} excluida por el usuario — omitiendo subida de {filename}.")
+                        continue
                     activity_prefix = f"ACTIVIDAD {act_num}"
                     logger.info(f"Uploading {filename} to {activity_prefix}...")
                     

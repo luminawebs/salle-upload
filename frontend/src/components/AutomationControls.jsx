@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { AutomationContext } from '../context/AutomationContext';
 import { Settings, Save, Check, Play, AlertTriangle } from 'lucide-react';
 
-export default function AutomationControls() {
+export default function AutomationControls({ onBeforeRun }) {
   const {
     settings,
     handleSetSetting,
@@ -49,7 +49,10 @@ export default function AutomationControls() {
           {!isRunning ? (
             <>
               <button
-                onClick={() => handleRun(handleSaveSettings)}
+                onClick={() => {
+                  if (onBeforeRun) onBeforeRun();
+                  handleRun(handleSaveSettings);
+                }}
                 disabled={!hasMatchingUpload}
                 title={!hasMatchingUpload ? 'Sube un documento .docx para este Curso ID antes de iniciar.' : undefined}
                 className="w-full py-2.5 px-4 rounded-lg font-semibold flex items-center justify-center transition-all bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-primary/20"

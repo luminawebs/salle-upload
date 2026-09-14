@@ -12,6 +12,7 @@ from actions.moodle_actions import navigate_to_course
 from actions.html_transformer import extract_questions_from_html_to_moodle_xml
 from actions.deprecated.puntos_extras_actions import _get_cmid_for_activity
 from actions.cuestionario_grade_actions import update_quiz_grades
+from core.activity_selection import get_skipped_activities
 
 logger = logging.getLogger(__name__)
 
@@ -332,11 +333,15 @@ def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10
         logger.info(f"No actividades directory found for course {course_id}.")
         return
 
+    skipped_activities = get_skipped_activities(course_id)
     for filename in sorted(os.listdir(actividades_dir)):
         if filename.endswith(".html") and filename.startswith("actividad"):
             match = re.search(r'\d+', filename)
             if match:
                 act_num = match.group()
+                if act_num in skipped_activities:
+                    logger.info(f"Actividad {act_num} excluida por el usuario — omitiendo exportación de cuestionario.")
+                    continue
                 activity_prefix = f"ACTIVIDAD {act_num}"
                 
                 html_path = os.path.join(actividades_dir, filename)

@@ -7,6 +7,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse
 from core.data_parser import parse_docx_to_html
 from core.document_reviewer import review_document
+from core.activity_selection import get_skipped_activities, set_skipped_activities
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import re
@@ -154,6 +155,30 @@ async def get_parsed_fragment(course_id: str, category: str, filename: str):
         content = f.read()
 
     return {"course_id": course_id, "category": category, "filename": filename, "content": content}
+
+
+@app.get("/api/skip-activities")
+async def get_skip_activities(course_id: str):
+    """Which activity numbers the user chose to exclude from upload for this course."""
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    return {"course_id": course_id, "skipped": sorted(get_skipped_activities(course_id))}
+
+
+@app.post("/api/skip-activities")
+async def post_skip_activities(request: Request):
+    """Replaces the excluded-activity list for a course. Read by the real
+    upload/cuestionario/rúbrica workflows so an excluded activity is never
+    uploaded, exported, or graded — see core/activity_selection.py."""
+    body = await request.json()
+    course_id = body.get("course_id", "")
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    skipped = body.get("skipped", [])
+    if not isinstance(skipped, list):
+        return JSONResponse(status_code=400, content={"error": "'skipped' debe ser una lista."})
+    set_skipped_activities(course_id, skipped)
+    return {"status": "success", "course_id": course_id, "skipped": sorted(get_skipped_activities(course_id))}
 
 
 @app.post("/api/review")

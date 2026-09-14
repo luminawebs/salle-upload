@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from actions.moodle_actions import MoodleAutomation, navigate_to_course
 from actions.deprecated.actividad_rubrica_actions import _navigate_to_rubric_editor, fill_rubric
 from core.docx_rubrica_parser import parse_rubricas_from_docx
+from core.activity_selection import get_skipped_activities
 from config.settings import Config
 
 logger = logging.getLogger(__name__)
@@ -106,7 +107,11 @@ def run_docx_rubrica_upload_workflow(driver, course_id: int, wait_time: int = 15
         return
 
     # 2. Iterate and upload
+    skipped_activities = get_skipped_activities(course_id)
     for act_num, criteria_list in rubricas_dict.items():
+        if str(act_num) in skipped_activities:
+            logger.info(f"Actividad {act_num} excluida por el usuario — omitiendo rúbrica.")
+            continue
         activity_name = f"ACTIVIDAD {act_num}"
         logger.info(f"Processing Rubrica for {activity_name} ({len(criteria_list)} criteria)...")
 

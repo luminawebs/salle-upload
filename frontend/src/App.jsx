@@ -1,28 +1,12 @@
-import React, { useState } from 'react';
-import MoodleEngineView from './components/MoodleEngineView';
-import DocumentReviewerView from './components/DocumentReviewerView';
-import AutomatizacionTrackerView from './components/AutomatizacionTrackerView';
-import UnifiedAnalyzerView from './components/UnifiedAnalyzerView';
+import React from 'react';
+import AutomationView from './components/AutomationView';
 import { AutomationProvider } from './context/AutomationContext';
 import GlobalPopupModal from './components/GlobalPopupModal';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('tracker');
-
   return (
     <AutomationProvider>
-      <div style={{ display: activeTab === 'tracker' ? 'block' : 'none', height: '100%' }}>
-        <AutomatizacionTrackerView setActiveTab={setActiveTab} />
-      </div>
-      <div style={{ display: activeTab === 'moodle' ? 'block' : 'none', height: '100%' }}>
-        <MoodleEngineView setActiveTab={setActiveTab} />
-      </div>
-      <div style={{ display: activeTab === 'reviewer' ? 'block' : 'none', height: '100%' }}>
-        <DocumentReviewerView setActiveTab={setActiveTab} />
-      </div>
-      <div style={{ display: activeTab === 'unified' ? 'block' : 'none', height: '100%' }}>
-        <UnifiedAnalyzerView setActiveTab={setActiveTab} />
-      </div>
+      <AutomationView />
       <GlobalPopupModal />
     </AutomationProvider>
   );
