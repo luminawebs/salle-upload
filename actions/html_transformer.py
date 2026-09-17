@@ -495,7 +495,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             from core.ai_structurer import validate_and_extract_questions
             serialized_parser_output = json.dumps(structured_questions, ensure_ascii=False)
             
-            ai_result = validate_and_extract_questions(html_content, serialized_parser_output, parsed_q_count=standard_q_count)
+            ai_result = validate_and_extract_questions(html_content, serialized_parser_output, parsed_q_count=standard_q_count, course_id=course_id)
             ai_end_time = time.perf_counter()
             
             is_perfect = False

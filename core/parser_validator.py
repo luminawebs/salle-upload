@@ -80,7 +80,7 @@ def run_validation(course_id: str) -> dict:
     for child in tree.children:
         if child.chunk_type in ["UNIT", "GENERALIDADES"]:
             logger.info(f"  -> AI Parsing: {child.title}")
-            ai_result = parse_chunk_with_ai(child.html)
+            ai_result = parse_chunk_with_ai(child.html, course_id=course_id)
             
             for act in ai_result.get("activities", []):
                 ai_activities.append(act)

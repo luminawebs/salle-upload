@@ -14,7 +14,11 @@ def get_gemini_client():
     if not getattr(Config, "ENABLE_AI_FEATURES", True):
         logger.info("AI features are disabled via configuration.")
         return None
-        
+
+    from core.ai_budget_guard import is_budget_exceeded
+    if is_budget_exceeded():
+        return None
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         logger.error("GEMINI_API_KEY environment variable not found. AI fallback disabled.")
@@ -36,7 +40,7 @@ def get_ai_config():
         "top_k": int(os.environ.get("AI_TOP_K", "40"))
     }
 
-def validate_and_extract_questions(html_content: str, standard_parser_output: str = "[]", parsed_q_count: int = 0) -> dict:
+def validate_and_extract_questions(html_content: str, standard_parser_output: str = "[]", parsed_q_count: int = 0, course_id=None) -> dict:
     """
     Uses Gemini to validate and extract questions from HTML, acting as a QA layer.
     Returns a dictionary with 'is_perfect', 'corrections', 'additions', 'removals', 'metadata', and 'token_usage'.
@@ -183,6 +187,8 @@ Instructions:
                     token_usage["finish_reason"] = str(candidate.finish_reason)
 
             result["token_usage"] = token_usage
+            from core.ai_budget_guard import record_usage
+            record_usage("quiz_qa", token_usage, course_id=course_id)
             return result
 
         except Exception as e:
@@ -202,14 +208,14 @@ Instructions:
     
     return {"error": "Retry logic failed unexpectedly.", "token_usage": {}}
 
-def analyze_selenium_error(error_traceback: str, current_url: str = "", context: str = "") -> str:
+def analyze_selenium_error(error_traceback: str, current_url: str = "", context: str = "", course_id=None) -> str:
     """
     Uses Gemini to analyze a Selenium failure and suggest code improvements.
     """
     client = get_gemini_client()
     if not client:
-        return "AI disabled due to missing API key."
-        
+        return "AI disabled (feature flag off, budget exceeded, or no API key)."
+
     prompt = f"""
 You are an expert QA Automation Engineer.
 Our Selenium script failed during execution in Moodle.
@@ -222,14 +228,26 @@ Traceback:
 {error_traceback}
 ```
 
-Please provide a brief, actionable "Code Improvement Prompt" for the developer. 
+Please provide a brief, actionable "Code Improvement Prompt" for the developer.
 Focus strictly on how to improve the Selenium code (e.g., "Add an Explicit Wait for the button with ID 'id_submit'", or "The selector might be stale, catch StaleElementReferenceException"). Do not write the full script, just the actionable advice.
 """
+    model_name = get_ai_config()["model_name"]
     try:
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model=model_name,
             contents=prompt
         )
+
+        token_usage = {"input": 0, "output": 0, "total": 0, "cached": 0, "model": model_name}
+        if hasattr(response, 'usage_metadata') and response.usage_metadata:
+            token_usage["input"] = getattr(response.usage_metadata, 'prompt_token_count', 0)
+            token_usage["output"] = getattr(response.usage_metadata, 'candidates_token_count', 0)
+            token_usage["total"] = getattr(response.usage_metadata, 'total_token_count', 0)
+            token_usage["cached"] = getattr(response.usage_metadata, 'cached_content_token_count', 0)
+
+        from core.ai_budget_guard import record_usage
+        record_usage("selenium_error_diagnosis", token_usage, course_id=course_id, context=context)
+
         return response.text.strip()
     except Exception as e:
         logger.error(f"Gemini API error during Selenium analysis: {e}")

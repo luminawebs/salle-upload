@@ -14,6 +14,18 @@ class Config:
     ENABLE_AI_FEATURES = os.getenv("ENABLE_AI_FEATURES", "False").lower() in ("true", "1", "t")
     TESTING_MODE = os.getenv("TESTING_MODE", "False").lower() in ("true", "1", "t")
 
+    # --- AI cost guard (see core/ai_budget_guard.py) ---
+    # Hard spending cap in USD across all AI calls, tracked in ai_usage_ledger.json.
+    # 0 (default) = no cap enforced, tracking-only. Set a real number to make the
+    # guard actually refuse further AI calls once this total is reached.
+    AI_BUDGET_USD = float(os.getenv("AI_BUDGET_USD", "0") or 0)
+    # Per-1M-token pricing for whatever Gemini model you're actually using — look
+    # these up yourself at https://ai.google.dev/gemini-api/docs/pricing for the
+    # exact model, since they change and vary by model. Left at 0 (unknown) by
+    # default rather than guessing a number that could be wrong.
+    AI_COST_PER_1M_INPUT_TOKENS_USD = float(os.getenv("AI_COST_PER_1M_INPUT_TOKENS_USD", "0") or 0)
+    AI_COST_PER_1M_OUTPUT_TOKENS_USD = float(os.getenv("AI_COST_PER_1M_OUTPUT_TOKENS_USD", "0") or 0)
+
     
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     WORKSPACE_DIR = os.path.join(BASE_DIR, "workspace")

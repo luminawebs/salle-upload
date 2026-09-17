@@ -125,7 +125,7 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
         try:
             from core.ai_structurer import analyze_selenium_error
             current_url = driver.current_url
-            suggestion = analyze_selenium_error(error_trace, current_url, f"Importing XML for {activity_name_prefix}")
+            suggestion = analyze_selenium_error(error_trace, current_url, f"Importing XML for {activity_name_prefix}", course_id=course_id)
             logger.warning(f"\n--- AI SELENIUM IMPROVEMENT SUGGESTION ---\n{suggestion}\n------------------------------------------\n")
         except: pass
         return False
@@ -319,7 +319,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
         try:
             from core.ai_structurer import analyze_selenium_error
             current_url = driver.current_url
-            suggestion = analyze_selenium_error(error_trace, current_url, f"Adding random questions for {activity_name_prefix}")
+            suggestion = analyze_selenium_error(error_trace, current_url, f"Adding random questions for {activity_name_prefix}", course_id=course_id)
             logger.warning(f"\n--- AI SELENIUM IMPROVEMENT SUGGESTION ---\n{suggestion}\n------------------------------------------\n")
         except: pass
         return False
