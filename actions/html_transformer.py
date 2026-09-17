@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 TEXT_SPAN_STYLE = "font-family: tahoma, arial, helvetica, sans-serif; font-size: small; color: #000000;"
 RUBRIC_HEADER_STYLE = "background-color: #e7b917;"
 
+# Matches a real question-number header ("Pregunta 5:", "Pregunta 5", "5. ¿Qué...?"),
+# but NOT a bare numeric answer option like "1940" or "12" — those have no "Pregunta"
+# prefix and no text following the number, so they must not be mistaken for a new question.
+QUESTION_NUMBER_RE = re.compile(r'^(?:Pregunta\s+\d+[\.:]?\s*|\d+[\.:]\s+(?=\S))', re.IGNORECASE)
+
 def get_image_base64(image_filename: str, course_id: int = None) -> str:
     image_path = None
     
@@ -64,6 +69,50 @@ def process_image_src(html_str, course_id=None):
                 img['src'] = base64_data
             img['style'] = "max-width: 100%; height: auto;"
     return soup.decode_contents()
+
+def _question_dict_html_fields(question: dict):
+    """Every HTML string inside a question dict that must be traceable back
+    to the source document — used to run an integrity check on AI-proposed
+    corrections/additions before they're trusted (see _validate_ai_question)."""
+    for key in ("stem_html", "correct_feedback_html", "incorrect_feedback_html"):
+        value = question.get(key)
+        if value:
+            yield key, value
+    for i, opt in enumerate(question.get("options", []) or []):
+        value = opt.get("text_html")
+        if value:
+            yield f"options[{i}].text_html", value
+
+def _validate_ai_question(question: dict, source_html: str) -> dict:
+    """
+    Checks every HTML field the AI returned for one question against the
+    original activity HTML using both integrity checks from
+    core/html_integrity.py: structural (tag order, preserved attributes —
+    the same one the shadow structure validator already relies on) AND
+    textual (are the actual words real, not paraphrased or invented).
+
+    An LLM's JSON response can be perfectly schema-valid while still
+    containing subtly reworded, reordered, or fabricated text — the schema
+    constrains shape, not truthfulness. This is the check that stands
+    between "the AI said so" and content actually reaching a real quiz.
+    Returns {"valid": bool, "warnings": [...]}.
+    """
+    from core.html_integrity import check_dom_integrity, check_text_integrity
+    all_warnings = []
+    for field_name, value in _question_dict_html_fields(question):
+        for check in (check_dom_integrity, check_text_integrity):
+            result = check(source_html, value)
+            if not result["valid"]:
+                all_warnings.append(f"{field_name}: {'; '.join(result['warnings'])}")
+    return {"valid": len(all_warnings) == 0, "warnings": all_warnings}
+
+def _short_preview(html: str, max_len: int = 90) -> str:
+    """Plain-text, single-line preview of an HTML fragment for audit logs."""
+    if not html:
+        return "(vacío)"
+    text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
+    text = " ".join(text.split())
+    return text[:max_len] + "…" if len(text) > max_len else text
 
 def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
     """
@@ -268,7 +317,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             elif current_q and state == 'OPTIONS':
                 # Distractors without a marker (e.g. in plain text format)
                 if len(text.split()) < 50 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
-                    if not re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE) and not text.lower().startswith('enunciado:'):
+                    if not QUESTION_NUMBER_RE.match(text) and not text.lower().startswith('enunciado:'):
                         is_option = True
 
         if is_option and current_q:
@@ -303,7 +352,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         # 2d. Check if Question Start
         is_start = False
         if b_type not in ['table', 'img']:
-            if re.match(r'^(?:Pregunta\s+)?\d+[\.:]?\s*', text, re.IGNORECASE):
+            if QUESTION_NUMBER_RE.match(text):
                 is_start = True
             elif text.startswith('¿') and not re.match(r'^¿(?:qu.|c.mo)\s+(?:lo\s+)?vamos\s+a\s+(?:lograr|evaluar|hacer)\?', text, re.IGNORECASE):
                 if state in ['OPTIONS', 'FEEDBACK'] or current_q is None:
@@ -456,7 +505,9 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
             metadata = {}
             token_usage = {}
             status_text = "SUCCESS"
-            
+            corrections_accepted = corrections_rejected = 0
+            additions_accepted = additions_rejected = 0
+
             if "error" in ai_result:
                 status_text = f"FAILED_FALLBACK ({ai_result['error']})"
                 logger.error(f"AI QA Layer returned error or exhausted retries: {ai_result['error']}. Falling back to standard parser.")
@@ -467,21 +518,53 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 removals = ai_result.get("removals", [])
                 metadata = ai_result.get("metadata", {})
                 token_usage = ai_result.get("token_usage", {})
-                
+
                 final_questions = list(structured_questions)
-                
+
                 for idx in sorted(removals, reverse=True):
                     if 0 <= idx < len(final_questions):
                         del final_questions[idx]
-                        
+
+                # Every correction/addition is untrusted until its HTML is verified
+                # to actually trace back to the source document — the JSON schema
+                # only constrains shape, not truthfulness. A rejected item keeps
+                # whatever the deterministic parser already had (for a correction)
+                # or is simply dropped (for an addition, since there's nothing to
+                # fall back to). This mirrors the same check the shadow structure
+                # validator already applies to its own AI output.
                 for corr in corrections:
                     idx = corr.get("index")
-                    if idx is not None and 0 <= idx < len(final_questions):
-                        final_questions[idx] = corr.get("corrected_question", final_questions[idx])
-                        
+                    corrected_question = corr.get("corrected_question")
+                    if idx is None or not (0 <= idx < len(final_questions)) or not corrected_question:
+                        continue
+                    integrity = _validate_ai_question(corrected_question, html_content)
+                    if integrity["valid"]:
+                        logger.info(
+                            f"AI correction ACCEPTED for question {idx}: "
+                            f"\"{_short_preview(final_questions[idx].get('stem_html', ''))}\" -> "
+                            f"\"{_short_preview(corrected_question.get('stem_html', ''))}\""
+                        )
+                        final_questions[idx] = corrected_question
+                        corrections_accepted += 1
+                    else:
+                        logger.warning(
+                            f"AI correction REJECTED for question {idx} (kept original — "
+                            f"failed integrity check): {integrity['warnings']}"
+                        )
+                        corrections_rejected += 1
+
                 for add in additions:
-                    final_questions.append(add)
-                
+                    integrity = _validate_ai_question(add, html_content)
+                    if integrity["valid"]:
+                        logger.info(f"AI addition ACCEPTED: \"{_short_preview(add.get('stem_html', ''))}\"")
+                        final_questions.append(add)
+                        additions_accepted += 1
+                    else:
+                        logger.warning(
+                            f"AI addition REJECTED (not added — failed integrity check): {integrity['warnings']}"
+                        )
+                        additions_rejected += 1
+
                 xml_questions.clear()
                 structured_questions.clear()
                 
@@ -517,9 +600,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
 Document: {course_id} / {document_name}
 Parser Questions: {standard_q_count}
 AI Validated Questions: {ai_q_count}
-Questions Added: {len(additions)}
-Questions Corrected: {len(corrections)}
-Questions Removed: {len(removals)}
+Questions Added: {additions_accepted}/{len(additions)} accepted (integrity check)
+Questions Corrected: {corrections_accepted}/{len(corrections)} accepted (integrity check)
+Questions Removed: {len(removals)} (applied as-is — not a content-integrity concern)
+Integrity Rejections: {corrections_rejected} correction(s), {additions_rejected} addition(s)
 Images Detected: {metadata.get('images_detected', False)} | Preserved: {metadata.get('images_preserved', False)}
 Tables Detected: {metadata.get('tables_detected', False)} | Preserved: {metadata.get('tables_preserved', False)}
 

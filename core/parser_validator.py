@@ -1,69 +1,12 @@
 import os
 import json
 import logging
-from bs4 import BeautifulSoup
 from core.document_splitter import DocumentSplitter
 from core.ai_document_parser import parse_chunk_with_ai
+from core.html_integrity import check_dom_integrity
 from actions.structure_actions import parse_raw_document
 
 logger = logging.getLogger(__name__)
-
-def check_dom_integrity(original_html: str, extracted_html: str) -> dict:
-    """
-    Stricter DOM consistency checks using BeautifulSoup.
-    Verifies that the extracted HTML preserves ordering, attributes, and no unexpected elements.
-    Returns {"valid": bool, "warnings": list}
-    """
-    if not extracted_html.strip():
-        return {"valid": True, "warnings": []}
-    
-    warnings = []
-    # If the exact string is a substring (ignoring outer whitespace), it's perfect.
-    if extracted_html.strip() in original_html:
-        return {"valid": True, "warnings": []}
-    
-    try:
-        orig_soup = BeautifulSoup(original_html, "html.parser")
-        ext_soup = BeautifulSoup(extracted_html, "html.parser")
-        
-        # 1. Check relative ordering of significant tags
-        def get_signature(soup):
-            sig = []
-            for tag in soup.find_all(['p', 'ul', 'ol', 'img', 'table', 'a']):
-                sig.append(tag.name)
-            return sig
-            
-        orig_sig = get_signature(orig_soup)
-        ext_sig = get_signature(ext_soup)
-        
-        # Extracted signature should be a contiguous sub-sequence of the original signature
-        def is_sublist(sub, lst):
-            if not sub: return True
-            if not lst: return False
-            for i in range(len(lst) - len(sub) + 1):
-                if lst[i:i+len(sub)] == sub:
-                    return True
-            return False
-            
-        if not is_sublist(ext_sig, orig_sig):
-            warnings.append(f"DOM Ordering mismatch. Extracted signature {ext_sig} not found contiguously in original.")
-            
-        # 2. Verify preservation of important attributes
-        important_attrs = ['src', 'href', 'alt', 'colspan', 'rowspan']
-        for ext_tag in ext_soup.find_all(True):
-            for attr in important_attrs:
-                if ext_tag.has_attr(attr):
-                    attr_val = ext_tag[attr]
-                    if isinstance(attr_val, list):
-                        attr_val = " ".join(attr_val)
-                    if attr_val not in original_html:
-                        warnings.append(f"Unexpected attribute value found: {attr}={attr_val}")
-                        
-        valid = len(warnings) == 0
-        return {"valid": valid, "warnings": warnings}
-        
-    except Exception as e:
-        return {"valid": False, "warnings": [f"BeautifulSoup parsing failed: {e}"]}
 
 def classify_activities(legacy_activities: list, ai_activities: list) -> list:
     """
