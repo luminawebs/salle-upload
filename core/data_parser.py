@@ -5,6 +5,7 @@ import re
 from bs4 import BeautifulSoup
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+from core.document_headings import find_unit_number, is_unit_heading_row, is_intro_heading
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +162,7 @@ def run_docx_splitting_workflow(course_id: int):
 
     # 1. Extract Introducción General
     for h1 in soup.find_all('h1'):
-        if "PRESENTACIÓN DEL ESPACIO ACADÉMICO" in h1.get_text().upper():
+        if is_intro_heading(h1.get_text().upper()):
             intro_html = extract_until_next_header(h1, stop_texts=["PLAN DE FORMACIÓN"])
             if intro_html:
                 with open(os.path.join(output_dirs["introduccion"], "introduccion_general.html"), "w", encoding="utf-8") as f:
@@ -243,11 +244,12 @@ def run_docx_splitting_workflow(course_id: int):
         tr = trs[i]
         text = tr.get_text().strip().upper()
         
-        # Detect Unit
-        if "UNIDAD DIDÁCTICA" in text:
-            m = re.search(r'UNIDAD DIDÁCTICA (\d+)', text)
-            if m:
-                current_unit = int(m.group(1))
+        # Detect Unit ("UNIDAD DIDÁCTICA N", or a bare "UNIDAD N." heading that
+        # sits alone in its row — see core/document_headings.py for why the
+        # single-cell condition matters)
+        unit_hit = find_unit_number(text, tr)
+        if unit_hit:
+            current_unit = unit_hit[0]
 
         # Detect Activity
         # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD II", "ACTIVIDAD 4:"
@@ -269,7 +271,7 @@ def run_docx_splitting_workflow(course_id: int):
                     
                     stop_conditions = [
                         re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
-                        next_text.startswith("UNIDAD DIDÁCTICA") or next_text.startswith("UNIDAD DIDACTICA"),
+                        is_unit_heading_row(next_text, next_tr),
                         next_text.startswith("CUESTIONARIO"),
                         next_text.startswith("EVALUACIÓN") or next_text.startswith("EVALUACION"),
                         next_text.startswith("PROYECTO DE CLASE"),

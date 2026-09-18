@@ -4,6 +4,7 @@ import base64
 import logging
 from bs4 import BeautifulSoup
 from core.question_types import MultichoiceQuestion, ClozeQuestion, DragDropQuestion
+from core.document_headings import is_intro_heading
 
 logger = logging.getLogger(__name__)
 
@@ -874,7 +875,7 @@ def generate_dynamic_generalidades_html(extracted_html_path, template_path):
 
     # Extract Presentación
     for el in soup.find_all(['p', 'h1', 'h2', 'h3']):
-        if 'PRESENTACIÓN DEL ESPACIO ACADÉMICO' in el.get_text().upper() or 'PRESENTACION DEL ESPACIO ACADEMICO' in el.get_text().upper():
+        if is_intro_heading(el.get_text().upper()):
             nxt = el.find_next_sibling()
             blocks = []
             while nxt and nxt.name not in ['h1', 'h2', 'table']:
