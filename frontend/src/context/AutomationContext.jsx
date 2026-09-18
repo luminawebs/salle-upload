@@ -52,7 +52,11 @@ export const AutomationProvider = ({ children }) => {
   });
 
   const [logs, setLogs] = useState([]);
-  const [status, setStatus] = useState('Ready'); // Ready, Running, Completed, Failed
+  // Ready, Running, Completed, CompletedWithIssues, Failed.
+  // CompletedWithIssues = the process exited cleanly but its own end-of-run
+  // summary (core/run_summary.py) reported errors or a document it couldn't
+  // make sense of — exit code 0 alone doesn't mean the course got built.
+  const [status, setStatus] = useState('Ready');
   const [progress, setProgress] = useState(0);
   const [currentTaskLabel, setCurrentTaskLabel] = useState('Esperando para iniciar...');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -64,6 +68,13 @@ export const AutomationProvider = ({ children }) => {
   // successfully). Used to warn/block "Run" if the ID field has since changed
   // and no longer matches what was actually analyzed.
   const [uploadedCourseId, setUploadedCourseId] = useState(null);
+  // Set when the review of the uploaded document found nothing the pipeline
+  // can work with (no units / no activities). Blocks "Run" until the user
+  // explicitly overrides it — running anyway leaves the course half-configured.
+  const [documentProblem, setDocumentProblem] = useState(null);
+  const [documentProblemOverride, setDocumentProblemOverride] = useState(false);
+  // The "[RESUMEN]" lines main.py prints at the end of each course.
+  const [runSummary, setRunSummary] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({
     parsing: true,
     structure: true,
@@ -157,8 +168,10 @@ export const AutomationProvider = ({ children }) => {
     currentLogPhase.current = 0;
     setCurrentTaskLabel('Iniciando entorno Moodle...');
     setLogs([{ text: "[Sistema] Conectando con el proceso de automatización...", phase: 0, timeStr: new Date().toLocaleTimeString() }]);
+    setRunSummary([]);
 
     let localHasFailed = false;
+    let hadProblems = false;
 
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
@@ -183,9 +196,21 @@ export const AutomationProvider = ({ children }) => {
         setStatus('Failed');
       }
 
+      // End-of-run summary from main.py (core/run_summary.py). Its first line
+      // per course carries estado=ok or estado=con_problemas. These lines
+      // repeat earlier error text, so they're kept out of the keyword-based
+      // phase guessing and the popup triggers below.
+      const isSummaryLine = msg.includes("[RESUMEN]");
+      if (isSummaryLine) {
+        setRunSummary(prev => [...prev, msg.replace(/^.*\[RESUMEN\]\s*/, "")]);
+        if (lower.includes("estado=con_problemas")) {
+          hadProblems = true;
+        }
+      }
+
       let newPhase = currentLogPhase.current;
 
-      if (!localHasFailed) {
+      if (!localHasFailed && !isSummaryLine) {
         if (lower.includes("course structure") || lower.includes("section rename") || lower.includes("uploading") || lower.includes("subiendo recursos")) {
           newPhase = 1;
           setProgress(35);
@@ -218,21 +243,30 @@ export const AutomationProvider = ({ children }) => {
       }
 
       // Check for specific errors that should trigger a popup
-      if (lowerMsg.includes("could not find any edit mode toggle") || lowerMsg.includes("interruptor de modo de edición")) {
-        setPopupMessage("No se encontró ningún botón o interruptor de modo de edición. Es posible que el usuario no tenga permisos de edición para este curso.");
-      }
-      if (lowerMsg.includes("no se encontró el documento en formato docx") || lowerMsg.includes("vuelva a subir el documento")) {
-        setPopupMessage(msg); // Use the original message as it contains the course ID
-      }
-      if (lowerMsg.includes("not a valid course view page") || lowerMsg.includes("could not load course")) {
-        setPopupMessage("No se pudo cargar el curso. Esto generalmente ocurre cuando el correo electrónico utilizado no está vinculado al curso.");
+      if (!isSummaryLine) {
+        if (lowerMsg.includes("could not find any edit mode toggle") || lowerMsg.includes("interruptor de modo de edición")) {
+          setPopupMessage("No se encontró ningún botón o interruptor de modo de edición. Es posible que el usuario no tenga permisos de edición para este curso.");
+        }
+        if (lowerMsg.includes("no se encontró el documento en formato docx") || lowerMsg.includes("vuelva a subir el documento")) {
+          setPopupMessage(msg); // Use the original message as it contains the course ID
+        }
+        if (lowerMsg.includes("not a valid course view page") || lowerMsg.includes("could not load course")) {
+          setPopupMessage("No se pudo cargar el curso. Esto generalmente ocurre cuando el correo electrónico utilizado no está vinculado al curso.");
+        }
       }
 
       if (msg.includes("La tarea finalizó") || msg.includes("Limpieza completada")) {
         if (!localHasFailed) {
-          setStatus('Completed');
           setProgress(100);
-          setCurrentTaskLabel('Flujo completado exitosamente.');
+          if (hadProblems) {
+            // Exit code 0 isn't proof the course was built: main.py's own
+            // summary said something went wrong or was silently skipped.
+            setStatus('CompletedWithIssues');
+            setCurrentTaskLabel('Finalizó con problemas: revisa el resumen.');
+          } else {
+            setStatus('Completed');
+            setCurrentTaskLabel('Flujo completado exitosamente.');
+          }
         }
         eventSource.close();
       }
@@ -271,6 +305,9 @@ export const AutomationProvider = ({ children }) => {
       activeLogTab, setActiveLogTab,
       courseName, setCourseName,
       uploadedCourseId, setUploadedCourseId,
+      documentProblem, setDocumentProblem,
+      documentProblemOverride, setDocumentProblemOverride,
+      runSummary,
       expandedCategories, toggleCategory,
       popupMessage, setPopupMessage,
       handleRun, handleStop

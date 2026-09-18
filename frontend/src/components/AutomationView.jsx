@@ -130,10 +130,30 @@ function FragmentViewer({ target, title, courseId, onClose }) {
   );
 }
 
+// A document the pipeline can't work with doesn't make it fail — it makes
+// every step after parsing quietly find nothing to do, and the run then still
+// looks like it succeeded. Catching that here, before Run, is far cheaper than
+// after Moodle has been half-configured. Returns a message, or null if fine.
+function describeDocumentProblem(report) {
+  if (!report) {
+    return 'No se pudo analizar el documento: el servidor no devolvió un reporte.';
+  }
+  const units = Object.values(report.unidades || {});
+  if (units.length === 0) {
+    return 'No se detectó ninguna Unidad en el documento (se reconocen los encabezados "UNIDAD DIDÁCTICA N" y "UNIDAD N." en su propia fila).';
+  }
+  const activityCount = units.reduce((n, u) => n + Object.keys(u.actividades || {}).length, 0);
+  if (activityCount === 0) {
+    return 'Se detectaron unidades, pero ninguna actividad.';
+  }
+  return null;
+}
+
 export default function AutomationView() {
   const {
     settings,
     status: runStatus, uploadedCourseId, setUploadedCourseId,
+    setDocumentProblem, setDocumentProblemOverride, runSummary,
     logs, progress, activeLogTab, elapsedSeconds
   } = useContext(AutomationContext);
 
@@ -196,6 +216,8 @@ export default function AutomationView() {
     setErrorMsg('');
     setReport(null);
     setUploadedCourseId(null);
+    setDocumentProblem(null);
+    setDocumentProblemOverride(false);
     setSkipped(new Set());
 
     const formData = new FormData();
@@ -208,6 +230,7 @@ export default function AutomationView() {
       if (!response.ok) throw new Error(data.error || 'Error procesando el documento');
 
       setReport(data.report || null);
+      setDocumentProblem(describeDocumentProblem(data.report || null));
       setFileInfo({ name: selectedFile.name, size: (selectedFile.size / 1024 / 1024).toFixed(2) + ' MB' });
       setUploadedCourseId(courseId);
       setUploadStatus('done');
@@ -229,6 +252,8 @@ export default function AutomationView() {
     setFileInfo(null);
     setSkipped(new Set());
     setUploadedCourseId(null);
+    setDocumentProblem(null);
+    setDocumentProblemOverride(false);
     setFragment(null);
     setViewMode('document');
   };
@@ -363,11 +388,28 @@ export default function AutomationView() {
               <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>Monitor de Ejecución
             </h2>
             <div className="flex flex-col items-center justify-center py-2">
-              <h3 className={`text-lg font-bold mb-1 ${runStatus === 'Running' ? 'text-primary' : runStatus === 'Completed' ? 'text-success' : 'text-gray-300'}`}>
-                {runStatus === 'Running' ? `En ejecución (${progress}%)` : runStatus === 'Completed' ? 'Finalizado' : 'Listo para ejecutar'}
+              <h3 className={`text-lg font-bold mb-1 ${
+                runStatus === 'Running' ? 'text-primary'
+                : runStatus === 'Completed' ? 'text-success'
+                : runStatus === 'CompletedWithIssues' ? 'text-warning'
+                : runStatus === 'Failed' ? 'text-error'
+                : 'text-gray-300'}`}>
+                {runStatus === 'Running' ? `En ejecución (${progress}%)`
+                  : runStatus === 'Completed' ? 'Finalizado'
+                  : runStatus === 'CompletedWithIssues' ? 'Finalizado con problemas'
+                  : runStatus === 'Failed' ? 'Ejecución detenida'
+                  : 'Listo para ejecutar'}
               </h3>
               <p className="text-xs text-gray-400 text-center">Tiempo: {formatTime(elapsedSeconds)}</p>
             </div>
+            {runStatus === 'CompletedWithIssues' && runSummary.length > 0 && (
+              <div className="mt-2 text-[11px] text-warning bg-warning/10 border border-warning/30 rounded-lg px-3 py-2 max-h-48 overflow-y-auto custom-scrollbar space-y-1">
+                <p className="font-semibold">El proceso terminó, pero no todo se completó:</p>
+                {runSummary.map((line, i) => (
+                  <p key={i} className="break-words leading-snug">{line}</p>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
