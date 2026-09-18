@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from core.document_headings import find_unit_number
 
 logger = logging.getLogger(__name__)
 
@@ -63,12 +64,15 @@ def parse_raw_document(filepath):
     for element in soup.find_all(['p', 'ul', 'ol', 'h1', 'h2', 'h3']):
         text = element.get_text().strip()
         
-        # Detect Section (Unidad)
-        if 'UNIDAD DIDÁCTICA' in text.upper():
-            m = re.search(r'UNIDAD DIDÁCTICA\s*(\d+)', text.upper())
-            if m:
-                unit_num_original = int(m.group(1))
-                name_part = text[m.end():].strip(' :.-')
+        # Detect Section (Unidad): "UNIDAD DIDÁCTICA N", or a bare "UNIDAD N."
+        # heading alone in its table row (see core/document_headings.py — the
+        # single-cell condition is what keeps the course overview table's
+        # "Unidad 1. ..." summary rows from being read as real sections).
+        unit_hit = find_unit_number(text.upper(), element.find_parent('tr'))
+        if unit_hit or 'UNIDAD DIDÁCTICA' in text.upper():
+            if unit_hit:
+                unit_num_original, match_end = unit_hit
+                name_part = text[match_end:].strip(' :.-')
                 if not name_part:
                     nxt = element.find_next_sibling('p')
                     if nxt:

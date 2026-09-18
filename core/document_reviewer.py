@@ -4,6 +4,7 @@ import json
 import logging
 import shutil
 from bs4 import BeautifulSoup
+from core.document_headings import bare_unit_number, is_intro_heading
 
 logger = logging.getLogger(__name__)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -69,7 +70,7 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # 1. Check Introducción General
     intro_found = False
     for h1 in soup.find_all(['h1', 'h2', 'p', 'td']):
-        if h1.get_text() and "PRESENTACIÓN DEL ESPACIO ACADÉMICO" in h1.get_text().upper():
+        if h1.get_text() and is_intro_heading(h1.get_text().upper()):
             intro_found = True
             break
             
@@ -87,11 +88,9 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     for tr in soup.find_all("tr"):
         text = tr.get_text(strip=True).upper()
         
-        # Detect Unit. Requires "DID\u00c1CTICA" \u2014 same requirement the real
-        # splitter uses (core/data_parser.py checks for "UNIDAD DID\u00c1CTICA")
-        # \u2014 so this report can't pick up a bare "UNIDAD 1" mention (e.g. in
-        # a course-overview summary table) as a real unit boundary when the
-        # actual pipeline wouldn't have treated it as one either.
+        # Detect Unit: "UNIDAD DIDÁCTICA N" first (matching is anchored to the
+        # element/row text here); a bare "UNIDAD N." heading is handled just
+        # below via the shared rule in core/document_headings.py.
         match_unidad = None
         for element in tr.find_all(['td', 'p', 'h1', 'h2', 'h3', 'strong', 'b']):
             element_text = element.get_text(strip=True).upper()
@@ -103,8 +102,19 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
         if not match_unidad:
             match_unidad = re.match(r'^UNIDAD\s*DID\u00c1CTICA\s*(\d+)', text)
 
-        if match_unidad:
-            current_unidad = match_unidad.group(1)
+        unit_key = match_unidad.group(1) if match_unidad else None
+        if unit_key is None:
+            # Bare "UNIDAD N." heading alone in its row, the same rule the
+            # splitter and the Moodle structure parser use (see
+            # core/document_headings.py), so this report and the real pipeline
+            # agree on what a unit is. Summary-table rows have several cells
+            # and are never accepted here.
+            bare = bare_unit_number(text, tr)
+            if bare is not None:
+                unit_key = str(bare)
+
+        if unit_key is not None:
+            current_unidad = unit_key
             if current_unidad not in report["unidades"]:
                 report["unidades"][current_unidad] = {
                     "resumen": {"encontrado": False, "detalles": "No se encontró el resumen"},

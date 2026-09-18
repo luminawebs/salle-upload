@@ -19,6 +19,7 @@ from actions.glosario_actions import create_glosario_activity
 from actions.generalidades_accordion_actions import run_generalidades_accordion_upload_workflow
 from config.settings import Config
 from core.debug_utils import capture_debug_state
+from core.run_summary import RunIssueTracker, log_course_summary, check_document_outputs
 
 # Setup base logging for the application
 logging.basicConfig(
@@ -57,6 +58,13 @@ def main():
     logger.info("Initializing WebDriver...")
     driver = get_driver()
 
+    # Counts logged errors (and silent no-ops) per course so the run can end
+    # with an honest summary instead of always looking successful — every
+    # step failure is caught and logged so the rest can continue, which means
+    # nothing else ever adds them up. See core/run_summary.py.
+    issue_tracker = RunIssueTracker()
+    logging.getLogger().addHandler(issue_tracker)
+
     try:
         # Pass the initialized driver into our action class
         moodle = MoodleAutomation(driver)
@@ -75,6 +83,7 @@ def main():
             file_handler = logging.FileHandler(log_file_path, mode='a', encoding='utf-8')
             file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
             logging.getLogger().addHandler(file_handler)
+            issue_tracker.reset()
 
             try:
                 logger.info(f"--- Processing Course ID: {course_id} ---")
@@ -97,7 +106,11 @@ def main():
                 run_docx_parsing_workflow(course_id)
 
                 logger.info("Executing DOCX splitting workflow...")
-                run_docx_splitting_workflow(course_id)
+                manifest = run_docx_splitting_workflow(course_id)
+                # A document whose headings the parser doesn't recognize
+                # doesn't fail here — it just yields nothing, and every
+                # later step silently has nothing to do. Say so up front.
+                check_document_outputs(logger, issue_tracker, course_id, manifest, Config.WORKSPACE_DIR)
 
                 logger.info("Executing Unidades Intro splitting workflow...")
                 run_unidades_intro_splitting_workflow(course_id)
@@ -354,6 +367,11 @@ def main():
                     logging.getLogger().removeHandler(file_handler)
                     file_handler.close()
                     continue
+            finally:
+                # Runs on every way out of this course — success, an error, or
+                # one of the early `continue`s — so a course can never end
+                # without saying whether it really went well.
+                log_course_summary(logger, issue_tracker, course_id)
 
             # Ensure the handler is removed if the try block completes successfully
             logging.getLogger().removeHandler(file_handler)
@@ -363,6 +381,7 @@ def main():
         import traceback
         logger.error(f"An unexpected error occurred during automation: {e}\n{traceback.format_exc()}")
     finally:
+        logging.getLogger().removeHandler(issue_tracker)
         logger.info("Shutting down WebDriver...")
         driver.quit()
 
