@@ -13,6 +13,7 @@ export default function AutomationControls({ onBeforeRun }) {
     documentProblem,
     documentProblemOverride,
     setDocumentProblemOverride,
+    unresolvedIssueCount,
     handleRun,
     handleStop
   } = useContext(AutomationContext);
@@ -27,7 +28,12 @@ export default function AutomationControls({ onBeforeRun }) {
   // used to "succeed" while leaving the course half-configured, so it now
   // takes an explicit acknowledgement.
   const blockedByDocument = hasMatchingUpload && !!documentProblem && !documentProblemOverride;
-  const canRun = hasMatchingUpload && !blockedByDocument;
+  // Content the review says would be lost or wrong in Moodle. Each problem
+  // must be fixed in the .docx (then re-uploaded) or marked "Ignorar" in the
+  // review panel. A document with no usable units at all is handled by the
+  // override above instead, so the two never stack.
+  const blockedByIssues = hasMatchingUpload && !documentProblem && unresolvedIssueCount > 0;
+  const canRun = hasMatchingUpload && !blockedByDocument && !blockedByIssues;
 
   return (
     <div className="bg-surface rounded-xl border border-border shadow-sm p-5">
@@ -68,7 +74,9 @@ export default function AutomationControls({ onBeforeRun }) {
                     ? 'Sube un documento .docx para este Curso ID antes de iniciar.'
                     : blockedByDocument
                       ? 'El documento no tiene unidades/actividades reconocibles. Revisa el aviso o confirma que quieres ejecutar de todas formas.'
-                      : undefined
+                      : blockedByIssues
+                        ? 'Hay problemas sin resolver en la revisión del documento.'
+                        : undefined
                 }
                 className="w-full py-2.5 px-4 rounded-lg font-semibold flex items-center justify-center transition-all bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-primary/20"
               >
@@ -81,6 +89,15 @@ export default function AutomationControls({ onBeforeRun }) {
                   {uploadedCourseId
                     ? `El documento subido corresponde al curso ${uploadedCourseId}, no a "${typedCourseId}". Sube el documento correcto o corrige el ID.`
                     : 'Sube un documento .docx para este Curso ID antes de iniciar.'}
+                </p>
+              )}
+              {blockedByIssues && (
+                <p className="flex items-start text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg px-3 py-2">
+                  <AlertTriangle className="w-3.5 h-3.5 mr-1.5 mt-0.5 flex-shrink-0" />
+                  {unresolvedIssueCount === 1
+                    ? 'Hay 1 problema sin resolver en la revisión del documento. '
+                    : `Hay ${unresolvedIssueCount} problemas sin resolver en la revisión del documento. `}
+                  Corrígelo en el .docx y vuelve a subirlo, o márcalo como «Ignorar».
                 </p>
               )}
               {hasMatchingUpload && documentProblem && (

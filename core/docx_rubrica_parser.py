@@ -66,6 +66,11 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
 
+    return parse_rubricas_from_html(html)
+
+
+def parse_rubricas_from_html(html: str) -> dict:
+    """Same as parse_rubricas_from_docx, for an HTML string already in memory."""
     soup = BeautifulSoup(html, "html.parser")
     rubricas = {}
 

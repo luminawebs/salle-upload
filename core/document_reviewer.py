@@ -47,9 +47,10 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # a previous activity in prose could hijack this report's detection
     # while the real splitter, scoped correctly per activity, stayed right.
     activity_manifest = {}
+    row_roles = []
     try:
         from core.data_parser import run_docx_splitting_workflow
-        activity_manifest = run_docx_splitting_workflow(course_id) or {}
+        activity_manifest = run_docx_splitting_workflow(course_id, row_roles_out=row_roles) or {}
     except Exception as e:
         logger.error(f"Error executing DOCX splitting workflow: {e}")
 
@@ -217,6 +218,17 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
                 logger.info(f"[ENCONTRADO] Material de referencia para la Unidad {u_num}")
             else:
                 logger.warning(f"[NO ENCONTRADO] Material de referencia para la Unidad {u_num}")
+
+    # What was read vs. what went nowhere, compared against the expected
+    # document structure (see core/document_coverage.py). Report-only: the UI
+    # uses it to list problems and block Run until each is fixed or ignored.
+    from core.document_coverage import analyze_document, failed_analysis
+    try:
+        from core.docx_rubrica_parser import parse_rubricas_from_html
+        report["cobertura"] = analyze_document(html, activity_manifest, row_roles, report, parse_rubricas_from_html(html))
+    except Exception as e:
+        logger.error(f"Error al analizar la cobertura del documento: {e}")
+        report["cobertura"] = failed_analysis(f"Error interno: {e}.")
 
     logger.info("✓ Revisión de documento completada.")
     _save_reports(base_dir, report, generate_json, generate_text)

@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from core.data_parser import parse_docx_to_html
 from core.document_reviewer import review_document
 from core.activity_selection import get_skipped_activities, set_skipped_activities
+from core.document_coverage import get_ignored_issues, set_ignored_issues
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import re
@@ -179,6 +180,30 @@ async def post_skip_activities(request: Request):
         return JSONResponse(status_code=400, content={"error": "'skipped' debe ser una lista."})
     set_skipped_activities(course_id, skipped)
     return {"status": "success", "course_id": course_id, "skipped": sorted(get_skipped_activities(course_id))}
+
+
+@app.get("/api/ignored-issues")
+async def get_ignored_issues_api(course_id: str):
+    """Document-review problems the user marked "Ignorar" for this course."""
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    return {"course_id": course_id, "ignored": sorted(get_ignored_issues(course_id))}
+
+
+@app.post("/api/ignored-issues")
+async def post_ignored_issues_api(request: Request):
+    """Replaces the ignored-problem list for a course. The UI counts an
+    ignored problem as resolved when deciding whether Run is allowed — see
+    core/document_coverage.py."""
+    body = await request.json()
+    course_id = body.get("course_id", "")
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    ignored = body.get("ignored", [])
+    if not isinstance(ignored, list):
+        return JSONResponse(status_code=400, content={"error": "'ignored' debe ser una lista."})
+    set_ignored_issues(course_id, ignored)
+    return {"status": "success", "course_id": course_id, "ignored": sorted(get_ignored_issues(course_id))}
 
 
 @app.post("/api/review")

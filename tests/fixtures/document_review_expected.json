@@ -1,0 +1,712 @@
+{
+ "DP.ProcesosPsicológicosBásicos.docx": {
+  "bloqueantes": [
+   "tipo_desconocido:a8"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "820c5e8c9ba1b0ed",
+   "actividades/actividad2.html": "b8ada7fa64fabc08",
+   "actividades/actividad3.html": "a090274cc059f30c",
+   "actividades/actividad4.html": "d9df5a0763d464e7",
+   "actividades/actividad5.html": "5819800b85cbef46",
+   "actividades/actividad6.html": "8a3dafd32bad74d0",
+   "actividades/actividad7.html": "71736bfe47ff5814",
+   "actividades/actividad8.html": "abc9ede54baf76b8",
+   "introduccion/introduccion_general.html": "9b5488a43b7f3fb1",
+   "material/Material_de_referencia_U1.html": "f06486891b6724d2",
+   "material/Material_de_referencia_U2.html": "de2f3424a03b9179",
+   "material/Material_de_referencia_U3.html": "b7944aeb60f8c488"
+  },
+  "problemas": [
+   "tipo_desconocido:a8"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea",
+    "3": "Tarea"
+   },
+   "2": {
+    "4": "Tarea",
+    "5": "Foro",
+    "6": "Cuestionario"
+   },
+   "3": {
+    "7": "Tarea",
+    "8": "Desconocido"
+   }
+  }
+ },
+ "DP_ARIE.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "20753ef2ac7386f8",
+   "actividades/actividad2.html": "9af3412d4b25e30d",
+   "actividades/actividad3.html": "dd32785aea900dfd",
+   "actividades/actividad4.html": "e948e9091750ba17",
+   "actividades/actividad5.html": "a75866e12160e787",
+   "actividades/actividad6.html": "c5639f11697c3405",
+   "introduccion/introduccion_general.html": "ecb691db806a811a",
+   "material/Material_de_referencia_U1.html": "3a67562cad3610b6",
+   "material/Material_de_referencia_U2.html": "99fcb0c49a489184",
+   "material/Material_de_referencia_U3.html": "344488c2105bded1"
+  },
+  "problemas": [],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea",
+    "4": "Tarea"
+   },
+   "3": {
+    "5": "Tarea",
+    "6": "Cuestionario"
+   }
+  }
+ },
+ "Examen_.docx": {
+  "bloqueantes": [],
+  "fragmentos": {},
+  "problemas": [],
+  "unidades": {}
+ },
+ "Guia diseño tecnopedagógico Bases de datos II.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "dfcc2ce88d018598",
+   "actividades/actividad2.html": "69d54eeece99da9e",
+   "actividades/actividad3.html": "64e3a291ff035201",
+   "actividades/actividad4.html": "7e190a50d003149b",
+   "actividades/actividad5.html": "644b0d0fca39275d",
+   "actividades/actividad6.html": "ac6361ebfdc92e4a",
+   "actividades/actividad7.html": "2c3142dd0b287b79",
+   "actividades/actividad8.html": "5bc60f5b889b75e4",
+   "introduccion/introduccion_general.html": "082ca19abb024e07",
+   "material/Material_de_referencia_U1.html": "44d4574339aa0539",
+   "material/Material_de_referencia_U2.html": "cee8aa7fe44cde06",
+   "material/Material_de_referencia_U3.html": "2e2f9f7cb0f3a2b4"
+  },
+  "problemas": [],
+  "unidades": {
+   "1": {
+    "1": "Foro",
+    "2": "Tarea",
+    "3": "Cuestionario"
+   },
+   "2": {
+    "4": "Tarea",
+    "5": "Tarea"
+   },
+   "3": {
+    "6": "Tarea",
+    "7": "Tarea",
+    "8": "Tarea"
+   }
+  }
+ },
+ "Guía diseño pedagógico curso.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "58609a1ec2010ee4",
+   "actividades/actividad2.html": "38ea65bc284f6ead",
+   "actividades/actividad3.html": "0dec9b81129bfb28",
+   "actividades/actividad4.html": "12e9e6c9340f07e2",
+   "introduccion/introduccion_general.html": "48e52125d93bd248",
+   "material/Material_de_referencia_U1.html": "db5973b54067157a",
+   "material/Material_de_referencia_U2.html": "f66a7f880dccbed9",
+   "material/Material_de_referencia_U3.html": "d46d4f75816f5585",
+   "material/Material_de_referencia_U4.html": "3ce957405c66e695"
+  },
+  "problemas": [],
+  "unidades": {
+   "1": {
+    "1": "Tarea"
+   },
+   "2": {
+    "2": "Tarea"
+   },
+   "3": {
+    "3": "Tarea"
+   },
+   "4": {
+    "4": "Tarea"
+   }
+  }
+ },
+ "v10/D.P. Ejecución, Control y Cierre de Proyectos.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "a39f4a86b32e57a6",
+   "actividades/actividad2.html": "2f2034c38b1df6f4",
+   "actividades/actividad3.html": "fd397024880435dc",
+   "actividades/actividad4.html": "21596a836bbb0742",
+   "actividades/actividad5.html": "21dd663b438b65f3",
+   "actividades/actividad6.html": "c1f419ef7f226d96",
+   "introduccion/introduccion_general.html": "d37c515535d7186f",
+   "material/Material_de_referencia_U1.html": "0bd1364f03819b18",
+   "material/Material_de_referencia_U2.html": "a68fe8e8b8a24f42",
+   "material/Material_de_referencia_U3.html": "1bc176277d52bf92",
+   "material/Material_de_referencia_U4.html": "9ba70b6890e83c04"
+  },
+  "problemas": [],
+  "unidades": {
+   "1": {
+    "1": "Tarea"
+   },
+   "2": {
+    "2": "Tarea"
+   },
+   "3": {
+    "3": "Cuestionario"
+   },
+   "4": {
+    "4": "Tarea",
+    "5": "Tarea",
+    "6": "Cuestionario"
+   }
+  }
+ },
+ "v4/1. DTP. - Estadística VF.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "77de71c364682f0a",
+   "actividades/actividad2.html": "92e3700eceb37f57",
+   "actividades/actividad3.html": "441b64c71944b23e",
+   "actividades/actividad4.html": "52bf628f96405191",
+   "actividades/actividad5.html": "18cbbeda50f8be1b",
+   "actividades/actividad6.html": "444d6afdcccb4f9c",
+   "actividades/actividad7.html": "c20f744ac68806c8",
+   "introduccion/introduccion_general.html": "2b4d37e40d2a21d5",
+   "material/Material_de_referencia_U1.html": "d4b2c2ab06ad0748",
+   "material/Material_de_referencia_U2.html": "9c8eb1491badf4d9",
+   "material/Material_de_referencia_U3.html": "ca316f1f1c1a3b26"
+  },
+  "problemas": [
+   "actividad_fuera_del_plan:a7"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea",
+    "4": "Tarea"
+   },
+   "3": {
+    "5": "Tarea",
+    "6": "Tarea",
+    "7": "Cuestionario"
+   }
+  }
+ },
+ "v4/Guía EAV_Marcos de referencia en ecosistemas digitales.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "a3765c8e821186b5",
+   "actividades/actividad2.html": "7f0d5d7a782f12e8",
+   "actividades/actividad3.html": "cb611cfa34cd7371",
+   "actividades/actividad4.html": "e50beebd0d54a782",
+   "actividades/actividad5.html": "e35735952448675c",
+   "actividades/actividad6.html": "971927cbb57e8c14",
+   "introduccion/introduccion_general.html": "f19a71367b9a01c8",
+   "material/Material_de_referencia_U1.html": "968f097cdcc48632",
+   "material/Material_de_referencia_U2.html": "89c467feac3eaad4",
+   "material/Material_de_referencia_U3.html": "4fbea76c162aae32"
+  },
+  "problemas": [],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea",
+    "4": "Cuestionario"
+   },
+   "3": {
+    "5": "Tarea",
+    "6": "Tarea"
+   }
+  }
+ },
+ "v5/1. Guía DP-Jesús, Maestro de Humanidad.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "428f1a55e3decb28",
+   "actividades/actividad2.html": "6d2aeb0dd5908fd6",
+   "actividades/actividad3.html": "9006781dd620378f",
+   "actividades/actividad4.html": "5919c252f3091529",
+   "actividades/actividad5.html": "875c7d3eef31f40f",
+   "actividades/actividad6.html": "6703f134c8d7adc0",
+   "actividades/actividad7.html": "e3fd07dcc2478761",
+   "introduccion/introduccion_general.html": "3d8b5542e2f6ba74",
+   "material/Material_de_referencia_U1.html": "cfe0c624668ccfc9",
+   "material/Material_de_referencia_U2.html": "fa4d26fe233a0f92"
+  },
+  "problemas": [
+   "actividad_fuera_del_plan:a7"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Foro",
+    "3": "Tarea"
+   },
+   "2": {
+    "4": "Tarea",
+    "5": "Tarea",
+    "6": "Foro",
+    "7": "Cuestionario"
+   }
+  }
+ },
+ "v6/Conflicto tierras AJUSTADA.docx": {
+  "bloqueantes": [
+   "actividad_no_reconocida:0268a0c69f",
+   "actividad_no_reconocida:71cdde06b9"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "dc34b585182f78e7",
+   "actividades/actividad2.html": "8a12c6d2b3eea463",
+   "actividades/actividad3.html": "03afea67399afce9",
+   "actividades/actividad4.html": "1c7703fef908d94d",
+   "introduccion/introduccion_general.html": "09cf4c83c4f1acf8",
+   "material/Material_de_referencia_U1.html": "2707a06d5e0b8873",
+   "material/Material_de_referencia_U2.html": "4923dd67a69ef762",
+   "material/Material_de_referencia_U3.html": "b4265a8d928d0211"
+  },
+  "problemas": [
+   "actividad_no_reconocida:0268a0c69f",
+   "actividad_no_reconocida:71cdde06b9"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Cuestionario"
+   },
+   "2": {
+    "2": "Cuestionario"
+   },
+   "3": {
+    "3": "Cuestionario",
+    "4": "Tarea"
+   }
+  }
+ },
+ "v7/Conflicto tierras AJUSTADA.docx": {
+  "bloqueantes": [
+   "actividad_no_reconocida:0268a0c69f",
+   "actividad_no_reconocida:71cdde06b9"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "7ac1a3f081347386",
+   "actividades/actividad2.html": "ba37db38f4e64c42",
+   "actividades/actividad3.html": "fa3c337537c4ef1c",
+   "actividades/actividad4.html": "1c7703fef908d94d",
+   "introduccion/introduccion_general.html": "09cf4c83c4f1acf8",
+   "material/Material_de_referencia_U1.html": "2707a06d5e0b8873",
+   "material/Material_de_referencia_U2.html": "4923dd67a69ef762",
+   "material/Material_de_referencia_U3.html": "b4265a8d928d0211"
+  },
+  "problemas": [
+   "actividad_no_reconocida:0268a0c69f",
+   "actividad_no_reconocida:71cdde06b9"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Cuestionario"
+   },
+   "2": {
+    "2": "Cuestionario"
+   },
+   "3": {
+    "3": "Cuestionario",
+    "4": "Tarea"
+   }
+  }
+ },
+ "v7/DP. Lenguaje de programacioìn I 2026 - EDIT.docx": {
+  "bloqueantes": [
+   "actividad_duplicada:a7",
+   "actividad_no_encontrada:a6",
+   "actividad_no_reconocida:dd8fc1a386",
+   "actividad_no_reconocida:fa61e18a5b",
+   "rubrica_faltante:a3",
+   "unidad_no_encontrada:u3"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "6bbfa85ebee6859b",
+   "actividades/actividad10.html": "1cee57be1fc92520",
+   "actividades/actividad11.html": "268e0f397c6bcbac",
+   "actividades/actividad2.html": "3001eff7cde11a11",
+   "actividades/actividad3.html": "b212a25bfbe25ad2",
+   "actividades/actividad4.html": "f3a4c31449f4ff7d",
+   "actividades/actividad5.html": "28e6e2fa3dc8ffff",
+   "actividades/actividad7.html": "f345f48af74e9cbd",
+   "actividades/actividad7_1.html": "bc821615ff30dc11",
+   "actividades/actividad8.html": "dae09e008355028b",
+   "actividades/actividad9.html": "e7d306e9e7095766",
+   "introduccion/introduccion_general.html": "28391833351c2fa4"
+  },
+  "problemas": [
+   "actividad_duplicada:a7",
+   "actividad_fuera_del_plan:a11",
+   "actividad_no_encontrada:a6",
+   "actividad_no_reconocida:dd8fc1a386",
+   "actividad_no_reconocida:fa61e18a5b",
+   "rubrica_faltante:a3",
+   "unidad_no_encontrada:u3"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Cuestionario",
+    "2": "Foro",
+    "3": "Tarea",
+    "4": "Cuestionario",
+    "5": "Tarea"
+   },
+   "2": {
+    "10": "Cuestionario",
+    "11": "Foro",
+    "7": "Tarea",
+    "8": "Tarea",
+    "9": "Tarea"
+   }
+  }
+ },
+ "v7/DP. Lenguaje de programacioìn I 2026.docx": {
+  "bloqueantes": [
+   "actividad_duplicada:a7",
+   "actividad_no_encontrada:a6",
+   "actividad_no_reconocida:dd8fc1a386",
+   "actividad_no_reconocida:fa61e18a5b",
+   "rubrica_faltante:a3",
+   "unidad_no_encontrada:u3"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "6bbfa85ebee6859b",
+   "actividades/actividad10.html": "1cee57be1fc92520",
+   "actividades/actividad11.html": "268e0f397c6bcbac",
+   "actividades/actividad2.html": "3001eff7cde11a11",
+   "actividades/actividad3.html": "b212a25bfbe25ad2",
+   "actividades/actividad4.html": "f3a4c31449f4ff7d",
+   "actividades/actividad5.html": "28e6e2fa3dc8ffff",
+   "actividades/actividad7.html": "f345f48af74e9cbd",
+   "actividades/actividad7_1.html": "bc821615ff30dc11",
+   "actividades/actividad8.html": "dae09e008355028b",
+   "actividades/actividad9.html": "e7d306e9e7095766",
+   "introduccion/introduccion_general.html": "28391833351c2fa4"
+  },
+  "problemas": [
+   "actividad_duplicada:a7",
+   "actividad_fuera_del_plan:a11",
+   "actividad_no_encontrada:a6",
+   "actividad_no_reconocida:dd8fc1a386",
+   "actividad_no_reconocida:fa61e18a5b",
+   "rubrica_faltante:a3",
+   "unidad_no_encontrada:u3"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Cuestionario",
+    "2": "Foro",
+    "3": "Tarea",
+    "4": "Cuestionario",
+    "5": "Tarea"
+   },
+   "2": {
+    "10": "Cuestionario",
+    "11": "Foro",
+    "7": "Tarea",
+    "8": "Tarea",
+    "9": "Tarea"
+   }
+  }
+ },
+ "v7/DP.LógicaDeProgramaciónII.docx": {
+  "bloqueantes": [
+   "tipo_desconocido:a5"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "cd284e01cbd0e160",
+   "actividades/actividad2.html": "0a39720e19fb8418",
+   "actividades/actividad3.html": "c18c9b4d8ac35285",
+   "actividades/actividad4.html": "32daff43ba75a831",
+   "actividades/actividad5.html": "ecc2e85dcbdefbe8",
+   "introduccion/introduccion_general.html": "d6e4c92daf51975a",
+   "material/Material_de_referencia_U1.html": "0262780f6d265bf9",
+   "material/Material_de_referencia_U2.html": "0262780f6d265bf9"
+  },
+  "problemas": [
+   "tipo_desconocido:a5"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Cuestionario",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Foro",
+    "4": "Tarea",
+    "5": "Desconocido"
+   }
+  }
+ },
+ "v8/DP. Lenguaje de programacioìn I 2026 (POO)(1).docx": {
+  "bloqueantes": [
+   "actividad_no_reconocida:5f5d786156",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "actividad_no_reconocida:aa28c4e707",
+   "actividad_no_reconocida:dd8fc1a386",
+   "contenido_sin_asignar:7c92801e67",
+   "tipo_desconocido:a3",
+   "tipo_desconocido:a5",
+   "tipo_desconocido:a6"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "78e2a8ed72c48034",
+   "actividades/actividad10.html": "46802d1d37e99b16",
+   "actividades/actividad11.html": "30d5e4e838ae0fc9",
+   "actividades/actividad2.html": "50e79b0f9d6a3411",
+   "actividades/actividad3.html": "13875fe3f9422d80",
+   "actividades/actividad4.html": "55efcbdf96bd3b6c",
+   "actividades/actividad5.html": "2a1b391d0db5d891",
+   "actividades/actividad6.html": "fb0a034d57c58897",
+   "actividades/actividad7.html": "0723eaa3e269c170",
+   "actividades/actividad8.html": "c98ec5808e99ac4b",
+   "actividades/actividad9.html": "27bf02af287569b6",
+   "glosario/glosario_import.xml": "21c2683f352629d3",
+   "introduccion/introduccion_general.html": "28391833351c2fa4"
+  },
+  "problemas": [
+   "actividad_fuera_del_plan:a11",
+   "actividad_no_reconocida:5f5d786156",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "actividad_no_reconocida:aa28c4e707",
+   "actividad_no_reconocida:dd8fc1a386",
+   "contenido_sin_asignar:7c92801e67",
+   "tipo_desconocido:a3",
+   "tipo_desconocido:a5",
+   "tipo_desconocido:a6"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Cuestionario",
+    "2": "Foro",
+    "3": "Desconocido",
+    "4": "Cuestionario",
+    "5": "Desconocido"
+   },
+   "2": {
+    "10": "Cuestionario",
+    "6": "Desconocido",
+    "7": "Cuestionario",
+    "8": "Tarea",
+    "9": "Tarea"
+   },
+   "3": {
+    "11": "Foro"
+   }
+  }
+ },
+ "v8/DP. Lenguaje de programación I 2026 (QUESTION_EDIT) 2.docx": {
+  "bloqueantes": [
+   "actividad_no_encontrada:a10",
+   "actividad_no_encontrada:a6",
+   "actividad_no_encontrada:a7",
+   "actividad_no_encontrada:a8",
+   "actividad_no_encontrada:a9",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "contenido_sin_asignar:4a1850dce5",
+   "tipo_desconocido:a1",
+   "unidad_no_encontrada:u2",
+   "unidad_no_encontrada:u3",
+   "unidad_sin_preguntas_orientadoras:u1",
+   "unidad_sin_resumen:u1"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "d224bdd18990bb86",
+   "actividades/actividad2.html": "d9264c6c89591bb2",
+   "actividades/actividad3.html": "51bfc8667aee66f1",
+   "actividades/actividad4.html": "61fb5bb2343e7d7f",
+   "actividades/actividad5.html": "165405913ca04f48",
+   "glosario/glosario_import.xml": "21c2683f352629d3",
+   "introduccion/introduccion_general.html": "28391833351c2fa4"
+  },
+  "problemas": [
+   "actividad_no_encontrada:a10",
+   "actividad_no_encontrada:a6",
+   "actividad_no_encontrada:a7",
+   "actividad_no_encontrada:a8",
+   "actividad_no_encontrada:a9",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "contenido_sin_asignar:4a1850dce5",
+   "tipo_desconocido:a1",
+   "unidad_no_encontrada:u2",
+   "unidad_no_encontrada:u3",
+   "unidad_sin_preguntas_orientadoras:u1",
+   "unidad_sin_resumen:u1"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Desconocido",
+    "2": "Cuestionario",
+    "3": "Tarea",
+    "4": "Tarea",
+    "5": "Cuestionario"
+   }
+  }
+ },
+ "v8/DP. Lenguaje de programación I 2026 (QUESTION_EDIT) 3.docx": {
+  "bloqueantes": [
+   "actividad_no_encontrada:a10",
+   "actividad_no_encontrada:a5",
+   "actividad_no_encontrada:a6",
+   "actividad_no_encontrada:a7",
+   "actividad_no_encontrada:a8",
+   "actividad_no_encontrada:a9",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "contenido_sin_asignar:4a1850dce5",
+   "tipo_desconocido:a1",
+   "unidad_no_encontrada:u2",
+   "unidad_no_encontrada:u3",
+   "unidad_sin_preguntas_orientadoras:u1",
+   "unidad_sin_resumen:u1"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "80a968d367d0659c",
+   "actividades/actividad2.html": "a8f7f410e648e28e",
+   "actividades/actividad3.html": "6d9e4b0bdb73d6bb",
+   "actividades/actividad4.html": "b45ae9c98db1e13e",
+   "glosario/glosario_import.xml": "21c2683f352629d3",
+   "introduccion/introduccion_general.html": "28391833351c2fa4"
+  },
+  "problemas": [
+   "actividad_no_encontrada:a10",
+   "actividad_no_encontrada:a5",
+   "actividad_no_encontrada:a6",
+   "actividad_no_encontrada:a7",
+   "actividad_no_encontrada:a8",
+   "actividad_no_encontrada:a9",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "contenido_sin_asignar:4a1850dce5",
+   "tipo_desconocido:a1",
+   "unidad_no_encontrada:u2",
+   "unidad_no_encontrada:u3",
+   "unidad_sin_preguntas_orientadoras:u1",
+   "unidad_sin_resumen:u1"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Desconocido",
+    "2": "Cuestionario",
+    "3": "Tarea",
+    "4": "Tarea"
+   }
+  }
+ },
+ "v8/DP. Lenguaje de programación I 2026 (QUESTION_EDIT).docx": {
+  "bloqueantes": [
+   "actividad_no_reconocida:6a2f2c74b7",
+   "actividad_no_reconocida:6a2f2c74b7-2",
+   "actividad_no_reconocida:b67372d60e",
+   "actividad_no_reconocida:dd8fc1a386",
+   "contenido_sin_asignar:4a1850dce5",
+   "tipo_desconocido:a1",
+   "tipo_desconocido:a6",
+   "unidad_sin_preguntas_orientadoras:u1",
+   "unidad_sin_preguntas_orientadoras:u2",
+   "unidad_sin_preguntas_orientadoras:u3",
+   "unidad_sin_resumen:u1",
+   "unidad_sin_resumen:u2",
+   "unidad_sin_resumen:u3"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "d224bdd18990bb86",
+   "actividades/actividad10.html": "f04c917d377eb9b1",
+   "actividades/actividad11.html": "4c02fb94b18064af",
+   "actividades/actividad2.html": "066fda86fe2e2054",
+   "actividades/actividad3.html": "51bfc8667aee66f1",
+   "actividades/actividad4.html": "61fb5bb2343e7d7f",
+   "actividades/actividad5.html": "f04c917d377eb9b1",
+   "actividades/actividad6.html": "d224bdd18990bb86",
+   "actividades/actividad7.html": "066fda86fe2e2054",
+   "actividades/actividad8.html": "36e56f0f42e790a0",
+   "actividades/actividad9.html": "61fb5bb2343e7d7f",
+   "glosario/glosario_import.xml": "21c2683f352629d3",
+   "introduccion/introduccion_general.html": "28391833351c2fa4"
+  },
+  "problemas": [
+   "actividad_fuera_del_plan:a11",
+   "actividad_no_reconocida:6a2f2c74b7",
+   "actividad_no_reconocida:6a2f2c74b7-2",
+   "actividad_no_reconocida:b67372d60e",
+   "actividad_no_reconocida:dd8fc1a386",
+   "contenido_sin_asignar:4a1850dce5",
+   "tipo_desconocido:a1",
+   "tipo_desconocido:a6",
+   "unidad_sin_preguntas_orientadoras:u1",
+   "unidad_sin_preguntas_orientadoras:u2",
+   "unidad_sin_preguntas_orientadoras:u3",
+   "unidad_sin_resumen:u1",
+   "unidad_sin_resumen:u2",
+   "unidad_sin_resumen:u3"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Desconocido",
+    "2": "Cuestionario",
+    "3": "Tarea",
+    "4": "Tarea",
+    "5": "Cuestionario"
+   },
+   "2": {
+    "10": "Cuestionario",
+    "6": "Desconocido",
+    "7": "Cuestionario",
+    "8": "Tarea",
+    "9": "Tarea"
+   },
+   "3": {
+    "11": "Foro"
+   }
+  }
+ },
+ "v9/Guia EAV.docx": {
+  "bloqueantes": [],
+  "fragmentos": {
+   "actividades/actividad1.html": "af28ea1233679683",
+   "actividades/actividad2.html": "fcae3d3bd1f326bd",
+   "actividades/actividad3.html": "ed660f460878da41",
+   "actividades/actividad4.html": "cc0e52ce99754ded",
+   "actividades/actividad5.html": "dee2a735a4bd48aa",
+   "glosario/glosario_import.xml": "6da902527a19e060",
+   "introduccion/introduccion_general.html": "5d8e7ff7d6613da6",
+   "material/Material_de_referencia_U1.html": "cdfaf31d9b1159b2",
+   "material/Material_de_referencia_U2.html": "6786d8dae4862530",
+   "material/Material_de_referencia_U3.html": "6e863c129cef6482",
+   "material/Material_de_referencia_U4.html": "e55609ba4ce03af0"
+  },
+  "problemas": [
+   "actividad_fuera_del_plan:a5"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Foro"
+   },
+   "2": {
+    "2": "Tarea"
+   },
+   "3": {
+    "3": "Tarea"
+   },
+   "4": {
+    "4": "Tarea",
+    "5": "Cuestionario"
+   }
+  }
+ }
+}

@@ -105,10 +105,25 @@ def run_docx_parsing_workflow(course_id: int):
         logger.warning(f"  {error_msg}")
         raise FileNotFoundError(error_msg)
 
-def run_docx_splitting_workflow(course_id: int):
+def top_level_rows(soup) -> list:
+    """
+    The table rows the splitter walks, in document order: rows of tables that
+    aren't nested inside another table. Shared with core/document_coverage.py
+    so "row N" means the same row in both places.
+    """
+    return [tr for tr in soup.find_all('tr') if tr.find_parent('table') and not tr.find_parent('table').find_parent('table')]
+
+
+def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
     """
     Reads workspace/<course_id>/raw_docx_extracted.html and splits it into the necessary
     HTML fragments (actividades, material de referencia, etc.).
+
+    row_roles_out: optional list, filled with one entry per top_level_rows()
+    row saying what the splitter did with it — {"role": "unit", "unit": n},
+    {"role": "activity", "unit": n, "activity": n, "heading": bool}, or None
+    for rows it skipped. Used by the document review to show what was and
+    wasn't read; it doesn't change what gets split.
     """
     logger.info(f"Executing DOCX splitting workflow for course {course_id}...")
     base_dir = os.path.join("workspace", str(course_id))
@@ -238,18 +253,20 @@ def run_docx_splitting_workflow(course_id: int):
         return res
 
     # 2. Extract Activities and Material de Referencia
-    trs = [tr for tr in soup.find_all('tr') if tr.find_parent('table') and not tr.find_parent('table').find_parent('table')]
+    trs = top_level_rows(soup)
+    roles = [None] * len(trs)
     i = 0
     while i < len(trs):
         tr = trs[i]
         text = tr.get_text().strip().upper()
-        
+
         # Detect Unit ("UNIDAD DIDÁCTICA N", or a bare "UNIDAD N." heading that
         # sits alone in its row — see core/document_headings.py for why the
         # single-cell condition matters)
         unit_hit = find_unit_number(text, tr)
         if unit_hit:
             current_unit = unit_hit[0]
+            roles[i] = {"role": "unit", "unit": current_unit}
 
         # Detect Activity
         # Handle cases like "ACTIVIDAD 2.", "ACTIVIDAD II", "ACTIVIDAD 4:"
@@ -258,6 +275,7 @@ def run_docx_splitting_workflow(course_id: int):
             if m:
                 raw_activity_number = m.group(1)
                 current_activity = parse_activity_number(raw_activity_number)
+                roles[i] = {"role": "activity", "unit": current_unit, "activity": current_activity, "heading": True}
                 act_html_parts = []
                 # Include the current row's td contents
                 for td in tr.find_all(['td', 'th'], recursive=False):
@@ -285,6 +303,7 @@ def run_docx_splitting_workflow(course_id: int):
                         break
                     for td in next_tr.find_all(['td', 'th'], recursive=False):
                         act_html_parts.append(td.decode_contents())
+                    roles[i] = {"role": "activity", "unit": current_unit, "activity": current_activity, "heading": False}
                     i += 1
                 act_html = "".join(act_html_parts)
 
@@ -408,6 +427,9 @@ def run_docx_splitting_workflow(course_id: int):
             # Not a unit, not an activity.
             pass
         i += 1
+
+    if row_roles_out is not None:
+        row_roles_out[:] = roles
 
     logger.info("  ✓ DOCX splitting workflow completed.")
     return activity_manifest

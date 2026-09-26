@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import GlobalSettingsPanel from './GlobalSettingsPanel';
 import AutomationControls from './AutomationControls';
+import DocumentReviewPanel from './DocumentReviewPanel';
 import { AutomationContext } from '../context/AutomationContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -28,15 +29,19 @@ const fragmentTargetFor = (kind, params) => {
   return null;
 };
 
-function FragmentViewer({ target, title, courseId, onClose }) {
-  const [content, setContent] = useState(null);
-  const [status, setStatus] = useState('loading'); // loading, done, error
+// `inline` ({ content, subtitle }) shows HTML the caller already has — e.g. a
+// block of the document the review couldn't assign — instead of fetching a
+// fragment file from the server.
+function FragmentViewer({ target, inline, title, courseId, onClose }) {
+  const [content, setContent] = useState(inline ? inline.content : null);
+  const [status, setStatus] = useState(inline ? 'done' : 'loading'); // loading, done, error
   const [errorMsg, setErrorMsg] = useState('');
   const [viewMode, setViewMode] = useState('preview'); // preview, source
 
-  const isXml = target.filename.endsWith('.xml');
+  const isXml = !inline && target.filename.endsWith('.xml');
 
   useEffect(() => {
+    if (inline) return undefined;
     let cancelled = false;
     setStatus('loading');
     const params = new URLSearchParams({
@@ -62,7 +67,7 @@ function FragmentViewer({ target, title, courseId, onClose }) {
         setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [target.category, target.filename, courseId]);
+  }, [inline, target?.category, target?.filename, courseId]);
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -73,7 +78,9 @@ function FragmentViewer({ target, title, courseId, onClose }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div>
             <h3 className="text-sm font-bold text-white">{title}</h3>
-            <p className="text-xs text-gray-500 mt-0.5">workspace/{courseId}/{target.category}/{target.filename}</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {inline ? inline.subtitle : `workspace/${courseId}/${target.category}/${target.filename}`}
+            </p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -153,7 +160,7 @@ export default function AutomationView() {
   const {
     settings,
     status: runStatus, uploadedCourseId, setUploadedCourseId,
-    setDocumentProblem, setDocumentProblemOverride, runSummary,
+    setDocumentProblem, setDocumentProblemOverride, setUnresolvedIssueCount, runSummary,
     logs, progress, activeLogTab, elapsedSeconds
   } = useContext(AutomationContext);
 
@@ -165,9 +172,18 @@ export default function AutomationView() {
   const [fragment, setFragment] = useState(null); // { target, title }
   const [viewMode, setViewMode] = useState('document'); // 'document' | 'terminal'
   const [skipped, setSkipped] = useState(new Set());
+  const [ignoredIssues, setIgnoredIssues] = useState(new Set());
 
   const courseId = (settings.COURSES_TO_PROCESS || '').trim();
   const logsEndRef = useRef(null);
+  const coverage = report?.cobertura || null;
+
+  // Blocking review problems that are neither fixed nor ignored gate Run
+  // (see AutomationControls).
+  useEffect(() => {
+    const issues = coverage?.problemas || [];
+    setUnresolvedIssueCount(issues.filter((p) => p.bloquea && !ignoredIssues.has(p.id)).length);
+  }, [coverage, ignoredIssues, setUnresolvedIssueCount]);
 
   useEffect(() => {
     if (viewMode === 'terminal') {
@@ -200,6 +216,47 @@ export default function AutomationView() {
     }
   };
 
+  const loadIgnoredIssues = async (cid) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/ignored-issues?course_id=${encodeURIComponent(cid)}`);
+      const data = await res.json();
+      setIgnoredIssues(new Set(data.ignored || []));
+    } catch (err) {
+      console.error('No se pudo cargar la lista de problemas ignorados:', err);
+    }
+  };
+
+  // Not optimistic, unlike toggleSkip: this choice unlocks Run, so the UI
+  // only shows a problem as ignored once the server has actually saved it.
+  const toggleIgnoreIssue = async (issueId) => {
+    const next = new Set(ignoredIssues);
+    if (next.has(issueId)) next.delete(issueId); else next.add(issueId);
+    try {
+      const res = await fetch(`${API_BASE}/api/ignored-issues`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ course_id: courseId, ignored: Array.from(next) })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al guardar');
+      setIgnoredIssues(new Set(data.ignored || []));
+    } catch (err) {
+      console.error('No se pudo guardar el problema ignorado:', err);
+    }
+  };
+
+  const showCoverageBlock = (blockId) => {
+    const block = (coverage?.bloques || []).find((b) => b.id === blockId);
+    if (!block) return;
+    setFragment({
+      inline: {
+        content: block.html || '',
+        subtitle: `Filas ${block.fila_inicio + 1}–${block.fila_fin + 1} de las tablas del documento · no asignadas a ninguna unidad ni actividad`
+      },
+      title: block.titulo
+    });
+  };
+
   const processFile = async (selectedFile) => {
     if (!selectedFile.name.endsWith('.docx')) {
       setErrorMsg('Por favor sube un archivo .docx válido.');
@@ -219,6 +276,7 @@ export default function AutomationView() {
     setDocumentProblem(null);
     setDocumentProblemOverride(false);
     setSkipped(new Set());
+    setIgnoredIssues(new Set());
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -235,6 +293,7 @@ export default function AutomationView() {
       setUploadedCourseId(courseId);
       setUploadStatus('done');
       loadSkipped(courseId);
+      loadIgnoredIssues(courseId);
     } catch (err) {
       console.error(err);
       setErrorMsg(err.message);
@@ -251,6 +310,7 @@ export default function AutomationView() {
     setErrorMsg('');
     setFileInfo(null);
     setSkipped(new Set());
+    setIgnoredIssues(new Set());
     setUploadedCourseId(null);
     setDocumentProblem(null);
     setDocumentProblemOverride(false);
@@ -466,6 +526,13 @@ export default function AutomationView() {
                     </div>
                   )}
 
+                  <DocumentReviewPanel
+                    coverage={coverage}
+                    ignored={ignoredIssues}
+                    onToggleIgnore={toggleIgnoreIssue}
+                    onShowBlock={showCoverageBlock}
+                  />
+
                   <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-md">
                     <div className="p-4 bg-background border-b border-border">
                       <h3 className="font-semibold text-white">Introducción General</h3>
@@ -669,6 +736,7 @@ export default function AutomationView() {
       {fragment && (
         <FragmentViewer
           target={fragment.target}
+          inline={fragment.inline}
           title={fragment.title}
           courseId={courseId}
           onClose={() => setFragment(null)}

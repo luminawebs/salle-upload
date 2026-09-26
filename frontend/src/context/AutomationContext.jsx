@@ -73,6 +73,10 @@ export const AutomationProvider = ({ children }) => {
   // explicitly overrides it — running anyway leaves the course half-configured.
   const [documentProblem, setDocumentProblem] = useState(null);
   const [documentProblemOverride, setDocumentProblemOverride] = useState(false);
+  // Blocking problems from the document review (report.cobertura.problemas,
+  // see core/document_coverage.py) that are neither fixed nor marked
+  // "Ignorar". Run stays disabled while this is above zero.
+  const [unresolvedIssueCount, setUnresolvedIssueCount] = useState(0);
   // The "[RESUMEN]" lines main.py prints at the end of each course.
   const [runSummary, setRunSummary] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({
@@ -307,6 +311,7 @@ export const AutomationProvider = ({ children }) => {
       uploadedCourseId, setUploadedCourseId,
       documentProblem, setDocumentProblem,
       documentProblemOverride, setDocumentProblemOverride,
+      unresolvedIssueCount, setUnresolvedIssueCount,
       runSummary,
       expandedCategories, toggleCategory,
       popupMessage, setPopupMessage,
