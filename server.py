@@ -159,6 +159,29 @@ async def get_parsed_fragment(course_id: str, category: str, filename: str):
     return {"course_id": course_id, "category": category, "filename": filename, "content": content}
 
 
+@app.get("/api/activity-preview")
+async def get_activity_preview(course_id: str, category: str, filename: str):
+    """
+    Structured "Vista previa" of one activity fragment: its sections and, for
+    quizzes, each question as the Moodle export reads it (core/activity_preview.py).
+    """
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    if category not in ("actividades", "actividades_extra"):
+        return JSONResponse(status_code=400, content={"error": "Categoría inválida."})
+    if filename != os.path.basename(filename) or not filename.endswith(".html"):
+        return JSONResponse(status_code=400, content={"error": "Nombre de archivo inválido."})
+
+    fragment_path = os.path.join("workspace", course_id, category, filename)
+    if not os.path.isfile(fragment_path):
+        return JSONResponse(status_code=404, content={"error": "No se encontró esa actividad. Vuelve a subir el documento."})
+    with open(fragment_path, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    from core.activity_preview import build_preview
+    return build_preview(html, course_id)
+
+
 @app.get("/api/skip-activities")
 async def get_skip_activities(course_id: str):
     """Which activity numbers the user chose to exclude from upload for this course."""

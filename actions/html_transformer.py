@@ -115,6 +115,100 @@ def _short_preview(html: str, max_len: int = 90) -> str:
     text = " ".join(text.split())
     return text[:max_len] + "…" if len(text) > max_len else text
 
+_ANSWER_LINE_RE = re.compile(r'^respuesta\s+correcta\s*:?\s*(.*)$', re.IGNORECASE)
+_TRUE_FALSE_ANSWERS = {"verdadero": True, "falso": False, "true": True, "false": False, "v": True, "f": False}
+# "Responda falso o verdadero según corresponda:" — an instruction, not a question.
+_TRUE_FALSE_INSTRUCTION_RE = re.compile(r'^respond[ae]\s+(?:falso|verdadero)\s+o\s+(?:falso|verdadero)', re.IGNORECASE)
+
+
+def _option_key(text: str) -> str:
+    """Comparable form of an option / answer text: no accents, case, list marker or end punctuation."""
+    import unicodedata
+    text = unicodedata.normalize("NFKD", text or "")
+    text = "".join(c for c in text if not unicodedata.combining(c)).lower()
+    text = re.sub(r'^\s*[a-e][\.\)\-]\s+', '', text)
+    return " ".join(text.split()).strip(" .;:,")
+
+
+def _mark_answer_line_format(blocks: list) -> None:
+    """
+    Marks the blocks of questions written as: question, unmarked options, then
+    "Respuesta correcta: X". Sets block['forced'] to 'question', 'option' (with
+    'forced_correct') or 'answer' (the answer line itself, skipped by the
+    parser). A question is only marked when exactly one option matches X, so
+    an ambiguous layout is left to the regular rules (and to the document
+    review, which reports it) rather than guessed.
+    """
+    import difflib
+
+    def words(b):
+        return len(b['text'].split())
+
+    def is_statement(b):
+        return (b is not None and 'forced' not in b and words(b) > 3 and not b['text'].rstrip().endswith(':')
+                and not re.match(r'(?i)^(retroalimentaci|explicaci|respuesta)', b['text']))
+
+    for k, block in enumerate(blocks):
+        m = _ANSWER_LINE_RE.match(block['text'])
+        if not m:
+            continue
+        block['forced'] = 'answer'
+        answer = _option_key(m.group(1))
+        if not answer:
+            continue
+
+        # The list items right before the answer line.
+        j = k - 1
+        while j >= 0 and blocks[j]['type'] == 'li' and 'forced' not in blocks[j]:
+            j -= 1
+        run = [b for b in blocks[j + 1:k] if b['text']]
+        before = blocks[j] if j >= 0 else None
+
+        # True/false: a lone statement answered "Verdadero" / "Falso".
+        if answer in _TRUE_FALSE_ANSWERS and len(run) <= 1:
+            statement = run[0] if run else before
+            if is_statement(statement):
+                statement['forced'] = 'question'
+                statement['forced_tf'] = _TRUE_FALSE_ANSWERS[answer]
+            continue
+        first = run[0]['text'].rstrip() if run else ''
+        if len(run) >= 3 and ('?' in first or first.endswith(':') or words(run[0]) > max(words(o) for o in run[1:])):
+            question, options = run[0], run[1:]
+        elif (len(run) >= 2 and before is not None and 'forced' not in before and before['type'] != 'li'
+              and words(before) > 3 and not re.match(r'(?i)^(retroalimentaci|explicaci)', before['text'])):
+            question, options = before, run
+        else:
+            # Lettered options written as paragraphs ("A. …", "B. …"): the
+            # question itself is found by the regular rules; only the correct
+            # option needs marking.
+            lettered = []
+            i = k - 1
+            while i >= 0 and 'forced' not in blocks[i] and re.match(r'^=?[A-Ea-e][\.\)\-]\s*', blocks[i]['text']):
+                lettered.insert(0, blocks[i])
+                i -= 1
+            if len(lettered) < 2:
+                continue
+            question, options = None, lettered
+
+        matches = [o for o in options if _option_key(o['text']) == answer]
+        if not matches:
+            # Tolerate a small difference between the answer and its option
+            # (a typo, a missing word) — but only when one option is clearly it.
+            scored = sorted(((difflib.SequenceMatcher(None, _option_key(o['text']), answer).ratio(), i)
+                             for i, o in enumerate(options)), reverse=True)
+            best = scored[0]
+            runner_up = scored[1][0] if len(scored) > 1 else 0
+            if best[0] >= 0.85 and best[0] - runner_up >= 0.1:
+                matches = [options[best[1]]]
+        if len(matches) != 1:
+            continue
+        if question is not None:
+            question['forced'] = 'question'
+        for option in options:
+            option['forced'] = 'option'
+            option['forced_correct'] = option is matches[0]
+
+
 def parse_questions(html_content: str, course_id: int = None) -> list:
     """
     The questions found in an activity's HTML, as parsed dicts (stem_html,
@@ -212,6 +306,12 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
 
     traverse(soup)
 
+    # --- "Respuesta correcta: X" format ---
+    # Question, then unmarked options, then a line naming the correct one
+    # (e.g. "Respuesta correcta: Siglo I"). Without this, the options had no
+    # marker and every question after the first was merged into it.
+    _mark_answer_line_format(blocks)
+
     # --- Pre-calculate option groups ---
     option_groups = set()
     for block in blocks:
@@ -257,6 +357,19 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
         # Stop parsing questions when reaching standard activity footers
         if re.match(r'^(?:Informaci.n para el equipo de producci.n|Lista de herramientas|Lecturas para desarrollar|Glosario)', text, re.IGNORECASE):
             break
+
+        # Set by _mark_answer_line_format ("Respuesta correcta: X" questions).
+        forced = block.get('forced')
+        if forced == 'answer':
+            # Paragraphs after "Respuesta correcta: X" explain the answer: they
+            # are this question's feedback, not new questions.
+            if current_q:
+                state = 'FEEDBACK'
+                current_q['active_fb_type'] = 'general'
+                current_q['after_answer'] = True
+            continue
+        if _TRUE_FALSE_INSTRUCTION_RE.match(text):
+            continue
 
         # 2a. Check if Type header
         if re.match(r'(?i)^Tipo:\s*(.*)', text):
@@ -318,7 +431,11 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
             and not re.search(r'\([xX]\)$', text)
         )
 
-        if b_type != 'table' and b_type != 'img':
+        if forced == 'option':
+            is_option = True
+        elif forced == 'question':
+            pass
+        elif b_type != 'table' and b_type != 'img':
             if re.match(r'^=?[A-Ea-e][\.\)\-]\s*', text) or text.lower().startswith('verdadero') or text.lower().startswith('falso'):
                 is_option = True
             elif "(respuesta" in text.lower() or "(correct answer)" in text.lower() or re.search(r'\([xX]\)$', text):
@@ -334,7 +451,9 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
                         is_option = True
 
         if is_option and current_q:
-            if re.search(r'\([xX]\)$', text):
+            if forced == 'option':
+                is_correct = block['forced_correct']
+            elif re.search(r'\([xX]\)$', text):
                 is_correct = True
                 clean_html_opt = re.sub(r'\([xX]\)(?=[^>]*(?:<|$))', '', clean_html_opt).strip()
             elif text.strip().startswith('='):
@@ -367,14 +486,16 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
 
         # 2d. Check if Question Start
         is_start = False
-        if b_type not in ['table', 'img']:
+        if forced == 'question':
+            is_start = True
+        elif b_type not in ['table', 'img']:
             if QUESTION_NUMBER_RE.match(text):
                 is_start = True
             elif text.startswith('¿') and not re.match(r'^¿(?:qu.|c.mo)\s+(?:lo\s+)?vamos\s+a\s+(?:lograr|evaluar|hacer)\?', text, re.IGNORECASE):
                 if state in ['OPTIONS', 'FEEDBACK'] or current_q is None:
                     is_start = True
             elif state in ['OPTIONS', 'FEEDBACK'] and b_type in ['p', 'div'] and not is_option:
-                if len(text.split()) > 5:
+                if len(text.split()) > 5 and not (current_q and current_q.get('after_answer')):
                     is_start = True
                     
         if is_start:
@@ -382,6 +503,10 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
             current_q = create_empty_q()
             current_q['base_list_level'] = l_level
             state = 'STEM'
+            if block.get('forced_tf') is not None:
+                # "Respuesta correcta: Verdadero/Falso" statement.
+                current_q['q_type'] = 'truefalse'
+                current_q['tf_answer'] = block['forced_tf']
             
             clean_html = html_str
             if text.lower().strip().startswith('enunciado:'):
@@ -522,6 +647,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                             
         if q['q_type'] == 'truefalse':
             is_true_false = True
+            if q.get('tf_answer') is not None:
+                correct_is_true = q['tf_answer']
             
         fb_gen = "<br>".join(q['feedback']['general'])
         fb_corr = "<br>".join(q['feedback']['correct'])

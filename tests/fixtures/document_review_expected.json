@@ -1,7 +1,6 @@
 {
  "DP.ProcesosPsicológicosBásicos.docx": {
   "bloqueantes": [
-   "cuestionario_preguntas_incompletas:a6",
    "tipo_desconocido:a8"
   ],
   "fragmentos": {
@@ -19,7 +18,6 @@
    "material/Material_de_referencia_U3.html": "b7944aeb60f8c488"
   },
   "problemas": [
-   "cuestionario_preguntas_incompletas:a6",
    "tipo_desconocido:a8"
   ],
   "unidades": {
@@ -236,9 +234,7 @@
   }
  },
  "v5/1. Guía DP-Jesús, Maestro de Humanidad.docx": {
-  "bloqueantes": [
-   "cuestionario_preguntas_incompletas:a7"
-  ],
+  "bloqueantes": [],
   "fragmentos": {
    "actividades/actividad1.html": "428f1a55e3decb28",
    "actividades/actividad2.html": "6d2aeb0dd5908fd6",
@@ -252,8 +248,7 @@
    "material/Material_de_referencia_U2.html": "fa4d26fe233a0f92"
   },
   "problemas": [
-   "actividad_fuera_del_plan:a7",
-   "cuestionario_preguntas_incompletas:a7"
+   "actividad_fuera_del_plan:a7"
   ],
   "unidades": {
    "1": {

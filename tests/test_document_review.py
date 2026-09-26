@@ -377,12 +377,89 @@ class QuizQuestionTests(unittest.TestCase):
         self.assertEqual((summary["encontradas"], summary["declaradas"], summary["esperadas"], summary["no_leidas"]),
                          (3, 3, 3, []))
 
+    def test_answer_line_format(self):
+        # Question, unmarked options, then "Respuesta correcta: X" (Jesús Maestro, Procesos Psicológicos).
+        from actions.html_transformer import parse_questions
+        html = ("<p>Preguntas:</p><ul><li>¿En qué siglo vivió Jesús?</li><li>Siglo I</li><li>Siglo II</li><li>Siglo III</li></ul>"
+                "<p>Respuesta correcta: Siglo I</p>"
+                "<ul><li>Es un ejemplo de razonamiento deductivo:</li><li>Concluir algo general a partir de casos</li>"
+                "<li>Concluir que un ave es un águila porque es un pájaro</li><li>Nada de lo anterior sirve aquí</li></ul>"
+                "<p>Respuesta correcta: Concluir que un ave es un aguila porque es un pajaro.</p>"
+                "<p>Retroalimentación incorrecta: Revisa el tema.</p>")
+        questions = parse_questions(html)
+        self.assertEqual(len(questions), 2)
+        self.assertEqual([[o["is_correct"] for o in q["options"]] for q in questions],
+                         [[True, False, False], [False, True, False]])
+        self.assertTrue(questions[1]["feedback"]["incorrect"], "feedback after the answer line is kept")
+
+    def test_answer_line_true_false(self):
+        from actions.html_transformer import parse_questions, extract_questions_from_html_to_moodle_xml
+        html = ("<p>Responda falso o verdadero según corresponda:</p>"
+                "<ul><li>La afasia es siempre el resultado de un daño permanente</li></ul><p>Respuesta correcta: Falso.</p>"
+                "<ul><li>La corteza cerebral participa en el procesamiento del lenguaje</li></ul><p>Respuesta correcta: Verdadero</p>")
+        questions = parse_questions(html)
+        self.assertEqual([(q["q_type"], q["tf_answer"]) for q in questions], [("truefalse", False), ("truefalse", True)])
+        xml_path = os.path.join(ROOT, "workspace", "_test_tf.xml")
+        try:
+            logging.disable(logging.CRITICAL)
+            self.assertEqual(extract_questions_from_html_to_moodle_xml(html, xml_path), 2)
+            with open(xml_path, encoding="utf-8") as f:
+                xml = f.read()
+            self.assertIn('fraction="0" format="moodle_auto_format">\n      <text>true', xml)
+            self.assertIn('fraction="100" format="moodle_auto_format">\n      <text>true', xml)
+        finally:
+            if os.path.exists(xml_path):
+                os.remove(xml_path)
+
+    def test_answer_line_with_lettered_paragraph_options(self):
+        # Conflicto tierras: options as "A. …" paragraphs used to have no correct answer at all.
+        from actions.html_transformer import parse_questions
+        html = ("<p>Pregunta 1.</p><p>¿Qué tipo de conflicto es?</p><p>A. Un litigio civil</p><p>B. Un conflicto agrario</p>"
+                "<p>C. Un trámite administrativo</p><p>Respuesta correcta: Un conflicto agrario</p>")
+        [question] = parse_questions(html)
+        self.assertEqual([o["is_correct"] for o in question["options"]], [False, True, False])
+
+    def test_explanation_after_answer_line_is_feedback_not_a_question(self):
+        # Conflicto tierras: long explanation paragraphs after the answer used
+        # to be read as extra "questions" with no options.
+        from actions.html_transformer import parse_questions
+        html = ("<p>Pregunta 1.</p><p>¿Qué tipo de conflicto es?</p><p>A. Un litigio civil</p><p>B. Un conflicto agrario</p>"
+                "<p>Respuesta correcta: Un conflicto agrario</p>"
+                "<p>La lectura del conflicto de tierras exige superar una comprensión puramente jurídica del caso.</p>"
+                "<p>Correcto. Los conflictos por la tierra deben leerse desde varias dimensiones a la vez.</p>"
+                "<p>Pregunta 2.</p><p>¿Quién decide?</p><p>A. El juez</p><p>B. Nadie</p><p>Respuesta correcta: El juez</p>")
+        questions = parse_questions(html)
+        self.assertEqual(len(questions), 2)
+        self.assertIn("comprensión puramente jurídica", "".join(questions[0]["feedback"]["general"]))
+        self.assertEqual([[o["is_correct"] for o in q["options"]] for q in questions], [[False, True], [True, False]])
+
+    def test_answer_line_that_matches_no_option_is_not_guessed(self):
+        from actions.html_transformer import parse_questions, summarize_quiz
+        html = ("<ul><li>¿Primera pregunta?</li><li>Uno</li><li>Dos</li></ul><p>Respuesta correcta: Tres</p>"
+                "<ul><li>¿Segunda pregunta?</li><li>Cuatro</li><li>Cinco</li></ul><p>Respuesta correcta: Cuatro</p>")
+        questions = parse_questions(html)
+        self.assertFalse(any(o["is_correct"] for o in questions[0]["options"]),
+                         "no option matches 'Tres': nothing may be marked correct")
+        self.assertEqual(summarize_quiz(html)["esperadas"], 2)
+
+    def test_activity_preview_sections_and_questions(self):
+        from core.activity_preview import build_preview
+        html = ("<p><b>¿Qué vamos a lograr?</b></p><p>Aprender algo.</p>"
+                "<p><b>¿Cómo lo vamos a lograr?</b></p><p>Responde:</p>" + self.FLAT_LIST +
+                "<p>¿Cómo lo vamos a evaluar?</p><p>Información para el equipo de producción de la DEE</p><p>Foro___</p>")
+        preview = build_preview(html)
+        self.assertEqual([s["titulo"] for s in preview["secciones"]],
+                         ["¿Qué vamos a lograr?", "¿Cómo lo vamos a lograr?", "¿Cómo lo vamos a evaluar?",
+                          "Información para el equipo de producción"])
+        self.assertIn("Aprender algo", preview["secciones"][0]["html"])
+        self.assertEqual([q["numero"] for q in preview["preguntas"]], [1, 2, 3])
+        self.assertEqual([q["correctas"] for q in preview["preguntas"]], [1, 1, 1])
+        self.assertEqual(preview["resumen_preguntas"]["esperadas"], 3)
+
     def test_questions_merged_into_one_are_listed_as_unread(self):
-        # "Respuesta correcta: X" after unmarked options: the parser merges these.
+        # Options with no answer marker at all: the parser merges these questions.
         html = ("<p>Preguntas:</p><ul><li>¿Primera pregunta?</li><li>Uno</li><li>Dos</li></ul>"
-                "<p>Respuesta correcta: Uno</p>"
-                "<ul><li>¿Segunda pregunta?</li><li>Tres</li><li>Cuatro</li></ul>"
-                "<p>Respuesta correcta: Tres</p>")
+                "<ul><li>¿Segunda pregunta?</li><li>Tres</li><li>Cuatro</li></ul>")
         from actions.html_transformer import summarize_quiz
         summary = summarize_quiz(html)
         self.assertLess(summary["encontradas"], summary["esperadas"])

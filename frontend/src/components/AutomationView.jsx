@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Upload, CheckCircle2, FileText, AlertTriangle, RefreshCw, XCircle,
-  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download, SlidersHorizontal
+  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download, SlidersHorizontal, ListOrdered
 } from 'lucide-react';
+import ActivityPreview from './ActivityPreview';
 import AdvancedSettingsPage from './AdvancedSettingsPage';
 import AutomationControls from './AutomationControls';
 import DocumentReviewPanel, { isUnresolved, QuestionCountBadge } from './DocumentReviewPanel';
@@ -36,9 +37,11 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
   const [content, setContent] = useState(inline ? inline.content : null);
   const [status, setStatus] = useState(inline ? 'done' : 'loading'); // loading, done, error
   const [errorMsg, setErrorMsg] = useState('');
-  const [viewMode, setViewMode] = useState('preview'); // preview, source
-
   const isXml = !inline && target.filename.endsWith('.xml');
+  // Activities get the ordered, section-by-section view by default
+  // (ActivityPreview); the raw page and the HTML stay available as tabs.
+  const isActivity = !inline && ['actividades', 'actividades_extra'].includes(target.category) && target.filename.endsWith('.html');
+  const [viewMode, setViewMode] = useState(isActivity ? 'structured' : 'preview'); // structured, preview, source
   const closeRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -109,11 +112,19 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
 
         {status === 'done' && !isXml && (
           <div className="flex items-center gap-2 px-5 pt-3 shrink-0">
+            {isActivity && (
+              <button
+                onClick={() => setViewMode('structured')}
+                className={`flex items-center text-xs px-3 py-1.5 rounded-lg border ${viewMode === 'structured' ? 'bg-primary/20 border-primary/40 text-primary' : 'border-border text-gray-400 hover:text-white'}`}
+              >
+                <ListOrdered className="w-3.5 h-3.5 mr-1.5" /> Vista previa
+              </button>
+            )}
             <button
               onClick={() => setViewMode('preview')}
               className={`flex items-center text-xs px-3 py-1.5 rounded-lg border ${viewMode === 'preview' ? 'bg-primary/20 border-primary/40 text-primary' : 'border-border text-gray-400 hover:text-white'}`}
             >
-              <Eye className="w-3.5 h-3.5 mr-1.5" /> Vista previa
+              <Eye className="w-3.5 h-3.5 mr-1.5" /> {isActivity ? 'Documento completo' : 'Vista previa'}
             </button>
             <button
               onClick={() => setViewMode('source')}
@@ -137,6 +148,10 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
               <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
+          )}
+
+          {status === 'done' && viewMode === 'structured' && (
+            <ActivityPreview courseId={courseId} category={target.category} filename={target.filename} />
           )}
 
           {status === 'done' && viewMode === 'preview' && (
