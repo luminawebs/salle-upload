@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Upload, CheckCircle2, FileText, AlertTriangle, RefreshCw, XCircle,
-  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download
+  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download, SlidersHorizontal
 } from 'lucide-react';
-import GlobalSettingsPanel from './GlobalSettingsPanel';
+import AdvancedSettingsPage from './AdvancedSettingsPage';
 import AutomationControls from './AutomationControls';
 import DocumentReviewPanel, { isUnresolved } from './DocumentReviewPanel';
 import { AutomationContext } from '../context/AutomationContext';
@@ -39,6 +39,23 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
   const [viewMode, setViewMode] = useState('preview'); // preview, source
 
   const isXml = !inline && target.filename.endsWith('.xml');
+  const closeRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Move focus into the dialog (otherwise it stays on the button that opened
+  // it, and arrow/space keys keep scrolling the page behind) and close on Esc.
+  // Runs once per opening: onClose is a new function on every parent render.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement;
+    closeRef.current?.focus();
+    const onKey = (e) => { if (e.key === 'Escape') onCloseRef.current(); };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      previouslyFocused?.focus?.({ preventScroll: true });
+    };
+  }, []);
 
   useEffect(() => {
     if (inline) return undefined;
@@ -72,6 +89,9 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         className="bg-surface border border-border rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -82,7 +102,7 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
               {inline ? inline.subtitle : `workspace/${courseId}/${target.category}/${target.filename}`}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white">
+          <button ref={closeRef} onClick={onClose} aria-label="Cerrar" className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -104,7 +124,7 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
           </div>
         )}
 
-        <div className="p-5 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-5 overflow-y-auto overscroll-contain custom-scrollbar flex-1 min-h-0">
           {status === 'loading' && (
             <div className="flex flex-col items-center justify-center py-10 text-gray-400">
               <RefreshCw className="w-6 h-6 animate-spin mb-2" />
@@ -171,13 +191,16 @@ export default function AutomationView() {
   const [isDragging, setIsDragging] = useState(false);
   const [fragment, setFragment] = useState(null); // { target, title }
   const [viewMode, setViewMode] = useState('document'); // 'document' | 'terminal'
+  // Top-level page: 'curso' (upload → review → run) or 'avanzado' (which
+  // pipeline steps run). Switching keeps everything above in state.
+  const [page, setPage] = useState('curso');
   const [skipped, setSkipped] = useState(new Set());
   const [ignoredIssues, setIgnoredIssues] = useState(new Set());
   const [busyIssue, setBusyIssue] = useState(null); // problem id while a correction is being applied
   const [reviewError, setReviewError] = useState('');
 
   const courseId = (settings.COURSES_TO_PROCESS || '').trim();
-  const logsEndRef = useRef(null);
+  const logsBoxRef = useRef(null); // the terminal's scrolling log box
   const coverage = report?.cobertura || null;
 
   // The document's numbered activities, offered as targets for "añadir a una
@@ -201,11 +224,24 @@ export default function AutomationView() {
     setUnresolvedIssueCount(issues.filter((p) => isUnresolved(p, ignoredIssues)).length);
   }, [coverage, ignoredIssues, setUnresolvedIssueCount]);
 
+  // Follow new log lines by scrolling the terminal box itself — never
+  // scrollIntoView, which also scrolled every container above it (yanking the
+  // whole page to the terminal on each line). Only while the user is at the
+  // bottom: scrolling up to read an older line stops the following.
+  const followLogsRef = useRef(true);
+  const handleLogsScroll = (e) => {
+    const el = e.currentTarget;
+    followLogsRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  };
   useEffect(() => {
-    if (viewMode === 'terminal') {
-      logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (viewMode === 'terminal') followLogsRef.current = true;
+  }, [viewMode, activeLogTab]);
+  useEffect(() => {
+    const el = logsBoxRef.current;
+    if (viewMode === 'terminal' && el && followLogsRef.current) {
+      el.scrollTop = el.scrollHeight;
     }
-  }, [logs, viewMode]);
+  }, [logs, viewMode, activeLogTab]);
 
   const loadSkipped = async (cid) => {
     try {
@@ -443,16 +479,40 @@ export default function AutomationView() {
 
   return (
     <div className="h-screen bg-background text-gray-200 font-sans flex flex-col overflow-hidden">
-      <header className="h-16 bg-surface border-b border-border flex items-center px-6 sticky top-0 z-10 shrink-0">
+      <header className="min-h-16 bg-surface border-b border-border flex flex-wrap items-center gap-y-2 px-6 py-2 sticky top-0 z-10 shrink-0">
         <img src="/logo.png" alt="La Salle" className="h-8 object-contain" />
         <div className="h-6 w-px bg-border mx-6"></div>
         <h1 className="text-lg font-bold tracking-tight text-white">Moodle Automation Engine</h1>
+        <nav className="ml-auto flex bg-background rounded-xl border border-border p-1" aria-label="Secciones">
+          {[
+            { id: 'curso', label: 'Carga del curso', Icon: Upload },
+            { id: 'avanzado', label: 'Configuración avanzada', Icon: SlidersHorizontal },
+          ].map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setPage(id)}
+              aria-current={page === id ? 'page' : undefined}
+              className={`flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${page === id ? 'bg-primary text-white shadow' : 'text-gray-400 hover:text-white'}`}
+            >
+              <Icon className="w-3.5 h-3.5 mr-1.5" /> {label}
+            </button>
+          ))}
+        </nav>
       </header>
 
+      {page === 'avanzado' ? (
+        <main className="flex-1 p-6 w-full min-h-0 overflow-y-auto custom-scrollbar">
+          <AdvancedSettingsPage onBack={() => setPage('curso')} />
+        </main>
+      ) : (
+      // Scrolling: below xl the columns stack and this <main> scrolls as one
+      // page (inner fixed-height scroll boxes collapsed to a few pixels there).
+      // At xl the page is fixed and each column scrolls on its own.
       <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1600px] mx-auto w-full min-h-0 overflow-y-auto xl:overflow-hidden">
 
         {/* Column 1: Source document + run controls + progress */}
-        <div className="xl:col-span-3 flex flex-col gap-6 h-full min-h-[600px]">
+        <div className="xl:col-span-4 flex flex-col gap-6 xl:h-full xl:min-h-0 xl:overflow-y-auto custom-scrollbar xl:pr-1">
           <div className="bg-surface rounded-xl border border-border p-5 shadow-sm shrink-0">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-5 flex items-center">
               <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
@@ -503,7 +563,7 @@ export default function AutomationView() {
             )}
           </div>
 
-          <AutomationControls onBeforeRun={() => setViewMode('terminal')} />
+          <AutomationControls onBeforeRun={() => setViewMode('terminal')} onOpenAdvanced={() => setPage('avanzado')} />
 
           <div className="bg-surface rounded-xl border border-border p-4 shadow-sm">
             <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center">
@@ -535,15 +595,10 @@ export default function AutomationView() {
           </div>
         </div>
 
-        {/* Column 2: Global settings */}
-        <div className="xl:col-span-3 flex flex-col gap-6 h-full">
-          <div className="flex-1 min-h-[400px]">
-            <GlobalSettingsPanel />
-          </div>
-        </div>
-
-        {/* Column 3: Documento parseado <-> Terminal */}
-        <div className="xl:col-span-6 flex flex-col gap-4 h-full min-h-0">
+        {/* Column 2: Documento parseado <-> Terminal. (The step toggles
+            that used to sit between these columns now live on the
+            "Configuración avanzada" page.) */}
+        <div className="xl:col-span-8 flex flex-col gap-4 xl:h-full xl:min-h-0">
           <div className="flex items-center justify-between shrink-0">
             <div className="flex bg-surface rounded-xl border border-border p-1 w-fit">
               <button
@@ -572,7 +627,7 @@ export default function AutomationView() {
           </div>
 
           {viewMode === 'document' ? (
-            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6 pb-6 min-h-0">
+            <div className="space-y-6 pb-6 xl:flex-1 xl:min-h-0 xl:overflow-y-auto custom-scrollbar">
               {!report && (
                 <div className="bg-surface rounded-xl border border-border p-8 text-center text-sm text-gray-500">
                   Sube un documento para ver su estructura y el contenido ya parseado.
@@ -762,7 +817,7 @@ export default function AutomationView() {
               )}
             </div>
           ) : (
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex flex-col h-[70vh] min-h-[360px] xl:h-auto xl:min-h-0 xl:flex-1">
               <div className="flex bg-surface rounded-t-xl border border-border border-b-0 overflow-hidden shrink-0">
                 {WORKFLOW_PHASES.map((phase, idx) => (
                   <button
@@ -780,7 +835,7 @@ export default function AutomationView() {
                   <h2 className="text-xs font-semibold text-gray-300 uppercase tracking-widest">Terminal de Moodle</h2>
                 </div>
 
-                <div className="flex-1 p-4 overflow-y-auto font-mono text-[13px] leading-relaxed space-y-2">
+                <div ref={logsBoxRef} onScroll={handleLogsScroll} className="flex-1 min-h-0 p-4 overflow-y-auto custom-scrollbar font-mono text-[13px] leading-relaxed space-y-2">
                   {logs.filter(l => l.phase === activeLogTab).length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-600">
                       <Activity className="w-8 h-8 mb-3 opacity-20" />
@@ -810,13 +865,13 @@ export default function AutomationView() {
                       );
                     })
                   )}
-                  <div ref={logsEndRef} />
                 </div>
               </div>
             </div>
           )}
         </div>
       </main>
+      )}
 
       {fragment && (
         <FragmentViewer

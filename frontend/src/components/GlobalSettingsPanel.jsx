@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { AutomationContext } from '../context/AutomationContext';
 import { Settings, Save, Check, ChevronDown, ChevronRight, Play } from 'lucide-react';
 
-const CATEGORIES = [
+export const CATEGORIES = [
   {
     id: 'ai',
     title: 'Inteligencia Artificial',
@@ -39,6 +39,11 @@ const CATEGORIES = [
     ]
   }
 ];
+
+// The flags that switch pipeline steps on/off (everything except the AI
+// category, which is a feature switch rather than a step). Used for the
+// "Pasos activos: N de M" summary next to Run.
+export const STEP_FLAGS = CATEGORIES.filter((c) => c.id !== 'ai').flatMap((c) => c.flags);
 
 export default function GlobalSettingsPanel() {
   const {

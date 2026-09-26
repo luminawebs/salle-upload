@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { AutomationContext } from '../context/AutomationContext';
-import { Settings, Save, Check, Play, AlertTriangle } from 'lucide-react';
+import { Settings, Save, Check, Play, AlertTriangle, SlidersHorizontal } from 'lucide-react';
+import { STEP_FLAGS } from './GlobalSettingsPanel';
 
-export default function AutomationControls({ onBeforeRun }) {
+export default function AutomationControls({ onBeforeRun, onOpenAdvanced }) {
   const {
     settings,
     handleSetSetting,
@@ -35,6 +36,11 @@ export default function AutomationControls({ onBeforeRun }) {
   const blockedByIssues = hasMatchingUpload && !documentProblem && unresolvedIssueCount > 0;
   const canRun = hasMatchingUpload && !blockedByDocument && !blockedByIssues;
 
+  // The step toggles live on the "Configuración avanzada" page; this keeps a
+  // switched-off step visible here, right where Run is pressed.
+  const activeSteps = STEP_FLAGS.filter((f) => settings[f.key] === 'True').length;
+  const disabledSteps = STEP_FLAGS.length - activeSteps;
+
   return (
     <div className="bg-surface rounded-xl border border-border shadow-sm p-5">
       <div className="flex items-center space-x-3 mb-5">
@@ -63,6 +69,21 @@ export default function AutomationControls({ onBeforeRun }) {
         <div className="flex flex-col gap-2">
           {!isRunning ? (
             <>
+              <div className={`flex items-center justify-between text-[11px] rounded-lg px-3 py-2 border ${disabledSteps > 0 ? 'text-warning bg-warning/10 border-warning/30' : 'text-gray-400 bg-background border-border'}`}>
+                <span>
+                  Pasos activos: <b className={disabledSteps > 0 ? '' : 'text-gray-200'}>{activeSteps} de {STEP_FLAGS.length}</b>
+                  {disabledSteps > 0 && ` · ${disabledSteps} desactivado${disabledSteps === 1 ? '' : 's'}`}
+                </span>
+                {onOpenAdvanced && (
+                  <button
+                    type="button"
+                    onClick={onOpenAdvanced}
+                    className="flex items-center font-semibold text-primary hover:underline ml-2 shrink-0"
+                  >
+                    <SlidersHorizontal className="w-3 h-3 mr-1" /> Configuración avanzada
+                  </button>
+                )}
+              </div>
               <button
                 onClick={() => {
                   if (onBeforeRun) onBeforeRun();

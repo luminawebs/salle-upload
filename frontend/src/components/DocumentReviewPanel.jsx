@@ -235,8 +235,10 @@ export default function DocumentReviewPanel({
   const issues = coverage.problemas || [];
   const blocks = coverage.bloques || [];
   const unresolved = issues.filter((p) => isUnresolved(p, ignored));
-  // Unresolved blocking problems first, then notices, then everything settled.
-  const order = (p) => (p.resuelto || ignored.has(p.id) ? 2 : p.bloquea ? 0 : 1);
+  // Blocking problems first, then notices. Deliberately NOT re-sorted by
+  // resolved/ignored state: resolving an item used to move it to the bottom,
+  // shifting the list under the user's cursor. Settled items are dimmed instead.
+  const order = (p) => (p.bloquea ? 0 : 1);
   const sorted = [...issues].sort((a, b) => order(a) - order(b));
 
   return (
