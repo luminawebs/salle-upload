@@ -43,7 +43,9 @@ def run_unidades_intro_splitting_workflow(course_id: int):
             continue
 
         if current_unidad:
-            tds = tr.find_all("td", recursive=False)
+            # Some templates format the Resumen / Preguntas orientadoras rows
+            # as header cells (<th>); reading only <td> silently dropped them.
+            tds = tr.find_all(["td", "th"], recursive=False)
             if not tds:
                 continue
 

@@ -180,6 +180,20 @@ export default function AutomationView() {
   const logsEndRef = useRef(null);
   const coverage = report?.cobertura || null;
 
+  // The document's numbered activities, offered as targets for "añadir a una
+  // actividad existente". A Cuestionario with no questions is marked, since
+  // it's the likely home for an orphaned set of questions.
+  const existingActivities = (() => {
+    const noQuestions = new Set((coverage?.problemas || [])
+      .filter((p) => p.tipo === 'cuestionario_sin_preguntas' && p.actividad)
+      .map((p) => p.actividad));
+    return Object.entries(report?.unidades || {})
+      .flatMap(([unit, data]) => Object.entries(data.actividades || {}).map(([num, act]) => ({
+        num: Number(num), tipo: act.tipo, unidad: Number(unit), sinPreguntas: noQuestions.has(Number(num))
+      })))
+      .sort((a, b) => a.num - b.num);
+  })();
+
   // Blocking review problems that are neither fixed, ignored, nor turned
   // into an activity gate Run (see AutomationControls).
   useEffect(() => {
@@ -247,18 +261,19 @@ export default function AutomationView() {
     }
   };
 
-  // Turns an unrecognized block into an activity (tipo = 'Foro' | 'Tarea' |
-  // 'Cuestionario') or undoes it (tipo = null). The server re-runs the review
-  // on the uploaded document and returns the new report, so what's shown is
-  // exactly what Run will use.
-  const createActivityFromBlock = async (issueId, tipo) => {
+  // Applies a choice for an unassigned block: { tipo: 'Foro' | 'Tarea' |
+  // 'Cuestionario' } makes it a new activity, { agregar_a: N } adds it to
+  // Actividad N, null undoes it. The server re-runs the review on the
+  // uploaded document and returns the new report, so what's shown is exactly
+  // what Run will use.
+  const applyBlockChoice = async (issueId, choice) => {
     setBusyIssue(issueId);
     setReviewError('');
     try {
       const res = await fetch(`${API_BASE}/api/corrections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course_id: courseId, issue_id: issueId, tipo })
+        body: JSON.stringify({ course_id: courseId, issue_id: issueId, choice })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No se pudo aplicar la corrección.');
@@ -273,6 +288,13 @@ export default function AutomationView() {
   };
 
   const showExtraActivity = (extra) => {
+    if (extra.accion === 'agregar') {
+      setFragment({
+        target: { category: 'actividades', filename: extra.archivo },
+        title: `Actividad ${extra.actividad} (Unidad ${extra.unidad}) — con el bloque añadido en la revisión al final`
+      });
+      return;
+    }
     setFragment({
       target: { category: 'actividades_extra', filename: extra.archivo },
       title: `${extra.nombre} — ${extra.tipo} (Unidad ${extra.unidad}, añadida en la revisión)`
@@ -568,13 +590,14 @@ export default function AutomationView() {
 
                   <DocumentReviewPanel
                     coverage={coverage}
+                    activities={existingActivities}
                     ignored={ignoredIssues}
                     busyIssue={busyIssue}
                     error={reviewError}
                     onToggleIgnore={toggleIgnoreIssue}
                     onShowBlock={showCoverageBlock}
                     onShowFragment={showExtraActivity}
-                    onCreateActivity={createActivityFromBlock}
+                    onChoice={applyBlockChoice}
                   />
 
                   <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-md">

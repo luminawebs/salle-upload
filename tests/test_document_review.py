@@ -124,11 +124,29 @@ class CoverageSyntheticTests(unittest.TestCase):
         _, issues = self.issues(html, "_test_cov_loose")
         self.assertIn("contenido_sin_asignar", issues)
 
-    def test_header_cell_resumen_is_explained(self):
-        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto.", th=True),
-                    _row("Preguntas orientadoras", "¿Qué?"), _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY)
-        _, issues = self.issues(html, "_test_cov_th")
-        self.assertIn("<th>", issues["unidad_sin_resumen"]["detalle"])
+    def test_header_cell_resumen_is_read(self):
+        # Some templates use <th> for these rows; both the review and the step
+        # that uploads unit introductions must read them.
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto del resumen.", th=True),
+                    _row("Preguntas orientadoras", "¿Qué?", th=True), _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY)
+        report, issues = self.issues(html, "_test_cov_th")
+        self.assertNotIn("unidad_sin_resumen", issues)
+        self.assertNotIn("unidad_sin_preguntas_orientadoras", issues)
+
+        from core.unidades_intro_parser import run_unidades_intro_splitting_workflow
+        course_dir = os.path.join(ROOT, "workspace", "_test_cov_th_intro")
+        os.makedirs(course_dir, exist_ok=True)
+        try:
+            with open(os.path.join(course_dir, "raw_docx_extracted.html"), "w", encoding="utf-8") as f:
+                f.write(html)
+            run_unidades_intro_splitting_workflow("_test_cov_th_intro")
+            written = ""
+            for p in glob.glob(os.path.join(course_dir, "introduccion", "*")):
+                with open(p, encoding="utf-8") as f:
+                    written += f.read()
+            self.assertIn("Texto del resumen.", written)
+        finally:
+            shutil.rmtree(course_dir, ignore_errors=True)
 
     def test_unknown_type_and_missing_plan_unit(self):
         html = _doc(*PLAN, _row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."),
@@ -195,14 +213,70 @@ class CorrectionsTests(unittest.TestCase):
                     _row("Herramientas de la plataforma virtual (Marque con una X): Foro__X__ Tarea___"),
                     _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY, _row("Criterios de desempeño Puntos"))
 
-    def test_block_right_after_an_activity_is_reported_as_merged(self):
+    def test_foro_heading_right_after_an_activity_ends_it(self):
         html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
                     _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY,
                     _row("FORO 2. Debate final"), _row("¿Qué vamos a lograr? Debatir."))
         issues = {p["tipo"]: p for p in self.review(html)["cobertura"]["problemas"]}
-        self.assertIn("actividad_fusionada", issues)
-        self.assertIn("FORO 2. Debate final", issues["actividad_fusionada"]["titulo"])
+        self.assertNotIn("actividad_fusionada", issues)
+        self.assertIn("FORO 2. Debate final", issues["actividad_no_reconocida"]["titulo"])
+        with open(os.path.join(self.course_dir, "actividades", "actividad1.html"), encoding="utf-8") as f:
+            self.assertNotIn("Debatir", f.read())
+
+    def test_other_heading_right_after_an_activity_is_reported_as_merged(self):
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                    _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY,
+                    _row("TALLER 2. Debate final"), _row("¿Qué vamos a lograr? Debatir."))
+        issues = {p["tipo"]: p for p in self.review(html)["cobertura"]["problemas"]}
+        self.assertIn("TALLER 2. Debate final", issues["actividad_fusionada"]["titulo"])
         self.assertTrue(issues["actividad_fusionada"]["bloquea"])
+
+    QUESTIONS = ("<p>1. ¿Cuál es la capital de Colombia?</p><p>=a) Bogotá</p><p>b) Lima</p>")
+    QUIZ_TOOLS = _row("Herramientas de la plataforma virtual (Marque con una X): Foro___ Tarea___ Cuestionario__X__")
+
+    def test_quiz_without_questions_is_flagged_and_appending_questions_fixes_it(self):
+        from core.document_corrections import set_block_choice, get_appended_blocks
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                    _row("ACTIVIDAD 1. Evaluación"), _row("¿Qué vamos a lograr? Evaluar."), self.QUIZ_TOOLS,
+                    _row("Cuestionario de la unidad"), _row(self.QUESTIONS))
+        report = self.review(html)
+        issues = {p["tipo"]: p for p in report["cobertura"]["problemas"]}
+        self.assertIn("cuestionario_sin_preguntas", issues)
+        block = issues["contenido_sin_asignar"]
+
+        set_block_choice(self.COURSE, block["id"], {"agregar_a": 1})
+        report = self.review(html)
+        issues = {p["tipo"]: p for p in report["cobertura"]["problemas"]}
+        self.assertNotIn("cuestionario_sin_preguntas", issues)
+        self.assertEqual(issues["contenido_sin_asignar"]["resuelto"]["accion"], "agregar")
+        self.assertEqual(issues["contenido_sin_asignar"]["resuelto"]["actividad"], 1)
+        self.assertEqual([a["actividad"] for a in get_appended_blocks(self.COURSE)], [1])
+        with open(os.path.join(self.course_dir, "actividades", "actividad1.html"), encoding="utf-8") as f:
+            self.assertIn("Bogotá", f.read())
+
+    def test_append_to_missing_activity_is_rejected_or_skipped(self):
+        from core.document_corrections import set_block_choice, get_appended_blocks
+        with self.assertRaises(ValueError):
+            set_block_choice(self.COURSE, "contenido_sin_asignar:abc", {"agregar_a": 0})
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."),
+                    _row("Preguntas orientadoras", "¿Qué?"), _row("Nota suelta"),
+                    _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY)
+        report = self.review(html)
+        block = next(p for p in report["cobertura"]["problemas"] if p["tipo"] == "contenido_sin_asignar")
+        set_block_choice(self.COURSE, block["id"], {"agregar_a": 99})  # there is no Actividad 99
+        report = self.review(html)
+        self.assertEqual(get_appended_blocks(self.COURSE), [])
+        still_open = next(p for p in report["cobertura"]["problemas"] if p["id"] == block["id"])
+        self.assertNotIn("resuelto", still_open)
+
+    def test_new_activity_readings_go_to_material_de_referencia(self):
+        from core.document_corrections import set_block_activity
+        html = self.doc("FORO 1. Debate inicial",
+                        _row("<p>Lecturas complementarias</p><ul><li>Lozano, R. (2020). Tierras.</li></ul>"))
+        set_block_activity(self.COURSE, self.block_issue(self.review(html))["id"], "Foro")
+        self.review(html)
+        with open(os.path.join(self.course_dir, "material", "Material_de_referencia_U1.html"), encoding="utf-8") as f:
+            self.assertIn("Lozano, R. (2020)", f.read())
 
     def test_block_becomes_activity_and_undo_removes_it(self):
         from core.document_corrections import set_block_activity, get_extra_activities
@@ -257,14 +331,27 @@ class CorrectionsTests(unittest.TestCase):
         self.review(html)
         self.assertEqual(sorted(os.listdir(os.path.join(self.course_dir, "actividades"))), ["actividad1.html"])
 
-    def test_extra_activities_go_to_their_unit_section(self):
+    def test_extra_activities_go_to_their_unit_section_in_document_order(self):
         from core.document_corrections import add_extra_activities_to_sections
-        sections = [{"unit_number": 1, "activities": []}, {"unit_number": 2, "activities": []}]
-        extras = [{"nombre": "Foro 1", "tipo": "Foro", "unidad": 1}, {"nombre": "Suelto", "tipo": "Tarea", "unidad": None}]
+        acts = [{"name": "ACTIVIDAD 4: Algo", "type": "Tarea"}, {"name": "ACTIVIDAD 5. Otra", "type": "Foro"}]
+        sections = [{"unit_number": 1, "activities": []}, {"unit_number": 2, "activities": list(acts)}]
+        extras = [
+            {"nombre": "Proyecto (Avance 1)", "tipo": "Tarea", "unidad": 1, "antes_de_actividad": 5},
+            {"nombre": "Foro final", "tipo": "Foro", "unidad": 1, "antes_de_actividad": None},
+            {"nombre": "Suelto", "tipo": "Tarea", "unidad": None},
+        ]
         unplaced = add_extra_activities_to_sections(sections, extras)
-        self.assertEqual(sections[1]["activities"], [{"name": "Foro 1", "type": "Foro"}])
+        self.assertEqual([a["name"] for a in sections[1]["activities"]],
+                         ["ACTIVIDAD 4: Algo", "Proyecto (Avance 1)", "ACTIVIDAD 5. Otra", "Foro final"])
         self.assertEqual(sections[0]["activities"], [], "section 1 is Generalidades, never a unit")
         self.assertEqual([e["nombre"] for e in unplaced], ["Suelto"])
+
+    def test_new_activity_records_the_activity_that_follows_it(self):
+        from core.document_corrections import set_block_activity, get_extra_activities
+        html = self.doc("FORO 1. Debate inicial")
+        set_block_activity(self.COURSE, self.block_issue(self.review(html))["id"], "Foro")
+        self.review(html)
+        self.assertEqual(get_extra_activities(self.COURSE)[0]["antes_de_actividad"], 1)
 
 
 def _docx_paths():

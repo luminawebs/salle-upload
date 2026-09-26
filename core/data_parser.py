@@ -134,6 +134,67 @@ def top_level_rows(soup) -> list:
     return [tr for tr in soup.find_all('tr') if tr.find_parent('table') and not tr.find_parent('table').find_parent('table')]
 
 
+def merge_material_de_referencia(act_html: str, current_unit: int, material_dir: str, raw_activity_number: str) -> None:
+    """
+    Copies the 'Lecturas complementarias' / 'Material de referencia' part of one
+    activity's HTML into workspace/<id>/material/Material_de_referencia_U<unit>.html,
+    merging its list into what earlier activities of the same unit already wrote.
+    raw_activity_number is only used in log messages.
+    """
+    act_soup_mat = BeautifulSoup(act_html, "html.parser")
+    header_mat = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and any(kw in t.text.lower() for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']))
+    if header_mat:
+        block_elem = header_mat
+        while block_elem.parent and block_elem.parent.name not in ['td', 'body', 'div', 'tr', '[document]']:
+            block_elem = block_elem.parent
+        
+        mat_parts = []
+        mat_parts.append(str(block_elem))
+        
+        for sibling in block_elem.find_next_siblings():
+            if sibling.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
+                break
+            mat_parts.append(str(sibling))
+        
+        new_mat_html = "".join(mat_parts)
+        unit_num = current_unit if current_unit > 0 else 1
+        mat_file = os.path.join(material_dir, f"Material_de_referencia_U{unit_num}.html")
+        
+        if os.path.exists(mat_file):
+            with open(mat_file, "r", encoding="utf-8") as f:
+                existing_html = f.read()
+            
+            existing_soup = BeautifulSoup(existing_html, "html.parser")
+            new_soup = BeautifulSoup(new_mat_html, "html.parser")
+            
+            existing_list = existing_soup.find(['ul', 'ol'])
+            new_lists = new_soup.find_all(['ul', 'ol'])
+            
+            if existing_list and new_lists:
+                for new_list in new_lists:
+                    for li in new_list.find_all('li', recursive=False):
+                        existing_list.append(li)
+            else:
+                # If we couldn't find lists to merge, just append non-header elements
+                for tag in new_soup.contents:
+                    if tag.name and tag.name.lower() in ['p', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'span', 'div']:
+                        normalized_text = " ".join(tag.get_text().lower().split())
+                        if any(kw in normalized_text for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']) and len(normalized_text) < 100:
+                            continue
+                    existing_soup.append(tag)
+                    
+            with open(mat_file, "w", encoding="utf-8") as f:
+                f.write(str(existing_soup))
+        else:
+            with open(mat_file, "w", encoding="utf-8") as f:
+                f.write(new_mat_html)
+                
+        logger.info(f"  ✓ SUCCESS: Extracted 'Lecturas complementarias' (Material de referencia) for 'Actividad {raw_activity_number}'")
+        logger.info(f"    - Merged into: {os.path.basename(mat_file)} (Unidad {unit_num})")
+    else:
+        logger.debug(f"  - No 'Lecturas complementarias' or 'Material de referencia' found for Actividad {raw_activity_number}")
+
+
 def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
     """
     Reads workspace/<course_id>/raw_docx_extracted.html and splits it into the necessary
@@ -321,7 +382,12 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                         next_text.startswith("EVALUACIÓN") or next_text.startswith("EVALUACION"),
                         next_text.startswith("PROYECTO DE CLASE"),
                         next_text.startswith("ENCUENTRO VIRTUAL"),
-                        next_text.startswith("GLOSARIO")
+                        next_text.startswith("GLOSARIO"),
+                        # "FORO 2. …" is another activity-like block, not part
+                        # of this one: without this it was swallowed whole into
+                        # the previous activity. It's reported in the review as
+                        # an unrecognized activity instead.
+                        re.match(r'^FORO\s+\d+', next_text),
                     ]
                     
                     if any(stop_conditions):
@@ -348,59 +414,8 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                 }
 
                 # Extract Lecturas complementarias / Material de referencia from the activity HTML
-                act_soup_mat = BeautifulSoup(act_html, "html.parser")
-                header_mat = act_soup_mat.find(lambda t: t.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'strong'] and any(kw in t.text.lower() for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']))
-                if header_mat:
-                    block_elem = header_mat
-                    while block_elem.parent and block_elem.parent.name not in ['td', 'body', 'div', 'tr', '[document]']:
-                        block_elem = block_elem.parent
-                    
-                    mat_parts = []
-                    mat_parts.append(str(block_elem))
-                    
-                    for sibling in block_elem.find_next_siblings():
-                        if sibling.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
-                            break
-                        mat_parts.append(str(sibling))
-                    
-                    new_mat_html = "".join(mat_parts)
-                    unit_num = current_unit if current_unit > 0 else 1
-                    mat_file = os.path.join(output_dirs["material"], f"Material_de_referencia_U{unit_num}.html")
-                    
-                    if os.path.exists(mat_file):
-                        with open(mat_file, "r", encoding="utf-8") as f:
-                            existing_html = f.read()
-                        
-                        existing_soup = BeautifulSoup(existing_html, "html.parser")
-                        new_soup = BeautifulSoup(new_mat_html, "html.parser")
-                        
-                        existing_list = existing_soup.find(['ul', 'ol'])
-                        new_lists = new_soup.find_all(['ul', 'ol'])
-                        
-                        if existing_list and new_lists:
-                            for new_list in new_lists:
-                                for li in new_list.find_all('li', recursive=False):
-                                    existing_list.append(li)
-                        else:
-                            # If we couldn't find lists to merge, just append non-header elements
-                            for tag in new_soup.contents:
-                                if tag.name and tag.name.lower() in ['p', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'span', 'div']:
-                                    normalized_text = " ".join(tag.get_text().lower().split())
-                                    if any(kw in normalized_text for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']) and len(normalized_text) < 100:
-                                        continue
-                                existing_soup.append(tag)
-                                
-                        with open(mat_file, "w", encoding="utf-8") as f:
-                            f.write(str(existing_soup))
-                    else:
-                        with open(mat_file, "w", encoding="utf-8") as f:
-                            f.write(new_mat_html)
-                            
-                    logger.info(f"  ✓ SUCCESS: Extracted 'Lecturas complementarias' (Material de referencia) for 'Actividad {raw_activity_number}'")
-                    logger.info(f"    - Merged into: {os.path.basename(mat_file)} (Unidad {unit_num})")
-                else:
-                    logger.debug(f"  - No 'Lecturas complementarias' or 'Material de referencia' found for Actividad {raw_activity_number}")
-                
+                merge_material_de_referencia(act_html, current_unit, output_dirs["material"], raw_activity_number)
+
                 act_soup = BeautifulSoup(act_html, "html.parser")
                 
                 # Remove the title of the "Actividad" (e.g. ACTIVIDAD 1: ...)
@@ -451,7 +466,7 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
     # "Proyecto de clase", … — headings the rules above don't recognize).
     # Written to actividades_extra/, separate from the numbered activities.
     from core.document_corrections import write_extra_activities
-    write_extra_activities(course_id, trs, roles, base_dir)
+    write_extra_activities(course_id, trs, roles, base_dir, activity_manifest)
 
     logger.info("  ✓ DOCX splitting workflow completed.")
     return activity_manifest

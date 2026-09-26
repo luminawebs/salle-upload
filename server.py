@@ -9,7 +9,7 @@ from core.data_parser import parse_docx_to_html
 from core.document_reviewer import review_document
 from core.activity_selection import get_skipped_activities, set_skipped_activities
 from core.document_coverage import get_ignored_issues, set_ignored_issues
-from core.document_corrections import set_block_activity
+from core.document_corrections import set_block_choice
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import re
@@ -210,24 +210,27 @@ async def post_ignored_issues_api(request: Request):
 @app.post("/api/corrections")
 async def post_correction(request: Request):
     """
-    Turns an unrecognized block into an activity of the given type (or undoes
-    it with tipo=null), then re-runs the review on the already-uploaded
-    document so the UI immediately shows the result — see
+    Applies a review-panel choice for an unassigned block — {"tipo": "Foro"}
+    makes it a new activity, {"agregar_a": 6} adds it to Actividad 6, and
+    "choice": null undoes it — then re-runs the review on the already-uploaded
+    document so the UI immediately shows the result. See
     core/document_corrections.py.
     """
     body = await request.json()
     course_id = body.get("course_id", "")
     issue_id = body.get("issue_id", "")
-    tipo = body.get("tipo")
+    choice = body.get("choice")
     if not is_safe_course_id(course_id):
         return JSONResponse(status_code=400, content={"error": "course_id inválido."})
-    if not isinstance(issue_id, str) or not issue_id.startswith("actividad_no_reconocida:"):
-        return JSONResponse(status_code=400, content={"error": "Solo se puede convertir en actividad un bloque «actividad no reconocida»."})
+    if not isinstance(issue_id, str) or not issue_id.startswith(("actividad_no_reconocida:", "contenido_sin_asignar:")):
+        return JSONResponse(status_code=400, content={"error": "Solo se pueden corregir bloques sin asignar."})
+    if isinstance(choice, dict) and "tipo" in choice and not issue_id.startswith("actividad_no_reconocida:"):
+        return JSONResponse(status_code=400, content={"error": "Solo un bloque «actividad no reconocida» puede convertirse en una actividad nueva."})
     if not os.path.isfile(os.path.join("workspace", course_id, "raw_docx_extracted.html")):
         return JSONResponse(status_code=404, content={"error": "No hay un documento subido para este curso. Vuelve a subirlo."})
     try:
-        set_block_activity(course_id, issue_id, tipo)
-    except ValueError as e:
+        set_block_choice(course_id, issue_id, choice)
+    except (ValueError, TypeError) as e:
         return JSONResponse(status_code=400, content={"error": str(e)})
     report = review_document(course_id, generate_json=False, generate_text=False, cleanup_fragments=False)
     return {"status": "success", "report": report}

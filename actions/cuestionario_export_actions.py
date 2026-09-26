@@ -324,6 +324,53 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
         except: pass
         return False
 
+def export_quiz_questions(driver, course_id: int, html_path: str, activity_prefix: str, wait_time: int, xml_name: str = None):
+    """
+    Extracts the questions from one activity fragment into a Moodle XML file
+    and, if enabled, imports them into the quiz whose name contains
+    activity_prefix, adds them as random questions and updates the grades.
+    """
+    
+    questions_dir = os.path.join("workspace", str(course_id), "questions")
+    os.makedirs(questions_dir, exist_ok=True)
+    xml_path = os.path.join(questions_dir, xml_name or f"{activity_prefix}_questions.xml")
+    
+    # We need to extract the questions from HTML to create the XML file
+    with open(html_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    q_count = extract_questions_from_html_to_moodle_xml(content, xml_path, course_id)
+    
+    if q_count > 0 and os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
+        export_enabled = getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
+        grade_update_enabled = getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)
+        
+        if export_enabled:
+            logger.info(f"Exporting questions for {activity_prefix}...")
+            export_success = False
+            if import_xml_to_cuestionario(driver, course_id, activity_prefix, xml_path, wait_time):
+                if add_questions_to_cuestionario(driver, course_id, activity_prefix, q_count, wait_time):
+                    export_success = True
+            
+            if export_success and grade_update_enabled:
+                update_quiz_grades(driver, activity_prefix, wait_time)
+            elif not grade_update_enabled:
+                logger.info(f"[{activity_prefix}] Quiz grade update skipped via config.")
+        else:
+            logger.info(f"[{activity_prefix}] Question export skipped via config.")
+            if grade_update_enabled:
+                logger.info(f"[{activity_prefix}] Navigating to update grades...")
+                navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
+                cmid = _get_cmid_for_activity(driver, activity_prefix, wait_time)
+                if cmid:
+                    edit_quiz_url = f"{Config.MOODLE_URL}/mod/quiz/edit.php?cmid={cmid}"
+                    driver.get(edit_quiz_url)
+                    time.sleep(2)
+                    update_quiz_grades(driver, activity_prefix, wait_time)
+                else:
+                    logger.error(f"Could not find cmid for {activity_prefix} to update grades.")
+
+
 def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10):
     logger.info(f"Starting Cuestionario Export workflow for course {course_id}...")
     base_dir = os.path.join("workspace", str(course_id))
@@ -343,43 +390,14 @@ def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10
                     logger.info(f"Actividad {act_num} excluida por el usuario — omitiendo exportación de cuestionario.")
                     continue
                 activity_prefix = f"ACTIVIDAD {act_num}"
-                
-                html_path = os.path.join(actividades_dir, filename)
-                questions_dir = os.path.join(base_dir, "questions")
-                os.makedirs(questions_dir, exist_ok=True)
-                xml_path = os.path.join(questions_dir, f"{activity_prefix}_questions.xml")
-                
-                # We need to extract the questions from HTML to create the XML file
-                with open(html_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    
-                q_count = extract_questions_from_html_to_moodle_xml(content, xml_path, course_id)
-                
-                if q_count > 0 and os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
-                    export_enabled = getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
-                    grade_update_enabled = getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)
-                    
-                    if export_enabled:
-                        logger.info(f"Exporting questions for {activity_prefix}...")
-                        export_success = False
-                        if import_xml_to_cuestionario(driver, course_id, activity_prefix, xml_path, wait_time):
-                            if add_questions_to_cuestionario(driver, course_id, activity_prefix, q_count, wait_time):
-                                export_success = True
-                        
-                        if export_success and grade_update_enabled:
-                            update_quiz_grades(driver, activity_prefix, wait_time)
-                        elif not grade_update_enabled:
-                            logger.info(f"[{activity_prefix}] Quiz grade update skipped via config.")
-                    else:
-                        logger.info(f"[{activity_prefix}] Question export skipped via config.")
-                        if grade_update_enabled:
-                            logger.info(f"[{activity_prefix}] Navigating to update grades...")
-                            navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
-                            cmid = _get_cmid_for_activity(driver, activity_prefix, wait_time)
-                            if cmid:
-                                edit_quiz_url = f"{Config.MOODLE_URL}/mod/quiz/edit.php?cmid={cmid}"
-                                driver.get(edit_quiz_url)
-                                time.sleep(2)
-                                update_quiz_grades(driver, activity_prefix, wait_time)
-                            else:
-                                logger.error(f"Could not find cmid for {activity_prefix} to update grades.")
+                export_quiz_questions(driver, course_id, os.path.join(actividades_dir, filename), activity_prefix, wait_time)
+
+    # Quizzes the user created from a block in the review panel: identified by
+    # their name (the document heading), not by an ACTIVIDAD number.
+    from core.document_corrections import get_extra_activities, EXTRA_DIR
+    for extra in get_extra_activities(course_id):
+        if extra["tipo"] != "Cuestionario":
+            continue
+        logger.info(f"Cuestionario añadido en la revisión: '{extra['nombre']}'")
+        export_quiz_questions(driver, course_id, os.path.join(base_dir, EXTRA_DIR, extra["archivo"]), extra["nombre"], wait_time,
+                              xml_name=f"{extra['clave']}_questions.xml")

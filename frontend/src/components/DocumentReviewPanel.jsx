@@ -19,29 +19,23 @@ const BLOCK_STYLES = {
 // Must match ACTIVITY_TYPES in core/document_coverage.py.
 const ACTIVITY_TYPES = ['Foro', 'Tarea', 'Cuestionario'];
 
-// "Posible actividad no reconocida": turn the block into an activity of the
+const controlClass = "bg-background border border-border rounded-md px-2 py-1 text-[11px] text-white focus:outline-none focus:border-primary disabled:opacity-50 max-w-full";
+const actionClass = "flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-md bg-primary/20 border border-primary/40 text-primary hover:bg-primary/30 disabled:opacity-40 disabled:cursor-not-allowed";
+
+// "Posible actividad no reconocida": turn the block into a new activity of the
 // chosen type (core/document_corrections.py). Pre-selects the type the author
 // marked with an X in the block's own "Herramientas…" row, when there is one.
-function MakeActivityControl({ issue, busy, onCreateActivity }) {
+function MakeActivityControl({ issue, busy, onChoice }) {
   const [tipo, setTipo] = useState(issue.tipo_sugerido || '');
   return (
     <div className="flex flex-wrap items-center gap-2 mt-2">
-      <select
-        value={tipo}
-        onChange={(e) => setTipo(e.target.value)}
-        disabled={busy}
-        aria-label="Tipo de actividad"
-        className="bg-background border border-border rounded-md px-2 py-1 text-[11px] text-white focus:outline-none focus:border-primary disabled:opacity-50"
-      >
+      <span className="text-[11px] text-gray-400 w-full sm:w-auto">Crear como actividad nueva:</span>
+      <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={busy}
+        aria-label="Tipo de actividad" className={controlClass}>
         <option value="">Tipo de actividad…</option>
         {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
       </select>
-      <button
-        type="button"
-        onClick={() => onCreateActivity(issue.id, tipo)}
-        disabled={!tipo || busy}
-        className="flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-md bg-primary/20 border border-primary/40 text-primary hover:bg-primary/30 disabled:opacity-40 disabled:cursor-not-allowed"
-      >
+      <button type="button" onClick={() => onChoice(issue.id, { tipo })} disabled={!tipo || busy} className={actionClass}>
         {busy ? <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> : <Plus className="w-3 h-3 mr-1" />}
         Crear actividad
       </button>
@@ -52,7 +46,59 @@ function MakeActivityControl({ issue, busy, onCreateActivity }) {
   );
 }
 
-function IssueRow({ issue, ignored, busy, onToggleIgnore, onShowBlock, onShowFragment, onCreateActivity }) {
+// Any unassigned block: add its content to the end of an existing activity
+// (e.g. questions that belong to a Cuestionario). Activities of the block's
+// own unit are listed first; a Cuestionario with no questions is marked.
+function AppendControl({ issue, activities = [], busy, onChoice }) {
+  const [target, setTarget] = useState('');
+  if (!activities.length) return null;
+  const sameUnit = activities.filter((a) => a.unidad === issue.unidad);
+  const others = activities.filter((a) => a.unidad !== issue.unidad);
+  const label = (a) => `Actividad ${a.num} · ${a.tipo} (Unidad ${a.unidad})${a.sinPreguntas ? ' — sin preguntas' : ''}`;
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-2">
+      <span className="text-[11px] text-gray-400 w-full sm:w-auto">O añadir a una actividad existente:</span>
+      <select value={target} onChange={(e) => setTarget(e.target.value)} disabled={busy}
+        aria-label="Actividad destino" className={controlClass}>
+        <option value="">Actividad…</option>
+        {sameUnit.length > 0 && others.length > 0 ? (
+          <>
+            <optgroup label={`Unidad ${issue.unidad}`}>
+              {sameUnit.map((a) => <option key={a.num} value={a.num}>{label(a)}</option>)}
+            </optgroup>
+            <optgroup label="Otras unidades">
+              {others.map((a) => <option key={a.num} value={a.num}>{label(a)}</option>)}
+            </optgroup>
+          </>
+        ) : activities.map((a) => <option key={a.num} value={a.num}>{label(a)}</option>)}
+      </select>
+      <button type="button" onClick={() => onChoice(issue.id, { agregar_a: Number(target) })}
+        disabled={!target || busy} className={actionClass}>
+        {busy ? <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> : <Plus className="w-3 h-3 mr-1" />}
+        Añadir
+      </button>
+    </div>
+  );
+}
+
+function ResolvedText({ resolved }) {
+  if (resolved.accion === 'agregar') {
+    return (
+      <p className="text-xs text-primary mt-1 leading-relaxed">
+        Su contenido se añadirá al final de la <b>Actividad {resolved.actividad}</b> y se subirá con ella.
+      </p>
+    );
+  }
+  return (
+    <p className="text-xs text-primary mt-1 leading-relaxed">
+      Se creará como <b>{resolved.tipo}</b> «{resolved.nombre}» en la Unidad {resolved.unidad} y se subirá su contenido.
+    </p>
+  );
+}
+
+const BLOCK_ISSUES = ['actividad_no_reconocida', 'contenido_sin_asignar'];
+
+function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBlock, onShowFragment, onChoice }) {
   const blocking = issue.bloquea;
   const resolved = issue.resuelto;
   const Icon = resolved ? CheckCircle2 : blocking ? CircleAlert : Info;
@@ -64,6 +110,7 @@ function IssueRow({ issue, ignored, busy, onToggleIgnore, onShowBlock, onShowFra
         ? 'border-warning/40 bg-warning/5'
         : 'border-border bg-background/60';
   const iconColor = resolved ? 'text-primary' : blocking && !ignored ? 'text-warning' : 'text-gray-400';
+  const canChoose = BLOCK_ISSUES.includes(issue.tipo) && !resolved && !ignored;
 
   return (
     <li className={`rounded-lg border px-3 py-2.5 ${tone}`}>
@@ -75,49 +122,35 @@ function IssueRow({ issue, ignored, busy, onToggleIgnore, onShowBlock, onShowFra
             {ignored && !resolved && <span className="ml-2 text-[10px] font-normal text-gray-500">(ignorado)</span>}
             {!blocking && !ignored && !resolved && <span className="ml-2 text-[10px] font-normal text-gray-500">(aviso, no bloquea)</span>}
           </p>
-          {resolved ? (
-            <p className="text-xs text-primary mt-1 leading-relaxed">
-              Se creará como <b>{resolved.tipo}</b> «{resolved.nombre}» en la Unidad {resolved.unidad} y se subirá su contenido.
-            </p>
-          ) : (
+          {resolved ? <ResolvedText resolved={resolved} /> : (
             <p className="text-xs text-gray-400 mt-1 leading-relaxed">{issue.detalle}</p>
           )}
-          {issue.tipo === 'actividad_no_reconocida' && !resolved && !ignored && (
-            <MakeActivityControl issue={issue} busy={busy} onCreateActivity={onCreateActivity} />
+          {canChoose && issue.tipo === 'actividad_no_reconocida' && (
+            <MakeActivityControl issue={issue} busy={busy} onChoice={onChoice} />
+          )}
+          {canChoose && (
+            <AppendControl issue={issue} activities={activities} busy={busy} onChoice={onChoice} />
           )}
           <div className="flex items-center gap-3 mt-2">
             {resolved ? (
-              <button
-                type="button"
-                onClick={() => onShowFragment(resolved)}
-                className="flex items-center text-[11px] text-primary hover:underline"
-              >
+              <button type="button" onClick={() => onShowFragment(resolved)}
+                className="flex items-center text-[11px] text-primary hover:underline">
                 <Eye className="w-3 h-3 mr-1" /> Ver parseo
               </button>
             ) : issue.bloque && (
-              <button
-                type="button"
-                onClick={() => onShowBlock(issue.bloque)}
-                className="flex items-center text-[11px] text-primary hover:underline"
-              >
+              <button type="button" onClick={() => onShowBlock(issue.bloque)}
+                className="flex items-center text-[11px] text-primary hover:underline">
                 <Eye className="w-3 h-3 mr-1" /> Ver contenido
               </button>
             )}
             {resolved ? (
-              <button
-                type="button"
-                onClick={() => onCreateActivity(issue.id, null)}
-                disabled={busy}
-                className="flex items-center text-[11px] text-gray-400 hover:text-white disabled:opacity-40"
-              >
+              <button type="button" onClick={() => onChoice(issue.id, null)} disabled={busy}
+                className="flex items-center text-[11px] text-gray-400 hover:text-white disabled:opacity-40">
                 <Undo2 className="w-3 h-3 mr-1" /> Deshacer
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => onToggleIgnore(issue.id)}
-                className="flex items-center text-[11px] text-gray-400 hover:text-white"
-              >
+              <button type="button" onClick={() => onToggleIgnore(issue.id)}
+                className="flex items-center text-[11px] text-gray-400 hover:text-white">
                 {ignored
                   ? <><Undo2 className="w-3 h-3 mr-1" /> Deshacer</>
                   : <><EyeOff className="w-3 h-3 mr-1" /> Ignorar</>}
@@ -196,7 +229,7 @@ function DocumentMap({ blocks, onShowBlock }) {
 export const isUnresolved = (issue, ignored) => issue.bloquea && !issue.resuelto && !ignored.has(issue.id);
 
 export default function DocumentReviewPanel({
-  coverage, ignored, busyIssue, error, onToggleIgnore, onShowBlock, onShowFragment, onCreateActivity
+  coverage, activities = [], ignored, busyIssue, error, onToggleIgnore, onShowBlock, onShowFragment, onChoice
 }) {
   if (!coverage) return null;
   const issues = coverage.problemas || [];
@@ -228,7 +261,7 @@ export default function DocumentReviewPanel({
           <p className="text-xs text-gray-400 mb-3">
             Compara lo que se leyó con la estructura esperada del documento. Cada problema se resuelve
             corrigiendo el .docx y volviéndolo a subir, marcándolo como «Ignorar» si es intencional o,
-            para un bloque que es una actividad, eligiendo su tipo y pulsando «Crear actividad».
+            para un bloque sin asignar, creándolo como actividad nueva o añadiéndolo a una actividad existente.
           </p>
           {error && (
             <p className="mb-3 text-xs text-error bg-error/10 border border-error/30 rounded-lg px-3 py-2">{error}</p>
@@ -240,10 +273,11 @@ export default function DocumentReviewPanel({
                 issue={issue}
                 ignored={ignored.has(issue.id)}
                 busy={busyIssue !== null}
+                activities={activities}
                 onToggleIgnore={onToggleIgnore}
                 onShowBlock={onShowBlock}
                 onShowFragment={onShowFragment}
-                onCreateActivity={onCreateActivity}
+                onChoice={onChoice}
               />
             ))}
           </ul>

@@ -428,6 +428,7 @@
  },
  "v7/DP.LógicaDeProgramaciónII.docx": {
   "bloqueantes": [
+   "cuestionario_sin_preguntas:a1",
    "tipo_desconocido:a5"
   ],
   "fragmentos": {
@@ -441,6 +442,7 @@
    "material/Material_de_referencia_U2.html": "0262780f6d265bf9"
   },
   "problemas": [
+   "cuestionario_sin_preguntas:a1",
    "tipo_desconocido:a5"
   ],
   "unidades": {
@@ -523,9 +525,7 @@
    "contenido_sin_asignar:4a1850dce5",
    "tipo_desconocido:a1",
    "unidad_no_encontrada:u2",
-   "unidad_no_encontrada:u3",
-   "unidad_sin_preguntas_orientadoras:u1",
-   "unidad_sin_resumen:u1"
+   "unidad_no_encontrada:u3"
   ],
   "fragmentos": {
    "actividades/actividad1.html": "d224bdd18990bb86",
@@ -546,9 +546,7 @@
    "contenido_sin_asignar:4a1850dce5",
    "tipo_desconocido:a1",
    "unidad_no_encontrada:u2",
-   "unidad_no_encontrada:u3",
-   "unidad_sin_preguntas_orientadoras:u1",
-   "unidad_sin_resumen:u1"
+   "unidad_no_encontrada:u3"
   ],
   "unidades": {
    "1": {
@@ -572,9 +570,7 @@
    "contenido_sin_asignar:4a1850dce5",
    "tipo_desconocido:a1",
    "unidad_no_encontrada:u2",
-   "unidad_no_encontrada:u3",
-   "unidad_sin_preguntas_orientadoras:u1",
-   "unidad_sin_resumen:u1"
+   "unidad_no_encontrada:u3"
   ],
   "fragmentos": {
    "actividades/actividad1.html": "80a968d367d0659c",
@@ -595,9 +591,7 @@
    "contenido_sin_asignar:4a1850dce5",
    "tipo_desconocido:a1",
    "unidad_no_encontrada:u2",
-   "unidad_no_encontrada:u3",
-   "unidad_sin_preguntas_orientadoras:u1",
-   "unidad_sin_resumen:u1"
+   "unidad_no_encontrada:u3"
   ],
   "unidades": {
    "1": {
@@ -616,13 +610,7 @@
    "actividad_no_reconocida:dd8fc1a386",
    "contenido_sin_asignar:4a1850dce5",
    "tipo_desconocido:a1",
-   "tipo_desconocido:a6",
-   "unidad_sin_preguntas_orientadoras:u1",
-   "unidad_sin_preguntas_orientadoras:u2",
-   "unidad_sin_preguntas_orientadoras:u3",
-   "unidad_sin_resumen:u1",
-   "unidad_sin_resumen:u2",
-   "unidad_sin_resumen:u3"
+   "tipo_desconocido:a6"
   ],
   "fragmentos": {
    "actividades/actividad1.html": "d224bdd18990bb86",
@@ -647,13 +635,7 @@
    "actividad_no_reconocida:dd8fc1a386",
    "contenido_sin_asignar:4a1850dce5",
    "tipo_desconocido:a1",
-   "tipo_desconocido:a6",
-   "unidad_sin_preguntas_orientadoras:u1",
-   "unidad_sin_preguntas_orientadoras:u2",
-   "unidad_sin_preguntas_orientadoras:u3",
-   "unidad_sin_resumen:u1",
-   "unidad_sin_resumen:u2",
-   "unidad_sin_resumen:u3"
+   "tipo_desconocido:a6"
   ],
   "unidades": {
    "1": {

@@ -115,10 +115,13 @@ def _short_preview(html: str, max_len: int = 90) -> str:
     text = " ".join(text.split())
     return text[:max_len] + "…" if len(text) > max_len else text
 
-def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
+def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc", use_ai: bool = True) -> int:
     """
     Finds questions in HTML and exports them to a Moodle XML file retaining full HTML.
     Uses a robust block-level state machine parser.
+
+    use_ai=False skips the optional AI QA step entirely (no API call, no
+    cost) — used by the document review to count questions.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
     
@@ -489,7 +492,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         logger.info("Standard parser found 0 questions but keywords indicate a questionnaire. Starting AI Validation as fallback...")
         should_invoke_ai = True
 
-    if should_invoke_ai:
+    if should_invoke_ai and use_ai:
         ai_start_time = time.perf_counter()
         try:
             import json

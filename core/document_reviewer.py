@@ -127,7 +127,9 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
             continue
 
         if current_unidad:
-            tds = tr.find_all("td")
+            # <th> too: some templates use header cells for Resumen /
+            # Preguntas orientadoras (same rule as core/unidades_intro_parser.py).
+            tds = tr.find_all(["td", "th"])
             if len(tds) >= 1:
                 td1_text = tds[0].get_text(strip=True).upper()
                 
@@ -178,17 +180,6 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
                 "cantidad_preguntas": 0
             }
 
-    # Clean up temporary split folders (unless the caller wants to keep them
-    # around, e.g. to let a UI show exactly how each item was parsed)
-    if cleanup_fragments:
-        for folder in ["actividades", "material", "introduccion", "actividades_extra"]:
-            folder_path = os.path.join(base_dir, folder)
-            if os.path.exists(folder_path):
-                try:
-                    shutil.rmtree(folder_path)
-                except Exception as e:
-                    logger.error(f"Error al eliminar la carpeta {folder_path}: {e}")
-
     # Log results for units
     if not report["unidades"]:
         logger.warning("[NO ENCONTRADO] Ninguna Unidad Didáctica se encontró en el documento.")
@@ -223,25 +214,66 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # document structure (see core/document_coverage.py). Report-only: the UI
     # uses it to list problems and block Run until each is fixed or ignored.
     from core.document_coverage import analyze_document, failed_analysis
-    from core.document_corrections import get_extra_activities
+    from core.document_corrections import get_extra_activities, get_appended_blocks, EXTRA_DIR
+    extras = get_extra_activities(course_id)
     # Blocks the user turned into activities in the review panel (written by
     # the splitter run above). Shown under their unit like any activity.
     report["actividades_extra"] = [
         {k: e[k] for k in ("clave", "issue_id", "nombre", "tipo", "unidad", "archivo")} | {"con_rubrica": bool(e.get("rubrica"))}
-        for e in get_extra_activities(course_id)
+        for e in extras
     ]
     try:
         from core.docx_rubrica_parser import parse_rubricas_from_html
         report["cobertura"] = analyze_document(
-            html, activity_manifest, row_roles, report, parse_rubricas_from_html(html), get_extra_activities(course_id)
+            html, activity_manifest, row_roles, report, parse_rubricas_from_html(html),
+            extras, get_appended_blocks(course_id), _count_quiz_questions(base_dir, activity_manifest, extras, course_id),
         )
     except Exception as e:
         logger.error(f"Error al analizar la cobertura del documento: {e}")
         report["cobertura"] = failed_analysis(f"Error interno: {e}.")
 
+    # After the coverage analysis: it reads the fragment files (quiz questions).
+    # Clean up temporary split folders (unless the caller wants to keep them
+    # around, e.g. to let a UI show exactly how each item was parsed)
+    if cleanup_fragments:
+        for folder in ["actividades", "material", "introduccion", "actividades_extra"]:
+            folder_path = os.path.join(base_dir, folder)
+            if os.path.exists(folder_path):
+                try:
+                    shutil.rmtree(folder_path)
+                except Exception as e:
+                    logger.error(f"Error al eliminar la carpeta {folder_path}: {e}")
+
     logger.info("✓ Revisión de documento completada.")
     _save_reports(base_dir, report, generate_json, generate_text)
     return report
+
+def _count_quiz_questions(base_dir, activity_manifest, extras, course_id) -> dict:
+    """
+    Questions the quiz export would find in each Cuestionario, read from the
+    fragment files the splitter just wrote (so blocks the user added to an
+    activity count too). The optional AI check is off: no API call, no cost.
+    """
+    from actions.html_transformer import extract_questions_from_html_to_moodle_xml
+    from core.document_corrections import EXTRA_DIR
+
+    targets = {}
+    for acts in (activity_manifest or {}).values():
+        for act_num, info in acts.items():
+            if info.get("tipo") == "Cuestionario" and info.get("file"):
+                targets[f"a{act_num}"] = os.path.join(base_dir, "actividades", info["file"])
+    for extra in extras:
+        if extra["tipo"] == "Cuestionario":
+            targets["x" + extra["issue_id"].split(":", 1)[1]] = os.path.join(base_dir, EXTRA_DIR, extra["archivo"])
+
+    counts = {}
+    for key, path in targets.items():
+        if not os.path.exists(path):
+            continue
+        with open(path, "r", encoding="utf-8") as f:
+            counts[key] = extract_questions_from_html_to_moodle_xml(f.read(), None, course_id, use_ai=False)
+    return counts
+
 
 def _save_reports(base_dir, report, generate_json, generate_text):
     if generate_json:
