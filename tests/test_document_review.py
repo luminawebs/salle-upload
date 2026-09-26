@@ -354,6 +354,57 @@ class CorrectionsTests(unittest.TestCase):
         self.assertEqual(get_extra_activities(self.COURSE)[0]["antes_de_actividad"], 1)
 
 
+class QuizQuestionTests(unittest.TestCase):
+    """How many questions a Cuestionario has, as read vs. as the document shows."""
+
+    # Word numbering often produces ONE flat list: questions and options side by
+    # side (this is DP_ARIE's Actividad 6, which used to read as 1 question).
+    FLAT_LIST = (
+        "<p>Número de preguntas de la prueba: 3</p><ol>"
+        "<li>¿Cuál es la capital de Colombia?</li><li>Lima</li><li>Bogotá (Respuesta)</li><li>Quito</li>"
+        "<li>¿Cuánto es 2 + 2?</li><li>3</li><li>4 (Respuesta)</li><li>5</li>"
+        "<li>¿Qué color tiene el cielo?</li><li>Azul (Respuesta)</li><li>Verde</li><li>Rojo</li>"
+        "</ol>"
+    )
+
+    def test_flat_list_questions_are_read_separately(self):
+        from actions.html_transformer import parse_questions, summarize_quiz
+        questions = parse_questions(self.FLAT_LIST)
+        self.assertEqual(len(questions), 3)
+        self.assertEqual([len(q["options"]) for q in questions], [3, 3, 3])
+        self.assertEqual([sum(o["is_correct"] for o in q["options"]) for q in questions], [1, 1, 1])
+        summary = summarize_quiz(self.FLAT_LIST)
+        self.assertEqual((summary["encontradas"], summary["declaradas"], summary["esperadas"], summary["no_leidas"]),
+                         (3, 3, 3, []))
+
+    def test_questions_merged_into_one_are_listed_as_unread(self):
+        # "Respuesta correcta: X" after unmarked options: the parser merges these.
+        html = ("<p>Preguntas:</p><ul><li>¿Primera pregunta?</li><li>Uno</li><li>Dos</li></ul>"
+                "<p>Respuesta correcta: Uno</p>"
+                "<ul><li>¿Segunda pregunta?</li><li>Tres</li><li>Cuatro</li></ul>"
+                "<p>Respuesta correcta: Tres</p>")
+        from actions.html_transformer import summarize_quiz
+        summary = summarize_quiz(html)
+        self.assertLess(summary["encontradas"], summary["esperadas"])
+        self.assertEqual(summary["esperadas"], 2)
+        self.assertIn("¿Segunda pregunta?", summary["no_leidas"])
+
+    def test_review_reports_missing_questions_and_counts(self):
+        course = "_test_quiz_counts"
+        course_dir = os.path.join(ROOT, "workspace", course)
+        quiz_tools = _row("Herramientas de la plataforma virtual (Marque con una X): Foro___ Tarea___ Cuestionario__X__")
+        partial = ("<p>Número de preguntas de la prueba: 10</p>"
+                   "<p>1. ¿Cuál es la capital de Colombia?</p><p>=a) Bogotá</p><p>b) Lima</p>")
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                    _row("ACTIVIDAD 1. Evaluación"), f"<tr><td>{partial}</td></tr>", quiz_tools)
+        report = _review_html(html, course)
+        act = report["unidades"]["1"]["actividades"]["1"]
+        self.assertEqual((act["cantidad_preguntas"], act["preguntas_esperadas"]), (1, 10))
+        issue = next(p for p in report["cobertura"]["problemas"] if p["tipo"] == "cuestionario_preguntas_incompletas")
+        self.assertIn("1 de 10", issue["titulo"])
+        self.assertTrue(issue["bloquea"])
+
+
 def _docx_paths():
     return sorted(glob.glob(os.path.join(DOCS_DIR, "**", "*.docx"), recursive=True))
 

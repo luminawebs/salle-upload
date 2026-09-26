@@ -54,7 +54,7 @@ function AppendControl({ issue, activities = [], busy, onChoice }) {
   if (!activities.length) return null;
   const sameUnit = activities.filter((a) => a.unidad === issue.unidad);
   const others = activities.filter((a) => a.unidad !== issue.unidad);
-  const label = (a) => `Actividad ${a.num} · ${a.tipo} (Unidad ${a.unidad})${a.sinPreguntas ? ' — sin preguntas' : ''}`;
+  const label = (a) => `Actividad ${a.num} · ${a.tipo} (Unidad ${a.unidad})${a.sinPreguntas ? ' — faltan preguntas' : ''}`;
   return (
     <div className="flex flex-wrap items-center gap-2 mt-2">
       <span className="text-[11px] text-gray-400 w-full sm:w-auto">O añadir a una actividad existente:</span>
@@ -98,6 +98,48 @@ function ResolvedText({ resolved }) {
 
 const BLOCK_ISSUES = ['actividad_no_reconocida', 'contenido_sin_asignar'];
 
+// Question count for a Cuestionario, shown on its activity row: green when
+// every question the document evidently has was read, amber when some are
+// missing ("1 de 10"), red when none were read.
+export function QuestionCountBadge({ found, expected }) {
+  if (found === undefined || found === null) return null;
+  const missing = expected > found;
+  const tone = found === 0
+    ? 'text-error bg-error/10 border-error/30'
+    : missing
+      ? 'text-warning bg-warning/10 border-warning/30'
+      : 'text-success bg-success/10 border-success/30';
+  const label = missing ? `${found} de ${expected} preguntas` : `${found} pregunta${found === 1 ? '' : 's'}`;
+  return (
+    <span
+      className={`ml-2 shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded border ${tone}`}
+      title={missing ? 'Faltan preguntas por leer: revisa «Revisión del documento».' : 'Preguntas que se subirán al banco del cuestionario.'}
+    >
+      {label}
+    </span>
+  );
+}
+
+// The "¿…?" lines of a Cuestionario that didn't become questions.
+function UnreadQuestions({ questions }) {
+  const [open, setOpen] = useState(false);
+  if (!questions || !questions.length) return null;
+  return (
+    <div className="mt-2">
+      <button type="button" onClick={() => setOpen(!open)}
+        className="flex items-center text-[11px] text-gray-300 hover:text-white">
+        {open ? <ChevronDown className="w-3 h-3 mr-1" /> : <ChevronRight className="w-3 h-3 mr-1" />}
+        {open ? 'Ocultar' : 'Ver'} {questions.length} pregunta{questions.length === 1 ? '' : 's'} no leída{questions.length === 1 ? '' : 's'}
+      </button>
+      {open && (
+        <ol className="mt-1.5 ml-4 list-decimal space-y-1 text-[11px] text-gray-400">
+          {questions.map((q, i) => <li key={i} className="break-words">{q}</li>)}
+        </ol>
+      )}
+    </div>
+  );
+}
+
 function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBlock, onShowFragment, onChoice }) {
   const blocking = issue.bloquea;
   const resolved = issue.resuelto;
@@ -125,6 +167,7 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
           {resolved ? <ResolvedText resolved={resolved} /> : (
             <p className="text-xs text-gray-400 mt-1 leading-relaxed">{issue.detalle}</p>
           )}
+          {!resolved && <UnreadQuestions questions={issue.preguntas_no_leidas} />}
           {canChoose && issue.tipo === 'actividad_no_reconocida' && (
             <MakeActivityControl issue={issue} busy={busy} onChoice={onChoice} />
           )}

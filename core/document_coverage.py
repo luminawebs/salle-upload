@@ -275,6 +275,42 @@ def _block_issues(blocks):
     return issues
 
 
+_MAX_LISTED_QUESTIONS = 30
+
+
+def _quiz_issue(key: str, label: str, summary, **extra):
+    """
+    The problem to report for one Cuestionario, or None. `summary` is
+    actions.html_transformer.summarize_quiz(): questions read vs. the number
+    the document evidently has (stated, one per "Respuesta correcta", or
+    "¿…?" lines that didn't become questions).
+    """
+    if not summary:
+        return None
+    read, expected, unread = summary["encontradas"], summary["esperadas"], summary["no_leidas"]
+    hints = (
+        "Puede que las preguntas estén escritas en un formato que el lector de preguntas no "
+        "reconoce (revisa «Ver parseo» de la actividad), o que estén en un bloque sin asignar: "
+        "en ese caso usa «Añadir a una actividad existente» en ese bloque."
+    )
+    listed = {"preguntas_no_leidas": unread[:_MAX_LISTED_QUESTIONS], "preguntas_leidas": read, "preguntas_esperadas": expected}
+    if read == 0:
+        return _issue(
+            "cuestionario_sin_preguntas", key,
+            f"{label} (Cuestionario): sin preguntas" + (f" (el documento tiene {expected})" if expected else ""),
+            f"No se reconoció ninguna pregunta, así que el cuestionario quedará vacío en Moodle. {hints}",
+            **listed, **extra,
+        )
+    if read < expected:
+        return _issue(
+            "cuestionario_preguntas_incompletas", key,
+            f"{label} (Cuestionario): se leyeron {read} de {expected} preguntas",
+            f"Solo se subirán {read} pregunta(s); el documento tiene al menos {expected}. {hints}",
+            **listed, **extra,
+        )
+    return None
+
+
 def find_unassigned_blocks(trs, row_roles) -> list:
     """
     The blocks of rows no unit/activity claimed, each with the id of the
@@ -301,7 +337,7 @@ def failed_analysis(reason: str) -> dict:
 
 
 def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, rubricas: dict,
-                     extras: list = None, appended: list = None, question_counts: dict = None) -> dict:
+                     extras: list = None, appended: list = None, quiz_info: dict = None) -> dict:
     """
     html: raw_docx_extracted.html. manifest / row_roles: what
     run_docx_splitting_workflow returned / filled in for that same HTML.
@@ -310,8 +346,9 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
     extras / appended: the blocks the user turned into activities or added to
     an existing one (core/document_corrections) — their problems are
     reported as resolved ("resuelto") instead of open.
-    question_counts: questions found per quiz, {"a<N>": n} for Actividad N and
-    {"x<issue hash>": n} for a quiz created in the review. None skips the check.
+    quiz_info: actions.html_transformer.summarize_quiz() per quiz, keyed
+    "a<N>" for Actividad N and "x<issue hash>" for a quiz created in the
+    review. None skips the question checks.
     """
     soup = BeautifulSoup(html, "html.parser")
     from core.data_parser import top_level_rows
@@ -341,13 +378,10 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
             block["titulo"] = f"{block['titulo']} (añadido a la Actividad {added['actividad']} en la revisión)"
     for extra in extras or []:
         issue_hash = extra["issue_id"].split(":", 1)[1]
-        if extra["tipo"] == "Cuestionario" and question_counts is not None and question_counts.get(f"x{issue_hash}") == 0:
-            issues.append(_issue(
-                "cuestionario_sin_preguntas", "x" + issue_hash,
-                f"«{extra['nombre']}» (Cuestionario): sin preguntas",
-                "No se reconoció ninguna pregunta en este bloque, así que el cuestionario quedará vacío en Moodle.",
-                unidad=extra["unidad"],
-            ))
+        quiz_issue = _quiz_issue("x" + issue_hash, f"«{extra['nombre']}»", (quiz_info or {}).get("x" + issue_hash),
+                                 unidad=extra["unidad"]) if extra["tipo"] == "Cuestionario" else None
+        if quiz_issue:
+            issues.append(quiz_issue)
         if extra["tipo"] in TYPES_NEEDING_RUBRIC and not extra.get("rubrica"):
             issues.append(_issue(
                 "rubrica_faltante", "x" + extra["issue_id"].split(":", 1)[1],
@@ -426,17 +460,10 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
                     "en la tabla «Herramientas de la plataforma virtual» de esta actividad.",
                     actividad=act, unidad=int(unit_key),
                 ))
-            if info.get("tipo") == "Cuestionario" and question_counts is not None and question_counts.get(f"a{act}") == 0:
-                issues.append(_issue(
-                    "cuestionario_sin_preguntas", f"a{act}",
-                    f"Actividad {act} (Cuestionario): sin preguntas",
-                    "No se reconoció ninguna pregunta en esta actividad, así que el cuestionario "
-                    "quedará vacío en Moodle. Puede que las preguntas estén escritas en un formato "
-                    "que el lector de preguntas no reconoce (revisa «Ver parseo» de la actividad), o "
-                    "que estén en un bloque sin asignar: en ese caso usa «Añadir a una actividad "
-                    "existente» en ese bloque.",
-                    actividad=act, unidad=int(unit_key),
-                ))
+            quiz_issue = _quiz_issue(f"a{act}", f"Actividad {act}", (quiz_info or {}).get(f"a{act}"),
+                                     actividad=act, unidad=int(unit_key)) if info.get("tipo") == "Cuestionario" else None
+            if quiz_issue:
+                issues.append(quiz_issue)
             if info.get("tipo") in TYPES_NEEDING_RUBRIC and act not in rubricas:
                 issues.append(_issue(
                     "rubrica_faltante", f"a{act}",

@@ -115,13 +115,11 @@ def _short_preview(html: str, max_len: int = 90) -> str:
     text = " ".join(text.split())
     return text[:max_len] + "…" if len(text) > max_len else text
 
-def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc", use_ai: bool = True) -> int:
+def parse_questions(html_content: str, course_id: int = None) -> list:
     """
-    Finds questions in HTML and exports them to a Moodle XML file retaining full HTML.
-    Uses a robust block-level state machine parser.
-
-    use_ai=False skips the optional AI QA step entirely (no API call, no
-    cost) — used by the document review to count questions.
+    The questions found in an activity's HTML, as parsed dicts (stem_html,
+    options, feedback, q_type). No XML, no AI. Shared by the Moodle XML export
+    below and by the document review, so both always count the same questions.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
     
@@ -309,6 +307,17 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         is_correct = False
         clean_html_opt = html_str
         
+        # A "¿…?" line with no answer marker is a question, even when it sits in
+        # the same list as the options: Word numbering often puts questions and
+        # their options in one flat list (e.g. 10 questions + 40 options as 50
+        # items), and the list-wide "option group" rule below used to swallow
+        # every question after the first as an extra option.
+        looks_like_question = (
+            text.startswith('¿') and '?' in text
+            and "(respuesta" not in text.lower() and "(correct answer)" not in text.lower()
+            and not re.search(r'\([xX]\)$', text)
+        )
+
         if b_type != 'table' and b_type != 'img':
             if re.match(r'^=?[A-Ea-e][\.\)\-]\s*', text) or text.lower().startswith('verdadero') or text.lower().startswith('falso'):
                 is_option = True
@@ -316,9 +325,9 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 is_option = True
             elif text.strip().startswith('='):
                 is_option = True
-            elif l_group_id and l_group_id in option_groups:
+            elif l_group_id and l_group_id in option_groups and not looks_like_question:
                 is_option = True
-            elif current_q and state == 'OPTIONS':
+            elif current_q and state == 'OPTIONS' and not looks_like_question:
                 # Distractors without a marker (e.g. in plain text format)
                 if len(text.split()) < 50 and not text.lower().startswith('retroalimentaci') and not text.lower().startswith('explicaci'):
                     if not QUESTION_NUMBER_RE.match(text) and not text.lower().startswith('enunciado:'):
@@ -334,7 +343,10 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 clean_html_opt = re.sub(r'(>|^)\s*=\s*', r'\1', clean_html_opt, count=1).strip()
                 # Move any unmarked distractors from the stem into options
                 if state == 'STEM':
-                    while current_q['stem_html']:
+                    # Keep at least the first stem line: it IS the question.
+                    # Popping it too emptied the stem and the whole question
+                    # was silently dropped (e.g. "1. ¿Capital?" / "=a) Bogotá").
+                    while len(current_q['stem_html']) > 1:
                         last_stem_html = current_q['stem_html'][-1]
                         last_stem_text = BeautifulSoup(last_stem_html, 'html.parser').get_text(strip=True)
                         if len(last_stem_text.split()) < 15 and not last_stem_text.lower().startswith('enunciado:') and not last_stem_text.lower().startswith('pregunta'):
@@ -406,6 +418,76 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
                 current_q['feedback'][fb_type].append(html_str)
 
     save_q()
+    return questions
+
+
+_ACTIVITY_SECTION_QUESTION_RE = re.compile(r'^¿(?:qu.|c.mo)\s+(?:lo\s+)?vamos\s+a\s+(?:lograr|evaluar|hacer)\?', re.IGNORECASE)
+_STATED_COUNT_RES = (
+    re.compile(r'n[uú]mero de preguntas[^0-9]{0,40}?(\d+)', re.IGNORECASE),
+    re.compile(r'cuestionario con\s+(\d+)\s+preguntas', re.IGNORECASE),
+)
+
+
+def summarize_quiz(html_content: str, course_id: int = None) -> dict:
+    """
+    What the document review shows for a Cuestionario:
+    - encontradas: questions the parser reads (what the export would upload).
+    - declaradas: the number of questions the document itself states
+      ("Número de preguntas de la prueba: 10"), or None.
+    - no_leidas: "¿…?" lines that didn't become a question of their own —
+      questions in a layout the parser doesn't recognize, or several questions
+      merged into one (each parsed question accounts for one "¿…?" line).
+    - esperadas: the most questions the document evidently has: the stated
+      number, one per "Respuesta correcta: …" line, or read + unread.
+    """
+    def norm(text):
+        return " ".join(text.split()).lower()
+
+    questions = parse_questions(html_content, course_id)
+    stems = [norm(BeautifulSoup("".join(q['stem_html']), 'html.parser').get_text(" ")) for q in questions]
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    plain = soup.get_text(" ")
+    declared = None
+    for pattern in _STATED_COUNT_RES:
+        m = pattern.search(plain)
+        if m:
+            declared = int(m.group(1))
+            break
+
+    candidates, answer_lines = [], 0
+    for el in soup.find_all(['p', 'li', 'h1', 'h2', 'h3', 'h4']):
+        if el.find(['p', 'li']):
+            continue  # only the innermost block, so no line is counted twice
+        text = " ".join(el.get_text(" ").split())
+        if re.match(r'^(?:Informaci.n para el equipo de producci.n|Lista de herramientas|Lecturas para desarrollar|Glosario)', text, re.IGNORECASE):
+            break  # same footer the parser stops at
+        if text.lower().startswith('respuesta correcta'):
+            answer_lines += 1
+        elif text.startswith('¿') and '?' in text and not _ACTIVITY_SECTION_QUESTION_RE.match(text) and "(respuesta" not in text.lower():
+            candidates.append(text)
+
+    # Each parsed question can account for one "¿…?" line (the first one in
+    # its stem). Further lines inside the same stem are questions that got
+    # merged into it; lines in no stem at all were read as options or skipped.
+    claimed = set()
+    for stem in stems:
+        for i, text in enumerate(candidates):
+            if i not in claimed and norm(text) in stem:
+                claimed.add(i)
+                break
+    unread = [text for i, text in enumerate(candidates) if i not in claimed]
+
+    expected = max(declared or 0, answer_lines, len(questions) + len(unread))
+    return {"encontradas": len(questions), "declaradas": declared, "esperadas": expected, "no_leidas": unread}
+
+
+def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
+    """
+    Finds questions in HTML and exports them to a Moodle XML file retaining full HTML.
+    Uses a robust block-level state machine parser (parse_questions).
+    """
+    questions = parse_questions(html_content, course_id)
     
     import time
     parser_start_time = time.perf_counter()
@@ -492,7 +574,7 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
         logger.info("Standard parser found 0 questions but keywords indicate a questionnaire. Starting AI Validation as fallback...")
         should_invoke_ai = True
 
-    if should_invoke_ai and use_ai:
+    if should_invoke_ai:
         ai_start_time = time.perf_counter()
         try:
             import json

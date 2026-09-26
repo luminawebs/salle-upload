@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import AdvancedSettingsPage from './AdvancedSettingsPage';
 import AutomationControls from './AutomationControls';
-import DocumentReviewPanel, { isUnresolved } from './DocumentReviewPanel';
+import DocumentReviewPanel, { isUnresolved, QuestionCountBadge } from './DocumentReviewPanel';
 import { AutomationContext } from '../context/AutomationContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -208,7 +208,7 @@ export default function AutomationView() {
   // it's the likely home for an orphaned set of questions.
   const existingActivities = (() => {
     const noQuestions = new Set((coverage?.problemas || [])
-      .filter((p) => p.tipo === 'cuestionario_sin_preguntas' && p.actividad)
+      .filter((p) => ['cuestionario_sin_preguntas', 'cuestionario_preguntas_incompletas'].includes(p.tipo) && p.actividad)
       .map((p) => p.actividad));
     return Object.entries(report?.unidades || {})
       .flatMap(([unit, data]) => Object.entries(data.actividades || {}).map(([num, act]) => ({
@@ -755,6 +755,9 @@ export default function AutomationView() {
                                           <span className={`text-[11px] font-medium truncate ${colorClass}`}>
                                             Actividad {id} - {act.tipo}
                                           </span>
+                                          {act.tipo === 'Cuestionario' && (
+                                            <QuestionCountBadge found={act.cantidad_preguntas} expected={act.preguntas_esperadas} />
+                                          )}
                                           {isSkipped && <span className="ml-2 text-[10px] text-gray-500 shrink-0">(excluida)</span>}
                                         </label>
                                         <button
@@ -779,9 +782,14 @@ export default function AutomationView() {
                                   key={extra.clave}
                                   className="flex items-center justify-between rounded border border-primary/30 bg-primary/5 px-2.5 py-1.5 mt-1.5"
                                 >
-                                  <span className="text-[11px] font-medium text-primary truncate min-w-0">
-                                    {extra.nombre} - {extra.tipo}
-                                    <span className="ml-2 text-[10px] font-normal text-gray-500">(añadida en la revisión)</span>
+                                  <span className="flex items-center min-w-0">
+                                    <span className="text-[11px] font-medium text-primary truncate min-w-0">
+                                      {extra.nombre} - {extra.tipo}
+                                      <span className="ml-2 text-[10px] font-normal text-gray-500">(añadida en la revisión)</span>
+                                    </span>
+                                    {extra.tipo === 'Cuestionario' && (
+                                      <QuestionCountBadge found={extra.cantidad_preguntas} expected={extra.preguntas_esperadas} />
+                                    )}
                                   </span>
                                   <button
                                     type="button"

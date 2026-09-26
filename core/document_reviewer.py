@@ -223,10 +223,24 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
         for e in extras
     ]
     try:
+        quizzes = _summarize_quizzes(base_dir, activity_manifest, extras, course_id)
+        # Question counts shown on each Cuestionario in the UI.
+        for unit in report["unidades"].values():
+            for act_num, act in unit["actividades"].items():
+                summary = quizzes.get(f"a{act_num}")
+                if summary:
+                    act["cantidad_preguntas"] = summary["encontradas"]
+                    act["preguntas_esperadas"] = summary["esperadas"]
+        for extra in report["actividades_extra"]:
+            summary = quizzes.get("x" + extra["issue_id"].split(":", 1)[1])
+            if summary:
+                extra["cantidad_preguntas"] = summary["encontradas"]
+                extra["preguntas_esperadas"] = summary["esperadas"]
+
         from core.docx_rubrica_parser import parse_rubricas_from_html
         report["cobertura"] = analyze_document(
             html, activity_manifest, row_roles, report, parse_rubricas_from_html(html),
-            extras, get_appended_blocks(course_id), _count_quiz_questions(base_dir, activity_manifest, extras, course_id),
+            extras, get_appended_blocks(course_id), quizzes,
         )
     except Exception as e:
         logger.error(f"Error al analizar la cobertura del documento: {e}")
@@ -248,13 +262,14 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     _save_reports(base_dir, report, generate_json, generate_text)
     return report
 
-def _count_quiz_questions(base_dir, activity_manifest, extras, course_id) -> dict:
+def _summarize_quizzes(base_dir, activity_manifest, extras, course_id) -> dict:
     """
-    Questions the quiz export would find in each Cuestionario, read from the
-    fragment files the splitter just wrote (so blocks the user added to an
-    activity count too). The optional AI check is off: no API call, no cost.
+    For each Cuestionario: questions the quiz export would read vs. the number
+    the document evidently has (see actions.html_transformer.summarize_quiz),
+    from the fragment files the splitter just wrote (so blocks the user added
+    to an activity count too). No AI, no API call.
     """
-    from actions.html_transformer import extract_questions_from_html_to_moodle_xml
+    from actions.html_transformer import summarize_quiz
     from core.document_corrections import EXTRA_DIR
 
     targets = {}
@@ -266,13 +281,13 @@ def _count_quiz_questions(base_dir, activity_manifest, extras, course_id) -> dic
         if extra["tipo"] == "Cuestionario":
             targets["x" + extra["issue_id"].split(":", 1)[1]] = os.path.join(base_dir, EXTRA_DIR, extra["archivo"])
 
-    counts = {}
+    summaries = {}
     for key, path in targets.items():
         if not os.path.exists(path):
             continue
         with open(path, "r", encoding="utf-8") as f:
-            counts[key] = extract_questions_from_html_to_moodle_xml(f.read(), None, course_id, use_ai=False)
-    return counts
+            summaries[key] = summarize_quiz(f.read(), course_id)
+    return summaries
 
 
 def _save_reports(base_dir, report, generate_json, generate_text):
