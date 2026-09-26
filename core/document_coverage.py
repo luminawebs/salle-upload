@@ -82,6 +82,10 @@ TYPES_NEEDING_RUBRIC = {"Tarea"}
 # Types the pipeline can't turn into a Moodle activity.
 UNRESOLVED_TYPES = {"Desconocido", "No sabe"}
 
+# Types a user can give an unrecognized block to turn it into an activity
+# (core/document_corrections.py).
+ACTIVITY_TYPES = ("Foro", "Tarea", "Cuestionario")
+
 _PLAN_UNIT_RE = re.compile(r"^UNIDAD\s*(?:DIDACTICA\s*)?(\d+)")
 _PLAN_ACTIVITY_START_RE = re.compile(r"^ACTIVIDAD\s+(\d+)\b")
 _MAX_BLOCK_HTML = 200_000
@@ -247,6 +251,8 @@ def _block_issues(blocks):
         where = f"Unidad {b['unidad']}" if b["unidad"] else "antes de la primera unidad"
         looks_like_activity = sum(1 for t in norm_rows if _starts_with_any(t, ACTIVITY_PART_LABELS))
         if looks_like_activity:
+            from core.data_parser import detect_activity_type
+            suggested = detect_activity_type(" ".join(norm_rows))
             issue = _issue(
                 "actividad_no_reconocida", key,
                 f"Posible actividad no reconocida: «{b['titulo']}»",
@@ -254,6 +260,7 @@ def _block_issues(blocks):
                 f"(«¿Qué vamos a lograr?», herramientas de la plataforma…), pero su "
                 f"encabezado no empieza con «ACTIVIDAD N», así que su contenido no se subirá.",
                 bloque=b["id"], unidad=b["unidad"],
+                tipo_sugerido=suggested if suggested in ACTIVITY_TYPES else None,
             )
         else:
             issue = _issue(
@@ -266,6 +273,18 @@ def _block_issues(blocks):
         b["problema"] = issue["id"]
         issues.append(issue)
     return issues
+
+
+def find_unassigned_blocks(trs, row_roles) -> list:
+    """
+    The blocks of rows no unit/activity claimed, each with the id of the
+    problem the review reports for it ("problema") and its row range. The id
+    is what the user's choices in the review panel are keyed by, so this is
+    the one place both the review and the corrections find blocks.
+    """
+    blocks = _build_blocks(trs, row_roles, _preamble_labels(trs, row_roles))
+    _block_issues(blocks)
+    return [b for b in blocks if b["estado"] == "problema"]
 
 
 def failed_analysis(reason: str) -> dict:
@@ -281,12 +300,15 @@ def failed_analysis(reason: str) -> dict:
     }
 
 
-def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, rubricas: dict) -> dict:
+def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, rubricas: dict, extras: list = None) -> dict:
     """
     html: raw_docx_extracted.html. manifest / row_roles: what
     run_docx_splitting_workflow returned / filled in for that same HTML.
     report: the review report (for resumen / preguntas per unit).
     rubricas: parse_rubricas_from_html(html).
+    extras: the blocks the user turned into activities
+    (core/document_corrections.get_extra_activities) — their problems are
+    reported as resolved ("resuelto") instead of open.
     """
     soup = BeautifulSoup(html, "html.parser")
     from core.data_parser import top_level_rows
@@ -298,6 +320,24 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
     preamble = _preamble_labels(trs, row_roles)
     blocks = _build_blocks(trs, row_roles, preamble)
     issues = _block_issues(blocks)
+
+    extras_by_issue = {e["issue_id"]: e for e in (extras or [])}
+    for issue in issues:
+        extra = extras_by_issue.get(issue["id"])
+        if extra:
+            issue["resuelto"] = {k: extra[k] for k in ("tipo", "nombre", "unidad", "archivo")}
+            block = next(b for b in blocks if b["id"] == issue["bloque"])
+            block["estado"] = "corregido"
+            block["titulo"] = f"{extra['nombre']} ({extra['tipo']}, añadida en la revisión)"
+    for extra in extras or []:
+        if extra["tipo"] in TYPES_NEEDING_RUBRIC and not extra.get("rubrica"):
+            issues.append(_issue(
+                "rubrica_faltante", "x" + extra["issue_id"].split(":", 1)[1],
+                f"«{extra['nombre']}» ({extra['tipo']}): sin rúbrica",
+                "No se encontró una tabla de «Criterios de desempeño» en este bloque, "
+                "así que no se subirá ninguna rúbrica.",
+                unidad=extra["unidad"],
+            ))
 
     # Where each unit's resumen / preguntas rows physically are, and what
     # kind of cell they start with — to explain *why* one wasn't read.
@@ -312,6 +352,28 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
         for part, label in part_labels.items():
             if unit and norm.startswith(label) and first_cell is not None:
                 unit_part_rows.setdefault((unit, part), first_cell.name)
+
+    # An activity whose rows contain a second "¿Qué vamos a lograr?" swallowed
+    # the next block: its heading ("FORO 2.", …) isn't a stop condition for
+    # the splitter, so that content is uploaded inside this activity.
+    for b in blocks:
+        if b["tipo"] != "actividad":
+            continue
+        starts = [r for r in range(b["fila_inicio"], b["fila_fin"] + 1)
+                  if _norm(_row_text(trs[r])).startswith(ACTIVITY_PART_LABELS[0])]
+        for second in starts[1:]:
+            heading_row = second - 1
+            heading = _row_text(trs[heading_row]) if heading_row > b["fila_inicio"] else ""
+            key = hashlib.sha1(_norm(heading or str(second)).encode("utf-8")).hexdigest()[:10]
+            issues.append(_issue(
+                "actividad_fusionada", f"a{b['actividad']}-{key}",
+                f"Actividad {b['actividad']} parece contener otra actividad"
+                + (f": «{heading[:90]}»" if heading else ""),
+                "Dentro de esta actividad aparece un segundo «¿Qué vamos a lograr?». Su encabezado no se "
+                "reconoce como el inicio de una actividad, así que ese contenido se subirá dentro de la "
+                f"Actividad {b['actividad']}. Corrige el encabezado en el .docx (p. ej. «ACTIVIDAD N.») o ignóralo.",
+                actividad=b["actividad"], unidad=b["unidad"],
+            ))
 
     found = {}  # activity -> unit, as split
     for unit_key, acts in (manifest or {}).items():

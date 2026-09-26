@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  CircleAlert, Info, ShieldCheck, Eye, EyeOff, Undo2, ChevronDown, ChevronRight, ListTree
+  CircleAlert, Info, ShieldCheck, Eye, EyeOff, Undo2, ChevronDown, ChevronRight, ListTree,
+  CheckCircle2, Plus, RefreshCw
 } from 'lucide-react';
 
 // What the pipeline read from the document and what it didn't — built by
@@ -10,32 +11,90 @@ import {
 
 const BLOCK_STYLES = {
   ok: { bar: 'bg-success', text: 'text-gray-200', label: 'Leído' },
+  corregido: { bar: 'bg-primary', text: 'text-primary', label: 'Añadido en la revisión' },
   conocido: { bar: 'bg-gray-600', text: 'text-gray-400', label: 'No se sube (esperado)' },
   problema: { bar: 'bg-warning', text: 'text-warning', label: 'Sin asignar' },
 };
 
-function IssueRow({ issue, ignored, onToggleIgnore, onShowBlock }) {
+// Must match ACTIVITY_TYPES in core/document_coverage.py.
+const ACTIVITY_TYPES = ['Foro', 'Tarea', 'Cuestionario'];
+
+// "Posible actividad no reconocida": turn the block into an activity of the
+// chosen type (core/document_corrections.py). Pre-selects the type the author
+// marked with an X in the block's own "Herramientas…" row, when there is one.
+function MakeActivityControl({ issue, busy, onCreateActivity }) {
+  const [tipo, setTipo] = useState(issue.tipo_sugerido || '');
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-2">
+      <select
+        value={tipo}
+        onChange={(e) => setTipo(e.target.value)}
+        disabled={busy}
+        aria-label="Tipo de actividad"
+        className="bg-background border border-border rounded-md px-2 py-1 text-[11px] text-white focus:outline-none focus:border-primary disabled:opacity-50"
+      >
+        <option value="">Tipo de actividad…</option>
+        {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <button
+        type="button"
+        onClick={() => onCreateActivity(issue.id, tipo)}
+        disabled={!tipo || busy}
+        className="flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-md bg-primary/20 border border-primary/40 text-primary hover:bg-primary/30 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {busy ? <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> : <Plus className="w-3 h-3 mr-1" />}
+        Crear actividad
+      </button>
+      {issue.tipo_sugerido && (
+        <span className="text-[10px] text-gray-500">Sugerido por la «X» marcada en el documento</span>
+      )}
+    </div>
+  );
+}
+
+function IssueRow({ issue, ignored, busy, onToggleIgnore, onShowBlock, onShowFragment, onCreateActivity }) {
   const blocking = issue.bloquea;
-  const Icon = blocking ? CircleAlert : Info;
-  const tone = ignored
-    ? 'border-border bg-background/40 opacity-60'
-    : blocking
-      ? 'border-warning/40 bg-warning/5'
-      : 'border-border bg-background/60';
+  const resolved = issue.resuelto;
+  const Icon = resolved ? CheckCircle2 : blocking ? CircleAlert : Info;
+  const tone = resolved
+    ? 'border-primary/40 bg-primary/5'
+    : ignored
+      ? 'border-border bg-background/40 opacity-60'
+      : blocking
+        ? 'border-warning/40 bg-warning/5'
+        : 'border-border bg-background/60';
+  const iconColor = resolved ? 'text-primary' : blocking && !ignored ? 'text-warning' : 'text-gray-400';
 
   return (
     <li className={`rounded-lg border px-3 py-2.5 ${tone}`}>
       <div className="flex items-start gap-2.5">
-        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${blocking && !ignored ? 'text-warning' : 'text-gray-400'}`} />
+        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${iconColor}`} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-white break-words">
             {issue.titulo}
-            {ignored && <span className="ml-2 text-[10px] font-normal text-gray-500">(ignorado)</span>}
-            {!blocking && !ignored && <span className="ml-2 text-[10px] font-normal text-gray-500">(aviso, no bloquea)</span>}
+            {ignored && !resolved && <span className="ml-2 text-[10px] font-normal text-gray-500">(ignorado)</span>}
+            {!blocking && !ignored && !resolved && <span className="ml-2 text-[10px] font-normal text-gray-500">(aviso, no bloquea)</span>}
           </p>
-          <p className="text-xs text-gray-400 mt-1 leading-relaxed">{issue.detalle}</p>
+          {resolved ? (
+            <p className="text-xs text-primary mt-1 leading-relaxed">
+              Se creará como <b>{resolved.tipo}</b> «{resolved.nombre}» en la Unidad {resolved.unidad} y se subirá su contenido.
+            </p>
+          ) : (
+            <p className="text-xs text-gray-400 mt-1 leading-relaxed">{issue.detalle}</p>
+          )}
+          {issue.tipo === 'actividad_no_reconocida' && !resolved && !ignored && (
+            <MakeActivityControl issue={issue} busy={busy} onCreateActivity={onCreateActivity} />
+          )}
           <div className="flex items-center gap-3 mt-2">
-            {issue.bloque && (
+            {resolved ? (
+              <button
+                type="button"
+                onClick={() => onShowFragment(resolved)}
+                className="flex items-center text-[11px] text-primary hover:underline"
+              >
+                <Eye className="w-3 h-3 mr-1" /> Ver parseo
+              </button>
+            ) : issue.bloque && (
               <button
                 type="button"
                 onClick={() => onShowBlock(issue.bloque)}
@@ -44,15 +103,26 @@ function IssueRow({ issue, ignored, onToggleIgnore, onShowBlock }) {
                 <Eye className="w-3 h-3 mr-1" /> Ver contenido
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => onToggleIgnore(issue.id)}
-              className="flex items-center text-[11px] text-gray-400 hover:text-white"
-            >
-              {ignored
-                ? <><Undo2 className="w-3 h-3 mr-1" /> Deshacer</>
-                : <><EyeOff className="w-3 h-3 mr-1" /> Ignorar</>}
-            </button>
+            {resolved ? (
+              <button
+                type="button"
+                onClick={() => onCreateActivity(issue.id, null)}
+                disabled={busy}
+                className="flex items-center text-[11px] text-gray-400 hover:text-white disabled:opacity-40"
+              >
+                <Undo2 className="w-3 h-3 mr-1" /> Deshacer
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onToggleIgnore(issue.id)}
+                className="flex items-center text-[11px] text-gray-400 hover:text-white"
+              >
+                {ignored
+                  ? <><Undo2 className="w-3 h-3 mr-1" /> Deshacer</>
+                  : <><EyeOff className="w-3 h-3 mr-1" /> Ignorar</>}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -100,7 +170,7 @@ function DocumentMap({ blocks, onShowBlock }) {
               );
               return (
                 <li key={b.id}>
-                  {b.estado === 'problema' ? (
+                  {b.estado === 'problema' || b.estado === 'corregido' ? (
                     <button
                       type="button"
                       onClick={() => onShowBlock(b.id)}
@@ -121,13 +191,19 @@ function DocumentMap({ blocks, onShowBlock }) {
   );
 }
 
-export default function DocumentReviewPanel({ coverage, ignored, onToggleIgnore, onShowBlock }) {
+// A problem is settled once it's ignored or (for an unrecognized block)
+// turned into an activity. Shared with AutomationView's Run gating.
+export const isUnresolved = (issue, ignored) => issue.bloquea && !issue.resuelto && !ignored.has(issue.id);
+
+export default function DocumentReviewPanel({
+  coverage, ignored, busyIssue, error, onToggleIgnore, onShowBlock, onShowFragment, onCreateActivity
+}) {
   if (!coverage) return null;
   const issues = coverage.problemas || [];
   const blocks = coverage.bloques || [];
-  const unresolved = issues.filter((p) => p.bloquea && !ignored.has(p.id));
-  // Unresolved blocking problems first, then notices, then everything ignored.
-  const order = (p) => (ignored.has(p.id) ? 2 : p.bloquea ? 0 : 1);
+  const unresolved = issues.filter((p) => isUnresolved(p, ignored));
+  // Unresolved blocking problems first, then notices, then everything settled.
+  const order = (p) => (p.resuelto || ignored.has(p.id) ? 2 : p.bloquea ? 0 : 1);
   const sorted = [...issues].sort((a, b) => order(a) - order(b));
 
   return (
@@ -151,16 +227,23 @@ export default function DocumentReviewPanel({ coverage, ignored, onToggleIgnore,
         <div className="p-4">
           <p className="text-xs text-gray-400 mb-3">
             Compara lo que se leyó con la estructura esperada del documento. Cada problema se resuelve
-            corrigiendo el .docx y volviéndolo a subir, o marcándolo como «Ignorar» si es intencional.
+            corrigiendo el .docx y volviéndolo a subir, marcándolo como «Ignorar» si es intencional o,
+            para un bloque que es una actividad, eligiendo su tipo y pulsando «Crear actividad».
           </p>
+          {error && (
+            <p className="mb-3 text-xs text-error bg-error/10 border border-error/30 rounded-lg px-3 py-2">{error}</p>
+          )}
           <ul className="space-y-2">
             {sorted.map((issue) => (
               <IssueRow
                 key={issue.id}
                 issue={issue}
                 ignored={ignored.has(issue.id)}
+                busy={busyIssue !== null}
                 onToggleIgnore={onToggleIgnore}
                 onShowBlock={onShowBlock}
+                onShowFragment={onShowFragment}
+                onCreateActivity={onCreateActivity}
               />
             ))}
           </ul>

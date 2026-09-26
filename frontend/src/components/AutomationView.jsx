@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import GlobalSettingsPanel from './GlobalSettingsPanel';
 import AutomationControls from './AutomationControls';
-import DocumentReviewPanel from './DocumentReviewPanel';
+import DocumentReviewPanel, { isUnresolved } from './DocumentReviewPanel';
 import { AutomationContext } from '../context/AutomationContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -173,16 +173,18 @@ export default function AutomationView() {
   const [viewMode, setViewMode] = useState('document'); // 'document' | 'terminal'
   const [skipped, setSkipped] = useState(new Set());
   const [ignoredIssues, setIgnoredIssues] = useState(new Set());
+  const [busyIssue, setBusyIssue] = useState(null); // problem id while a correction is being applied
+  const [reviewError, setReviewError] = useState('');
 
   const courseId = (settings.COURSES_TO_PROCESS || '').trim();
   const logsEndRef = useRef(null);
   const coverage = report?.cobertura || null;
 
-  // Blocking review problems that are neither fixed nor ignored gate Run
-  // (see AutomationControls).
+  // Blocking review problems that are neither fixed, ignored, nor turned
+  // into an activity gate Run (see AutomationControls).
   useEffect(() => {
     const issues = coverage?.problemas || [];
-    setUnresolvedIssueCount(issues.filter((p) => p.bloquea && !ignoredIssues.has(p.id)).length);
+    setUnresolvedIssueCount(issues.filter((p) => isUnresolved(p, ignoredIssues)).length);
   }, [coverage, ignoredIssues, setUnresolvedIssueCount]);
 
   useEffect(() => {
@@ -245,13 +247,49 @@ export default function AutomationView() {
     }
   };
 
+  // Turns an unrecognized block into an activity (tipo = 'Foro' | 'Tarea' |
+  // 'Cuestionario') or undoes it (tipo = null). The server re-runs the review
+  // on the uploaded document and returns the new report, so what's shown is
+  // exactly what Run will use.
+  const createActivityFromBlock = async (issueId, tipo) => {
+    setBusyIssue(issueId);
+    setReviewError('');
+    try {
+      const res = await fetch(`${API_BASE}/api/corrections`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ course_id: courseId, issue_id: issueId, tipo })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo aplicar la corrección.');
+      setReport(data.report || null);
+      setDocumentProblem(describeDocumentProblem(data.report || null));
+    } catch (err) {
+      console.error(err);
+      setReviewError(err.message);
+    } finally {
+      setBusyIssue(null);
+    }
+  };
+
+  const showExtraActivity = (extra) => {
+    setFragment({
+      target: { category: 'actividades_extra', filename: extra.archivo },
+      title: `${extra.nombre} — ${extra.tipo} (Unidad ${extra.unidad}, añadida en la revisión)`
+    });
+  };
+
   const showCoverageBlock = (blockId) => {
     const block = (coverage?.bloques || []).find((b) => b.id === blockId);
     if (!block) return;
     setFragment({
       inline: {
         content: block.html || '',
-        subtitle: `Filas ${block.fila_inicio + 1}–${block.fila_fin + 1} de las tablas del documento · no asignadas a ninguna unidad ni actividad`
+        subtitle: `Filas ${block.fila_inicio + 1}–${block.fila_fin + 1} de las tablas del documento · ` + (
+          block.estado === 'corregido'
+            ? 'contenido original del bloque (convertido en actividad en la revisión)'
+            : 'no asignadas a ninguna unidad ni actividad'
+        )
       },
       title: block.titulo
     });
@@ -277,6 +315,7 @@ export default function AutomationView() {
     setDocumentProblemOverride(false);
     setSkipped(new Set());
     setIgnoredIssues(new Set());
+    setReviewError('');
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -311,6 +350,7 @@ export default function AutomationView() {
     setFileInfo(null);
     setSkipped(new Set());
     setIgnoredIssues(new Set());
+    setReviewError('');
     setUploadedCourseId(null);
     setDocumentProblem(null);
     setDocumentProblemOverride(false);
@@ -529,8 +569,12 @@ export default function AutomationView() {
                   <DocumentReviewPanel
                     coverage={coverage}
                     ignored={ignoredIssues}
+                    busyIssue={busyIssue}
+                    error={reviewError}
                     onToggleIgnore={toggleIgnoreIssue}
                     onShowBlock={showCoverageBlock}
+                    onShowFragment={showExtraActivity}
+                    onCreateActivity={createActivityFromBlock}
                   />
 
                   <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-md">
@@ -652,6 +696,24 @@ export default function AutomationView() {
                               ) : (
                                 <p className="text-xs text-gray-500">Ninguna actividad encontrada.</p>
                               )}
+                              {(report.actividades_extra || []).filter((e) => String(e.unidad) === String(num)).map((extra) => (
+                                <div
+                                  key={extra.clave}
+                                  className="flex items-center justify-between rounded border border-primary/30 bg-primary/5 px-2.5 py-1.5 mt-1.5"
+                                >
+                                  <span className="text-[11px] font-medium text-primary truncate min-w-0">
+                                    {extra.nombre} - {extra.tipo}
+                                    <span className="ml-2 text-[10px] font-normal text-gray-500">(añadida en la revisión)</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => showExtraActivity(extra)}
+                                    className="flex items-center text-[10px] text-primary hover:underline ml-2 shrink-0"
+                                  >
+                                    <Eye className="w-3 h-3 mr-1" /> Ver parseo
+                                  </button>
+                                </div>
+                              ))}
                             </div>
 
                             {renderItem('Material de Referencia', unit.material_referencia?.encontrado, unit.material_referencia?.detalles,

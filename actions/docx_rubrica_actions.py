@@ -94,15 +94,47 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
 
     return None, None
 
+def _upload_rubric(driver, course_id: int, activity_name: str, criteria_list: list, wait_time: int, fallback_name: str = None):
+    """Finds the Moodle activity by name (then fallback_name) and fills its rubric."""
+    assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, activity_name, wait_time)
+    if not assign_url and fallback_name:
+        # Fallback check for mixed case
+        assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, fallback_name, wait_time)
+
+    if not assign_url:
+        logger.error(f"Could not find Moodle assignment for {activity_name}. Skipping rubric.")
+        return
+
+    # Navigate to the editor
+    success_nav = _navigate_to_rubric_editor(driver, assign_url, wait_time)
+    if not success_nav:
+        logger.error(f"Failed to navigate to the rubric editor for {activity_name}.")
+        return
+
+    # Fill and save the rubric
+    try:
+        rubric_title = full_activity_name if full_activity_name else activity_name
+        success = fill_rubric(driver, criteria_list, wait_time, rubric_name=rubric_title)
+        if success:
+            logger.info(f"Successfully uploaded rubric for {rubric_title}.")
+        else:
+            logger.error(f"Failed to upload rubric for {rubric_title}.")
+    except Exception as e:
+        logger.error(f"Exception while filling rubric for {activity_name}: {e}")
+
+
 def run_docx_rubrica_upload_workflow(driver, course_id: int, wait_time: int = 15):
     """
     Workflow to parse rubrics from the DOCX and upload them to the corresponding Actividad assignments.
     """
     logger.info("Starting DOCX Rubrica upload workflow...")
     
-    # 1. Parse the rubrics from the extracted DOCX
+    # 1. Parse the rubrics from the extracted DOCX, plus those of Tarea blocks
+    # the user turned into activities in the review panel.
+    from core.document_corrections import get_extra_activities
     rubricas_dict = parse_rubricas_from_docx(course_id)
-    if not rubricas_dict:
+    extra_rubrics = [e for e in get_extra_activities(course_id) if e["tipo"] == "Tarea" and e.get("rubrica")]
+    if not rubricas_dict and not extra_rubrics:
         logger.warning("No rubrics found in the DOCX for this course. Skipping upload.")
         return
 
@@ -114,29 +146,8 @@ def run_docx_rubrica_upload_workflow(driver, course_id: int, wait_time: int = 15
             continue
         activity_name = f"ACTIVIDAD {act_num}"
         logger.info(f"Processing Rubrica for {activity_name} ({len(criteria_list)} criteria)...")
+        _upload_rubric(driver, course_id, activity_name, criteria_list, wait_time, fallback_name=f"Actividad {act_num}")
 
-        assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, activity_name, wait_time)
-        if not assign_url:
-            # Fallback check for mixed case
-            assign_url, full_activity_name = _find_assign_url_by_name(driver, course_id, f"Actividad {act_num}", wait_time)
-
-        if not assign_url:
-            logger.error(f"Could not find Moodle assignment for {activity_name}. Skipping rubric.")
-            continue
-
-        # Navigate to the editor
-        success_nav = _navigate_to_rubric_editor(driver, assign_url, wait_time)
-        if not success_nav:
-            logger.error(f"Failed to navigate to the rubric editor for {activity_name}.")
-            continue
-
-        # Fill and save the rubric
-        try:
-            rubric_title = full_activity_name if full_activity_name else activity_name
-            success = fill_rubric(driver, criteria_list, wait_time, rubric_name=rubric_title)
-            if success:
-                logger.info(f"Successfully uploaded rubric for {rubric_title}.")
-            else:
-                logger.error(f"Failed to upload rubric for {rubric_title}.")
-        except Exception as e:
-            logger.error(f"Exception while filling rubric for {activity_name}: {e}")
+    for extra in extra_rubrics:
+        logger.info(f"Processing Rubrica for '{extra['nombre']}' ({len(extra['rubrica'])} criteria, añadida en la revisión)...")
+        _upload_rubric(driver, course_id, extra["nombre"], extra["rubrica"], wait_time)

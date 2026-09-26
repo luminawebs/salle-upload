@@ -374,6 +374,107 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         logger.error(f"Failed to disable multimedia filter for '{activity_name_prefix}': {e}")
         return False
 
+def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix: str, wait_time: int):
+    """
+    Uploads one activity fragment (an HTML file written by the splitter) into
+    the description of the Moodle activity whose name matches activity_prefix,
+    then sets forum completion and disables the multimedia filter.
+    """
+    filename = os.path.basename(file_path)
+    edit_url = get_edit_url_for_activity(driver, activity_prefix, wait_time)
+    if edit_url:
+        original_window = driver.current_window_handle
+        driver.execute_script(f"window.open('{edit_url}', '_blank');")
+        driver.switch_to.window(driver.window_handles[-1])
+        
+        try:
+            wait = WebDriverWait(driver, wait_time)
+            submit_btn_css = "#id_submitbutton, #id_submitbutton2, input[name='submitbutton'], input[name='submitbutton2'], button[name='submitbutton']"
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, submit_btn_css)))
+            
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Transform the HTML
+            from actions.html_transformer import transform_activity_html, remove_questions_from_html
+            
+            content = remove_questions_from_html(content)
+            content = transform_activity_html(content, course_id)
+                
+            is_forum = False
+            try:
+                body = driver.find_element(By.TAG_NAME, "body")
+                if "path-mod-forum" in (body.get_attribute("class") or ""):
+                    is_forum = True
+            except Exception:
+                pass
+
+            submit = not (is_forum and getattr(Config, "ENABLE_FORO_ACTIVITY_COMPLETION_UPDATE", True))
+
+            # Use descripcion for tasks
+            success = inject_html_into_wysiwyg(driver, content, wait_time, target_section="descripcion", submit_form=submit)
+            if success:
+                if not submit:
+                    # Do Foro Completion Logic
+                    try:
+                        # Expand "Condiciones de finalización de actividad"
+                        try:
+                            container = driver.find_element(By.ID, "id_activitycompletionheadercontainer")
+                            if not container.is_displayed():
+                                header = driver.find_element(By.CSS_SELECTOR, "a[aria-controls='id_activitycompletionheadercontainer']")
+                                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", header)
+                                time.sleep(0.5)
+                                driver.execute_script("arguments[0].click();", header)
+                                time.sleep(1)
+                        except Exception:
+                            pass
+                            
+                        # Select "Añadir requisitos"
+                        req_radio = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='radio'][name='completion'][value='2']")))
+                        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", req_radio)
+                        time.sleep(0.5)
+                        if not req_radio.is_selected():
+                            driver.execute_script("arguments[0].click();", req_radio)
+                            time.sleep(1)
+                            
+                        # Select "Recibir una calificación"
+                        grade_check = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='checkbox'][name='completionusegrade']")))
+                        if not grade_check.is_selected():
+                            driver.execute_script("arguments[0].click();", grade_check)
+                            time.sleep(1)
+                            
+                        # Select "Foro completo" from dropdown
+                        from selenium.webdriver.support.ui import Select
+                        grade_item = driver.find_element(By.ID, "id_completiongradeitemnumber")
+                        Select(grade_item).select_by_value("1")
+                        time.sleep(0.5)
+                    except Exception as e:
+                        logger.warning(f"Could not configure Foro completion for {filename}: {e}")
+                        
+                    # Click Save since we deferred it
+                    try:
+                        submit_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton, #id_submitbutton2, input[name='submitbutton2'], input[name='submitbutton']")
+                        try:
+                            submit_btn.click()
+                        except Exception:
+                            driver.execute_script("arguments[0].click();", submit_btn)
+                    except Exception as e:
+                        logger.error(f"Failed to submit form for {filename}: {e}")
+
+                # Wait until we are redirected back to the course view (or whatever page) in the new tab
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
+                logger.info(f"Success: {filename}")
+                
+                # Navigate to filters and configure (it will do this inside the new tab!)
+                disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)
+            else:
+                logger.error(f"Failed to inject {filename}")
+            time.sleep(2)
+        finally:
+            driver.close()
+            driver.switch_to.window(original_window)
+
+
 def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
     base_dir = os.path.join("workspace", str(course_id))
     actividades_dir = os.path.join(base_dir, "actividades")
@@ -417,97 +518,12 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                     activity_prefix = f"ACTIVIDAD {act_num}"
                     logger.info(f"Uploading {filename} to {activity_prefix}...")
                     
-                    edit_url = get_edit_url_for_activity(driver, activity_prefix, wait_time)
-                    if edit_url:
-                        original_window = driver.current_window_handle
-                        driver.execute_script(f"window.open('{edit_url}', '_blank');")
-                        driver.switch_to.window(driver.window_handles[-1])
-                        
-                        try:
-                            wait = WebDriverWait(driver, wait_time)
-                            submit_btn_css = "#id_submitbutton, #id_submitbutton2, input[name='submitbutton'], input[name='submitbutton2'], button[name='submitbutton']"
-                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, submit_btn_css)))
-                            
-                            file_path = os.path.join(actividades_dir, filename)
-                            with open(file_path, 'r', encoding='utf-8') as f:
-                                content = f.read()
-                                
-                            # Transform the HTML
-                            from actions.html_transformer import transform_activity_html, remove_questions_from_html
-                            
-                            content = remove_questions_from_html(content)
-                            content = transform_activity_html(content, course_id)
-                                
-                            is_forum = False
-                            try:
-                                body = driver.find_element(By.TAG_NAME, "body")
-                                if "path-mod-forum" in (body.get_attribute("class") or ""):
-                                    is_forum = True
-                            except Exception:
-                                pass
+                    upload_activity_fragment(driver, course_id, os.path.join(actividades_dir, filename), activity_prefix, wait_time)
 
-                            submit = not (is_forum and getattr(Config, "ENABLE_FORO_ACTIVITY_COMPLETION_UPDATE", True))
-
-                            # Use descripcion for tasks
-                            success = inject_html_into_wysiwyg(driver, content, wait_time, target_section="descripcion", submit_form=submit)
-                            if success:
-                                if not submit:
-                                    # Do Foro Completion Logic
-                                    try:
-                                        # Expand "Condiciones de finalización de actividad"
-                                        try:
-                                            container = driver.find_element(By.ID, "id_activitycompletionheadercontainer")
-                                            if not container.is_displayed():
-                                                header = driver.find_element(By.CSS_SELECTOR, "a[aria-controls='id_activitycompletionheadercontainer']")
-                                                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", header)
-                                                time.sleep(0.5)
-                                                driver.execute_script("arguments[0].click();", header)
-                                                time.sleep(1)
-                                        except Exception:
-                                            pass
-                                            
-                                        # Select "Añadir requisitos"
-                                        req_radio = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='radio'][name='completion'][value='2']")))
-                                        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", req_radio)
-                                        time.sleep(0.5)
-                                        if not req_radio.is_selected():
-                                            driver.execute_script("arguments[0].click();", req_radio)
-                                            time.sleep(1)
-                                            
-                                        # Select "Recibir una calificación"
-                                        grade_check = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='checkbox'][name='completionusegrade']")))
-                                        if not grade_check.is_selected():
-                                            driver.execute_script("arguments[0].click();", grade_check)
-                                            time.sleep(1)
-                                            
-                                        # Select "Foro completo" from dropdown
-                                        from selenium.webdriver.support.ui import Select
-                                        grade_item = driver.find_element(By.ID, "id_completiongradeitemnumber")
-                                        Select(grade_item).select_by_value("1")
-                                        time.sleep(0.5)
-                                    except Exception as e:
-                                        logger.warning(f"Could not configure Foro completion for {filename}: {e}")
-                                        
-                                    # Click Save since we deferred it
-                                    try:
-                                        submit_btn = driver.find_element(By.CSS_SELECTOR, "#id_submitbutton, #id_submitbutton2, input[name='submitbutton2'], input[name='submitbutton']")
-                                        try:
-                                            submit_btn.click()
-                                        except Exception:
-                                            driver.execute_script("arguments[0].click();", submit_btn)
-                                    except Exception as e:
-                                        logger.error(f"Failed to submit form for {filename}: {e}")
-
-                                # Wait until we are redirected back to the course view (or whatever page) in the new tab
-                                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
-                                logger.info(f"Success: {filename}")
-                                
-                                # Navigate to filters and configure (it will do this inside the new tab!)
-                                disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)
-                            else:
-                                logger.error(f"Failed to inject {filename}")
-                            time.sleep(2)
-                        finally:
-                            driver.close()
-                            driver.switch_to.window(original_window)
+    # Activities the user added in the review panel: matched by their name
+    # (the document heading the structure step created them with).
+    from core.document_corrections import get_extra_activities, EXTRA_DIR
+    for extra in get_extra_activities(course_id):
+        logger.info(f"Uploading {extra['archivo']} to '{extra['nombre']}' (añadida en la revisión)...")
+        upload_activity_fragment(driver, course_id, os.path.join(base_dir, EXTRA_DIR, extra["archivo"]), extra["nombre"], wait_time)
 

@@ -105,6 +105,26 @@ def run_docx_parsing_workflow(course_id: int):
         logger.warning(f"  {error_msg}")
         raise FileNotFoundError(error_msg)
 
+def detect_activity_type(text_upper: str) -> str:
+    """
+    The activity type the author marked with an X in the "Herramientas de la
+    plataforma virtual" row (Foro/Tarea/Cuestionario/…), or "Desconocido".
+    `text_upper` is the activity's plain text, upper-cased.
+    """
+    if "HERRAMIENTA" in text_upper and "PLATAFORMA VIRTUAL" in text_upper:
+        if re.search(r'FORO[_\s]*X', text_upper):
+            return "Foro"
+        if re.search(r'TAREA[_\s]*X', text_upper):
+            return "Tarea"
+        if re.search(r'CUESTIONARIO[_\s]*X', text_upper):
+            return "Cuestionario"
+        if re.search(r'NO SABE[_\s]*X', text_upper):
+            return "No sabe"
+        if re.search(r'OTRA[_\s¿A-Z\?]*X', text_upper):
+            return "Otra"
+    return "Desconocido"
+
+
 def top_level_rows(soup) -> list:
     """
     The table rows the splitter walks, in document order: rows of tables that
@@ -158,7 +178,14 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
         "introduccion": os.path.join(base_dir, "introduccion"),
         "glosario": os.path.join(base_dir, "glosario"),
     }
+    # Start from empty folders. The splitter runs more than once per course
+    # (on upload for the review, again when Run starts, again after a review
+    # correction), and leftovers from a previous run were not overwritten but
+    # added to: every activity got a second copy (actividadN_1.html, uploaded
+    # twice) and each Material_de_referencia file had its readings appended again.
+    import shutil
     for d in output_dirs.values():
+        shutil.rmtree(d, ignore_errors=True)
         os.makedirs(d, exist_ok=True)
         
     # Helpers
@@ -314,18 +341,7 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                 # hijacked by a stray "Actividad N" mention inside someone
                 # else's body text, the way a whole-document row scan can.
                 act_text_upper = BeautifulSoup(act_html, "html.parser").get_text(" ").upper()
-                tipo_actividad = "Desconocido"
-                if "HERRAMIENTA" in act_text_upper and "PLATAFORMA VIRTUAL" in act_text_upper:
-                    if re.search(r'FORO[_\s]*X', act_text_upper):
-                        tipo_actividad = "Foro"
-                    elif re.search(r'TAREA[_\s]*X', act_text_upper):
-                        tipo_actividad = "Tarea"
-                    elif re.search(r'CUESTIONARIO[_\s]*X', act_text_upper):
-                        tipo_actividad = "Cuestionario"
-                    elif re.search(r'NO SABE[_\s]*X', act_text_upper):
-                        tipo_actividad = "No sabe"
-                    elif re.search(r'OTRA[_\s¿A-Z\?]*X', act_text_upper):
-                        tipo_actividad = "Otra"
+                tipo_actividad = detect_activity_type(act_text_upper)
                 activity_manifest.setdefault(str(current_unit), {})[str(current_activity)] = {
                     "tipo": tipo_actividad,
                     "raw_number": raw_activity_number,
@@ -430,6 +446,12 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
 
     if row_roles_out is not None:
         row_roles_out[:] = roles
+
+    # Blocks the user marked as an activity in the review panel ("Foro 1.",
+    # "Proyecto de clase", … — headings the rules above don't recognize).
+    # Written to actividades_extra/, separate from the numbered activities.
+    from core.document_corrections import write_extra_activities
+    write_extra_activities(course_id, trs, roles, base_dir)
 
     logger.info("  ✓ DOCX splitting workflow completed.")
     return activity_manifest

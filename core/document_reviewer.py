@@ -181,7 +181,7 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # Clean up temporary split folders (unless the caller wants to keep them
     # around, e.g. to let a UI show exactly how each item was parsed)
     if cleanup_fragments:
-        for folder in ["actividades", "material", "introduccion"]:
+        for folder in ["actividades", "material", "introduccion", "actividades_extra"]:
             folder_path = os.path.join(base_dir, folder)
             if os.path.exists(folder_path):
                 try:
@@ -223,9 +223,18 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # document structure (see core/document_coverage.py). Report-only: the UI
     # uses it to list problems and block Run until each is fixed or ignored.
     from core.document_coverage import analyze_document, failed_analysis
+    from core.document_corrections import get_extra_activities
+    # Blocks the user turned into activities in the review panel (written by
+    # the splitter run above). Shown under their unit like any activity.
+    report["actividades_extra"] = [
+        {k: e[k] for k in ("clave", "issue_id", "nombre", "tipo", "unidad", "archivo")} | {"con_rubrica": bool(e.get("rubrica"))}
+        for e in get_extra_activities(course_id)
+    ]
     try:
         from core.docx_rubrica_parser import parse_rubricas_from_html
-        report["cobertura"] = analyze_document(html, activity_manifest, row_roles, report, parse_rubricas_from_html(html))
+        report["cobertura"] = analyze_document(
+            html, activity_manifest, row_roles, report, parse_rubricas_from_html(html), get_extra_activities(course_id)
+        )
     except Exception as e:
         logger.error(f"Error al analizar la cobertura del documento: {e}")
         report["cobertura"] = failed_analysis(f"Error interno: {e}.")

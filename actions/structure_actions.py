@@ -364,6 +364,13 @@ def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
     
     raw_doc_path = os.path.join("workspace", str(course_id), "raw_docx_extracted.html")
     sections = parse_raw_document(raw_doc_path)
+
+    # Blocks the user turned into activities in the review panel
+    # (core/document_corrections.py) — created in their unit's section,
+    # named after their document heading.
+    from core.document_corrections import get_extra_activities, add_extra_activities_to_sections
+    for extra in add_extra_activities_to_sections(sections, get_extra_activities(course_id)):
+        logger.error(f"No se encontró la sección de la Unidad {extra.get('unidad')} para '{extra['nombre']}'; no se creará.")
     
     # --- PHASE 2 INTEGRATION: Silently run AI validation in parallel ---
     try:

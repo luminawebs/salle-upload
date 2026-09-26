@@ -99,34 +99,55 @@ def parse_rubricas_from_html(html: str) -> dict:
                         break
                     
             if next_criterios_table:
-                criteria_list = []
-                rows = next_criterios_table.find_all('tr', recursive=False)
-                if not rows and next_criterios_table.tbody:
-                    rows = next_criterios_table.tbody.find_all('tr', recursive=False)
-                if not rows and next_criterios_table.thead:
-                    rows = next_criterios_table.thead.find_all('tr', recursive=False)
-                
-                for i, row in enumerate(rows):
-                    if i == 0:
-                        continue # Skip header row
-                    
-                    cols = row.find_all(['th', 'td'], recursive=False)
-                    if len(cols) >= 2:
-                        criterio_text = cols[0].get_text(strip=True)
-                        puntos_text = cols[1].get_text(strip=True)
-                        
-                        if "Total" in criterio_text or "suma total" in criterio_text.lower() or not criterio_text:
-                            continue
-                        
-                        scores = calculate_scores(puntos_text)
-                        criteria_list.append({
-                            "name": criterio_text,
-                            "levels": LEVEL_DESCRIPTIONS,
-                            "scores": scores
-                        })
-                
+                criteria_list = criteria_from_table(next_criterios_table)
                 if criteria_list:
                     rubricas[act_num] = criteria_list
                     logger.info(f"Parsed rubric for Actividad {act_num} with {len(criteria_list)} criteria.")
 
     return rubricas
+
+
+def criteria_from_table(table) -> list:
+    """The criteria of one 'Criterios de desempeño | Puntos' table (header row skipped)."""
+    criteria_list = []
+    rows = table.find_all('tr', recursive=False)
+    if not rows and table.tbody:
+        rows = table.tbody.find_all('tr', recursive=False)
+    if not rows and table.thead:
+        rows = table.thead.find_all('tr', recursive=False)
+
+    for i, row in enumerate(rows):
+        if i == 0:
+            continue # Skip header row
+
+        cols = row.find_all(['th', 'td'], recursive=False)
+        if len(cols) >= 2:
+            criterio_text = cols[0].get_text(strip=True)
+            puntos_text = cols[1].get_text(strip=True)
+
+            if "Total" in criterio_text or "suma total" in criterio_text.lower() or not criterio_text:
+                continue
+
+            scores = calculate_scores(puntos_text)
+            criteria_list.append({
+                "name": criterio_text,
+                "levels": LEVEL_DESCRIPTIONS,
+                "scores": scores
+            })
+    return criteria_list
+
+
+def parse_rubrica_from_fragment(html: str) -> list:
+    """
+    The rubric inside one block of HTML (e.g. an activity the user added in
+    the review panel): the innermost table mentioning 'Criterios de
+    desempeño', or [] if there's none.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    candidates = [t for t in soup.find_all('table') if 'Criterios de desempe' in t.get_text()]
+    innermost = [t for t in candidates if not any(c is not t and t in c.parents for c in candidates)]
+    for table in innermost:
+        criteria = criteria_from_table(table)
+        if criteria:
+            return criteria
+    return []

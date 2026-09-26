@@ -9,6 +9,7 @@ from core.data_parser import parse_docx_to_html
 from core.document_reviewer import review_document
 from core.activity_selection import get_skipped_activities, set_skipped_activities
 from core.document_coverage import get_ignored_issues, set_ignored_issues
+from core.document_corrections import set_block_activity
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import re
@@ -130,7 +131,7 @@ async def upload_doc(file: UploadFile = File(...), course_id: str = Form(...)):
 # Whitelist of split-output subfolders a client is allowed to read fragments
 # from. Keeps /api/parsed-fragment from being turned into a generic file
 # reader over the rest of the course's workspace folder.
-PARSED_FRAGMENT_CATEGORIES = {"actividades", "material", "introduccion", "glosario"}
+PARSED_FRAGMENT_CATEGORIES = {"actividades", "material", "introduccion", "glosario", "actividades_extra"}
 
 
 @app.get("/api/parsed-fragment")
@@ -204,6 +205,32 @@ async def post_ignored_issues_api(request: Request):
         return JSONResponse(status_code=400, content={"error": "'ignored' debe ser una lista."})
     set_ignored_issues(course_id, ignored)
     return {"status": "success", "course_id": course_id, "ignored": sorted(get_ignored_issues(course_id))}
+
+
+@app.post("/api/corrections")
+async def post_correction(request: Request):
+    """
+    Turns an unrecognized block into an activity of the given type (or undoes
+    it with tipo=null), then re-runs the review on the already-uploaded
+    document so the UI immediately shows the result — see
+    core/document_corrections.py.
+    """
+    body = await request.json()
+    course_id = body.get("course_id", "")
+    issue_id = body.get("issue_id", "")
+    tipo = body.get("tipo")
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    if not isinstance(issue_id, str) or not issue_id.startswith("actividad_no_reconocida:"):
+        return JSONResponse(status_code=400, content={"error": "Solo se puede convertir en actividad un bloque «actividad no reconocida»."})
+    if not os.path.isfile(os.path.join("workspace", course_id, "raw_docx_extracted.html")):
+        return JSONResponse(status_code=404, content={"error": "No hay un documento subido para este curso. Vuelve a subirlo."})
+    try:
+        set_block_activity(course_id, issue_id, tipo)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"error": str(e)})
+    report = review_document(course_id, generate_json=False, generate_text=False, cleanup_fragments=False)
+    return {"status": "success", "report": report}
 
 
 @app.post("/api/review")
