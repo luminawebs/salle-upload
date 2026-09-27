@@ -209,6 +209,21 @@ def _mark_answer_line_format(blocks: list) -> None:
             option['forced_correct'] = option is matches[0]
 
 
+# Where the questions of an activity end. The footer always ends them. The
+# evaluation section / deliverable ("¿Cómo lo vamos a evaluar?", "Entregable: …")
+# ends them only once questions have started: some templates put the
+# questions inside "¿Cómo lo vamos a evaluar?" ("Estas son las preguntas…").
+QUESTIONS_FOOTER_RE = re.compile(
+    r'^(?:Informaci.n para el equipo de producci.n|Lista de herramientas|Lecturas para desarrollar|Glosario)',
+    re.IGNORECASE,
+)
+AFTER_QUESTIONS_RE = re.compile(r'^(?:¿?\s*C.mo lo vamos a evaluar|Entregable\b)', re.IGNORECASE)
+
+
+def _ends_questions(text: str, questions_started: bool) -> bool:
+    return bool(QUESTIONS_FOOTER_RE.match(text) or (questions_started and AFTER_QUESTIONS_RE.match(text)))
+
+
 def parse_questions(html_content: str, course_id: int = None) -> list:
     """
     The questions found in an activity's HTML, as parsed dicts (stem_html,
@@ -216,13 +231,25 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
     below and by the document review, so both always count the same questions.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
-    
+    return _parse_question_blocks(soup, course_id)[0]
+
+
+def _parse_question_blocks(soup, course_id: int = None, style_tables: bool = True):
+    """
+    Returns (questions, blocks, (start, end)): the parsed questions, the
+    flattened blocks (each with 'el', the element it came from in `soup`) and
+    the range of blocks that belong to the questions — from the first
+    question to where the questions end. strip_quiz_questions() removes
+    exactly that range, so the description uploaded to Moodle never carries
+    the questions or their answers. style_tables=False leaves `soup` untouched.
+    """
     # --- 0. PRE-PROCESS TABLES FOR QUESTIONS ---
-    for table in soup.find_all('table'):
-        table['style'] = (table.get('style', '') + '; border: 1px solid black; border-collapse: collapse;').strip('; ')
-        table['border'] = "1"
-        for td in table.find_all(['td', 'th']):
-            td['style'] = (td.get('style', '') + '; border: 1px solid black;').strip('; ')
+    if style_tables:
+        for table in soup.find_all('table'):
+            table['style'] = (table.get('style', '') + '; border: 1px solid black; border-collapse: collapse;').strip('; ')
+            table['border'] = "1"
+            for td in table.find_all(['td', 'th']):
+                td['style'] = (td.get('style', '') + '; border: 1px solid black;').strip('; ')
             
     # --- 1. DOM FLATTENING ---
     blocks = []
@@ -230,7 +257,7 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
         if isinstance(node, str):
             text = node.strip()
             if text:
-                blocks.append({'type': 'text', 'html': str(node), 'text': text, 'list_level': list_level, 'list_group_id': list_group_id})
+                blocks.append({'type': 'text', 'html': str(node), 'text': text, 'list_level': list_level, 'list_group_id': list_group_id, 'el': node})
             return
             
         if getattr(node, 'name', None) in ['ul', 'ol']:
@@ -248,7 +275,7 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
                     html_str = "".join(current_html)
                     text_str = "".join(current_text).strip()
                     if text_str or "img" in html_str or "table" in html_str:
-                        blocks.append({'type': 'li', 'html': html_str, 'text': text_str, 'list_level': list_level, 'list_group_id': list_group_id})
+                        blocks.append({'type': 'li', 'html': html_str, 'text': text_str, 'list_level': list_level, 'list_group_id': list_group_id, 'el': node})
                     current_html.clear()
                     current_text.clear()
 
@@ -280,23 +307,23 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
                     processed_html = process_image_src(str(frag_soup), course_id)
                     text_frag = frag_soup.get_text(separator=" ", strip=True)
                     if text_frag or "img" in processed_html or "table" in processed_html:
-                        blocks.append({'type': node.name, 'html': processed_html, 'text': text_frag, 'list_level': list_level, 'list_group_id': list_group_id})
+                        blocks.append({'type': node.name, 'html': processed_html, 'text': text_frag, 'list_level': list_level, 'list_group_id': list_group_id, 'el': node})
                 return
             
             processed_html = process_image_src(str(node), course_id)
             text = node.get_text(separator=" ", strip=True)
             if text or "img" in processed_html or "table" in processed_html:
-                blocks.append({'type': node.name, 'html': processed_html, 'text': text, 'list_level': list_level, 'list_group_id': list_group_id})
+                blocks.append({'type': node.name, 'html': processed_html, 'text': text, 'list_level': list_level, 'list_group_id': list_group_id, 'el': node})
             return
             
         if getattr(node, 'name', None) == 'table':
             processed_html = process_image_src(str(node), course_id)
-            blocks.append({'type': 'table', 'html': processed_html, 'text': node.get_text(separator=" ", strip=True), 'list_level': list_level, 'list_group_id': list_group_id})
+            blocks.append({'type': 'table', 'html': processed_html, 'text': node.get_text(separator=" ", strip=True), 'list_level': list_level, 'list_group_id': list_group_id, 'el': node})
             return
             
         if getattr(node, 'name', None) == 'img':
             processed_html = process_image_src(str(node), course_id)
-            blocks.append({'type': 'img', 'html': processed_html, 'text': '', 'list_level': list_level, 'list_group_id': list_group_id})
+            blocks.append({'type': 'img', 'html': processed_html, 'text': '', 'list_level': list_level, 'list_group_id': list_group_id, 'el': node})
             return
             
         # Fallback for other tags
@@ -343,7 +370,8 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
             'q_type': 'multichoice'
         }
 
-    for block in blocks:
+    region_start, region_end = None, len(blocks)
+    for block_index, block in enumerate(blocks):
         text = block['text']
         b_type = block['type']
         html_str = block['html']
@@ -354,8 +382,10 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
         if not text and b_type not in ['img', 'table'] and "img" not in html_str and "table" not in html_str:
             continue
 
-        # Stop parsing questions when reaching standard activity footers
-        if re.match(r'^(?:Informaci.n para el equipo de producci.n|Lista de herramientas|Lecturas para desarrollar|Glosario)', text, re.IGNORECASE):
+        # Stop parsing questions where they end (footer; evaluation section or
+        # deliverable once questions have started)
+        if _ends_questions(text, region_start is not None):
+            region_end = block_index
             break
 
         # Set by _mark_answer_line_format ("Respuesta correcta: X" questions).
@@ -499,6 +529,8 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
                     is_start = True
                     
         if is_start:
+            if region_start is None:
+                region_start = block_index
             save_q()
             current_q = create_empty_q()
             current_q['base_list_level'] = l_level
@@ -543,7 +575,7 @@ def parse_questions(html_content: str, course_id: int = None) -> list:
                 current_q['feedback'][fb_type].append(html_str)
 
     save_q()
-    return questions
+    return questions, blocks, (region_start, region_end)
 
 
 _ACTIVITY_SECTION_QUESTION_RE = re.compile(r'^¿(?:qu.|c.mo)\s+(?:lo\s+)?vamos\s+a\s+(?:lograr|evaluar|hacer)\?', re.IGNORECASE)
@@ -585,8 +617,8 @@ def summarize_quiz(html_content: str, course_id: int = None) -> dict:
         if el.find(['p', 'li']):
             continue  # only the innermost block, so no line is counted twice
         text = " ".join(el.get_text(" ").split())
-        if re.match(r'^(?:Informaci.n para el equipo de producci.n|Lista de herramientas|Lecturas para desarrollar|Glosario)', text, re.IGNORECASE):
-            break  # same footer the parser stops at
+        if _ends_questions(text, bool(candidates or answer_lines)):
+            break  # same place the parser stops at
         if text.lower().startswith('respuesta correcta'):
             answer_lines += 1
         elif text.startswith('¿') and '?' in text and not _ACTIVITY_SECTION_QUESTION_RE.match(text) and "(respuesta" not in text.lower():
@@ -850,10 +882,60 @@ Total Time: {t_time:.2f}s
             
     return len(xml_questions)
 
-def remove_questions_from_html(html_content: str) -> str:
+def remove_questions_from_html(html_content: str, is_quiz: bool = False) -> str:
     """
-    Removes the questions block from the HTML.
+    Removes the questions block from the HTML (the activity description
+    uploaded to Moodle must not carry questions or their answers).
+
+    The original rule only recognizes questions starting at "Pregunta 1".
+    is_quiz=True (Cuestionario activities) additionally removes every question
+    the question parser finds, whatever its layout — see strip_quiz_questions.
+    It's limited to quizzes on purpose: a Tarea or Foro also contains "¿…?"
+    lines, but those are instructions the student needs to read.
     """
+    html_content = _remove_pregunta_1_block(html_content)
+    if is_quiz:
+        html_content = strip_quiz_questions(html_content)
+    return html_content
+
+
+def strip_quiz_questions(html_content: str) -> str:
+    """
+    Removes the questions of a quiz — stems, options, answer lines,
+    feedback — exactly as parse_questions() reads them, plus a lone
+    "Preguntas:" heading left right before them. Everything outside that
+    range (objectives, instructions, evaluation, …) is kept unchanged.
+    """
+    soup = BeautifulSoup(html_content, 'html.parser')
+    questions, blocks, (start, end) = _parse_question_blocks(soup, style_tables=False)
+    if not questions or start is None:
+        return html_content
+
+    elements = []
+    for block in blocks[start:end]:
+        el = block.get('el')
+        if el is not None and all(el is not e for e in elements):
+            elements.append(el)
+
+    # A heading like "Preguntas:" right before the first question would be
+    # left pointing at nothing.
+    first_el = blocks[start].get('el')
+    heading = first_el.find_previous(['p', 'h1', 'h2', 'h3', 'h4', 'li']) if first_el is not None and hasattr(first_el, 'find_previous') else None
+    if heading is not None and re.match(r'(?i)^\s*(preguntas|cuestionario)\s*:?\s*$', heading.get_text(" ")):
+        elements.append(heading)
+
+    for el in elements:
+        el.extract()
+
+    # Lists left with no items go too.
+    for lst in soup.find_all(['ul', 'ol']):
+        if not lst.find('li'):
+            lst.decompose()
+    return str(soup)
+
+
+def _remove_pregunta_1_block(html_content: str) -> str:
+    """The original rule: delete from "Pregunta 1" until the evaluation section."""
     soup = BeautifulSoup(html_content, 'html.parser')
     start_deleting = False
     elements_to_delete = []

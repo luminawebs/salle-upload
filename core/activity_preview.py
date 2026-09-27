@@ -88,8 +88,18 @@ def build_preview(html: str, course_id=None) -> dict:
         })
 
     summary = summarize_quiz(html, course_id) if questions or "respuesta correcta" in html.lower() else None
+
+    # For a quiz: the description exactly as the upload cleans it (questions
+    # and answers removed), so the user can check nothing leaks to students.
+    from actions.html_transformer import remove_questions_from_html
+    from core.data_parser import detect_activity_type
+    activity_type = detect_activity_type(BeautifulSoup(html, "html.parser").get_text(" ").upper())
+    description = remove_questions_from_html(html, is_quiz=True) if activity_type == "Cuestionario" else None
+
     return {
+        "tipo": activity_type,
         "secciones": split_sections(html),
         "preguntas": questions,
         "resumen_preguntas": summary,
+        "descripcion_moodle_html": description,
     }

@@ -374,11 +374,16 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         logger.error(f"Failed to disable multimedia filter for '{activity_name_prefix}': {e}")
         return False
 
-def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix: str, wait_time: int):
+def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix: str, wait_time: int, activity_type: str = None):
     """
     Uploads one activity fragment (an HTML file written by the splitter) into
     the description of the Moodle activity whose name matches activity_prefix,
     then sets forum completion and disables the multimedia filter.
+
+    activity_type ("Cuestionario", "Tarea", …): read from the fragment's own
+    "Herramientas … marque con una X" row when not given. For a Cuestionario
+    every question is removed from the description, so students never see
+    the questions — or which option is correct — before taking the quiz.
     """
     filename = os.path.basename(file_path)
     edit_url = get_edit_url_for_activity(driver, activity_prefix, wait_time)
@@ -398,7 +403,11 @@ def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix:
             # Transform the HTML
             from actions.html_transformer import transform_activity_html, remove_questions_from_html
             
-            content = remove_questions_from_html(content)
+            if activity_type is None:
+                from bs4 import BeautifulSoup
+                from core.data_parser import detect_activity_type
+                activity_type = detect_activity_type(BeautifulSoup(content, "html.parser").get_text(" ").upper())
+            content = remove_questions_from_html(content, is_quiz=(activity_type == "Cuestionario"))
             content = transform_activity_html(content, course_id)
                 
             is_forum = False
@@ -525,5 +534,6 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
     from core.document_corrections import get_extra_activities, EXTRA_DIR
     for extra in get_extra_activities(course_id):
         logger.info(f"Uploading {extra['archivo']} to '{extra['nombre']}' (añadida en la revisión)...")
-        upload_activity_fragment(driver, course_id, os.path.join(base_dir, EXTRA_DIR, extra["archivo"]), extra["nombre"], wait_time)
+        upload_activity_fragment(driver, course_id, os.path.join(base_dir, EXTRA_DIR, extra["archivo"]), extra["nombre"], wait_time,
+                                 activity_type=extra["tipo"])
 

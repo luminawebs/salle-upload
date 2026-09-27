@@ -9,6 +9,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || "";
 // (built by core/activity_preview.py), so what's checked here is what uploads.
 
 const QUESTION_TAB = '__preguntas__';
+const DESCRIPTION_TAB = '__descripcion__';
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
 const TYPE_LABELS = {
   multichoice: 'Opción múltiple',
@@ -196,6 +197,8 @@ export default function ActivityPreview({ courseId, category, filename }) {
   const hasQuestions = data.preguntas.length > 0 || (data.resumen_preguntas?.esperadas || 0) > 0;
   const tabs = [
     ...(hasQuestions ? [{ id: QUESTION_TAB, label: `Preguntas (${data.preguntas.length})` }] : []),
+    ...(data.descripcion_moodle_html !== null && data.descripcion_moodle_html !== undefined
+      ? [{ id: DESCRIPTION_TAB, label: 'Descripción en Moodle' }] : []),
     ...data.secciones.map((s) => ({ id: s.titulo, label: s.titulo })),
   ];
   const section = data.secciones.find((s) => s.titulo === tab);
@@ -219,6 +222,14 @@ export default function ActivityPreview({ courseId, category, filename }) {
 
       {tab === QUESTION_TAB ? (
         <QuestionsView questions={data.preguntas} summary={data.resumen_preguntas} />
+      ) : tab === DESCRIPTION_TAB ? (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-400">
+            Lo que verán los estudiantes en la descripción del cuestionario: las preguntas y sus
+            respuestas se quitan; van solo al banco de preguntas.
+          </p>
+          <div className="bg-background rounded-lg border border-border p-4"><Html html={data.descripcion_moodle_html} /></div>
+        </div>
       ) : section ? (
         section.html.trim()
           ? <div className="bg-background rounded-lg border border-border p-4"><Html html={section.html} /></div>

@@ -22,6 +22,8 @@ import shutil
 import sys
 import unittest
 
+from bs4 import BeautifulSoup
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
@@ -455,6 +457,45 @@ class QuizQuestionTests(unittest.TestCase):
         self.assertEqual([q["numero"] for q in preview["preguntas"]], [1, 2, 3])
         self.assertEqual([q["correctas"] for q in preview["preguntas"]], [1, 1, 1])
         self.assertEqual(preview["resumen_preguntas"]["esperadas"], 3)
+
+    def test_quiz_description_loses_questions_and_answers_but_keeps_the_rest(self):
+        # DP_ARIE Actividad 6 used to upload all 10 questions, each with "(Respuesta)", in the description.
+        from actions.html_transformer import remove_questions_from_html, parse_questions
+        html = ("<p>¿Qué vamos a lograr?</p><p>Presentar la evaluación.</p>"
+                "<p>¿Cómo lo vamos a lograr?</p><p>Número de preguntas de la prueba: 3</p>"
+                "<p>Luego proceda a responder la evaluación:</p><p>Preguntas:</p>"
+                + self.FLAT_LIST.replace("<p>Número de preguntas de la prueba: 3</p>", "") +
+                "<p>Entregable : Presentar la prueba en la fecha indicada.</p>"
+                "<p>¿Cómo lo vamos a evaluar?</p><p>Criterios de desempeño</p>")
+        cleaned = remove_questions_from_html(html, is_quiz=True)
+        text = " ".join(BeautifulSoup(cleaned, "html.parser").get_text(" ").split())
+        self.assertNotIn("(Respuesta)", text)
+        self.assertNotIn("¿Cuál es la capital", text)
+        self.assertNotIn("Preguntas:", text, "a heading left pointing at nothing is removed too")
+        for kept in ("¿Qué vamos a lograr?", "Presentar la evaluación.", "proceda a responder", "Número de preguntas",
+                     "Entregable : Presentar la prueba", "¿Cómo lo vamos a evaluar?", "Criterios de desempeño"):
+            self.assertIn(kept, text)
+        self.assertEqual(parse_questions(cleaned), [])
+
+    def test_questions_inside_the_evaluation_section_are_read_and_removed(self):
+        # Lenguaje de programación I: the questions sit under "¿Cómo lo vamos a evaluar?".
+        from actions.html_transformer import remove_questions_from_html, parse_questions
+        html = ("<p>¿Cómo lo vamos a lograr?</p><p>El cuestionario tiene diez preguntas.</p>"
+                "<p>¿Cómo lo vamos a evaluar?</p><p>Estas son las preguntas que tiene el cuestionario:</p>"
+                "<p>1. ¿Qué es una clase?</p><p>a. Un vector.</p><p>b. Una plantilla de objetos. (respuesta correcta)</p>"
+                "<p>2. ¿Qué define a un objeto?</p><p>a. Su nombre.</p><p>b. Sus atributos y métodos. (respuesta correcta)</p>"
+                "<p>Información para el equipo de producción de la DEE</p>")
+        self.assertEqual(len(parse_questions(html)), 2)
+        text = BeautifulSoup(remove_questions_from_html(html, is_quiz=True), "html.parser").get_text(" ")
+        self.assertNotIn("respuesta correcta", text)
+        self.assertIn("El cuestionario tiene diez preguntas.", text)
+        self.assertIn("Información para el equipo", text)
+
+    def test_non_quiz_description_keeps_its_questions(self):
+        # A Tarea's "¿…?" lines are instructions for the student.
+        from actions.html_transformer import remove_questions_from_html
+        html = "<p>Responda en su ensayo:</p><ul><li>¿Qué es la ética?</li><li>¿Por qué importa?</li></ul>"
+        self.assertEqual(remove_questions_from_html(html), str(BeautifulSoup(html, "html.parser")))
 
     def test_questions_merged_into_one_are_listed_as_unread(self):
         # Options with no answer marker at all: the parser merges these questions.
