@@ -213,6 +213,18 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # What was read vs. what went nowhere, compared against the expected
     # document structure (see core/document_coverage.py). Report-only: the UI
     # uses it to list problems and block Run until each is fixed or ignored.
+    # Whether the splitter found a glossary (it writes glosario_import.xml only
+    # when it does) — most documents have none, so the UI shows a one-line
+    # note instead of a full card.
+    glossary_path = os.path.join(base_dir, "glosario", "glosario_import.xml")
+    report["glosario"] = {"encontrado": False, "entradas": 0}
+    if os.path.exists(glossary_path):
+        try:
+            with open(glossary_path, "r", encoding="utf-8") as f:
+                report["glosario"] = {"encontrado": True, "entradas": f.read().count("<ENTRY>")}
+        except Exception as e:
+            logger.error(f"No se pudo leer {glossary_path}: {e}")
+
     from core.document_coverage import analyze_document, failed_analysis
     from core.document_corrections import get_extra_activities, get_appended_blocks, EXTRA_DIR
     extras = get_extra_activities(course_id)

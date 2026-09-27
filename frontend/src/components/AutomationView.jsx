@@ -686,29 +686,42 @@ export default function AutomationView() {
                     </div>
                   </div>
 
-                  <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-md">
-                    <div className="p-4 bg-background border-b border-border flex items-center">
-                      <BookOpen className="w-4 h-4 text-primary mr-2" />
-                      <h3 className="font-semibold text-white">Glosario</h3>
+                  {report.glosario?.encontrado === false ? (
+                    // Most documents have no glossary: a single quiet row, not a card.
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-surface rounded-xl border border-border text-sm">
+                      <BookOpen className="w-4 h-4 text-gray-500 shrink-0" />
+                      <span className="font-semibold text-gray-300">Glosario</span>
+                      <span className="text-xs text-gray-500">· Este documento no incluye glosario.</span>
                     </div>
-                    <div className="p-1">
-                      <button
-                        type="button"
-                        onClick={() => setFragment({ target: fragmentTargetFor('glosario', {}), title: 'Glosario (XML de importación)' })}
-                        className="w-full text-left hover:bg-primary/5 transition-colors"
-                      >
-                        <div className="flex items-start p-3 border-t border-border mt-3">
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-semibold text-white">Entradas del glosario</h4>
-                              <span className="flex items-center text-[10px] text-primary"><Eye className="w-3 h-3 mr-1" /> Ver XML</span>
+                  ) : (
+                    <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-md">
+                      <div className="p-4 bg-background border-b border-border flex items-center">
+                        <BookOpen className="w-4 h-4 text-primary mr-2" />
+                        <h3 className="font-semibold text-white">Glosario</h3>
+                      </div>
+                      <div className="p-1">
+                        <button
+                          type="button"
+                          onClick={() => setFragment({ target: fragmentTargetFor('glosario', {}), title: 'Glosario (XML de importación)' })}
+                          className="w-full text-left hover:bg-primary/5 transition-colors"
+                        >
+                          <div className="flex items-start p-3 border-t border-border mt-3">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-semibold text-white">Entradas del glosario</h4>
+                                <span className="flex items-center text-[10px] text-primary"><Eye className="w-3 h-3 mr-1" /> Ver XML</span>
+                              </div>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {report.glosario?.entradas
+                                  ? `${report.glosario.entradas} término${report.glosario.entradas === 1 ? '' : 's'} se importará${report.glosario.entradas === 1 ? '' : 'n'} al glosario de Moodle.`
+                                  : 'Aquí se muestra el XML de importación del glosario.'}
+                              </p>
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">Si el documento tiene un glosario, aquí se muestra el XML de importación real.</p>
                           </div>
-                        </div>
-                      </button>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {report.unidades && Object.keys(report.unidades).length > 0 ? (
                     Object.entries(report.unidades).map(([num, unit]) => {
