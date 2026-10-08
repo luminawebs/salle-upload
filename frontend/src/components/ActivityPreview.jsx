@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, AlertTriangle, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { RefreshCw, AlertTriangle, ChevronLeft, ChevronRight, Check, HelpCircle } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 
@@ -11,12 +11,13 @@ const API_BASE = import.meta.env.VITE_API_BASE || "";
 const QUESTION_TAB = '__preguntas__';
 const DESCRIPTION_TAB = '__descripcion__';
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
-const TYPE_LABELS = {
+export const TYPE_LABELS = {
   multichoice: 'Opción múltiple',
   verdadero_falso: 'Verdadero / Falso',
   truefalse: 'Verdadero / Falso',
   cloze: 'Completar',
   drag_drop: 'Arrastrar y soltar',
+  essay: 'Pregunta abierta',
 };
 
 // A multiple-choice / true-false question with no options, or none marked
@@ -31,7 +32,7 @@ const answerProblem = (q) => {
 };
 const hasAnswerProblem = (q) => answerProblem(q) !== null;
 
-function Html({ html }) {
+export function Html({ html }) {
   return (
     <div
       className="prose prose-invert prose-sm max-w-none"
@@ -40,7 +41,64 @@ function Html({ html }) {
   );
 }
 
-function QuestionsView({ questions, summary }) {
+// One question as the export reads it: stem, options (correct ones marked),
+// a warning when it would upload without a valid answer, and feedback.
+export function QuestionCard({ q, title, children }) {
+  return (
+    <div className="bg-background rounded-lg border border-border p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h4 className="text-sm font-bold text-white">{title}</h4>
+        <span className="text-[10px] text-gray-500 uppercase tracking-wide">{TYPE_LABELS[q.tipo] || q.tipo}</span>
+      </div>
+
+      <Html html={q.enunciado_html} />
+
+      {q.opciones.length > 0 && (
+        <ol className="space-y-1.5">
+          {q.opciones.map((o, i) => (
+            <li
+              key={i}
+              className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm ${o.correcta ? 'border-success/50 bg-success/10' : 'border-border'}`}
+            >
+              {/* Options that already start with their own letter ("A. …") keep it. */}
+              {!/^\s*[A-Ea-e][.)]\s/.test(o.html.replace(/<[^>]+>/g, '')) && (
+                <span className="text-xs font-semibold text-gray-500 mt-0.5 w-4 shrink-0">
+                  {/* Drag and drop: word 1 fills [[1]], word 2 fills [[2]]… */}
+                  {q.tipo === 'drag_drop' ? `${i + 1}.` : `${LETTERS[i]})`}
+                </span>
+              )}
+              <div className="flex-1 min-w-0"><Html html={o.html} /></div>
+              {o.correcta && (
+                <span className="flex items-center text-[10px] font-semibold text-success shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 mr-0.5" /> Correcta
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {hasAnswerProblem(q) && (
+        <p className="flex items-start text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg px-3 py-2">
+          <AlertTriangle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
+          {answerProblem(q)}
+        </p>
+      )}
+
+      {Object.entries(q.retroalimentacion || {}).map(([kind, html]) => (
+        <div key={kind} className="text-xs border-t border-border pt-3">
+          <p className="text-gray-500 mb-1">
+            Retroalimentación{kind === 'correct' ? ' (correcta)' : kind === 'incorrect' ? ' (incorrecta)' : ''}
+          </p>
+          <Html html={html} />
+        </div>
+      ))}
+      {children}
+    </div>
+  );
+}
+
+function QuestionsView({ questions, summary, onOpenFormats }) {
   const [index, setIndex] = useState(0);
   const q = questions[index];
   const withProblems = questions.filter(hasAnswerProblem).length;
@@ -55,6 +113,11 @@ function QuestionsView({ questions, summary }) {
         )}
         {missing > 0 && (
           <span className="text-warning">faltan {missing} por leer (ver «Revisión del documento»)</span>
+        )}
+        {onOpenFormats && (
+          <button type="button" onClick={onOpenFormats} className="ml-auto flex items-center text-primary hover:underline">
+            <HelpCircle className="w-3.5 h-3.5 mr-1" /> ¿Cómo se escriben las preguntas?
+          </button>
         )}
       </div>
 
@@ -91,52 +154,7 @@ function QuestionsView({ questions, summary }) {
             })}
           </div>
 
-          <div className="bg-background rounded-lg border border-border p-4 space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <h4 className="text-sm font-bold text-white">Pregunta {q.numero} de {questions.length}</h4>
-              <span className="text-[10px] text-gray-500 uppercase tracking-wide">{TYPE_LABELS[q.tipo] || q.tipo}</span>
-            </div>
-
-            <Html html={q.enunciado_html} />
-
-            {q.opciones.length > 0 && (
-              <ol className="space-y-1.5">
-                {q.opciones.map((o, i) => (
-                  <li
-                    key={i}
-                    className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm ${o.correcta ? 'border-success/50 bg-success/10' : 'border-border'}`}
-                  >
-                    {/* Options that already start with their own letter ("A. …") keep it. */}
-                    {!/^\s*[A-Ea-e][.)]\s/.test(o.html.replace(/<[^>]+>/g, '')) && (
-                      <span className="text-xs font-semibold text-gray-500 mt-0.5 w-4 shrink-0">{LETTERS[i]})</span>
-                    )}
-                    <div className="flex-1 min-w-0"><Html html={o.html} /></div>
-                    {o.correcta && (
-                      <span className="flex items-center text-[10px] font-semibold text-success shrink-0 mt-0.5">
-                        <Check className="w-3 h-3 mr-0.5" /> Correcta
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            )}
-
-            {hasAnswerProblem(q) && (
-              <p className="flex items-start text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg px-3 py-2">
-                <AlertTriangle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
-                {answerProblem(q)}
-              </p>
-            )}
-
-            {Object.entries(q.retroalimentacion || {}).map(([kind, html]) => (
-              <div key={kind} className="text-xs border-t border-border pt-3">
-                <p className="text-gray-500 mb-1">
-                  Retroalimentación{kind === 'correct' ? ' (correcta)' : kind === 'incorrect' ? ' (incorrecta)' : ''}
-                </p>
-                <Html html={html} />
-              </div>
-            ))}
-
+          <QuestionCard q={q} title={`Pregunta ${q.numero} de ${questions.length}`}>
             <div className="flex justify-between pt-1">
               <button type="button" onClick={() => setIndex(index - 1)} disabled={index === 0}
                 className="flex items-center text-xs text-gray-400 hover:text-white disabled:opacity-30">
@@ -147,14 +165,14 @@ function QuestionsView({ questions, summary }) {
                 Siguiente <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          </QuestionCard>
         </>
       )}
     </div>
   );
 }
 
-export default function ActivityPreview({ courseId, category, filename }) {
+export default function ActivityPreview({ courseId, category, filename, onOpenFormats }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [tab, setTab] = useState(null);
@@ -221,7 +239,7 @@ export default function ActivityPreview({ courseId, category, filename }) {
       </div>
 
       {tab === QUESTION_TAB ? (
-        <QuestionsView questions={data.preguntas} summary={data.resumen_preguntas} />
+        <QuestionsView questions={data.preguntas} summary={data.resumen_preguntas} onOpenFormats={onOpenFormats} />
       ) : tab === DESCRIPTION_TAB ? (
         <div className="space-y-2">
           <p className="text-xs text-gray-400">

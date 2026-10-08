@@ -66,17 +66,27 @@ def split_sections(html: str) -> list:
     return [s for s in sections if s["html"].strip() or s["titulo"] != _INTRO_TITLE]
 
 
-def build_preview(html: str, course_id=None) -> dict:
-    """Sections plus, when the fragment has questions, each question as the export reads it."""
-    from actions.html_transformer import parse_questions, summarize_quiz
+def preview_questions(html: str, course_id=None) -> list:
+    """Each question as the export reads it: numero, tipo, enunciado_html, opciones [{html, correcta}], correctas, retroalimentacion."""
+    from actions.html_transformer import parse_questions, question_handler
 
     questions = []
     for number, q in enumerate(parse_questions(html, course_id), start=1):
-        is_tf = q["q_type"] == "truefalse" and q.get("tf_answer") is not None
+        # The export's own type decision (it also turns a "Verdadero / Falso"
+        # pair of options into a true/false question).
+        question_handler(q, number, course_id)
+        answer = q.get("tf_answer")
+        if q["q_type"] == "truefalse" and answer is None:
+            marked = [o for o in q["options"] if o["is_correct"]]
+            if len(marked) == 1:
+                text = BeautifulSoup(marked[0]["html"], "html.parser").get_text(" ").lower()
+                answer = "verdadero" in text or "true" in text
+        is_tf = q["q_type"] == "truefalse" and (answer is not None or len(q["options"]) == 2)
         options = [] if is_tf else [{"html": o["html"], "correcta": bool(o["is_correct"])} for o in q["options"]]
         if is_tf:
-            options = [{"html": "Verdadero", "correcta": q["tf_answer"] is True},
-                       {"html": "Falso", "correcta": q["tf_answer"] is False}]
+            # With no answer marked, neither shows as correct (the review flags it).
+            options = [{"html": "Verdadero", "correcta": answer is True},
+                       {"html": "Falso", "correcta": answer is False}]
         feedback = {k: "<br>".join(v) for k, v in q["feedback"].items() if v}
         questions.append({
             "numero": number,
@@ -86,7 +96,14 @@ def build_preview(html: str, course_id=None) -> dict:
             "correctas": sum(1 for o in options if o["correcta"]),
             "retroalimentacion": feedback,
         })
+    return questions
 
+
+def build_preview(html: str, course_id=None) -> dict:
+    """Sections plus, when the fragment has questions, each question as the export reads it."""
+    from actions.html_transformer import summarize_quiz
+
+    questions = preview_questions(html, course_id)
     summary = summarize_quiz(html, course_id) if questions or "respuesta correcta" in html.lower() else None
 
     # For a quiz: the description exactly as the upload cleans it (questions

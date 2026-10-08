@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Upload, CheckCircle2, FileText, AlertTriangle, RefreshCw, XCircle,
-  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download, SlidersHorizontal, ListOrdered
+  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download, SlidersHorizontal, ListOrdered, HelpCircle
 } from 'lucide-react';
 import ActivityPreview from './ActivityPreview';
 import AdvancedSettingsPage from './AdvancedSettingsPage';
+import QuestionFormatsPage from './QuestionFormatsPage';
 import AutomationControls from './AutomationControls';
 import DocumentReviewPanel, { isUnresolved, QuestionCountBadge } from './DocumentReviewPanel';
 import { AutomationContext } from '../context/AutomationContext';
@@ -33,7 +34,7 @@ const fragmentTargetFor = (kind, params) => {
 // `inline` ({ content, subtitle }) shows HTML the caller already has — e.g. a
 // block of the document the review couldn't assign — instead of fetching a
 // fragment file from the server.
-function FragmentViewer({ target, inline, title, courseId, onClose }) {
+function FragmentViewer({ target, inline, title, courseId, onClose, onOpenFormats }) {
   const [content, setContent] = useState(inline ? inline.content : null);
   const [status, setStatus] = useState(inline ? 'done' : 'loading'); // loading, done, error
   const [errorMsg, setErrorMsg] = useState('');
@@ -151,7 +152,7 @@ function FragmentViewer({ target, inline, title, courseId, onClose }) {
           )}
 
           {status === 'done' && viewMode === 'structured' && (
-            <ActivityPreview courseId={courseId} category={target.category} filename={target.filename} />
+            <ActivityPreview courseId={courseId} category={target.category} filename={target.filename} onOpenFormats={onOpenFormats} />
           )}
 
           {status === 'done' && viewMode === 'preview' && (
@@ -501,6 +502,7 @@ export default function AutomationView() {
         <nav className="ml-auto flex bg-background rounded-xl border border-border p-1" aria-label="Secciones">
           {[
             { id: 'curso', label: 'Carga del curso', Icon: Upload },
+            { id: 'formatos', label: 'Formatos de preguntas', Icon: HelpCircle },
             { id: 'avanzado', label: 'Configuración avanzada', Icon: SlidersHorizontal },
           ].map(({ id, label, Icon }) => (
             <button
@@ -519,6 +521,10 @@ export default function AutomationView() {
       {page === 'avanzado' ? (
         <main className="flex-1 p-6 w-full min-h-0 overflow-y-auto custom-scrollbar">
           <AdvancedSettingsPage onBack={() => setPage('curso')} />
+        </main>
+      ) : page === 'formatos' ? (
+        <main className="flex-1 p-6 w-full min-h-0 overflow-y-auto custom-scrollbar">
+          <QuestionFormatsPage onBack={() => setPage('curso')} />
         </main>
       ) : (
       // Scrolling: below xl the columns stack and this <main> scrolls as one
@@ -916,6 +922,7 @@ export default function AutomationView() {
           title={fragment.title}
           courseId={courseId}
           onClose={() => setFragment(null)}
+          onOpenFormats={() => { setFragment(null); setPage('formatos'); }}
         />
       )}
     </div>

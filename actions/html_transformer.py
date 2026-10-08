@@ -3,7 +3,7 @@ import re
 import base64
 import logging
 from bs4 import BeautifulSoup
-from core.question_types import MultichoiceQuestion, ClozeQuestion, DragDropQuestion
+from core.question_types import MultichoiceQuestion, ClozeQuestion, DragDropQuestion, EssayQuestion
 from core.document_headings import is_intro_heading
 
 logger = logging.getLogger(__name__)
@@ -411,6 +411,8 @@ def _parse_question_blocks(soup, course_id: int = None, style_tables: bool = Tru
                     current_q['q_type'] = 'drag_drop'
                 elif 'verdadero' in type_val:
                     current_q['q_type'] = 'truefalse'
+                elif 'abierta' in type_val or 'ensayo' in type_val:
+                    current_q['q_type'] = 'essay'
             continue
 
         # 2a.5. Check if Opciones header
@@ -533,6 +535,7 @@ def _parse_question_blocks(soup, course_id: int = None, style_tables: bool = Tru
                 region_start = block_index
             save_q()
             current_q = create_empty_q()
+            current_q['block_start'] = block_index
             current_q['base_list_level'] = l_level
             state = 'STEM'
             if block.get('forced_tf') is not None:
@@ -575,7 +578,26 @@ def _parse_question_blocks(soup, course_id: int = None, style_tables: bool = Tru
                 current_q['feedback'][fb_type].append(html_str)
 
     save_q()
+    # Where each question ends: where the next one starts, or where the questions end.
+    for q, nxt in zip(questions, questions[1:] + [None]):
+        q['block_end'] = nxt['block_start'] if nxt else region_end
     return questions, blocks, (region_start, region_end)
+
+
+def question_excerpts(html_content: str):
+    """
+    The document HTML of each question (aligned with parse_questions) and of the
+    whole question block (first question to where the questions end) — what the
+    AI shadow mode sends when only one question, or only the block, is in doubt.
+    """
+    soup = BeautifulSoup(html_content, 'html.parser')
+    questions, blocks, (start, end) = _parse_question_blocks(soup, style_tables=False)
+
+    def join(a, b):
+        return "".join(b_['html'] for b_ in blocks[a:b])
+
+    excerpts = [join(q['block_start'], q['block_end']) for q in questions]
+    return excerpts, (join(start, end) if start is not None else "")
 
 
 _ACTIVITY_SECTION_QUESTION_RE = re.compile(r'^¿(?:qu.|c.mo)\s+(?:lo\s+)?vamos\s+a\s+(?:lograr|evaluar|hacer)\?', re.IGNORECASE)
@@ -639,6 +661,64 @@ def summarize_quiz(html_content: str, course_id: int = None) -> dict:
     return {"encontradas": len(questions), "declaradas": declared, "esperadas": expected, "no_leidas": unread}
 
 
+def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "doc"):
+    """
+    The Moodle XML builder for one parsed question (core/question_types/) and
+    the values the AI QA layer below reuses: (handler, stem_html, opts,
+    is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc). One place decides
+    the Moodle type, so the export and the question-format guide
+    (core/question_types/catalog.py) always agree.
+    """
+    stem_html = "<br>".join(q['stem_html'])
+    opts = []
+    is_true_false = False
+    correct_is_true = False
+    
+    for o in q['options']:
+        opts.append((o['html'], o['is_correct']))
+        
+    # Detect true/false heuristically if not set explicitly
+    if q['q_type'] == 'multichoice':
+        opt_texts = [BeautifulSoup(o[0], 'html.parser').get_text(strip=True).lower() for o in opts]
+        if len(opt_texts) == 2:
+            if any(x in txt for txt in opt_texts for x in ['verdadero', 'true']) and any(x in txt for txt in opt_texts for x in ['falso', 'false']):
+                is_true_false = True
+                q['q_type'] = 'truefalse'
+                for o_html, is_corr in opts:
+                    if is_corr and any(x in o_html.lower() for x in ['verdadero', 'true']):
+                        correct_is_true = True
+                        
+    if q['q_type'] == 'truefalse':
+        is_true_false = True
+        if q.get('tf_answer') is not None:
+            correct_is_true = q['tf_answer']
+        
+    fb_gen = "<br>".join(q['feedback']['general'])
+    fb_corr = "<br>".join(q['feedback']['correct'])
+    fb_inc = "<br>".join(q['feedback']['incorrect'])
+    
+    if q['q_type'] in ['multichoice', 'truefalse']:
+        q_handler = MultichoiceQuestion(
+            q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name,
+            is_true_false=is_true_false, correct_is_true=correct_is_true
+        )
+    elif q['q_type'] == 'cloze':
+        q_handler = ClozeQuestion(
+            q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
+        )
+    elif q['q_type'] == 'drag_drop':
+        q_handler = DragDropQuestion(
+            q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
+        )
+    elif q['q_type'] == 'essay':
+        q_handler = EssayQuestion(
+            q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
+        )
+    else:
+        q_handler = MultichoiceQuestion(q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name)
+    return q_handler, stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc
+
+
 def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
     """
     Finds questions in HTML and exports them to a Moodle XML file retaining full HTML.
@@ -658,50 +738,8 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
 
     q_num = 1
     for q in questions:
-        stem_html = "<br>".join(q['stem_html'])
-        opts = []
-        is_true_false = False
-        correct_is_true = False
-        
-        for o in q['options']:
-            opts.append((o['html'], o['is_correct']))
-            
-        # Detect true/false heuristically if not set explicitly
-        if q['q_type'] == 'multichoice':
-            opt_texts = [BeautifulSoup(o[0], 'html.parser').get_text(strip=True).lower() for o in opts]
-            if len(opt_texts) == 2:
-                if any(x in txt for txt in opt_texts for x in ['verdadero', 'true']) and any(x in txt for txt in opt_texts for x in ['falso', 'false']):
-                    is_true_false = True
-                    q['q_type'] = 'truefalse'
-                    for o_html, is_corr in opts:
-                        if is_corr and any(x in o_html.lower() for x in ['verdadero', 'true']):
-                            correct_is_true = True
-                            
-        if q['q_type'] == 'truefalse':
-            is_true_false = True
-            if q.get('tf_answer') is not None:
-                correct_is_true = q['tf_answer']
-            
-        fb_gen = "<br>".join(q['feedback']['general'])
-        fb_corr = "<br>".join(q['feedback']['correct'])
-        fb_inc = "<br>".join(q['feedback']['incorrect'])
-        
-        if q['q_type'] in ['multichoice', 'truefalse']:
-            q_handler = MultichoiceQuestion(
-                q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name,
-                is_true_false=is_true_false, correct_is_true=correct_is_true
-            )
-        elif q['q_type'] == 'cloze':
-            q_handler = ClozeQuestion(
-                q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
-            )
-        elif q['q_type'] == 'drag_drop':
-            q_handler = DragDropQuestion(
-                q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name
-            )
-        else:
-            q_handler = MultichoiceQuestion(q_num, stem_html, opts, fb_gen, fb_corr, fb_inc, course_id, document_name)
-            
+        q_handler, stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc = question_handler(
+            q, q_num, course_id, document_name)
         xml_questions.append(q_handler.to_moodle_xml())
         
         # Build structured output for AI QA

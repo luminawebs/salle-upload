@@ -279,7 +279,7 @@ def _summarize_quizzes(base_dir, activity_manifest, extras, course_id) -> dict:
     For each Cuestionario: questions the quiz export would read vs. the number
     the document evidently has (see actions.html_transformer.summarize_quiz),
     from the fragment files the splitter just wrote (so blocks the user added
-    to an activity count too). No AI, no API call.
+    to an activity count too). The counts use no AI; see the shadow call below.
     """
     from actions.html_transformer import summarize_quiz
     from core.document_corrections import EXTRA_DIR
@@ -293,12 +293,19 @@ def _summarize_quizzes(base_dir, activity_manifest, extras, course_id) -> dict:
         if extra["tipo"] == "Cuestionario":
             targets["x" + extra["issue_id"].split(":", 1)[1]] = os.path.join(base_dir, EXTRA_DIR, extra["archivo"])
 
-    summaries = {}
+    summaries, contents = {}, []
     for key, path in targets.items():
         if not os.path.exists(path):
             continue
         with open(path, "r", encoding="utf-8") as f:
-            summaries[key] = summarize_quiz(f.read(), course_id)
+            html = f.read()
+        summaries[key] = summarize_quiz(html, course_id)
+        contents.append((key, os.path.basename(path), html))
+
+    # AI shadow mode (off unless AI_QUESTIONS_SHADOW=true): quizzes with gaps
+    # are read by the AI in the background and only recorded in ai_shadow/.
+    from core.ai_question_shadow import schedule_shadow
+    schedule_shadow(course_id, contents)
     return summaries
 
 

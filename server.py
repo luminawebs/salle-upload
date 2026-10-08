@@ -182,6 +182,17 @@ async def get_activity_preview(course_id: str, category: str, filename: str):
     return build_preview(html, course_id)
 
 
+@app.get("/api/question-formats")
+async def get_question_formats():
+    """
+    The "Formatos de preguntas" guide: each question type with examples as a
+    teacher writes them, each run through the real parser and Moodle XML
+    builder right now (core/question_types/catalog.py), so it can't go stale.
+    """
+    from core.question_types.catalog import render_catalog
+    return render_catalog()
+
+
 @app.get("/api/skip-activities")
 async def get_skip_activities(course_id: str):
     """Which activity numbers the user chose to exclude from upload for this course."""

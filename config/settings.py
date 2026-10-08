@@ -26,6 +26,13 @@ class Config:
     AI_COST_PER_1M_INPUT_TOKENS_USD = float(os.getenv("AI_COST_PER_1M_INPUT_TOKENS_USD", "0") or 0)
     AI_COST_PER_1M_OUTPUT_TOKENS_USD = float(os.getenv("AI_COST_PER_1M_OUTPUT_TOKENS_USD", "0") or 0)
 
+    # Shadow mode for the AI quiz-question reader (core/ai_question_shadow.py):
+    # when the review finds a quiz with gaps, the AI reads it in the background
+    # and its answer is only saved to ai_shadow/ for measurement — nothing is
+    # shown or uploaded. Independent of ENABLE_AI_FEATURES, but it refuses to
+    # run without a spending cap (AI_BUDGET_USD and both AI_COST_* above > 0).
+    AI_QUESTIONS_SHADOW = os.getenv("AI_QUESTIONS_SHADOW", "False").lower() in ("true", "1", "t")
+
     
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     WORKSPACE_DIR = os.path.join(BASE_DIR, "workspace")

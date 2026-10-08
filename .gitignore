@@ -43,3 +43,7 @@ workspace/
 
 __pycache__/
 *.py[cod]
+
+# AI shadow-mode records (course content) and usage ledger
+ai_shadow/
+ai_usage_ledger.json
