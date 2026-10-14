@@ -34,7 +34,7 @@ const fragmentTargetFor = (kind, params) => {
 // `inline` ({ content, subtitle }) shows HTML the caller already has — e.g. a
 // block of the document the review couldn't assign — instead of fetching a
 // fragment file from the server.
-function FragmentViewer({ target, inline, title, courseId, onClose, onOpenFormats }) {
+function FragmentViewer({ target, inline, title, courseId, onClose, onOpenFormats, initialTab, onReport }) {
   const [content, setContent] = useState(inline ? inline.content : null);
   const [status, setStatus] = useState(inline ? 'done' : 'loading'); // loading, done, error
   const [errorMsg, setErrorMsg] = useState('');
@@ -152,7 +152,7 @@ function FragmentViewer({ target, inline, title, courseId, onClose, onOpenFormat
           )}
 
           {status === 'done' && viewMode === 'structured' && (
-            <ActivityPreview courseId={courseId} category={target.category} filename={target.filename} onOpenFormats={onOpenFormats} />
+            <ActivityPreview courseId={courseId} category={target.category} filename={target.filename} onOpenFormats={onOpenFormats} initialTab={initialTab} onReport={onReport} />
           )}
 
           {status === 'done' && viewMode === 'preview' && (
@@ -350,6 +350,15 @@ export default function AutomationView() {
     setFragment({
       target: { category: 'actividades_extra', filename: extra.archivo },
       title: `${extra.nombre} — ${extra.tipo} (Unidad ${extra.unidad}, añadida en la revisión)`
+    });
+  };
+
+  // "Revisar con la IA" on a quiz problem: its Vista previa, on the AI tab.
+  const showAIReview = (issue) => {
+    setFragment({
+      target: { category: issue.categoria, filename: issue.archivo },
+      title: `${issue.titulo.split(' (Cuestionario)')[0]} — revisión con IA`,
+      initialTab: 'ia'
     });
   };
 
@@ -673,6 +682,7 @@ export default function AutomationView() {
                     onToggleIgnore={toggleIgnoreIssue}
                     onShowBlock={showCoverageBlock}
                     onShowFragment={showExtraActivity}
+                    onOpenAI={showAIReview}
                     onChoice={applyBlockChoice}
                   />
 
@@ -921,8 +931,10 @@ export default function AutomationView() {
           inline={fragment.inline}
           title={fragment.title}
           courseId={courseId}
+          initialTab={fragment.initialTab}
           onClose={() => setFragment(null)}
           onOpenFormats={() => { setFragment(null); setPage('formatos'); }}
+          onReport={(updated) => { setReport(updated); setDocumentProblem(describeDocumentProblem(updated)); }}
         />
       )}
     </div>

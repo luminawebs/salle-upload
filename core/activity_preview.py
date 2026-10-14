@@ -66,12 +66,17 @@ def split_sections(html: str) -> list:
     return [s for s in sections if s["html"].strip() or s["titulo"] != _INTRO_TITLE]
 
 
-def preview_questions(html: str, course_id=None) -> list:
-    """Each question as the export reads it: numero, tipo, enunciado_html, opciones [{html, correcta}], correctas, retroalimentacion."""
+def preview_questions(html: str, course_id=None, parsed: list = None) -> list:
+    """
+    Each question as the export reads it: numero, tipo, enunciado_html,
+    opciones [{html, correcta}], correctas, retroalimentacion, origen ("ia"
+    for an accepted AI proposal). `parsed` replaces the parser's reading (the
+    questions after accepted AI proposals).
+    """
     from actions.html_transformer import parse_questions, question_handler
 
     questions = []
-    for number, q in enumerate(parse_questions(html, course_id), start=1):
+    for number, q in enumerate(parsed if parsed is not None else parse_questions(html, course_id), start=1):
         # The export's own type decision (it also turns a "Verdadero / Falso"
         # pair of options into a true/false question).
         question_handler(q, number, course_id)
@@ -95,16 +100,25 @@ def preview_questions(html: str, course_id=None) -> list:
             "opciones": options,
             "correctas": sum(1 for o in options if o["correcta"]),
             "retroalimentacion": feedback,
+            "origen": q.get("origen", "parser"),
         })
     return questions
 
 
-def build_preview(html: str, course_id=None) -> dict:
-    """Sections plus, when the fragment has questions, each question as the export reads it."""
+def build_preview(html: str, course_id=None, filename: str = None) -> dict:
+    """
+    Sections plus, when the fragment has questions, each question as the
+    export reads it — including the AI proposals the user accepted for this
+    activity file (`filename`), as the upload will.
+    """
     from actions.html_transformer import summarize_quiz
+    from core.ai_question_review import final_questions, strip_accepted_questions
 
-    questions = preview_questions(html, course_id)
+    accepted = final_questions(course_id, filename, html) if filename and course_id else None
+    questions = preview_questions(html, course_id, accepted)
     summary = summarize_quiz(html, course_id) if questions or "respuesta correcta" in html.lower() else None
+    if summary and accepted is not None:
+        summary["encontradas"] = len(questions)  # accepted AI questions count as read
 
     # For a quiz: the description exactly as the upload cleans it (questions
     # and answers removed), so the user can check nothing leaks to students.
@@ -112,6 +126,8 @@ def build_preview(html: str, course_id=None) -> dict:
     from core.data_parser import detect_activity_type
     activity_type = detect_activity_type(BeautifulSoup(html, "html.parser").get_text(" ").upper())
     description = remove_questions_from_html(html, is_quiz=True) if activity_type == "Cuestionario" else None
+    if description is not None and filename and course_id:
+        description = strip_accepted_questions(course_id, filename, html, description)
 
     return {
         "tipo": activity_type,

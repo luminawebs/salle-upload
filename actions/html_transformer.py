@@ -724,12 +724,15 @@ def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "
     return q_handler, stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc
 
 
-def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc") -> int:
+def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path: str = None, course_id: int = None, document_name: str = "doc", questions: list = None) -> int:
     """
     Finds questions in HTML and exports them to a Moodle XML file retaining full HTML.
     Uses a robust block-level state machine parser (parse_questions).
+    `questions` replaces the parser's reading — the questions after the user
+    accepted AI proposals (core/ai_question_review.final_questions).
     """
-    questions = parse_questions(html_content, course_id)
+    if questions is None:
+        questions = parse_questions(html_content, course_id)
     
     import time
     parser_start_time = time.perf_counter()

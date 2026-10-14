@@ -339,7 +339,13 @@ def export_quiz_questions(driver, course_id: int, html_path: str, activity_prefi
     with open(html_path, 'r', encoding='utf-8') as f:
         content = f.read()
         
-    q_count = extract_questions_from_html_to_moodle_xml(content, xml_path, course_id)
+    # The questions after the AI proposals the user accepted in "Vista previa"
+    # (None: nothing accepted, the parser's reading as before).
+    from core.ai_question_review import final_questions
+    accepted = final_questions(course_id, os.path.basename(html_path), content)
+    if accepted is not None:
+        logger.info(f"[{activity_prefix}] Usando {len(accepted)} preguntas con las propuestas de la IA aceptadas.")
+    q_count = extract_questions_from_html_to_moodle_xml(content, xml_path, course_id, questions=accepted)
     
     if q_count > 0 and os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
         export_enabled = getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)

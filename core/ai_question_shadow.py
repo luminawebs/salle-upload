@@ -297,16 +297,21 @@ def metrics(parsed: list, ai_questions: list, comparison: dict, summary: dict) -
 
 # --- Running ----------------------------------------------------------------
 
-def shadow_ready() -> tuple:
-    """(ok, reason). Shadow mode only runs with a spending cap it can actually enforce."""
-    if not Config.AI_QUESTIONS_SHADOW:
-        return False, "AI_QUESTIONS_SHADOW está desactivado."
+def ai_ready() -> tuple:
+    """(ok, reason). Any AI reading of a quiz needs a key and a spending cap it can actually enforce."""
     if Config.AI_BUDGET_USD <= 0 or Config.AI_COST_PER_1M_INPUT_TOKENS_USD <= 0 or Config.AI_COST_PER_1M_OUTPUT_TOKENS_USD <= 0:
         return False, ("Falta un tope de gasto: define AI_BUDGET_USD, AI_COST_PER_1M_INPUT_TOKENS_USD "
                        "y AI_COST_PER_1M_OUTPUT_TOKENS_USD (> 0) en .env.")
     if not os.environ.get("GEMINI_API_KEY"):
         return False, "Falta GEMINI_API_KEY en .env."
     return True, ""
+
+
+def shadow_ready() -> tuple:
+    """(ok, reason). The automatic background reading also needs AI_QUESTIONS_SHADOW."""
+    if not Config.AI_QUESTIONS_SHADOW:
+        return False, "AI_QUESTIONS_SHADOW está desactivado."
+    return ai_ready()
 
 
 def html_hash(html: str) -> str:

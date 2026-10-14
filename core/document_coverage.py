@@ -293,22 +293,29 @@ def _quiz_issue(key: str, label: str, summary, **extra):
         "reconoce (revisa «Ver parseo» de la actividad), o que estén en un bloque sin asignar: "
         "en ese caso usa «Añadir a una actividad existente» en ese bloque."
     )
-    listed = {"preguntas_no_leidas": unread[:_MAX_LISTED_QUESTIONS], "preguntas_leidas": read, "preguntas_esperadas": expected}
+    listed = {"preguntas_no_leidas": unread[:_MAX_LISTED_QUESTIONS], "preguntas_leidas": read, "preguntas_esperadas": expected,
+              "archivo": summary.get("archivo"), "categoria": summary.get("categoria")}
+    issue = None
     if read == 0:
-        return _issue(
+        issue = _issue(
             "cuestionario_sin_preguntas", key,
             f"{label} (Cuestionario): sin preguntas" + (f" (el documento tiene {expected})" if expected else ""),
             f"No se reconoció ninguna pregunta, así que el cuestionario quedará vacío en Moodle. {hints}",
             **listed, **extra,
         )
-    if read < expected:
-        return _issue(
+    elif read < expected:
+        issue = _issue(
             "cuestionario_preguntas_incompletas", key,
             f"{label} (Cuestionario): se leyeron {read} de {expected} preguntas",
             f"Solo se subirán {read} pregunta(s); el documento tiene al menos {expected}. {hints}",
             **listed, **extra,
         )
-    return None
+    # The user reviewed every AI proposal for this quiz (core/ai_question_review.py).
+    review = summary.get("revision_ia")
+    if issue and review and review["completa"]:
+        issue["resuelto"] = {"accion": "ia", "aceptadas": review["aceptadas"],
+                             "preguntas": summary.get("encontradas_finales", read)}
+    return issue
 
 
 def find_unassigned_blocks(trs, row_roles) -> list:

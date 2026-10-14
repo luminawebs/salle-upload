@@ -179,7 +179,7 @@ async def get_activity_preview(course_id: str, category: str, filename: str):
         html = f.read()
 
     from core.activity_preview import build_preview
-    return build_preview(html, course_id)
+    return build_preview(html, course_id, filename)
 
 
 @app.get("/api/question-formats")
@@ -268,6 +268,93 @@ async def post_correction(request: Request):
         return JSONResponse(status_code=400, content={"error": str(e)})
     report = review_document(course_id, generate_json=False, generate_text=False, cleanup_fragments=False)
     return {"status": "success", "report": report}
+
+
+def _quiz_fragment(course_id: str, category: str, filename: str):
+    """(html, error response): one activity fragment the AI review may read."""
+    if not is_safe_course_id(course_id):
+        return None, JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    if category not in ("actividades", "actividades_extra"):
+        return None, JSONResponse(status_code=400, content={"error": "Categoría inválida."})
+    if not isinstance(filename, str) or filename != os.path.basename(filename) or not filename.endswith(".html"):
+        return None, JSONResponse(status_code=400, content={"error": "Nombre de archivo inválido."})
+    path = os.path.join("workspace", course_id, category, filename)
+    if not os.path.isfile(path):
+        return None, JSONResponse(status_code=404, content={"error": "No se encontró esa actividad. Vuelve a subir el documento."})
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read(), None
+
+
+def _ai_proposal_payload(course_id: str, filename: str, html: str) -> dict:
+    from core.ai_question_review import build_proposal
+    from core.ai_question_shadow import ai_ready, find_gaps
+    available, reason = ai_ready()
+    gaps, _, _ = find_gaps(html, course_id)
+    return {"disponible": available, "motivo": reason, "brechas": gaps,
+            "propuesta": build_proposal(course_id, filename, html)}
+
+
+@app.get("/api/ai-proposal")
+async def get_ai_proposal(course_id: str, category: str, filename: str):
+    """
+    The AI's proposals for one quiz, if it already read it (no AI call here),
+    with the user's decisions — see core/ai_question_review.py.
+    """
+    html, error = _quiz_fragment(course_id, category, filename)
+    if error:
+        return error
+    return _ai_proposal_payload(course_id, filename, html)
+
+
+@app.post("/api/ai-proposal")
+async def post_ai_proposal(request: Request):
+    """
+    Asks the AI to read one quiz (question → block → activity, verified word
+    for word; core/ai_question_shadow.run_shadow). Takes up to a couple of
+    minutes; a quiz already read in this exact version isn't sent again.
+    """
+    body = await request.json()
+    course_id, category, filename = body.get("course_id", ""), body.get("category", ""), body.get("filename", "")
+    html, error = _quiz_fragment(course_id, category, filename)
+    if error:
+        return error
+    from core.ai_question_review import activity_key
+    from core.ai_question_shadow import ai_ready, run_shadow
+    available, reason = ai_ready()
+    if not available:
+        return JSONResponse(status_code=400, content={"error": f"La revisión con IA no está disponible. {reason}"})
+    record = await asyncio.to_thread(run_shadow, course_id, activity_key(filename), html, filename)
+    if record is not None and "error" in record and "intentos" in record and not any("ia" in a for a in record["intentos"]):
+        return JSONResponse(status_code=502, content={"error": f"La IA no pudo leer la actividad: {record['error'][:300]}"})
+    return _ai_proposal_payload(course_id, filename, html)
+
+
+@app.post("/api/ai-decisions")
+async def post_ai_decisions(request: Request):
+    """
+    Accepts or discards AI proposals for one quiz — {"decisiones": {item id:
+    "aceptar" | "descartar" | null}} — then re-runs the review so the quiz's
+    problem shows as resolved once every proposal is decided.
+    """
+    body = await request.json()
+    course_id, category, filename = body.get("course_id", ""), body.get("category", ""), body.get("filename", "")
+    html, error = _quiz_fragment(course_id, category, filename)
+    if error:
+        return error
+    changes = body.get("decisiones")
+    if not isinstance(changes, dict) or any(v not in ("aceptar", "descartar", None) for v in changes.values()):
+        return JSONResponse(status_code=400, content={"error": "Decisiones inválidas."})
+    from core.ai_question_review import build_proposal, set_decisions
+    proposal = build_proposal(course_id, filename, html)
+    if proposal is None:
+        return JSONResponse(status_code=404, content={"error": "No hay una propuesta de la IA para esta actividad."})
+    valid = {it["id"] for it in proposal["items"] if it["aceptable"]}
+    unknown = set(changes) - valid
+    if unknown:
+        return JSONResponse(status_code=400, content={"error": "Alguna propuesta ya no existe; vuelve a abrir la actividad."})
+    set_decisions(course_id, filename, html, changes)
+    report = review_document(course_id, generate_json=False, generate_text=False, cleanup_fragments=False)
+    return {"report": report, **_ai_proposal_payload(course_id, filename, html)}
 
 
 @app.post("/api/review")

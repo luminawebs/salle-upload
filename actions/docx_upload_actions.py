@@ -407,7 +407,12 @@ def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix:
                 from bs4 import BeautifulSoup
                 from core.data_parser import detect_activity_type
                 activity_type = detect_activity_type(BeautifulSoup(content, "html.parser").get_text(" ").upper())
+            original = content
             content = remove_questions_from_html(content, is_quiz=(activity_type == "Cuestionario"))
+            if activity_type == "Cuestionario":
+                # Also the questions only the AI found (see core/ai_question_review.py).
+                from core.ai_question_review import strip_accepted_questions
+                content = strip_accepted_questions(course_id, filename, original, content)
             content = transform_activity_html(content, course_id)
                 
             is_forum = False

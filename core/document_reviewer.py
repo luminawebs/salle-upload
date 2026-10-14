@@ -241,12 +241,12 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
             for act_num, act in unit["actividades"].items():
                 summary = quizzes.get(f"a{act_num}")
                 if summary:
-                    act["cantidad_preguntas"] = summary["encontradas"]
+                    act["cantidad_preguntas"] = summary["encontradas_finales"]
                     act["preguntas_esperadas"] = summary["esperadas"]
         for extra in report["actividades_extra"]:
             summary = quizzes.get("x" + extra["issue_id"].split(":", 1)[1])
             if summary:
-                extra["cantidad_preguntas"] = summary["encontradas"]
+                extra["cantidad_preguntas"] = summary["encontradas_finales"]
                 extra["preguntas_esperadas"] = summary["esperadas"]
 
         from core.docx_rubrica_parser import parse_rubricas_from_html
@@ -293,17 +293,29 @@ def _summarize_quizzes(base_dir, activity_manifest, extras, course_id) -> dict:
         if extra["tipo"] == "Cuestionario":
             targets["x" + extra["issue_id"].split(":", 1)[1]] = os.path.join(base_dir, EXTRA_DIR, extra["archivo"])
 
+    from core.ai_question_review import activity_key, final_questions, review_state
+
     summaries, contents = {}, []
     for key, path in targets.items():
         if not os.path.exists(path):
             continue
         with open(path, "r", encoding="utf-8") as f:
             html = f.read()
-        summaries[key] = summarize_quiz(html, course_id)
-        contents.append((key, os.path.basename(path), html))
+        filename = os.path.basename(path)
+        summary = summarize_quiz(html, course_id)
+        # Where the quiz is (for "Revisar con la IA") and the user's review of
+        # the AI's proposals, if any: accepted questions count as read.
+        summary["archivo"] = filename
+        summary["categoria"] = os.path.basename(os.path.dirname(path))
+        summary["revision_ia"] = review_state(course_id, filename, html)
+        final = final_questions(course_id, filename, html)
+        summary["encontradas_finales"] = len(final) if final is not None else summary["encontradas"]
+        summaries[key] = summary
+        contents.append((activity_key(filename), filename, html))
 
     # AI shadow mode (off unless AI_QUESTIONS_SHADOW=true): quizzes with gaps
-    # are read by the AI in the background and only recorded in ai_shadow/.
+    # are read by the AI in the background, so a proposal is ready when the
+    # user opens "Revisar con la IA".
     from core.ai_question_shadow import schedule_shadow
     schedule_shadow(course_id, contents)
     return summaries

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, AlertTriangle, ChevronLeft, ChevronRight, Check, HelpCircle } from 'lucide-react';
+import { RefreshCw, AlertTriangle, ChevronLeft, ChevronRight, Check, HelpCircle, Sparkles } from 'lucide-react';
+import AIProposal from './AIProposal';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 
@@ -10,6 +11,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 const QUESTION_TAB = '__preguntas__';
 const DESCRIPTION_TAB = '__descripcion__';
+const AI_TAB = '__ia__';
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
 export const TYPE_LABELS = {
   multichoice: 'Opción múltiple',
@@ -48,7 +50,14 @@ export function QuestionCard({ q, title, children }) {
     <div className="bg-background rounded-lg border border-border p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h4 className="text-sm font-bold text-white">{title}</h4>
-        <span className="text-[10px] text-gray-500 uppercase tracking-wide">{TYPE_LABELS[q.tipo] || q.tipo}</span>
+        <span className="flex items-center gap-2 text-[10px] text-gray-500 uppercase tracking-wide">
+          {q.origen === 'ia' && (
+            <span className="flex items-center normal-case tracking-normal text-primary border border-primary/40 rounded px-1.5 py-0.5">
+              <Sparkles className="w-3 h-3 mr-1" /> Propuesta de la IA aceptada
+            </span>
+          )}
+          {TYPE_LABELS[q.tipo] || q.tipo}
+        </span>
       </div>
 
       <Html html={q.enunciado_html} />
@@ -172,10 +181,12 @@ function QuestionsView({ questions, summary, onOpenFormats }) {
   );
 }
 
-export default function ActivityPreview({ courseId, category, filename, onOpenFormats }) {
+export default function ActivityPreview({ courseId, category, filename, onOpenFormats, initialTab, onReport }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [tab, setTab] = useState(null);
+  // Bumped after an AI decision, so the questions shown are the ones that will upload.
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -190,11 +201,13 @@ export default function ActivityPreview({ courseId, category, filename, onOpenFo
         if (cancelled) return;
         setData(body);
         const hasQuestions = body.preguntas.length > 0 || (body.resumen_preguntas?.esperadas || 0) > 0;
-        setTab(hasQuestions ? QUESTION_TAB : (body.secciones[0]?.titulo ?? null));
+        setTab((current) => current ?? (initialTab === 'ia' && body.tipo === 'Cuestionario'
+          ? AI_TAB
+          : hasQuestions ? QUESTION_TAB : (body.secciones[0]?.titulo ?? null)));
       })
       .catch((err) => { if (!cancelled) setError(err.message); });
     return () => { cancelled = true; };
-  }, [courseId, category, filename]);
+  }, [courseId, category, filename, version, initialTab]);
 
   if (error) {
     return (
@@ -215,6 +228,7 @@ export default function ActivityPreview({ courseId, category, filename, onOpenFo
   const hasQuestions = data.preguntas.length > 0 || (data.resumen_preguntas?.esperadas || 0) > 0;
   const tabs = [
     ...(hasQuestions ? [{ id: QUESTION_TAB, label: `Preguntas (${data.preguntas.length})` }] : []),
+    ...(data.tipo === 'Cuestionario' ? [{ id: AI_TAB, label: 'Revisión con IA' }] : []),
     ...(data.descripcion_moodle_html !== null && data.descripcion_moodle_html !== undefined
       ? [{ id: DESCRIPTION_TAB, label: 'Descripción en Moodle' }] : []),
     ...data.secciones.map((s) => ({ id: s.titulo, label: s.titulo })),
@@ -238,7 +252,14 @@ export default function ActivityPreview({ courseId, category, filename, onOpenFo
         ))}
       </div>
 
-      {tab === QUESTION_TAB ? (
+      {tab === AI_TAB ? (
+        <AIProposal
+          courseId={courseId}
+          category={category}
+          filename={filename}
+          onChanged={(report) => { setVersion((v) => v + 1); onReport?.(report); }}
+        />
+      ) : tab === QUESTION_TAB ? (
         <QuestionsView questions={data.preguntas} summary={data.resumen_preguntas} onOpenFormats={onOpenFormats} />
       ) : tab === DESCRIPTION_TAB ? (
         <div className="space-y-2">

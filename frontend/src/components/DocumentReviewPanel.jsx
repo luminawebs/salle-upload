@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   CircleAlert, Info, ShieldCheck, Eye, EyeOff, Undo2, ChevronDown, ChevronRight, ListTree,
-  CheckCircle2, Plus, RefreshCw
+  CheckCircle2, Plus, RefreshCw, Sparkles
 } from 'lucide-react';
 
 // What the pipeline read from the document and what it didn't — built by
@@ -82,6 +82,15 @@ function AppendControl({ issue, activities = [], busy, onChoice }) {
 }
 
 function ResolvedText({ resolved }) {
+  if (resolved.accion === 'ia') {
+    return (
+      <p className="text-xs text-primary mt-1 leading-relaxed">
+        Revisado con la IA: {resolved.aceptadas === 0
+          ? 'no se aceptó ningún cambio.'
+          : <>{resolved.aceptadas} propuesta{resolved.aceptadas === 1 ? '' : 's'} aceptada{resolved.aceptadas === 1 ? '' : 's'}; el cuestionario subirá <b>{resolved.preguntas} pregunta{resolved.preguntas === 1 ? '' : 's'}</b>.</>}
+      </p>
+    );
+  }
   if (resolved.accion === 'agregar') {
     return (
       <p className="text-xs text-primary mt-1 leading-relaxed">
@@ -97,6 +106,7 @@ function ResolvedText({ resolved }) {
 }
 
 const BLOCK_ISSUES = ['actividad_no_reconocida', 'contenido_sin_asignar'];
+const QUIZ_ISSUES = ['cuestionario_sin_preguntas', 'cuestionario_preguntas_incompletas'];
 
 // Question count for a Cuestionario, shown on its activity row: green when
 // every question the document evidently has was read, amber when some are
@@ -140,7 +150,7 @@ function UnreadQuestions({ questions }) {
   );
 }
 
-function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBlock, onShowFragment, onChoice }) {
+function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBlock, onShowFragment, onChoice, onOpenAI }) {
   const blocking = issue.bloquea;
   const resolved = issue.resuelto;
   const Icon = resolved ? CheckCircle2 : blocking ? CircleAlert : Info;
@@ -153,6 +163,7 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
         : 'border-border bg-background/60';
   const iconColor = resolved ? 'text-primary' : blocking && !ignored ? 'text-warning' : 'text-gray-400';
   const canChoose = BLOCK_ISSUES.includes(issue.tipo) && !resolved && !ignored;
+  const aiReview = QUIZ_ISSUES.includes(issue.tipo) && issue.archivo && onOpenAI;
 
   return (
     <li className={`rounded-lg border px-3 py-2.5 ${tone}`}>
@@ -174,8 +185,14 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
           {canChoose && (
             <AppendControl issue={issue} activities={activities} busy={busy} onChoice={onChoice} />
           )}
-          <div className="flex items-center gap-3 mt-2">
-            {resolved ? (
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            {aiReview && !ignored && (
+              <button type="button" onClick={() => onOpenAI(issue)}
+                className="flex items-center text-[11px] font-semibold text-primary hover:underline">
+                <Sparkles className="w-3 h-3 mr-1" /> {resolved ? 'Ver revisión con la IA' : 'Revisar con la IA'}
+              </button>
+            )}
+            {resolved?.accion === 'ia' ? null : resolved ? (
               <button type="button" onClick={() => onShowFragment(resolved)}
                 className="flex items-center text-[11px] text-primary hover:underline">
                 <Eye className="w-3 h-3 mr-1" /> Ver parseo
@@ -186,7 +203,7 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
                 <Eye className="w-3 h-3 mr-1" /> Ver contenido
               </button>
             )}
-            {resolved ? (
+            {resolved?.accion === 'ia' ? null : resolved ? (
               <button type="button" onClick={() => onChoice(issue.id, null)} disabled={busy}
                 className="flex items-center text-[11px] text-gray-400 hover:text-white disabled:opacity-40">
                 <Undo2 className="w-3 h-3 mr-1" /> Deshacer
@@ -272,7 +289,7 @@ function DocumentMap({ blocks, onShowBlock }) {
 export const isUnresolved = (issue, ignored) => issue.bloquea && !issue.resuelto && !ignored.has(issue.id);
 
 export default function DocumentReviewPanel({
-  coverage, activities = [], ignored, busyIssue, error, onToggleIgnore, onShowBlock, onShowFragment, onChoice
+  coverage, activities = [], ignored, busyIssue, error, onToggleIgnore, onShowBlock, onShowFragment, onChoice, onOpenAI
 }) {
   if (!coverage) return null;
   const issues = coverage.problemas || [];
@@ -322,6 +339,7 @@ export default function DocumentReviewPanel({
                 onToggleIgnore={onToggleIgnore}
                 onShowBlock={onShowBlock}
                 onShowFragment={onShowFragment}
+                onOpenAI={onOpenAI}
                 onChoice={onChoice}
               />
             ))}
