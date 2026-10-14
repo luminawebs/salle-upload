@@ -658,7 +658,12 @@ def summarize_quiz(html_content: str, course_id: int = None) -> dict:
     unread = [text for i, text in enumerate(candidates) if i not in claimed]
 
     expected = max(declared or 0, answer_lines, len(questions) + len(unread))
-    return {"encontradas": len(questions), "declaradas": declared, "esperadas": expected, "no_leidas": unread}
+    # What the document itself evidences, without the parser's own count (which
+    # can include paragraphs misread as questions) — what an independent
+    # reading of the quiz, like the AI shadow mode, should reach.
+    minimum = max(declared or 0, answer_lines, len(candidates))
+    return {"encontradas": len(questions), "declaradas": declared, "esperadas": expected,
+            "minimas": minimum, "no_leidas": unread}
 
 
 def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "doc"):

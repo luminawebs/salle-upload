@@ -93,6 +93,12 @@ class VerifyTests(unittest.TestCase):
                                "linea_respuesta", "Respuesta correcta: Cali")], QUIZ)
         self.assertFalse(r["verificacion"]["respuesta"])
 
+    def test_spacing_before_punctuation_is_not_a_difference(self):
+        # "<b>Computer</b>, …" reads as "Computer , …" in the document text.
+        source = "<p>Say that there are three classes: <b>Computer</b>, <b>AppleComputer</b>.</p>"
+        [r] = shadow.verify([q("Say that there are three classes: Computer, AppleComputer.", [])], source)
+        self.assertTrue(r["verificacion"]["valida"])
+
     def test_answer_without_origin_is_a_guess(self):
         [r] = shadow.verify([q("¿Cuál es la capital de Colombia?", [("Bogotá", True)], "ninguna")], QUIZ)
         self.assertFalse(r["verificacion"]["valida"])
@@ -132,7 +138,7 @@ class RunShadowTests(unittest.TestCase):
                 ["faltan_preguntas"],
                 [{"enunciado": "¿Cuál es la capital de Colombia?", "tipo": "multichoice",
                   "opciones": [{"texto": "Bogotá", "correcta": True}]}],
-                {"encontradas": 1, "declaradas": None, "esperadas": 3})),
+                {"encontradas": 1, "declaradas": None, "esperadas": 3, "minimas": 3})),
         ]
         for p in patches:
             p.start()
@@ -171,7 +177,7 @@ class RunShadowTests(unittest.TestCase):
 
     def test_no_gap_no_call(self):
         client = FakeClient(self.payload())
-        with mock.patch.object(shadow, "find_gaps", return_value=([], [], {"encontradas": 3, "declaradas": None, "esperadas": 3})):
+        with mock.patch.object(shadow, "find_gaps", return_value=([], [], {"encontradas": 3, "declaradas": None, "esperadas": 3, "minimas": 3})):
             self.assertIsNone(shadow.run_shadow("c1", "a2", QUIZ, client=client))
         self.assertEqual(client.calls, 0)
 
@@ -195,7 +201,7 @@ class EscalationTests(unittest.TestCase):
             mock.patch("core.ai_budget_guard.LEDGER_PATH", os.path.join(self.tmp.name, "ledger.json")),
             # Question 2 has no correct answer marked; nothing is missing.
             mock.patch.object(shadow, "find_gaps", return_value=(
-                ["sin_correcta"], parsed, {"encontradas": 3, "declaradas": None, "esperadas": 3})),
+                ["sin_correcta"], parsed, {"encontradas": 3, "declaradas": None, "esperadas": 3, "minimas": 3})),
         ]
         for p in patches:
             p.start()

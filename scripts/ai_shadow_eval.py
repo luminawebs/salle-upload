@@ -8,6 +8,7 @@ Run from the project root:
     python -m scripts.ai_shadow_eval --run      # calls the AI for those quizzes (needs .env: see below)
     python -m scripts.ai_shadow_eval --run --all   # also quizzes the parser reads fully (false-positive check)
     python -m scripts.ai_shadow_eval --report   # free: table from the records already in ai_shadow/
+    python -m scripts.ai_shadow_eval --rescore  # free: re-check the saved AI answers after changing the checks
 
 --run needs in .env: GEMINI_API_KEY, AI_BUDGET_USD, AI_COST_PER_1M_INPUT_TOKENS_USD,
 AI_COST_PER_1M_OUTPUT_TOKENS_USD (AI_QUESTIONS_SHADOW isn't needed here).
@@ -139,6 +140,8 @@ def main() -> None:
     parser.add_argument("--run", action="store_true", help="call the AI (costs money)")
     parser.add_argument("--all", action="store_true", help="include quizzes without gaps")
     parser.add_argument("--report", action="store_true", help="only summarize ai_shadow/")
+    parser.add_argument("--rescore", action="store_true",
+                        help="re-score the saved AI answers with the current checks (free, no AI call)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.WARNING)
     logging.disable(logging.WARNING)  # the splitter logs every document; only this report matters here
@@ -168,8 +171,16 @@ def main() -> None:
             gaps, parsed, summary = shadow.find_gaps(html)
             if not gaps and not args.all:
                 continue
+            record_file = shadow.record_path(doc_key(path), key, html)
+            recorded = os.path.exists(record_file)
+            if args.rescore:
+                if recorded:
+                    with open(record_file, encoding="utf-8") as f:
+                        record = shadow.rescore(json.load(f), html)
+                    with open(record_file, "w", encoding="utf-8") as f:
+                        json.dump(record, f, ensure_ascii=False, indent=1)
+                continue
             cheapest, worst = estimate(html, gaps, parsed, summary["esperadas"])
-            recorded = os.path.exists(shadow.record_path(doc_key(path), key, html))
             print(f"{rel[:55]:55} {key:5} {summary['encontradas']:>3}/{summary['esperadas']:<3} "
                   f"{','.join(gaps) or 'sin brecha':32} ~${cheapest:.3f}–{worst:.3f}" + ("  (ya registrado)" if recorded else ""))
             if recorded:
@@ -181,11 +192,13 @@ def main() -> None:
                 if record and "error" in record:
                     print(f"    error: {record['error'][:200]}")
                     if any(code in record["error"] for code in ("401", "403", "UNAUTHENTICATED", "PERMISSION_DENIED")):
-                        sys.exit("
-La clave de la IA no es válida (GEMINI_API_KEY). Se detuvo la evaluación; no se guardó nada.")
+                        sys.exit("\nLa clave de la IA no es válida (GEMINI_API_KEY). Se detuvo la evaluación; no se guardó nada.")
 
     print()
-    if args.run:
+    if args.rescore:
+        print("Registros re-evaluados con las verificaciones actuales (sin llamar a la IA):\n")
+        report()
+    elif args.run:
         print(f"Enviadas a la IA: {sent}. Resumen:\n")
         report()
     else:

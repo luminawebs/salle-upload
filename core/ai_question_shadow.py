@@ -123,7 +123,13 @@ def _norm(text: str) -> str:
     """Comparison form: NFC, one space, case-folded, typographic quotes/dashes unified."""
     text = unicodedata.normalize("NFC", text or "")
     text = text.translate(str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'", "–": "-", "—": "-", " ": " "}))
-    return " ".join(text.split()).casefold()
+    text = " ".join(text.split())
+    # Inline formatting splits words from their punctuation when the HTML is
+    # read as text ("<b>Computer</b>, …" -> "Computer , …"); the AI copies the
+    # words, not that artifact.
+    text = re.sub(r"\s+([,.;:?!)\]])", r"\1", text)
+    text = re.sub(r"([(\[¿¡])\s+", r"\1", text)
+    return text.casefold()
 
 
 def _plain(html: str) -> str:
@@ -317,13 +323,26 @@ def _ai_unanswered(q: dict) -> bool:
             and (not q["opciones"] or not any(o.get("correcta") for o in q["opciones"])))
 
 
+def _score(attempt: dict, html: str, parsed: list, expected: int) -> dict:
+    """
+    Verifies and compares the AI's questions in `attempt` (against the whole
+    activity `html` and the parser's questions for that same part). "clara"
+    says the answer settles it: every AI question verified, none still
+    unanswered, and at least as many questions as the document evidences.
+    Pure code, no AI: re-running it re-scores a saved answer for free.
+    """
+    ai_questions = verify(attempt["ia"], html)
+    comparison = compare(parsed, ai_questions)
+    m = metrics(parsed, ai_questions, comparison, {"esperadas": expected})
+    clear = (bool(ai_questions) and m["ia_rechazadas"] == 0
+             and not any(_ai_unanswered(q) for q in ai_questions)
+             and len(comparison["emparejadas"]) + m["nuevas_validas"] >= expected)
+    attempt.update({"comparacion": comparison, "metricas": m, "clara": clear})
+    return attempt
+
+
 def _attempt(client, level: str, excerpt: str, html: str, parsed: list, expected: int, course_id, key: str) -> dict:
-    """
-    One AI reading of `excerpt` (verified against the whole activity `html`),
-    compared with the parser's questions for that same part. "clara" says the
-    answer settles it: every AI question verified, none still unanswered, and
-    as many questions as the document evidently has.
-    """
+    """One AI reading of `excerpt`, scored with _score."""
     from core.ai_structurer import generate_json
     started = time.perf_counter()
     result = generate_json(client, build_prompt(level, excerpt), SCHEMA, INTEGRATION,
@@ -333,14 +352,21 @@ def _attempt(client, level: str, excerpt: str, html: str, parsed: list, expected
     if "error" in result:
         attempt.update({"error": result["error"], "clara": False})
         return attempt
-    ai_questions = verify(result.get("preguntas", []), html)
-    comparison = compare(parsed, ai_questions)
-    m = metrics(parsed, ai_questions, comparison, {"esperadas": expected})
-    clear = (bool(ai_questions) and m["ia_rechazadas"] == 0
-             and not any(_ai_unanswered(q) for q in ai_questions)
-             and len(comparison["emparejadas"]) + m["nuevas_validas"] >= expected)
-    attempt.update({"ia": ai_questions, "comparacion": comparison, "metricas": m, "clara": clear})
-    return attempt
+    attempt["ia"] = result.get("preguntas", [])
+    return _score(attempt, html, parsed, expected)
+
+
+def _final(attempts: list):
+    """The level that settled it: all question-level attempts clear, else the first clear larger level."""
+    questions = [a for a in attempts if a["nivel"] == "pregunta"]
+    if questions and all(a["clara"] for a in questions):
+        return {"nivel": "pregunta", "metricas": _sum_metrics(questions)}
+    for a in attempts:
+        if a["nivel"] != "pregunta" and a["clara"]:
+            return {"nivel": a["nivel"], "metricas": a["metricas"]}
+    if attempts and "metricas" in attempts[-1]:
+        return {"nivel": attempts[-1]["nivel"], "metricas": attempts[-1]["metricas"], "sin_resolver": True}
+    return None
 
 
 def _sum_metrics(attempts: list) -> dict:
@@ -376,34 +402,29 @@ def run_shadow(course_id, key: str, html: str, name: str = "", client=None, forc
 
     from actions.html_transformer import question_excerpts
     excerpts, block = question_excerpts(html)
-    attempts, final = [], None
+    attempts = []
 
     # 1. Only the questions the parser flags, when it knows which ones they are.
     flagged = [i for i, q in enumerate(parsed) if _answer_problem(q)]
-    if flagged and "faltan_preguntas" not in gaps and len(flagged) <= MAX_QUESTION_CALLS             and len(excerpts) == len(parsed):
-        level_attempts = []
+    if (flagged and "faltan_preguntas" not in gaps and len(flagged) <= MAX_QUESTION_CALLS
+            and len(excerpts) == len(parsed)):
         for i in flagged:
             a = _attempt(client, "pregunta", excerpts[i], html, [parsed[i]], 1, course_id, key)
             a["pregunta"] = i + 1
-            level_attempts.append(a)
+            attempts.append(a)
             if "error" in a:
                 break
-        attempts += level_attempts
-        if all(a["clara"] for a in level_attempts):
-            final = {"nivel": "pregunta", "metricas": _sum_metrics(level_attempts)}
 
     # 2. The whole set of questions. 3. The whole activity.
     for level, excerpt in (("bloque", block), ("actividad", html)):
         # A failed call (bad key, network, cut-off answer) isn't an unclear
         # answer: moving up a level would only repeat the failure.
-        if final or not excerpt or (level == "actividad" and excerpt == block)                 or any("error" in a for a in attempts):
+        settled = _final(attempts) is not None and not _final(attempts).get("sin_resolver")
+        failed = any("error" in a for a in attempts)
+        if settled or failed or not excerpt or (level == "actividad" and excerpt == block):
             continue
-        a = _attempt(client, level, excerpt, html, parsed, summary["esperadas"], course_id, key)
-        attempts.append(a)
-        if a["clara"]:
-            final = {"nivel": level, "metricas": a["metricas"]}
-    if final is None and attempts and "metricas" in attempts[-1]:
-        final = {"nivel": attempts[-1]["nivel"], "metricas": attempts[-1]["metricas"], "sin_resolver": True}
+        attempts.append(_attempt(client, level, excerpt, html, parsed, summary["minimas"], course_id, key))
+    final = _final(attempts)
 
     record = {
         "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -412,7 +433,7 @@ def run_shadow(course_id, key: str, html: str, name: str = "", client=None, forc
         "nombre": name,
         "html_hash": html_hash(html),
         "brechas": gaps,
-        "resumen_parser": {k: summary[k] for k in ("encontradas", "declaradas", "esperadas")},
+        "resumen_parser": {k: summary[k] for k in ("encontradas", "declaradas", "esperadas", "minimas")},
         "parser": parsed,
         "intentos": attempts,
         "tokens": {k: sum(a["tokens"].get(k, 0) or 0 for a in attempts) for k in ("input", "output")},
@@ -432,6 +453,29 @@ def run_shadow(course_id, key: str, html: str, name: str = "", client=None, forc
     logger.info(f"[IA sombra] {key}: " + (f"error: {record['error']}" if "error" in record else
                 f"nivel {record['nivel_final']}, {'resuelta' if record['resuelta'] else 'sin resolver'}, "
                 f"{len(attempts)} llamada(s)"))
+    return record
+
+
+def rescore(record: dict, html: str) -> dict:
+    """
+    Re-scores a saved record with the current verification and comparison
+    code, from the AI answers it already holds: no AI call, no cost. `html`
+    must be the activity the record was made from (same html_hash).
+    """
+    gaps, parsed, summary = find_gaps(html, record["curso"])
+    for a in record["intentos"]:
+        if "ia" not in a:
+            continue
+        if a["nivel"] == "pregunta":
+            _score(a, html, [parsed[a["pregunta"] - 1]], 1)
+        else:
+            _score(a, html, parsed, summary["minimas"])
+    final = _final(record["intentos"])
+    record.update({"brechas": gaps, "parser": parsed,
+                   "resumen_parser": {k: summary[k] for k in ("encontradas", "declaradas", "esperadas", "minimas")}})
+    if final:
+        record.update({"nivel_final": final["nivel"], "resuelta": not final.get("sin_resolver"),
+                       "metricas": final["metricas"]})
     return record
 
 
