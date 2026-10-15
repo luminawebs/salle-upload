@@ -53,6 +53,7 @@ _TITLES = {key: (title, phase) for key, title, phase in STEPS}
 # Libraries that log every HTTP call at DEBUG: kept out of the file too.
 _NOISY_LIBRARIES = ("selenium", "urllib3", "httpx", "httpcore", "google_genai", "PIL", "asyncio", "trio", "WDM")
 
+_page_loads = []    # [(seconds, url)] of this course's driver.get() calls
 _plan = []          # enabled step keys for the current course
 _current = None     # (key, start time)
 _durations = []     # [(title, seconds)]
@@ -63,6 +64,7 @@ def begin_course(enabled_steps: list) -> None:
     global _plan, _current, _durations
     _plan = [key for key, _, _ in STEPS if key in enabled_steps]
     _current, _durations = None, []
+    _page_loads.clear()
 
 
 def _close_step() -> None:
@@ -95,13 +97,27 @@ def warn(text: str) -> None:
     logger.warning(text)
 
 
+def record_page_load(url: str, seconds: float) -> None:
+    """One driver.get() (core/driver_setup._time_page_loads)."""
+    _page_loads.append((seconds, url))
+    logging.getLogger("tiempos").debug(f"Página cargada en {seconds:.1f} s: {url}")
+
+
+def _duration(seconds: float) -> str:
+    minutes = seconds / 60
+    return f"{minutes:.0f} min" if minutes >= 1 else f"{seconds:.0f} s"
+
+
 def summary_lines() -> list:
-    """Time per step, for the end-of-course summary."""
+    """Time per step, and page loads, for the end-of-course summary."""
     _close_step()
-    lines = []
-    for title, seconds in _durations:
-        minutes = seconds / 60
-        lines.append(f"{title}: {f'{minutes:.0f} min' if minutes >= 1 else f'{seconds:.0f} s'}")
+    lines = [f"{title}: {_duration(seconds)}" for title, seconds in _durations]
+    if _page_loads:
+        total = sum(s for s, _ in _page_loads)
+        lines.append(f"Cargas de página: {len(_page_loads)} · {_duration(total)} en total · "
+                     f"{total / len(_page_loads):.0f} s de promedio")
+        slowest = sorted(_page_loads, reverse=True)[:5]
+        logging.getLogger("tiempos").debug("Páginas más lentas: " + "; ".join(f"{s:.0f} s {u}" for s, u in slowest))
     return lines
 
 

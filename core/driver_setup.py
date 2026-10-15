@@ -97,5 +97,25 @@ def get_driver():
     # Allow up to 90s for heavy Moodle course pages to load
     # (the previous 30s was too short and caused "renderer timed out" errors)
     driver.set_page_load_timeout(90)
+    _time_page_loads(driver)
 
     return driver
+
+
+def _time_page_loads(driver) -> None:
+    """Records how long every driver.get() takes (core/progress: the summary
+    and the full log show where a run's time goes). Measuring only."""
+    original_get = driver.get
+
+    def timed_get(url):
+        started = time.monotonic()
+        try:
+            return original_get(url)
+        finally:
+            try:
+                from core import progress
+                progress.record_page_load(url, time.monotonic() - started)
+            except Exception:
+                pass
+
+    driver.get = timed_get
