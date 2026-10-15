@@ -9,6 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from core.document_headings import find_unit_number
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def parse_raw_document(filepath):
@@ -352,6 +354,7 @@ def create_activity(driver, section_element, activity_info, wait_time=10, course
                 raise Exception("Save button clicked but did not navigate back to course.")
             
         logger.info(f"Successfully created '{act_name}'.")
+        progress.ok(f"Creada: {act_name}")
         return True
         
     except Exception as e:

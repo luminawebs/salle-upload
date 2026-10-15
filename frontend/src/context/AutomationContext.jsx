@@ -212,31 +212,32 @@ export const AutomationProvider = ({ children }) => {
         }
       }
 
+      // main.py marks each step explicitly (core/progress.py):
+      // "[PASO 3/9 F1] Creando secciones y actividades" — position, total and
+      // the terminal tab (F0–F3). The progress bar and the label come from it.
       let newPhase = currentLogPhase.current;
-
-      if (!localHasFailed && !isSummaryLine) {
-        if (lower.includes("course structure") || lower.includes("section rename") || lower.includes("uploading") || lower.includes("subiendo recursos")) {
-          newPhase = 1;
-          setProgress(35);
-          setCurrentTaskLabel("Estructurando Moodle");
-        }
-        if (lower.includes("cuestionario") || lower.includes("actividad") || lower.includes("foro") || lower.includes("quiz") || lower.includes("exporting questions")) {
-          newPhase = 2;
-          setProgress(65);
-          setCurrentTaskLabel("Configurando Evaluaciones");
-        }
-        if (lower.includes("competencias") || lower.includes("configuracion final") || lower.includes("limpieza") || lower.includes("activity completion") || lower.includes("criterios de finalización")) {
-          newPhase = 3;
-          setProgress(90);
-          setCurrentTaskLabel("Finalizando automatización");
-        }
-
+      let kind = 'info';
+      const stepMatch = msg.match(/^\[PASO (\d+)\/(\d+) F(\d)\] (.*)$/);
+      if (stepMatch && !localHasFailed) {
+        const [, position, total, phase, title] = stepMatch;
+        newPhase = Number(phase);
+        kind = 'step';
+        setProgress(Math.min(99, Math.round(((Number(position) - 1) / Number(total)) * 100)));
+        setCurrentTaskLabel(`Paso ${position} de ${total}: ${title}`);
         currentLogPhase.current = newPhase;
         setActiveLogTab(newPhase);
+      } else if (msg.startsWith('✓')) {
+        kind = 'ok';
+      } else if (msg.startsWith('Error:') || lower.includes('código de salida') && !lower.includes('código de salida 0')) {
+        kind = 'error';
+      } else if (msg.startsWith('Aviso:') || (isSummaryLine && lower.includes('estado=con_problemas'))) {
+        kind = 'warn';
+      } else if (msg.startsWith('[Sistema]')) {
+        kind = 'system';
       }
 
       const timeStr = new Date().toLocaleTimeString('es-ES', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setLogs(prev => [...prev, { text: msg, phase: newPhase, timeStr }]);
+      setLogs(prev => [...prev, { text: msg, phase: newPhase, timeStr, kind }]);
 
       const lowerMsg = msg.toLowerCase();
       if (lowerMsg.includes("nombre del curso:") || lowerMsg.includes("course name:")) {

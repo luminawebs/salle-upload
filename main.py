@@ -21,12 +21,33 @@ from config.settings import Config
 from core.debug_utils import capture_debug_state
 from core.run_summary import RunIssueTracker, log_course_summary, check_document_outputs
 
-# Setup base logging for the application
-logging.basicConfig(
-    level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s"
-)
+# The web terminal shows only progress, warnings and errors; every line goes
+# to the per-run log file at DEBUG (core/progress.py).
+from core import progress
+progress.configure_root()
 logger = logging.getLogger("main")
 
+
+
+def _enabled_steps() -> list:
+    """The progress steps this run will go through (core/progress.STEPS), from the step switches."""
+    flags = {
+        "formato_inicio": "ENABLE_COURSE_FORMAT_CHANGE",
+        "estructura": "ENABLE_COURSE_STRUCTURE_CREATION",
+        "generalidades": "ENABLE_GENERALIDADES_ACCORDION_UPLOAD",
+        "glosario": "ENABLE_GLOSARIO_UPLOAD",
+        "descripciones": "ENABLE_DOCX_UPLOAD_HTML",
+        "materiales": "ENABLE_MATERIALES_ESTUDIO_EXPORT",
+        "unidades": "ENABLE_UNIDADES_INTRO_UPLOAD",
+        "rubricas": "ENABLE_DOCX_RUBRICA_UPLOAD",
+        "finalizacion": "ENABLE_ACTIVITY_COMPLETION_UPDATE",
+    }
+    steps = ["documento"] + [key for key, flag in flags.items() if getattr(Config, flag, False)]
+    if getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False) or getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False):
+        steps.append("cuestionarios")
+    if getattr(Config, "ENABLE_COURSE_FORMAT_CHANGE", False) or getattr(Config, "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", False):
+        steps.append("formato_final")
+    return steps
 
 
 def run_workflow_safely(driver, course_id, moodle, workflow_name, workflow_func, *args, **kwargs):
@@ -56,6 +77,7 @@ def main():
     infografia_base_url = None
     actividad_source = "local"
     logger.info("Initializing WebDriver...")
+    progress.info("Abriendo el navegador…")
     driver = get_driver()
 
     # Counts logged errors (and silent no-ops) per course so the run can end
@@ -70,24 +92,21 @@ def main():
         moodle = MoodleAutomation(driver)
 
         # Step 1: Perform login once
+        progress.info("Iniciando sesión en Moodle…")
         success = moodle.login(Config.MOODLE_USERNAME, Config.MOODLE_PASSWORD)
         if not success:
             logger.error("Aborting process since login failed.")
             return
 
         for course_id in courses_to_process:
-            course_log_dir = os.path.join(Config.WORKSPACE_DIR, str(course_id), "logs")
-            os.makedirs(course_log_dir, exist_ok=True)
-            log_file_path = os.path.join(course_log_dir, "execution.log")
-            
-            file_handler = logging.FileHandler(log_file_path, mode='a', encoding='utf-8')
-            file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+            file_handler = progress.file_handler(course_id)
             logging.getLogger().addHandler(file_handler)
             issue_tracker.reset()
+            progress.begin_course(_enabled_steps())
 
             try:
                 logger.info(f"--- Processing Course ID: {course_id} ---")
-                logger.info(f"Nombre del curso: Curso {course_id}")
+                progress.info(f"Nombre del curso: Curso {course_id}")
                 course_loaded = moodle.navigate_to_course(course_id)
 
                 if not course_loaded:
@@ -102,17 +121,21 @@ def main():
                 # be gated behind ENABLE_DOCX_PARSING/ENABLE_DOCX_SPLITTING_HTML/
                 # ENABLE_UNIDADES_INTRO_SPLIT, which meant a stale or
                 # accidentally-saved .env value could silently skip it.
-                logger.info("Executing DOCX extraction workflow...")
+                progress.step("documento")
+                logger.debug("Executing DOCX extraction workflow...")
                 run_docx_parsing_workflow(course_id)
 
-                logger.info("Executing DOCX splitting workflow...")
+                logger.debug("Executing DOCX splitting workflow...")
                 manifest = run_docx_splitting_workflow(course_id)
+                if manifest:
+                    activities = sum(len(acts) for acts in manifest.values())
+                    progress.ok(f"Documento leído: {len(manifest)} unidad(es), {activities} actividad(es)")
                 # A document whose headings the parser doesn't recognize
                 # doesn't fail here — it just yields nothing, and every
                 # later step silently has nothing to do. Say so up front.
                 check_document_outputs(logger, issue_tracker, course_id, manifest, Config.WORKSPACE_DIR)
 
-                logger.info("Executing Unidades Intro splitting workflow...")
+                logger.debug("Executing Unidades Intro splitting workflow...")
                 run_unidades_intro_splitting_workflow(course_id)
 
                 # Upload workflow moved to after edit mode
@@ -137,7 +160,8 @@ def main():
                         logger.warning("Could not enable edit mode. Skipping interactions for this course.")
                         continue
                 if getattr(Config, "ENABLE_COURSE_FORMAT_CHANGE", False):
-                    logger.info("Switching course format to 'Secciones personalizadas'...")
+                    progress.step("formato_inicio")
+                    logger.debug("Switching course format to 'Secciones personalizadas'...")
                     try:
                         set_custom_sections_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
                         capture_debug_state(driver, course_id, 'set_custom_sections_format', is_error=False)
@@ -156,7 +180,8 @@ def main():
                     logger.info("Course format change workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_COURSE_STRUCTURE_CREATION", False) and edit_enabled:
-                    logger.info("Executing course structure creation workflow...")
+                    progress.step("estructura")
+                    logger.debug("Executing course structure creation workflow...")
                     try:
                         run_course_structure_creation_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
                         capture_debug_state(driver, course_id, 'course_structure_creation', is_error=False)
@@ -174,7 +199,8 @@ def main():
                 elif not getattr(Config, "ENABLE_COURSE_STRUCTURE_CREATION", False):
                     logger.info("Course structure creation workflow is disabled via config.")
                 if getattr(Config, "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", False) and edit_enabled:
-                    logger.info("Executing Generalidades Accordion upload workflow...")
+                    progress.step("generalidades")
+                    logger.debug("Executing Generalidades Accordion upload workflow...")
                     try:
                         run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
                         capture_debug_state(driver, course_id, 'generalidades_accordion_upload', is_error=False)
@@ -193,7 +219,8 @@ def main():
                     logger.info("Generalidades Accordion upload workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_GLOSARIO_UPLOAD", False) and edit_enabled:
-                    logger.info("Executing Glosario creation workflow...")
+                    progress.step("glosario")
+                    logger.debug("Executing Glosario creation workflow...")
                     try:
                         glosario_xml_path = os.path.join(Config.WORKSPACE_DIR, str(course_id), "glosario", "glosario_import.xml")
                         create_glosario_activity(driver, course_id, glosario_xml_path, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
@@ -213,7 +240,8 @@ def main():
                     logger.info("Glosario creation workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_DOCX_UPLOAD_HTML", False):
-                    logger.info("Executing DOCX HTML upload workflow...")
+                    progress.step("descripciones")
+                    logger.debug("Executing DOCX HTML upload workflow...")
                     try:
                         run_docx_upload_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
                         capture_debug_state(driver, course_id, 'docx_upload', is_error=False)
@@ -234,7 +262,8 @@ def main():
 
 
                 if getattr(Config, "ENABLE_MATERIALES_ESTUDIO_EXPORT", False) and edit_enabled:
-                    logger.info("Executing Materiales de Estudio workflow...")
+                    progress.step("materiales")
+                    logger.debug("Executing Materiales de Estudio workflow...")
                     try:
                         run_materiales_estudio_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
                         capture_debug_state(driver, course_id, 'materiales_estudio', is_error=False)
@@ -254,7 +283,8 @@ def main():
 
 
                 if (getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False) or getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)) and edit_enabled:
-                    logger.info("Executing Cuestionario export/grade workflow...")
+                    progress.step("cuestionarios")
+                    logger.debug("Executing Cuestionario export/grade workflow...")
                     try:
                         run_cuestionario_export_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
                         capture_debug_state(driver, course_id, 'cuestionario_export', is_error=False)
@@ -273,7 +303,8 @@ def main():
                     logger.info("Cuestionario export/grade workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_UNIDADES_INTRO_UPLOAD", False):
-                    logger.info("Executing Unidades Intro upload workflow...")
+                    progress.step("unidades")
+                    logger.debug("Executing Unidades Intro upload workflow...")
                     try:
                         upload_unidades_intro_for_course(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
                         capture_debug_state(driver, course_id, 'unidades_intro_upload', is_error=False)
@@ -292,7 +323,8 @@ def main():
                     logger.info("Unidades Intro upload workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_DOCX_RUBRICA_UPLOAD", False):
-                    logger.info("Executing DOCX Rubrica upload workflow...")
+                    progress.step("rubricas")
+                    logger.debug("Executing DOCX Rubrica upload workflow...")
                     try:
                         run_docx_rubrica_upload_workflow(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
                         capture_debug_state(driver, course_id, 'docx_rubrica_upload', is_error=False)
@@ -311,7 +343,8 @@ def main():
                     logger.info("DOCX Rubrica upload workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False) and edit_enabled:
-                    logger.info("Executing activity completion update workflow...")
+                    progress.step("finalizacion")
+                    logger.debug("Executing activity completion update workflow...")
                     from actions.activity_completion_actions import run_activity_completion_workflow
                     run_activity_completion_workflow(
                         driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME
@@ -321,7 +354,8 @@ def main():
                     logger.info("Activity completion update workflow is disabled via config.")
 
                 if getattr(Config, "ENABLE_COURSE_FORMAT_CHANGE", False):
-                    logger.info("Reverting course format back to 'Formato de botones'...")
+                    progress.step("formato_final")
+                    logger.debug("Reverting course format back to 'Formato de botones'...")
                     try:
                         set_buttons_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
                         capture_debug_state(driver, course_id, 'set_buttons_format', is_error=False)
@@ -340,7 +374,9 @@ def main():
                     logger.info("Course format revert workflow is disabled via config.")
                     
                 if getattr(Config, "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", False):
-                    logger.info("Setting final course format to 'Formato de botones'...")
+                    if not getattr(Config, "ENABLE_COURSE_FORMAT_CHANGE", False):
+                        progress.step("formato_final")
+                    logger.debug("Setting final course format to 'Formato de botones'...")
                     try:
                         set_final_buttons_format(driver, course_id, wait_time=Config.EXPLICIT_WAIT_TIME)
                         capture_debug_state(driver, course_id, 'set_final_buttons_format', is_error=False)
@@ -371,7 +407,7 @@ def main():
                 # Runs on every way out of this course — success, an error, or
                 # one of the early `continue`s — so a course can never end
                 # without saying whether it really went well.
-                log_course_summary(logger, issue_tracker, course_id)
+                log_course_summary(logger, issue_tracker, course_id, progress.summary_lines())
 
             # Ensure the handler is removed if the try block completes successfully
             logging.getLogger().removeHandler(file_handler)

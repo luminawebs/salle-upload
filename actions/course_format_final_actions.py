@@ -8,6 +8,8 @@ from selenium.common.exceptions import TimeoutException
 
 from config.settings import Config
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def set_final_buttons_format(driver, course_id, wait_time=10):
@@ -72,6 +74,7 @@ def set_final_buttons_format(driver, course_id, wait_time=10):
             pass
             
         logger.info("Successfully set course format to 'Formato de botones' and saved.")
+        progress.ok("Formato final del curso: Formato de botones")
         return True
         
     except Exception as e:

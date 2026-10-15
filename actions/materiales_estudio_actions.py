@@ -11,6 +11,8 @@ from config.settings import Config
 from core.wysiwyg_handler import inject_html_into_wysiwyg
 from actions.html_transformer import format_urls_in_html, format_typography_in_html
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def add_etiqueta_materiales(driver, section_element, wait_time=10):
@@ -78,7 +80,8 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
     except Exception:
         pass
-        
+
+    progress.ok(f"Materiales de estudio agregados: Unidad {unidad_num}")
     return True
 
 def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_time=10):

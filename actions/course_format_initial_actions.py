@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from config.settings import Config
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def set_custom_sections_format(driver, course_id, wait_time=10):
@@ -93,6 +95,7 @@ def set_custom_sections_format(driver, course_id, wait_time=10):
             pass
             
         logger.info("Successfully set course format to 'Secciones personalizadas' and saved.")
+        progress.ok("Formato del curso: Secciones personalizadas")
         return True
         
     except Exception as e:

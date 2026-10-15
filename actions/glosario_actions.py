@@ -6,6 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
@@ -14,7 +16,8 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
     and imports the entries from the given xml_path.
     """
     if not os.path.exists(xml_path):
-        logger.warning(f"Glosario XML not found at {xml_path}. Skipping Glosario creation.")
+        logger.debug(f"Glosario XML not found at {xml_path}. Skipping Glosario creation.")
+        progress.info("El documento no tiene glosario: no se crea.")
         return False
         
     wait = WebDriverWait(driver, wait_time)
@@ -255,6 +258,7 @@ def import_glosario_entries(driver, xml_path, wait_time=10):
             pass
             
         logger.info(f"Successfully imported Glosario entries from {xml_path}")
+        progress.ok("Glosario importado")
         return True
     except Exception as e:
         logger.error(f"Error importing Glosario entries: {e}")

@@ -103,9 +103,13 @@ class RunIssueTracker(logging.Handler):
         return True, lines
 
 
-def log_course_summary(log: logging.Logger, tracker: RunIssueTracker, course_id):
-    """Logs the summary block: WARNING when there are problems, INFO when clean."""
+def log_course_summary(log: logging.Logger, tracker: RunIssueTracker, course_id, step_times=None):
+    """Logs the summary block: WARNING when there are problems, INFO when clean.
+    `step_times` (core/progress.summary_lines): time per step, listed after it."""
     has_problems, lines = tracker.summary_lines(course_id)
+    if step_times:
+        lines.append(f"{SUMMARY_PREFIX} Tiempo por paso:")
+        lines += [f"{SUMMARY_PREFIX}   · {line}" for line in step_times]
     emit = log.warning if has_problems else log.info
     for line in lines:
         emit(line)

@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import logging
 from selenium.webdriver.common.by import By
@@ -6,6 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from core.wysiwyg_handler import extract_html_from_wysiwyg, inject_html_into_wysiwyg
+
+from core import progress
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +137,8 @@ def upload_unidades_intro_for_course(driver, course_id: int, wait_time: int = 15
             success = inject_html_into_wysiwyg(driver, new_html, wait_time, target_section="resumen")
             if success:
                 logger.info(f"Success: {filename}")
+                unit = re.search(r"\d+", filename)
+                progress.ok(f"Introducción subida: Unidad {unit.group() if unit else filename}")
             else:
                 logger.error(f"Failed to inject HTML for {filename}")
                 all_success = False

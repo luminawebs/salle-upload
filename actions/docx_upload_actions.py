@@ -12,6 +12,8 @@ from core.wysiwyg_handler import inject_html_into_wysiwyg, extract_html_from_wys
 from core.activity_selection import get_skipped_activities
 from config.settings import Config
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def parse_activity_number(val):
@@ -478,6 +480,7 @@ def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix:
                 # Wait until we are redirected back to the course view (or whatever page) in the new tab
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
                 logger.info(f"Success: {filename}")
+                progress.ok(f"Descripción subida: {activity_prefix}")
                 
                 # Navigate to filters and configure (it will do this inside the new tab!)
                 disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)

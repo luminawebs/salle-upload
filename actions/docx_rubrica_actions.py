@@ -12,6 +12,8 @@ from core.docx_rubrica_parser import parse_rubricas_from_docx
 from core.activity_selection import get_skipped_activities
 from config.settings import Config
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_time: int) -> tuple[str | None, str | None]:
@@ -117,6 +119,7 @@ def _upload_rubric(driver, course_id: int, activity_name: str, criteria_list: li
         success = fill_rubric(driver, criteria_list, wait_time, rubric_name=rubric_title)
         if success:
             logger.info(f"Successfully uploaded rubric for {rubric_title}.")
+            progress.ok(f"Rúbrica subida: {rubric_title} ({len(criteria_list)} criterios)")
         else:
             logger.error(f"Failed to upload rubric for {rubric_title}.")
     except Exception as e:

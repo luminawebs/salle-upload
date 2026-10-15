@@ -7,6 +7,8 @@ from actions.docx_upload_actions import get_edit_url_for_introduccion_general
 from core.wysiwyg_handler import inject_html_into_wysiwyg
 from actions.html_transformer import generate_dynamic_generalidades_html, get_image_base64
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10):
@@ -128,5 +130,6 @@ def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10)
     success = inject_html_into_wysiwyg(driver, html_markers, wait_time, target_section="intro", submit_form=True)
     if success:
         logger.info("Successfully uploaded Generalidades Accordion.")
+        progress.ok("Presentación del curso subida")
         
     return success

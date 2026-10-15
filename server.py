@@ -182,6 +182,23 @@ async def get_activity_preview(course_id: str, category: str, filename: str):
     return build_preview(html, course_id, filename)
 
 
+@app.get("/api/run-log")
+async def get_run_log(course_id: str):
+    """
+    The full log of the course's latest run — every line at DEBUG level,
+    including what the web terminal doesn't show (core/progress.py).
+    """
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    from core.progress import latest_run_log
+    path = latest_run_log(course_id)
+    if not path:
+        return JSONResponse(status_code=404, content={"error": "Todavía no hay un registro completo de este curso."})
+    from fastapi.responses import FileResponse
+    return FileResponse(path, media_type="text/plain; charset=utf-8",
+                        filename=f"registro_completo_{course_id}_{os.path.basename(path)[4:-4]}.txt")
+
+
 @app.get("/api/question-formats")
 async def get_question_formats():
     """

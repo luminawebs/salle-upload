@@ -9,6 +9,8 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from actions.moodle_actions import navigate_to_course
 from config.settings import Config
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def update_activity_completion(driver, course_id: int, wait_time: int = 10):
@@ -161,6 +163,7 @@ def update_activity_completion(driver, course_id: int, wait_time: int = 10):
                 continue
                 
         logger.info("Successfully finished updating activity completion conditions.")
+        progress.ok("Condiciones de finalización actualizadas")
         return True
         
     except Exception as e:

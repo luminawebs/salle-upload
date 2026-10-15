@@ -5,6 +5,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def update_quiz_grades(driver, activity_name_prefix: str, wait_time: int = 10) -> bool:
@@ -116,6 +118,7 @@ def update_quiz_grades(driver, activity_name_prefix: str, wait_time: int = 10) -
                 logger.error(f"[{activity_name_prefix}] Could not successfully update weight for question {idx+1} after retries.")
                 
         logger.info(f"[{activity_name_prefix}] Successfully updated all question weights.")
+        progress.ok(f"{activity_name_prefix}: calificación ajustada (nota máxima 5)")
         return True
     except Exception as e:
         logger.error(f"Failed to update quiz grades for {activity_name_prefix}: {e}")

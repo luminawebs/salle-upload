@@ -16,6 +16,8 @@ from core.activity_selection import get_skipped_activities
 from core.data_parser import detect_activity_type
 from bs4 import BeautifulSoup
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str, xml_path: str, wait_time: int) -> bool:
@@ -309,6 +311,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                 logger.warning(f"[{activity_name_prefix}] Could not click 'Agregar pregunta aleatoria': {e}")
             
             logger.info(f"Successfully added questions and random questions to {activity_name_prefix} quiz.")
+            progress.ok(f"{activity_name_prefix}: {target_random_count} preguntas aleatorias en el cuestionario")
             return True
         else:
             logger.warning(f"Could not find 'Agregar' menu for {activity_name_prefix}")
@@ -357,6 +360,7 @@ def export_quiz_questions(driver, course_id: int, html_path: str, activity_prefi
             logger.info(f"Exporting questions for {activity_prefix}...")
             export_success = False
             if import_xml_to_cuestionario(driver, course_id, activity_prefix, xml_path, wait_time):
+                progress.ok(f"{activity_prefix}: {q_count} preguntas importadas al banco")
                 if add_questions_to_cuestionario(driver, course_id, activity_prefix, q_count, wait_time):
                     export_success = True
             

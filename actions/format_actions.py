@@ -9,6 +9,8 @@ from selenium.common.exceptions import TimeoutException
 
 from config.settings import Config
 
+from core import progress
+
 logger = logging.getLogger(__name__)
 
 def _change_course_format(driver, course_id, wait_time, target_format_value, format_name):
@@ -153,6 +155,7 @@ def _change_course_format(driver, course_id, wait_time, target_format_value, for
             logger.warning("[FORMAT_SAVE] Did not find body.path-course-view within explicit wait time. Proceeding anyway.")
             
         logger.info(f"Successfully changed format to '{format_name}'.")
+        progress.ok(f"Formato del curso: {format_name}")
         return True
         
     except TimeoutException:

@@ -453,18 +453,34 @@ export default function AutomationView() {
     e.target.value = null;
   };
 
-  const handleDownloadLogs = () => {
-    if (!logs || logs.length === 0) return;
-    const logText = logs.map(l => `[${l.timeStr}] ${l.text}`).join('\n');
-    const blob = new Blob([logText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+  // The full log of the run (every line, at debug level) is kept on the
+  // server — the terminal shows only progress, warnings and errors. Falls
+  // back to what the terminal shows when there's no run file yet.
+  const saveText = (text, name) => {
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'terminal_logs.txt';
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadLogs = async () => {
+    if (uploadedCourseId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/run-log?course_id=${encodeURIComponent(uploadedCourseId)}`);
+        if (res.ok) {
+          saveText(await res.text(), `registro_completo_${uploadedCourseId}.txt`);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    if (!logs || logs.length === 0) return;
+    saveText(logs.map(l => `[${l.timeStr}] ${l.text}`).join('\n'), 'terminal_logs.txt');
   };
 
   const formatTime = (totalSeconds) => {
@@ -652,7 +668,7 @@ export default function AutomationView() {
               className="flex items-center px-3 py-1.5 bg-surface hover:bg-[#1e2638] text-gray-300 hover:text-white font-medium rounded-lg transition-colors shadow-sm text-xs border border-border hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:text-gray-300"
             >
               <Download className="w-3.5 h-3.5 mr-1.5" />
-              Descargar todos los registros (.txt)
+              Descargar registro completo (.txt)
             </button>
           </div>
 
@@ -896,23 +912,25 @@ export default function AutomationView() {
                   ) : (
                     logs.filter(l => l.phase === activeLogTab).map((logObj, i) => {
                       const log = logObj.text;
-                      let color = 'text-gray-300';
-                      let icon = <span className="text-gray-600 mr-2">·</span>;
-                      const lower = log.toLowerCase();
-                      if (lower.includes("error") || lower.includes("fail") || lower.includes("exception")) {
-                        color = 'text-error'; icon = <span className="text-error mr-2">✖</span>;
-                      } else if (lower.includes("warning") || lower.includes("skip")) {
-                        color = 'text-warning'; icon = <span className="text-warning mr-2">⚠</span>;
-                      } else if (lower.includes("success") || lower.includes("éxito") || lower.includes("ok") || lower.includes("completad")) {
-                        color = 'text-success'; icon = <span className="text-success mr-2">✓</span>;
-                      } else if (lower.includes("sistema") || lower.includes("iniciando")) {
-                        color = 'text-primary'; icon = <span className="text-primary mr-2">➜</span>;
-                      }
+                      // Kind set when the line arrived (AutomationContext): step marker,
+                      // result, warning, error. Not guessed from words in the text.
+                      const STYLES = {
+                        step: ['text-primary font-semibold', '➜'],
+                        ok: ['text-success', ''],
+                        warn: ['text-warning', '⚠'],
+                        error: ['text-error', '✖'],
+                        system: ['text-primary', '➜'],
+                        info: ['text-gray-300', '·'],
+                      };
+                      const [color, mark] = STYLES[logObj.kind] || STYLES.info;
+                      const icon = mark ? <span className="mr-2">{mark}</span> : null;
+                      const stepMatch = logObj.kind === 'step' && log.match(/^\[PASO (\d+)\/(\d+) F\d\] (.*)$/);
+                      const text = stepMatch ? `Paso ${stepMatch[1]} de ${stepMatch[2]} · ${stepMatch[3]}` : log;
                       return (
                         <div key={i} className={`flex items-start ${color}`}>
                           <span className="text-gray-600 mr-3 shrink-0 text-xs mt-0.5">[{logObj.timeStr}]</span>
                           {icon}
-                          <span className="break-all">{log}</span>
+                          <span className="break-words whitespace-pre-wrap">{text}</span>
                         </div>
                       );
                     })
