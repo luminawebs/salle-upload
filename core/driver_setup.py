@@ -1,6 +1,56 @@
+import glob
+import logging
+import os
+import shutil
+import tempfile
+import time
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from config.settings import Config
+
+logger = logging.getLogger(__name__)
+
+# Chrome's temporary profile folders (~160 MB each). Chrome deletes its own on
+# a clean exit, but a run that is cancelled or replaced by a new upload is
+# killed before it can, and the folders piled up until the server's disk was
+# full ("No space left on device") and Chrome could no longer start.
+_CHROME_TEMP_PATTERNS = ("org.chromium.Chromium.scoped_dir.*", ".org.chromium.Chromium.*", ".com.google.Chrome.*")
+_STALE_AFTER_SECONDS = 30 * 60
+
+
+def _last_change(path: str) -> float:
+    """Newest modification time of a folder and its direct entries (a live Chrome keeps touching them)."""
+    newest = os.path.getmtime(path)
+    try:
+        for entry in os.scandir(path):
+            try:
+                newest = max(newest, entry.stat(follow_symlinks=False).st_mtime)
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return newest
+
+
+def clean_stale_chrome_temp() -> int:
+    """Deletes Chrome temporary folders left by earlier runs (untouched for 30+ minutes). Returns MB freed."""
+    freed = 0
+    now = time.time()
+    for pattern in _CHROME_TEMP_PATTERNS:
+        for path in glob.glob(os.path.join(tempfile.gettempdir(), pattern)):
+            try:
+                if not os.path.isdir(path) or now - _last_change(path) < _STALE_AFTER_SECONDS:
+                    continue
+                size = sum(os.path.getsize(os.path.join(root, f)) for root, _, files in os.walk(path) for f in files)
+                shutil.rmtree(path, ignore_errors=True)
+                freed += size
+            except OSError:
+                continue
+    if freed:
+        logger.info(f"Deleted {freed // (1024 * 1024)} MB of Chrome temporary folders left by earlier runs.")
+    return freed // (1024 * 1024)
+
 
 def get_driver():
     """

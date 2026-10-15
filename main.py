@@ -1,4 +1,5 @@
 import logging
+import sys
 import json
 import os
 from core.driver_setup import get_driver
@@ -78,7 +79,24 @@ def main():
     actividad_source = "local"
     logger.info("Initializing WebDriver...")
     progress.info("Abriendo el navegador…")
-    driver = get_driver()
+    try:
+        from core.driver_setup import clean_stale_chrome_temp
+        clean_stale_chrome_temp()
+    except Exception as e:  # cleaning is a courtesy: never stop a run over it
+        logger.debug(f"Could not clean Chrome temporary folders: {e}")
+    try:
+        driver = get_driver()
+    except Exception as e:
+        # Before any course starts there's no summary: say it plainly, with
+        # the hint, instead of a bare Python traceback.
+        import traceback
+        from core.run_hints import hints_for
+        reason = str(e).splitlines()[0] if str(e) else type(e).__name__
+        logger.debug(traceback.format_exc())
+        logger.error(f"No se pudo iniciar Chrome en el servidor: {reason}")
+        for hint in hints_for([traceback.format_exc()]):
+            progress.warn(f"Pista: {hint['pista']}")
+        sys.exit(1)
 
     # Counts logged errors (and silent no-ops) per course so the run can end
     # with an honest summary instead of always looking successful — every
