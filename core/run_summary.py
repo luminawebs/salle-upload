@@ -45,9 +45,12 @@ class RunIssueTracker(logging.Handler):
     """Attach to the root logger; call reset() at the start of each course."""
 
     def __init__(self):
-        super().__init__(level=logging.ERROR)
+        # WARNING and up: errors are counted; warnings only feed the hints
+        # (core/run_hints.py) — some known failures are logged as warnings.
+        super().__init__(level=logging.WARNING)
         self._data_lock = threading.Lock()
         self.errors = []            # [(logger_name, first_line_of_message)]
+        self.warnings = []          # [first_line_of_message], for hints only
         self.document_issues = []   # [message]
 
     def emit(self, record):
@@ -62,7 +65,10 @@ class RunIssueTracker(logging.Handler):
             if any(marker in message for marker in _AI_MESSAGE_MARKERS):
                 return
             with self._data_lock:
-                self.errors.append((record.name, message.splitlines()[0]))
+                if record.levelno >= logging.ERROR:
+                    self.errors.append((record.name, message.splitlines()[0]))
+                elif SUMMARY_PREFIX not in message:
+                    self.warnings.append(message.splitlines()[0])
         except Exception:
             self.handleError(record)
 
@@ -73,6 +79,7 @@ class RunIssueTracker(logging.Handler):
     def reset(self):
         with self._data_lock:
             self.errors.clear()
+            self.warnings.clear()
             self.document_issues.clear()
 
     def summary_lines(self, course_id, max_items: int = 15):
@@ -80,9 +87,11 @@ class RunIssueTracker(logging.Handler):
         with self._data_lock:
             docs = list(self.document_issues)
             errs = list(self.errors)
+            warnings = list(self.warnings)
 
+        hints = _hint_lines(course_id, [msg for _, msg in errs] + warnings)
         if not docs and not errs:
-            return False, [f"{SUMMARY_PREFIX} Curso {course_id} | {STATE_OK} | Completado sin errores."]
+            return False, [f"{SUMMARY_PREFIX} Curso {course_id} | {STATE_OK} | Completado sin errores."] + hints
 
         lines = [
             f"{SUMMARY_PREFIX} Curso {course_id} | {STATE_PROBLEMS} | "
@@ -100,7 +109,20 @@ class RunIssueTracker(logging.Handler):
                 lines.append(f"{SUMMARY_PREFIX}   - ... y {len(counts) - max_items} error(es) distinto(s) más (ver la terminal).")
                 break
             lines.append(f"{SUMMARY_PREFIX}   - [{name}] {msg}" + (f" (x{n})" if n > 1 else ""))
-        return True, lines
+        return True, lines + hints
+
+
+def _hint_lines(course_id, messages) -> list:
+    """Summary lines with the hints for these messages; the code pointer goes only to the full log."""
+    try:
+        from core.run_hints import hints_for
+        found = hints_for(messages)
+    except Exception as e:  # a broken hint must never break the summary
+        logging.getLogger(__name__).debug(f"Run hints failed: {e}")
+        return []
+    for hint in found:
+        logging.getLogger(__name__).debug(f"PISTA [{hint['id']}] curso {course_id}: código → {hint['codigo']}")
+    return [f"{SUMMARY_PREFIX}   Pista: {hint['pista']}" for hint in found]
 
 
 def log_course_summary(log: logging.Logger, tracker: RunIssueTracker, course_id, step_times=None):

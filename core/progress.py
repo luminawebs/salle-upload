@@ -140,6 +140,13 @@ def console_handler() -> logging.Handler:
 
 def configure_root() -> None:
     """main.py: everything reaches the handlers at DEBUG; the console shows only the user's part."""
+    # The server decodes this process's output as UTF-8; Windows would write
+    # accents and "…" in its own code page (they arrived as "�").
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except (ValueError, OSError):
+            pass
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     for handler in list(root.handlers):
