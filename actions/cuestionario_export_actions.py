@@ -13,6 +13,8 @@ from actions.html_transformer import extract_questions_from_html_to_moodle_xml
 from actions.deprecated.puntos_extras_actions import _get_cmid_for_activity
 from actions.cuestionario_grade_actions import update_quiz_grades
 from core.activity_selection import get_skipped_activities
+from core.data_parser import detect_activity_type
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -396,7 +398,16 @@ def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10
                     logger.info(f"Actividad {act_num} excluida por el usuario — omitiendo exportación de cuestionario.")
                     continue
                 activity_prefix = f"ACTIVIDAD {act_num}"
-                export_quiz_questions(driver, course_id, os.path.join(actividades_dir, filename), activity_prefix, wait_time)
+                path = os.path.join(actividades_dir, filename)
+                # Only quizzes: a Tarea or Foro also has "¿…?" lines (guiding
+                # questions for the student), which used to be imported into
+                # the question bank as if they were quiz questions.
+                with open(path, "r", encoding="utf-8") as f:
+                    activity_type = detect_activity_type(BeautifulSoup(f.read(), "html.parser").get_text(" ").upper())
+                if activity_type != "Cuestionario":
+                    logger.info(f"{activity_prefix} es de tipo {activity_type}: no es un cuestionario, no se exportan preguntas.")
+                    continue
+                export_quiz_questions(driver, course_id, path, activity_prefix, wait_time)
 
     # Quizzes the user created from a block in the review panel: identified by
     # their name (the document heading), not by an ACTIVIDAD number.

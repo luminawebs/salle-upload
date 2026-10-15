@@ -815,9 +815,11 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
     error_msg = soup.find("div", class_="alert-danger") or soup.find("div", class_="errormessage")
     if error_msg:
         err_text = error_msg.get_text(strip=True)
-        logger.warning(f"  Moodle error/warning detected on manage page: {err_text}")
         if "no está listo" not in err_text.lower() and "not ready" not in err_text.lower():
+            logger.warning(f"  Moodle error/warning detected on manage page: {err_text}")
             return False
+        # Expected before a rubric exists ("el formulario … no está listo").
+        logger.info("  La rúbrica aún no existe en esta actividad; se creará.")
 
     if "Error | Padre" in page_title or "error" in page_title.lower():
         logger.warning(f"  Access error to grading manage page for cmid {cmid}. Activity might not support advanced grading.")
@@ -826,9 +828,11 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
     # Collect all links for diagnostics
     all_hrefs = [(a.get_text(" ", strip=True)[:60], a.get("href", ""))
                  for a in soup.find_all("a", href=True)]
-    logger.info(f"  Links found on page ({len(all_hrefs)}):")
+    # Every link on the page (thousands: the whole category menu) — only at
+    # debug level; at info it was ~4,000 log lines per rubric.
+    logger.debug(f"  Links found on page ({len(all_hrefs)}):")
     for text, href in all_hrefs:
-        logger.info(f"    [{text}] → {href}")
+        logger.debug(f"    [{text}] → {href}")
 
     # ── Case 1: Rubric already defined — find rubric/edit.php ─────────────────
     rubric_edit_url = next(

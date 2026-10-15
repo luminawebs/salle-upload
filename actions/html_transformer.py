@@ -771,8 +771,11 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     # --- 4. VALIDATION LOGIC (AI QA Layer) ---
     standard_q_count = len(xml_questions)
     should_invoke_ai = False
-    
-    if standard_q_count > 0:
+
+    from config.settings import Config
+    if not getattr(Config, "ENABLE_AI_FEATURES", False):
+        pass  # AI off: the parser's reading as is, without a "failed" AI report in the log
+    elif standard_q_count > 0:
         logger.info(f"Standard parser detected {standard_q_count} questions. Starting AI Validation...")
         should_invoke_ai = True
     elif "cuestionario" in html_content.lower() or "evaluemos" in html_content.lower() or "pregunta " in html_content.lower():

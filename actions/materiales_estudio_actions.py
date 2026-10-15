@@ -244,7 +244,10 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
                         break
                     
             if not target_section:
-                logger.warning(f"Could NOT find any section containing the text 'UNIDAD {unidad_num}'. Stopping unit iteration.")
+                if unidad_num == 1:
+                    logger.warning("Could NOT find any section containing the text 'UNIDAD 1'. No study materials were added.")
+                else:
+                    logger.info(f"No hay sección 'UNIDAD {unidad_num}': materiales agregados a las {unidad_num - 1} unidades.")
                 break
                 
             logger.info(f"Successfully found section for Unidad {unidad_num}. Adding 'Área de texto y medios' (Etiqueta)...")

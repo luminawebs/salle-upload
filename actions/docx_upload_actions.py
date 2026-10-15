@@ -500,7 +500,12 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
         
     # Upload Introduccion General
     intro_path = os.path.join(introduccion_dir, "introduccion_general.html")
-    if os.path.exists(intro_path):
+    if getattr(Config, "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", False):
+        # The Generalidades accordion step already put the introduction in that
+        # label (renamed "Presentación"); uploading the plain version here would
+        # replace the accordion — and the label is no longer found by its old text.
+        logger.info("Introducción General: ya se subió como acordeón de Generalidades; no se sube la versión simple.")
+    elif os.path.exists(intro_path):
         logger.info(f"Uploading Introducción General for course {course_id}...")
         edit_url = get_edit_url_for_introduccion_general(driver, wait_time)
         if edit_url:
