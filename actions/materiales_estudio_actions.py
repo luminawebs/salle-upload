@@ -80,8 +80,7 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
     except Exception:
         pass
-
-    progress.ok(f"Materiales de estudio agregados: Unidad {unidad_num}")
+        
     return True
 
 def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_time=10):
@@ -212,7 +211,8 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body.path-course-view")))
     except Exception:
         pass
-        
+
+    progress.ok(f"Materiales de estudio agregados: Unidad {unidad_num}")
     return True
 
 def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
