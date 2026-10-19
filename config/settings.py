@@ -1,8 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from a .env file if present
-load_dotenv()
+# Load environment variables from the .env file. override=True: the file wins
+# over values already in the environment. The web UI writes the course ID and
+# the step switches to .env right before each run; without override, a value
+# the server process inherited when it started (e.g. a systemd EnvironmentFile)
+# silently replaced them — a run processed the previous course ID.
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
 
 
 class Config:
