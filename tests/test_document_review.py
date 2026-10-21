@@ -546,6 +546,31 @@ def _summarize_docx(path: str, index: int) -> dict:
     }
 
 
+class RubricChoiceTests(unittest.TestCase):
+    """An activity with two rubric tables: the one under "¿Cómo lo vamos a evaluar?" is the grading rubric."""
+
+    @staticmethod
+    def _table(rows):
+        body = "".join(f"<tr><td>{c}</td><td>{p}</td></tr>" for c, p in rows)
+        return f"<table><tr><td>Criterios de desempeño</td><td>Puntos</td></tr>{body}<tr><td>Total</td><td>5.0</td></tr></table>"
+
+    def test_grading_rubric_wins_over_coevaluation_table(self):
+        from core.docx_rubrica_parser import parse_rubricas_from_html, parse_rubrica_from_fragment
+        coeval = self._table([("Soluciona el problema", "2.0"), ("Comentado", "1.0"), ("Funcionalidad", "2.0")])
+        grading = self._table([("Soluciona", "1.0"), ("Comentado", "0.5"), ("Funcionalidad", "1.0"),
+                               ("Evalúa a otro grupo", "1.0"), ("Pregunta", "0.5"), ("Responde", "1.0")])
+        body = (f"<p>Fase 2: Coevaluación</p>{coeval}<p>Deben compartir en el foro esta rúbrica.</p>"
+                f"<p>¿Cómo lo vamos a evaluar?</p>{grading}")
+        html = f"<table><tr><td>ACTIVIDAD 2: Foro</td></tr><tr><td>{body}</td></tr></table>"
+        self.assertEqual(len(parse_rubricas_from_html(html)[2]), 6)
+        self.assertEqual(len(parse_rubrica_from_fragment(body)), 6)
+
+    def test_single_table_unchanged(self):
+        from core.docx_rubrica_parser import parse_rubricas_from_html
+        html = f"<table><tr><td>ACTIVIDAD 1</td></tr><tr><td>{self._table([('A', '2.0'), ('B', '3.0')])}</td></tr></table>"
+        self.assertEqual(len(parse_rubricas_from_html(html)[1]), 2)
+
+
 class RealDocumentRegressionTests(unittest.TestCase):
     """The real course documents must keep producing exactly the recorded result."""
 
