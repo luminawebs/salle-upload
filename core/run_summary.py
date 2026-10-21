@@ -32,7 +32,7 @@ STATE_OK = "estado=ok"
 STATE_PROBLEMS = "estado=con_problemas"
 
 _AI_LOGGER_PREFIXES = (
-    "core.ai_", "core.parser_validator", "core.document_splitter",
+    "core.ai_", "core.deprecated",
     "google_genai", "httpx",
 )
 _AI_MESSAGE_MARKERS = (

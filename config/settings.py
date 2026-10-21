@@ -15,6 +15,10 @@ class Config:
     # ==================================================================================================
     # --------------------------------- ACTIVE SETTINGS ------------------------------------------------
     # ==================================================================================================
+    # Turned on the legacy AI integrations (quiz QA layer, document-structure
+    # validator, Selenium error diagnosis), now in core/deprecated/ and not
+    # called. Nothing active reads it: the quiz AI ("Revisar con la IA") needs
+    # only GEMINI_API_KEY and the spending cap below.
     ENABLE_AI_FEATURES = os.getenv("ENABLE_AI_FEATURES", "False").lower() in ("true", "1", "t")
     TESTING_MODE = os.getenv("TESTING_MODE", "False").lower() in ("true", "1", "t")
 

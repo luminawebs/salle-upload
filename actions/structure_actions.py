@@ -375,50 +375,6 @@ def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
     for extra in add_extra_activities_to_sections(sections, get_extra_activities(course_id)):
         logger.error(f"No se encontró la sección de la Unidad {extra.get('unidad')} para '{extra['nombre']}'; no se creará.")
     
-    # --- PHASE 2 INTEGRATION: Silently run AI validation in parallel ---
-    try:
-        from core.parser_validator import run_validation
-        import threading
-        import json
-        
-        def run_ai_silently():
-            logger.info(f"[{course_id}] Starting silent AI parallel validation...")
-            try:
-                report = run_validation(course_id)
-                if not report:
-                    return
-                
-                metrics_path = "ai_fallback_metrics.json"
-                metrics = []
-                if os.path.exists(metrics_path):
-                    try:
-                        with open(metrics_path, "r", encoding="utf-8") as f:
-                            metrics = json.load(f)
-                    except json.JSONDecodeError:
-                        pass
-                
-                metrics.append({
-                    "course_id": course_id,
-                    "timestamp": time.time(),
-                    "legacy_count": report.get("legacy_activities_count", 0),
-                    "ai_count": report.get("ai_activities_count", 0),
-                    "warnings": report.get("warnings", []),
-                    "comparisons": report.get("comparisons", [])
-                })
-                
-                with open(metrics_path, "w", encoding="utf-8") as f:
-                    json.dump(metrics, f, indent=2, ensure_ascii=False)
-                    
-                logger.info(f"[{course_id}] AI fallback metrics updated.")
-            except Exception as e:
-                logger.error(f"[{course_id}] Silent AI validation failed: {e}")
-        
-        ai_thread = threading.Thread(target=run_ai_silently)
-        ai_thread.start()
-        
-    except ImportError:
-        logger.warning("AI parser validator not found, skipping parallel validation.")
-    # -----------------------------------------------------------------
     
     if not sections:
         logger.warning(f"No sections found in {raw_doc_path} or file missing.")

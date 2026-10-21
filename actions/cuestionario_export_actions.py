@@ -126,12 +126,7 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
         import traceback
         error_trace = traceback.format_exc()
         logger.error(f"Failed to import Moodle XML file for {activity_name_prefix}: {e}")
-        try:
-            from core.ai_structurer import analyze_selenium_error
-            current_url = driver.current_url
-            suggestion = analyze_selenium_error(error_trace, current_url, f"Importing XML for {activity_name_prefix}", course_id=course_id)
-            logger.warning(f"\n--- AI SELENIUM IMPROVEMENT SUGGESTION ---\n{suggestion}\n------------------------------------------\n")
-        except: pass
+        logger.debug(error_trace)
         return False
 
 def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: str, question_count: int, wait_time: int) -> bool:
@@ -321,12 +316,7 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
         import traceback
         error_trace = traceback.format_exc()
         logger.error(f"Failed to add random questions to {activity_name_prefix} quiz: {e}")
-        try:
-            from core.ai_structurer import analyze_selenium_error
-            current_url = driver.current_url
-            suggestion = analyze_selenium_error(error_trace, current_url, f"Adding random questions for {activity_name_prefix}", course_id=course_id)
-            logger.warning(f"\n--- AI SELENIUM IMPROVEMENT SUGGESTION ---\n{suggestion}\n------------------------------------------\n")
-        except: pass
+        logger.debug(error_trace)
         return False
 
 def export_quiz_questions(driver, course_id: int, html_path: str, activity_prefix: str, wait_time: int, xml_name: str = None):
@@ -351,7 +341,11 @@ def export_quiz_questions(driver, course_id: int, html_path: str, activity_prefi
     if accepted is not None:
         logger.info(f"[{activity_prefix}] Usando {len(accepted)} preguntas con las propuestas de la IA aceptadas.")
     q_count = extract_questions_from_html_to_moodle_xml(content, xml_path, course_id, questions=accepted)
-    
+    if q_count == 0:
+        # Counted as an error, so the run never ends "sin errores" with an empty quiz.
+        logger.error(f"{activity_prefix}: no hay ninguna pregunta para subir al cuestionario.")
+        return
+
     if q_count > 0 and os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
         export_enabled = getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
         grade_update_enabled = getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)

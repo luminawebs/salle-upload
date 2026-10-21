@@ -8,7 +8,7 @@ versus subtly reworded, reordered, or invented. This check verifies the
 extracted HTML is really traceable back to the original, before any caller
 treats it as trustworthy.
 
-Originally lived only in core/parser_validator.py (used to verify the
+Originally lived only in core/deprecated/parser_validator.py (used to verify the
 "shadow" AI structure validator's output); pulled out here so
 actions/html_transformer.py's AI question QA layer can apply the same check
 to corrections/additions it's about to upload for real.

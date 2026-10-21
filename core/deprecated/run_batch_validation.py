@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from core.parser_validator import run_validation
+from core.deprecated.parser_validator import run_validation
 from core.data_parser import run_docx_parsing_workflow, run_docx_splitting_workflow
 
 logging.basicConfig(level=logging.INFO)

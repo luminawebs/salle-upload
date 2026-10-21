@@ -1,8 +1,8 @@
 import os
 import json
 import logging
-from core.document_splitter import DocumentSplitter
-from core.ai_document_parser import parse_chunk_with_ai
+from core.deprecated.document_splitter import DocumentSplitter
+from core.deprecated.ai_document_parser import parse_chunk_with_ai
 from core.html_integrity import check_dom_integrity
 from actions.structure_actions import parse_raw_document
 

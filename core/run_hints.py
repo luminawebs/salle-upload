@@ -52,6 +52,15 @@ HINTS = (
         "codigo": "actions/cuestionario_export_actions.py · add_questions_to_cuestionario",
     },
     {
+        "id": "cuestionario_vacio",
+        "patron": r"no hay ninguna pregunta para subir al cuestionario",
+        "ejemplo": "ACTIVIDAD 1: no hay ninguna pregunta para subir al cuestionario.",
+        "pista": "El cuestionario quedó sin preguntas. Abre la actividad en «Vista previa»: la pestaña "
+                 "«Preguntas» muestra lo que se lee y «Revisión con IA» puede proponer las que faltan. "
+                 "El formato esperado está en «Formatos de preguntas».",
+        "codigo": "actions/cuestionario_export_actions.py · export_quiz_questions",
+    },
+    {
         "id": "importar_preguntas",
         "patron": r"failed to import moodle xml",
         "ejemplo": "Failed to import Moodle XML file for ACTIVIDAD 4: timeout",

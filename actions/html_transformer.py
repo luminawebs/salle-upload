@@ -71,50 +71,6 @@ def process_image_src(html_str, course_id=None):
             img['style'] = "max-width: 100%; height: auto;"
     return soup.decode_contents()
 
-def _question_dict_html_fields(question: dict):
-    """Every HTML string inside a question dict that must be traceable back
-    to the source document — used to run an integrity check on AI-proposed
-    corrections/additions before they're trusted (see _validate_ai_question)."""
-    for key in ("stem_html", "correct_feedback_html", "incorrect_feedback_html"):
-        value = question.get(key)
-        if value:
-            yield key, value
-    for i, opt in enumerate(question.get("options", []) or []):
-        value = opt.get("text_html")
-        if value:
-            yield f"options[{i}].text_html", value
-
-def _validate_ai_question(question: dict, source_html: str) -> dict:
-    """
-    Checks every HTML field the AI returned for one question against the
-    original activity HTML using both integrity checks from
-    core/html_integrity.py: structural (tag order, preserved attributes —
-    the same one the shadow structure validator already relies on) AND
-    textual (are the actual words real, not paraphrased or invented).
-
-    An LLM's JSON response can be perfectly schema-valid while still
-    containing subtly reworded, reordered, or fabricated text — the schema
-    constrains shape, not truthfulness. This is the check that stands
-    between "the AI said so" and content actually reaching a real quiz.
-    Returns {"valid": bool, "warnings": [...]}.
-    """
-    from core.html_integrity import check_dom_integrity, check_text_integrity
-    all_warnings = []
-    for field_name, value in _question_dict_html_fields(question):
-        for check in (check_dom_integrity, check_text_integrity):
-            result = check(source_html, value)
-            if not result["valid"]:
-                all_warnings.append(f"{field_name}: {'; '.join(result['warnings'])}")
-    return {"valid": len(all_warnings) == 0, "warnings": all_warnings}
-
-def _short_preview(html: str, max_len: int = 90) -> str:
-    """Plain-text, single-line preview of an HTML fragment for audit logs."""
-    if not html:
-        return "(vacío)"
-    text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
-    text = " ".join(text.split())
-    return text[:max_len] + "…" if len(text) > max_len else text
-
 _ANSWER_LINE_RE = re.compile(r'^respuesta\s+correcta\s*:?\s*(.*)$', re.IGNORECASE)
 _TRUE_FALSE_ANSWERS = {"verdadero": True, "falso": False, "true": True, "false": False, "v": True, "f": False}
 # "Responda falso o verdadero según corresponda:" — an instruction, not a question.
@@ -668,11 +624,10 @@ def summarize_quiz(html_content: str, course_id: int = None) -> dict:
 
 def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "doc"):
     """
-    The Moodle XML builder for one parsed question (core/question_types/) and
-    the values the AI QA layer below reuses: (handler, stem_html, opts,
-    is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc). One place decides
-    the Moodle type, so the export and the question-format guide
-    (core/question_types/catalog.py) always agree.
+    The Moodle XML builder for one parsed question (core/question_types/), plus
+    (stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc).
+    One place decides the Moodle type, so the export and the question-format
+    guide (core/question_types/catalog.py) always agree.
     """
     stem_html = "<br>".join(q['stem_html'])
     opts = []
@@ -734,189 +689,18 @@ def extract_questions_from_html_to_moodle_xml(html_content: str, output_xml_path
     if questions is None:
         questions = parse_questions(html_content, course_id)
     
-    import time
-    parser_start_time = time.perf_counter()
-    parser_end_time = time.perf_counter()
-
-    # --- 3. BUILD XML STRINGS ---
+    # The questions go to Moodle exactly as read (or as the user accepted them
+    # in "Revisión con IA"). A former AI QA layer here rewrote them without
+    # the user seeing it; when its rebuild failed it left the quiz with no
+    # questions at all. Removed: AI help for quizzes is the reviewed proposals
+    # in core/ai_question_review.py.
     xml_questions = []
-    structured_questions = []
     xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n<quiz>\n'
     xml_footer = '</quiz>\n'
 
-    q_num = 1
-    for q in questions:
-        q_handler, stem_html, opts, is_true_false, correct_is_true, fb_gen, fb_corr, fb_inc = question_handler(
-            q, q_num, course_id, document_name)
+    for q_num, q in enumerate(questions, start=1):
+        q_handler = question_handler(q, q_num, course_id, document_name)[0]
         xml_questions.append(q_handler.to_moodle_xml())
-        
-        # Build structured output for AI QA
-        q_dict = {
-            "stem_html": stem_html,
-            "options": [],
-            "correct_feedback_html": fb_corr or fb_gen,
-            "incorrect_feedback_html": fb_inc or fb_gen
-        }
-        
-        if q['q_type'] == 'truefalse':
-            q_dict["options"].append({"text_html": "true", "is_correct": correct_is_true})
-            q_dict["options"].append({"text_html": "false", "is_correct": not correct_is_true})
-        else:
-            for opt_html, is_correct in opts:
-                q_dict["options"].append({"text_html": opt_html, "is_correct": is_correct})
-                
-        structured_questions.append(q_dict)
-        q_num += 1
-
-    # --- 4. VALIDATION LOGIC (AI QA Layer) ---
-    standard_q_count = len(xml_questions)
-    should_invoke_ai = False
-
-    from config.settings import Config
-    if not getattr(Config, "ENABLE_AI_FEATURES", False):
-        pass  # AI off: the parser's reading as is, without a "failed" AI report in the log
-    elif standard_q_count > 0:
-        logger.info(f"Standard parser detected {standard_q_count} questions. Starting AI Validation...")
-        should_invoke_ai = True
-    elif "cuestionario" in html_content.lower() or "evaluemos" in html_content.lower() or "pregunta " in html_content.lower():
-        logger.info("Standard parser found 0 questions but keywords indicate a questionnaire. Starting AI Validation as fallback...")
-        should_invoke_ai = True
-
-    if should_invoke_ai:
-        ai_start_time = time.perf_counter()
-        try:
-            import json
-            from core.ai_structurer import validate_and_extract_questions
-            serialized_parser_output = json.dumps(structured_questions, ensure_ascii=False)
-            
-            ai_result = validate_and_extract_questions(html_content, serialized_parser_output, parsed_q_count=standard_q_count, course_id=course_id)
-            ai_end_time = time.perf_counter()
-            
-            is_perfect = False
-            corrections = []
-            additions = []
-            removals = []
-            metadata = {}
-            token_usage = {}
-            status_text = "SUCCESS"
-            corrections_accepted = corrections_rejected = 0
-            additions_accepted = additions_rejected = 0
-
-            if "error" in ai_result:
-                status_text = f"FAILED_FALLBACK ({ai_result['error']})"
-                logger.error(f"AI QA Layer returned error or exhausted retries: {ai_result['error']}. Falling back to standard parser.")
-            else:
-                is_perfect = ai_result.get("is_perfect", False)
-                corrections = ai_result.get("corrections", [])
-                additions = ai_result.get("additions", [])
-                removals = ai_result.get("removals", [])
-                metadata = ai_result.get("metadata", {})
-                token_usage = ai_result.get("token_usage", {})
-
-                final_questions = list(structured_questions)
-
-                for idx in sorted(removals, reverse=True):
-                    if 0 <= idx < len(final_questions):
-                        del final_questions[idx]
-
-                # Every correction/addition is untrusted until its HTML is verified
-                # to actually trace back to the source document — the JSON schema
-                # only constrains shape, not truthfulness. A rejected item keeps
-                # whatever the deterministic parser already had (for a correction)
-                # or is simply dropped (for an addition, since there's nothing to
-                # fall back to). This mirrors the same check the shadow structure
-                # validator already applies to its own AI output.
-                for corr in corrections:
-                    idx = corr.get("index")
-                    corrected_question = corr.get("corrected_question")
-                    if idx is None or not (0 <= idx < len(final_questions)) or not corrected_question:
-                        continue
-                    integrity = _validate_ai_question(corrected_question, html_content)
-                    if integrity["valid"]:
-                        logger.info(
-                            f"AI correction ACCEPTED for question {idx}: "
-                            f"\"{_short_preview(final_questions[idx].get('stem_html', ''))}\" -> "
-                            f"\"{_short_preview(corrected_question.get('stem_html', ''))}\""
-                        )
-                        final_questions[idx] = corrected_question
-                        corrections_accepted += 1
-                    else:
-                        logger.warning(
-                            f"AI correction REJECTED for question {idx} (kept original — "
-                            f"failed integrity check): {integrity['warnings']}"
-                        )
-                        corrections_rejected += 1
-
-                for add in additions:
-                    integrity = _validate_ai_question(add, html_content)
-                    if integrity["valid"]:
-                        logger.info(f"AI addition ACCEPTED: \"{_short_preview(add.get('stem_html', ''))}\"")
-                        final_questions.append(add)
-                        additions_accepted += 1
-                    else:
-                        logger.warning(
-                            f"AI addition REJECTED (not added — failed integrity check): {integrity['warnings']}"
-                        )
-                        additions_rejected += 1
-
-                xml_questions.clear()
-                structured_questions.clear()
-                
-                q_num_rebuild = 1
-                for q in final_questions:
-                    stem = q.get("stem_html", "")
-                    opts = []
-                    for opt in q.get("options", []):
-                        opts.append((opt.get("text_html", ""), opt.get("is_correct", False)))
-                    correct_fb = q.get("correct_feedback_html", "")
-                    incorrect_fb = q.get("incorrect_feedback_html", "")
-                    
-                    is_tf = False
-                    correct_is_true = False
-                    if len(opts) == 2:
-                        opt_texts_lower = [o[0].lower() for o in opts]
-                        if any(x in o for o in opt_texts_lower for x in ['verdadero', 'true']) and any(x in o for o in opt_texts_lower for x in ['falso', 'false']):
-                            is_tf = True
-                            for opt_text, is_corr in opts:
-                                if is_corr and ('verdadero' in opt_text.lower() or 'true' in opt_text.lower()):
-                                    correct_is_true = True
-                    
-                    add_question(q_num_rebuild, stem, opts, is_tf, correct_is_true, "", correct_fb, incorrect_fb)
-                    q_num_rebuild += 1
-            
-            p_time = parser_end_time - parser_start_time
-            a_time = ai_end_time - ai_start_time
-            t_time = p_time + a_time
-            ai_q_count = len(xml_questions)
-            
-            report = f"""
-================= QA VALIDATION REPORT =================
-Document: {course_id} / {document_name}
-Parser Questions: {standard_q_count}
-AI Validated Questions: {ai_q_count}
-Questions Added: {additions_accepted}/{len(additions)} accepted (integrity check)
-Questions Corrected: {corrections_accepted}/{len(corrections)} accepted (integrity check)
-Questions Removed: {len(removals)} (applied as-is — not a content-integrity concern)
-Integrity Rejections: {corrections_rejected} correction(s), {additions_rejected} addition(s)
-Images Detected: {metadata.get('images_detected', False)} | Preserved: {metadata.get('images_preserved', False)}
-Tables Detected: {metadata.get('tables_detected', False)} | Preserved: {metadata.get('tables_preserved', False)}
-
---- Token & API Metrics ---
-Model: {token_usage.get('model', 'N/A')}
-Input: {token_usage.get('input', 0)} | Output: {token_usage.get('output', 0)} | Cached: {token_usage.get('cached', 0)} | Total: {token_usage.get('total', 0)}
-Finish Reason: {token_usage.get('finish_reason', 'N/A')}
-Status: {status_text}
-
---- Timing ---
-Parser Time: {p_time:.2f}s
-AI Time: {a_time:.2f}s
-Total Time: {t_time:.2f}s
-========================================================"""
-            logger.info(report)
-            if metadata.get("warnings"):
-                logger.warning(f"AI QA Warning: {metadata['warnings']}")
-        except Exception as e:
-            logger.error(f"AI Validation workflow failed: {e}. Falling back to standard parser output.")
 
     if not xml_questions:
         return 0
