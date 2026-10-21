@@ -7,7 +7,12 @@ export const CATEGORIES = [
     id: 'ai',
     title: 'Inteligencia Artificial',
     flags: [
-      { key: 'ENABLE_AI_FEATURES', label: 'Habilitar Funciones de IA' }
+      {
+        key: 'ENABLE_AI_FEATURES',
+        label: 'Revisión de cuestionarios con IA',
+        hint: 'Permite pedir a la IA que revise las preguntas de un cuestionario («Revisar con la IA»). '
+          + 'Solo se usa cuando alguien lo pide, nada se sube sin aprobarlo y tiene un tope de gasto.',
+      }
     ]
   },
   {
@@ -118,6 +123,7 @@ export default function GlobalSettingsPanel() {
                         </div>
                         <span className={`text-[11px] leading-tight ${isActive ? 'text-gray-100 font-medium' : 'text-gray-400'}`}>
                           {flag.label}
+                          {flag.hint && <span className="block mt-0.5 text-[10px] font-normal text-gray-500">{flag.hint}</span>}
                         </span>
                         <input
                           type="checkbox"

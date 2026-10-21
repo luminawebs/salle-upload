@@ -15,10 +15,12 @@ class Config:
     # ==================================================================================================
     # --------------------------------- ACTIVE SETTINGS ------------------------------------------------
     # ==================================================================================================
-    # Turned on the legacy AI integrations (quiz QA layer, document-structure
-    # validator, Selenium error diagnosis), now in core/deprecated/ and not
-    # called. Nothing active reads it: the quiz AI ("Revisar con la IA") needs
-    # only GEMINI_API_KEY and the spending cap below.
+    # The switch for the only active AI: the quiz review ("Revisar con la IA",
+    # core/ai_question_review.py), shown in "Configuración avanzada" as
+    # "Revisión de cuestionarios con IA". It also needs GEMINI_API_KEY and the
+    # spending cap below. core/ai_question_shadow.ai_switch_on reads it from
+    # .env on every check, so the UI toggle applies without a restart. (It used
+    # to turn on the legacy integrations now in core/deprecated/.)
     ENABLE_AI_FEATURES = os.getenv("ENABLE_AI_FEATURES", "False").lower() in ("true", "1", "t")
     TESTING_MODE = os.getenv("TESTING_MODE", "False").lower() in ("true", "1", "t")
 

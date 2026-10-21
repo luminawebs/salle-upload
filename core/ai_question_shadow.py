@@ -297,8 +297,27 @@ def metrics(parsed: list, ai_questions: list, comparison: dict, summary: dict) -
 
 # --- Running ----------------------------------------------------------------
 
+def ai_switch_on() -> bool:
+    """
+    The "Revisión de cuestionarios con IA" switch (ENABLE_AI_FEATURES, in
+    "Configuración avanzada"). Read from .env on every check, not from the
+    settings loaded when the server started, so turning it on or off in the
+    UI applies right away.
+    """
+    try:
+        with open(os.path.join(Config.BASE_DIR, ".env"), encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("ENABLE_AI_FEATURES="):
+                    return line.split("=", 1)[1].strip().lower() in ("true", "1", "t")
+    except OSError:
+        pass
+    return Config.ENABLE_AI_FEATURES
+
+
 def ai_ready() -> tuple:
-    """(ok, reason). Any AI reading of a quiz needs a key and a spending cap it can actually enforce."""
+    """(ok, reason). Any AI reading of a quiz needs the switch on, a key and a spending cap it can actually enforce."""
+    if not ai_switch_on():
+        return False, "Está desactivada en «Configuración avanzada» → «Inteligencia Artificial»."
     if Config.AI_BUDGET_USD <= 0 or Config.AI_COST_PER_1M_INPUT_TOKENS_USD <= 0 or Config.AI_COST_PER_1M_OUTPUT_TOKENS_USD <= 0:
         return False, ("Falta un tope de gasto: define AI_BUDGET_USD, AI_COST_PER_1M_INPUT_TOKENS_USD "
                        "y AI_COST_PER_1M_OUTPUT_TOKENS_USD (> 0) en .env.")

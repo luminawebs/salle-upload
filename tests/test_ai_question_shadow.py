@@ -247,10 +247,27 @@ class EscalationTests(unittest.TestCase):
 class ReadyTests(unittest.TestCase):
     def test_refuses_without_spending_cap(self):
         with mock.patch.multiple(shadow.Config, AI_QUESTIONS_SHADOW=True, AI_BUDGET_USD=0,
-                                 AI_COST_PER_1M_INPUT_TOKENS_USD=1.5, AI_COST_PER_1M_OUTPUT_TOKENS_USD=9):
+                                 AI_COST_PER_1M_INPUT_TOKENS_USD=1.5, AI_COST_PER_1M_OUTPUT_TOKENS_USD=9),                 mock.patch.object(shadow, "ai_switch_on", return_value=True):
             ok, reason = shadow.shadow_ready()
         self.assertFalse(ok)
         self.assertIn("AI_BUDGET_USD", reason)
+
+    def test_switch_off_means_no_ai(self):
+        with mock.patch.multiple(shadow.Config, AI_BUDGET_USD=5, AI_COST_PER_1M_INPUT_TOKENS_USD=1.5,
+                                 AI_COST_PER_1M_OUTPUT_TOKENS_USD=9),                 mock.patch.object(shadow, "ai_switch_on", return_value=False):
+            ok, reason = shadow.ai_ready()
+        self.assertFalse(ok)
+        self.assertIn("Configuración avanzada", reason)
+
+    def test_switch_is_read_from_the_env_file_each_time(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(shadow.Config, "BASE_DIR", tmp):
+            path = os.path.join(tmp, ".env")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write("ENABLE_AI_FEATURES=True\n")
+            self.assertTrue(shadow.ai_switch_on())
+            with open(path, "w", encoding="utf-8") as f:
+                f.write("ENABLE_AI_FEATURES=False\n")
+            self.assertFalse(shadow.ai_switch_on())
 
     def test_off_by_default_schedules_nothing(self):
         with mock.patch.object(shadow.Config, "AI_QUESTIONS_SHADOW", False), \

@@ -158,7 +158,7 @@ export default function AIProposal({ courseId, category, filename, onChanged }) 
             El sistema ya lee todas las preguntas de esta actividad con su respuesta: no hay nada que revisar con la IA.
           </p>
         ) : data && !data.disponible ? (
-          <p className="text-sm text-gray-400">La revisión con IA no está disponible en este servidor. {data.motivo}</p>
+          <p className="text-sm text-gray-400">La revisión con IA no está disponible. {data.motivo}</p>
         ) : data && (
           <div className="rounded-lg border border-border bg-background p-4 space-y-3">
             <p className="text-sm text-gray-300">
