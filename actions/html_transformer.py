@@ -622,6 +622,30 @@ def summarize_quiz(html_content: str, course_id: int = None) -> dict:
             "minimas": minimum, "no_leidas": unread}
 
 
+_URL_HINT_RE = re.compile(r'https?://|www\.|<a\s', re.IGNORECASE)
+
+
+def _format_question_urls(q: dict) -> None:
+    """
+    URLs in the question text, options and feedback become "(Disponible aquí)"
+    links, as in activity descriptions (format_urls_in_soup). Only HTML that
+    has a URL is touched, so every other question's XML stays byte-identical.
+    In place, once per question (preview_questions shows what uploads).
+    """
+    if q.get('_urls_formatted'):
+        return
+
+    def fmt(html):
+        return format_urls_in_html(html) if html and _URL_HINT_RE.search(html) else html
+
+    q['stem_html'] = [fmt(h) for h in q.get('stem_html', [])]
+    for option in q.get('options', []):
+        option['html'] = fmt(option['html'])
+    for kind, parts in (q.get('feedback') or {}).items():
+        q['feedback'][kind] = [fmt(h) for h in parts]
+    q['_urls_formatted'] = True
+
+
 def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "doc"):
     """
     The Moodle XML builder for one parsed question (core/question_types/), plus
@@ -629,6 +653,7 @@ def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "
     One place decides the Moodle type, so the export and the question-format
     guide (core/question_types/catalog.py) always agree.
     """
+    _format_question_urls(q)
     stem_html = "<br>".join(q['stem_html'])
     opts = []
     is_true_false = False
@@ -803,8 +828,20 @@ def format_urls_in_soup(soup, link_text: str = "(Disponible aquí)"):
     """
     # First handle URLs that are already inside <a> tags
     for a_tag in soup.find_all("a"):
+        # Word bookmarks (<a id="_Hlk…"></a>) and in-document anchors (#…) are
+        # not links to anything: they used to become a "(Disponible aquí)"
+        # pointing nowhere.
+        href = (a_tag.get("href") or "").strip()
+        if not href or href.startswith("#"):
+            continue
+
         # Set target attribute
         a_tag['target'] = "_blank"
+
+        # A linked image stays an image (replacing its content with the link
+        # text would delete it); it only opens in a new tab.
+        if a_tag.find("img"):
+            continue
         
         # Change the link text
         a_tag.string = link_text

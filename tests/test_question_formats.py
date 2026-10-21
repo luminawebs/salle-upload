@@ -43,5 +43,36 @@ class QuestionFormatTests(unittest.TestCase):
             self.assertEqual(fmt["variantes"][0]["titulo"], "Plantilla recomendada", fmt["id"])
 
 
+class QuestionUrlTests(unittest.TestCase):
+    """URLs in questions become "(Disponible aquí)" links, as in activity descriptions."""
+
+    def setUp(self):
+        logging.disable(logging.CRITICAL)
+        self.addCleanup(logging.disable, logging.NOTSET)
+
+    def test_url_in_question_becomes_disponible_aqui(self):
+        from actions.html_transformer import parse_questions, question_handler
+        html = ("<p>1. ¿A cuál elemento corresponde la imagen?</p>"
+                "<p>Imagen tomada de: https://example.org/polymorphism.jpg</p>"
+                "<p>a) Polimorfismo (respuesta correcta)</p><p>b) Herencia</p>")
+        xml = question_handler(parse_questions(html)[0], 1)[0].to_moodle_xml()
+        self.assertIn('href="https://example.org/polymorphism.jpg"', xml)
+        self.assertIn(">(Disponible aquí)</a>", xml)
+        self.assertIn("color: rgb(0, 0, 238)", xml)
+        self.assertNotIn(">https://example.org", xml)
+
+    def test_word_bookmark_is_not_a_link(self):
+        from actions.html_transformer import format_urls_in_html
+        out = format_urls_in_html('<p><a id="_Hlk239664928"></a>Pregunta 1</p>')
+        self.assertNotIn("Disponible", out)
+
+    def test_question_without_url_is_untouched(self):
+        from actions.html_transformer import parse_questions, question_handler
+        q = parse_questions("<p>1. ¿Capital?</p><p>a) Bogotá (respuesta correcta)</p><p>b) Cali</p>")[0]
+        before = list(q["stem_html"])
+        question_handler(q, 1)
+        self.assertEqual(q["stem_html"], before)
+
+
 if __name__ == "__main__":
     unittest.main()
