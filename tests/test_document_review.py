@@ -771,6 +771,70 @@ class ActivityTypeChoiceTests(unittest.TestCase):
                          [("ACTIVIDAD 7: ", "Cuestionario"), ("ACTIVIDAD 7. ", "Tarea"), ("ACTIVIDAD 8. ", "Foro")])
 
 
+class WordNumberingTests(unittest.TestCase):
+    """Questions numbered with Word's automatic numbering (core/docx_numbering.py)."""
+
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+    def _docx(self, paragraphs):
+        """paragraphs: (text, numId or None, ilvl). numIds 1 = decimal "%1.", 2 and 3 = upperLetter "%1."."""
+        import io
+        import zipfile
+
+        def para(text, num, lvl):
+            num_pr = f'<w:numPr><w:ilvl w:val="{lvl}"/><w:numId w:val="{num}"/></w:numPr>' if num else ""
+            return f'<w:p><w:pPr>{num_pr}</w:pPr><w:r><w:t xml:space="preserve">{text}</w:t></w:r></w:p>'
+
+        body = "".join(para(*p) for p in paragraphs)
+        document = f'<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="{self.W}"><w:body>{body}</w:body></w:document>'
+        abstracts = "".join(
+            f'<w:abstractNum w:abstractNumId="{a}"><w:lvl w:ilvl="0"><w:start w:val="1"/>'
+            f'<w:numFmt w:val="{fmt}"/><w:lvlText w:val="%1."/></w:lvl></w:abstractNum>'
+            for a, fmt in ((10, "decimal"), (20, "upperLetter"), (30, "upperLetter")))
+        nums = '<w:num w:numId="1"><w:abstractNumId w:val="10"/></w:num>' \
+               '<w:num w:numId="2"><w:abstractNumId w:val="20"/></w:num>' \
+               '<w:num w:numId="3"><w:abstractNumId w:val="30"/></w:num>'
+        numbering = f'<?xml version="1.0" encoding="UTF-8"?><w:numbering xmlns:w="{self.W}">{abstracts}{nums}</w:numbering>'
+        out = io.BytesIO()
+        with zipfile.ZipFile(out, "w") as z:
+            z.writestr("word/document.xml", document)
+            z.writestr("word/numbering.xml", numbering)
+        return out.getvalue()
+
+    def _texts(self, docx_bytes):
+        import io
+        import zipfile
+        from lxml import etree
+        root = etree.fromstring(zipfile.ZipFile(io.BytesIO(docx_bytes)).read("word/document.xml"))
+        return ["".join(p.itertext()) for p in root.iter(f"{{{self.W}}}p")]
+
+    def test_flattened_quiz_lists_get_their_numbers_as_text(self):
+        from core.docx_numbering import materialize_quiz_numbering
+        docx = self._docx([("ACTIVIDAD 8. Evaluación final", None, 0),
+                           ("¿Capital?", 1, 0), ("Bogotá (respuesta)", 2, 0), ("Cali", 2, 0),
+                           ("¿Río?", 1, 0), ("Magdalena (respuesta)", 3, 0), ("Cauca", 3, 0)])
+        self.assertEqual(self._texts(materialize_quiz_numbering(docx))[1:],
+                         ["1. ¿Capital?", "A. Bogotá (respuesta)", "B. Cali",
+                          "2. ¿Río?", "A. Magdalena (respuesta)", "B. Cauca"])
+
+    def test_lists_outside_quizzes_stay_word_lists(self):
+        from core.docx_numbering import materialize_quiz_numbering
+        docx = self._docx([("ACTIVIDAD 2. Ensayo", None, 0), ("Lee el texto", 1, 0), ("Escribe", 2, 0)])
+        self.assertEqual(materialize_quiz_numbering(docx), docx)
+
+    def test_quiz_instructions_without_answers_stay_word_lists(self):
+        from core.docx_numbering import materialize_quiz_numbering
+        docx = self._docx([("ACTIVIDAD 8. Evaluación final", None, 0),
+                           ("Mira el video", 1, 0), ("Lee la guía", 2, 0),
+                           ("1. ¿Capital?", None, 0), ("a. Bogotá (respuesta)", None, 0)])
+        self.assertEqual(materialize_quiz_numbering(docx), docx)
+
+    def test_question_number_is_not_part_of_the_moodle_question_text(self):
+        from actions.html_transformer import parse_questions, question_handler
+        q = parse_questions("<p>1. ¿Capital?</p><p>A. Bogotá (respuesta)</p><p>B. Cali</p>")[0]
+        self.assertIn("<![CDATA[<p>¿Capital?</p>]]>", question_handler(q, 1)[0].to_moodle_xml())
+
+
 class RealDocumentRegressionTests(unittest.TestCase):
     """The real course documents must keep producing exactly the recorded result."""
 

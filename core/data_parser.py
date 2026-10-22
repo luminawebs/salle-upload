@@ -60,8 +60,13 @@ def parse_docx_to_html(docx_path: str, course_id: int) -> str:
 
     try:
         with open(docx_path, "rb") as docx_file:
+            # Quizzes numbered with Word's automatic numbering keep their
+            # "1." / "A." as text (core/docx_numbering.py).
+            from io import BytesIO
+            from core.docx_numbering import materialize_quiz_numbering
+            docx_bytes = materialize_quiz_numbering(docx_file.read())
             result = mammoth.convert_to_html(
-                docx_file,
+                BytesIO(docx_bytes),
                 convert_image=mammoth.images.img_element(convert_image)
             )
             html = result.value # The generated HTML

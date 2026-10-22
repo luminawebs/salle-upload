@@ -646,6 +646,13 @@ def _format_question_urls(q: dict) -> None:
     q['_urls_formatted'] = True
 
 
+# The document's own number at the start of a question ("1. ¿…?", "12) …"):
+# Moodle numbers the questions itself ("Pregunta 1"), and in a shuffled quiz
+# "5." on question 1 would mislead. Leading tags are kept; "1.5 mm…" isn't a
+# number label (no space after the dot).
+_LEADING_QUESTION_NUMBER_RE = re.compile(r'^((?:\s*<[^>]+>)*)\s*\d{1,3}\s*[.)]\s+')
+
+
 def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "doc"):
     """
     The Moodle XML builder for one parsed question (core/question_types/), plus
@@ -654,7 +661,7 @@ def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "
     guide (core/question_types/catalog.py) always agree.
     """
     _format_question_urls(q)
-    stem_html = "<br>".join(q['stem_html'])
+    stem_html = _LEADING_QUESTION_NUMBER_RE.sub(r"\1", "<br>".join(q['stem_html']), count=1)
     opts = []
     is_true_false = False
     correct_is_true = False
