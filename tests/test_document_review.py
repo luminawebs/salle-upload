@@ -829,6 +829,14 @@ class WordNumberingTests(unittest.TestCase):
                            ("1. ¿Capital?", None, 0), ("a. Bogotá (respuesta)", None, 0)])
         self.assertEqual(materialize_quiz_numbering(docx), docx)
 
+    def test_questions_that_would_upload_without_a_grade(self):
+        from actions.html_transformer import parse_questions, ungraded_questions
+        html = ("<p>1. ¿Capital?</p><p>a) Bogotá (respuesta)</p><p>b) Cali</p>"
+                "<p>2. Complete: la amplitud, la flexibilidad y la __respuesta acomodativa.</p>"
+                "<p>3. ¿Río?</p><p>a) Magdalena</p><p>b) Cauca</p>")
+        self.assertEqual([(q["numero"], q["motivo"]) for q in ungraded_questions(parse_questions(html))],
+                         [(2, "sin_opciones"), (3, "sin_respuesta")])
+
     def test_question_number_is_not_part_of_the_moodle_question_text(self):
         from actions.html_transformer import parse_questions, question_handler
         q = parse_questions("<p>1. ¿Capital?</p><p>A. Bogotá (respuesta)</p><p>B. Cali</p>")[0]

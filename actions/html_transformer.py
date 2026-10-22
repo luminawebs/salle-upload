@@ -646,6 +646,27 @@ def _format_question_urls(q: dict) -> None:
     q['_urls_formatted'] = True
 
 
+def ungraded_questions(questions: list) -> list:
+    """
+    The questions that would reach Moodle without a grade: no options at all
+    (uploaded as a "description", text only) or options with none marked
+    correct. [{"numero": n, "texto": "…", "motivo": "sin_opciones" | "sin_respuesta"}].
+    `questions`: what the export uploads (parse_questions, or final_questions
+    with the AI proposals the user accepted).
+    """
+    from core.question_types.multichoice import MultichoiceQuestion
+    found = []
+    for n, q in enumerate(questions, 1):
+        handler, stem_html, opts, is_tf = question_handler(q, n)[:4]
+        if not isinstance(handler, MultichoiceQuestion) or is_tf:
+            continue
+        reason = "sin_opciones" if not opts else ("sin_respuesta" if not any(c for _, c in opts) else None)
+        if reason:
+            text = " ".join(BeautifulSoup(stem_html, "html.parser").get_text(" ").split())
+            found.append({"numero": n, "texto": text[:200], "motivo": reason})
+    return found
+
+
 # The document's own number at the start of a question ("1. ¿…?", "12) …"):
 # Moodle numbers the questions itself ("Pregunta 1"), and in a shuffled quiz
 # "5." on question 1 would mislead. Leading tags are kept; "1.5 mm…" isn't a

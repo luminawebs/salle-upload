@@ -310,6 +310,10 @@ def _summarize_quizzes(base_dir, activity_manifest, extras, course_id) -> dict:
         summary["revision_ia"] = review_state(course_id, filename, html)
         final = final_questions(course_id, filename, html)
         summary["encontradas_finales"] = len(final) if final is not None else summary["encontradas"]
+        # Questions that would upload without a grade (no options, or none
+        # marked correct), from exactly what the export uploads.
+        from actions.html_transformer import parse_questions, ungraded_questions
+        summary["sin_calificar"] = ungraded_questions(final if final is not None else parse_questions(html, course_id))
         summaries[key] = summary
         contents.append((activity_key(filename), filename, html))
 

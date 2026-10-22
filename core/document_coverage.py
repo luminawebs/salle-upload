@@ -366,6 +366,30 @@ def _quiz_issue(key: str, label: str, summary, **extra):
     return issue
 
 
+def _ungraded_issue(key: str, label: str, summary, **extra) -> list:
+    """
+    [problem] when some of a Cuestionario's questions would reach Moodle
+    without a grade (actions.html_transformer.ungraded_questions): no options
+    (uploaded as text only) or none marked correct. Computed on what the
+    export uploads, so AI proposals the user accepted count. [] otherwise.
+    """
+    ungraded = (summary or {}).get("sin_calificar") or []
+    if not ungraded:
+        return []
+    numbers = ", ".join(str(q["numero"]) for q in ungraded)
+    n = len(ungraded)
+    return [_issue(
+        "preguntas_sin_calificar", key,
+        f"{label} (Cuestionario): {n} pregunta{'s' if n > 1 else ''} se subiría{'n' if n > 1 else ''} sin calificar",
+        f"{'Las preguntas' if n > 1 else 'La pregunta'} {numbers} no "
+        f"{'tienen' if n > 1 else 'tiene'} opciones con la respuesta marcada con «(respuesta)», así que en Moodle "
+        f"{'quedarían' if n > 1 else 'quedaría'} sin puntaje (solo texto, o sin respuesta correcta). Corrige su formato "
+        "en el .docx (ver «Formatos de preguntas»), usa «Revisar con la IA», o ignóralo si es texto informativo.",
+        preguntas_sin_calificar=[f"{q['numero']}. {q['texto']}" for q in ungraded],
+        archivo=summary.get("archivo"), categoria=summary.get("categoria"), **extra,
+    )]
+
+
 def find_unassigned_blocks(trs, row_roles) -> list:
     """
     The blocks of rows no unit/activity claimed, each with the id of the
@@ -437,6 +461,9 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
                                  unidad=extra["unidad"]) if extra["tipo"] == "Cuestionario" else None
         if quiz_issue:
             issues.append(quiz_issue)
+        if extra["tipo"] == "Cuestionario":
+            issues += _ungraded_issue("x" + issue_hash, f"«{extra['nombre']}»", (quiz_info or {}).get("x" + issue_hash),
+                                      unidad=extra["unidad"])
         if extra["tipo"] in TYPES_NEEDING_RUBRIC and not extra.get("rubrica"):
             issues.append(_issue(
                 "rubrica_faltante", "x" + extra["issue_id"].split(":", 1)[1],
@@ -568,6 +595,9 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
                                      actividad=act, unidad=int(unit_key)) if info.get("tipo") == "Cuestionario" else None
             if quiz_issue:
                 issues.append(quiz_issue)
+            if info.get("tipo") == "Cuestionario":
+                issues += _ungraded_issue(f"a{act}", f"Actividad {act}", (quiz_info or {}).get(f"a{act}"),
+                                          actividad=act, unidad=int(unit_key))
             if info.get("tipo") in TYPES_NEEDING_RUBRIC and act not in rubricas:
                 issues.append(_issue(
                     "rubrica_faltante", f"a{act}",

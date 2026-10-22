@@ -150,7 +150,7 @@ function ResolvedText({ resolved }) {
 
 const BLOCK_ISSUES = ['actividad_no_reconocida', 'contenido_sin_asignar'];
 const TYPE_ISSUES = ['tipo_desconocido', 'tipo_no_coincide'];
-const QUIZ_ISSUES = ['cuestionario_sin_preguntas', 'cuestionario_preguntas_incompletas'];
+const QUIZ_ISSUES = ['cuestionario_sin_preguntas', 'cuestionario_preguntas_incompletas', 'preguntas_sin_calificar'];
 
 // Question count for a Cuestionario, shown on its activity row: green when
 // every question the document evidently has was read, amber when some are
@@ -174,8 +174,10 @@ export function QuestionCountBadge({ found, expected }) {
   );
 }
 
-// The "¿…?" lines of a Cuestionario that didn't become questions.
-function UnreadQuestions({ questions }) {
+// The "¿…?" lines of a Cuestionario that didn't become questions, or (with
+// `noun`) its questions that would upload without a grade.
+// `numbered`: false when each line already starts with its question number.
+function UnreadQuestions({ questions, noun = 'no leída', numbered = true }) {
   const [open, setOpen] = useState(false);
   if (!questions || !questions.length) return null;
   return (
@@ -183,10 +185,10 @@ function UnreadQuestions({ questions }) {
       <button type="button" onClick={() => setOpen(!open)}
         className="flex items-center text-[11px] text-gray-300 hover:text-white">
         {open ? <ChevronDown className="w-3 h-3 mr-1" /> : <ChevronRight className="w-3 h-3 mr-1" />}
-        {open ? 'Ocultar' : 'Ver'} {questions.length} pregunta{questions.length === 1 ? '' : 's'} no leída{questions.length === 1 ? '' : 's'}
+        {open ? 'Ocultar' : 'Ver'} {questions.length} pregunta{questions.length === 1 ? '' : 's'} {noun}{questions.length === 1 ? '' : 's'}
       </button>
       {open && (
-        <ol className="mt-1.5 ml-4 list-decimal space-y-1 text-[11px] text-gray-400">
+        <ol className={`mt-1.5 ml-4 space-y-1 text-[11px] text-gray-400 ${numbered ? 'list-decimal' : 'list-none'}`}>
           {questions.map((q, i) => <li key={i} className="break-words">{q}</li>)}
         </ol>
       )}
@@ -223,6 +225,7 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
             <p className="text-xs text-gray-400 mt-1 leading-relaxed">{issue.detalle}</p>
           )}
           {!resolved && <UnreadQuestions questions={issue.preguntas_no_leidas} />}
+          {!resolved && <UnreadQuestions questions={issue.preguntas_sin_calificar} noun="afectada" numbered={false} />}
           {canChoose && issue.tipo === 'actividad_no_reconocida' && (
             <MakeActivityControl issue={issue} busy={busy} onChoice={onChoice} />
           )}

@@ -320,6 +320,7 @@
  },
  "v11/Guiìa DP-Praìctica_cliìnica_60_.docx": {
   "bloqueantes": [
+   "preguntas_sin_calificar:a8",
    "tipo_desconocido:a6"
   ],
   "fragmentos": {
@@ -337,6 +338,7 @@
    "material/Material_de_referencia_U3.html": "23b487e2a7a85c1f"
   },
   "problemas": [
+   "preguntas_sin_calificar:a8",
    "tipo_desconocido:a6"
   ],
   "unidades": {
@@ -391,7 +393,9 @@
   }
  },
  "v4/Guía EAV_Marcos de referencia en ecosistemas digitales.docx": {
-  "bloqueantes": [],
+  "bloqueantes": [
+   "preguntas_sin_calificar:a4"
+  ],
   "fragmentos": {
    "actividades/actividad1.html": "a3765c8e821186b5",
    "actividades/actividad2.html": "7f0d5d7a782f12e8",
@@ -404,7 +408,9 @@
    "material/Material_de_referencia_U2.html": "89c467feac3eaad4",
    "material/Material_de_referencia_U3.html": "4fbea76c162aae32"
   },
-  "problemas": [],
+  "problemas": [
+   "preguntas_sin_calificar:a4"
+  ],
   "unidades": {
    "1": {
     "1": "Tarea",
@@ -486,7 +492,10 @@
  "v7/Conflicto tierras AJUSTADA.docx": {
   "bloqueantes": [
    "actividad_no_reconocida:0268a0c69f",
-   "actividad_no_reconocida:71cdde06b9"
+   "actividad_no_reconocida:71cdde06b9",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a2",
+   "preguntas_sin_calificar:a3"
   ],
   "fragmentos": {
    "actividades/actividad1.html": "7ac1a3f081347386",
@@ -500,7 +509,10 @@
   },
   "problemas": [
    "actividad_no_reconocida:0268a0c69f",
-   "actividad_no_reconocida:71cdde06b9"
+   "actividad_no_reconocida:71cdde06b9",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a2",
+   "preguntas_sin_calificar:a3"
   ],
   "unidades": {
    "1": {
@@ -521,6 +533,8 @@
    "actividad_no_encontrada:a6",
    "actividad_no_reconocida:dd8fc1a386",
    "actividad_no_reconocida:fa61e18a5b",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a10",
    "rubrica_faltante:a3",
    "unidad_no_encontrada:u3"
   ],
@@ -544,6 +558,8 @@
    "actividad_no_encontrada:a6",
    "actividad_no_reconocida:dd8fc1a386",
    "actividad_no_reconocida:fa61e18a5b",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a10",
    "rubrica_faltante:a3",
    "unidad_no_encontrada:u3"
   ],
@@ -570,6 +586,8 @@
    "actividad_no_encontrada:a6",
    "actividad_no_reconocida:dd8fc1a386",
    "actividad_no_reconocida:fa61e18a5b",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a10",
    "rubrica_faltante:a3",
    "unidad_no_encontrada:u3"
   ],
@@ -593,6 +611,8 @@
    "actividad_no_encontrada:a6",
    "actividad_no_reconocida:dd8fc1a386",
    "actividad_no_reconocida:fa61e18a5b",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a10",
    "rubrica_faltante:a3",
    "unidad_no_encontrada:u3"
   ],
@@ -651,6 +671,9 @@
    "actividad_no_reconocida:aa28c4e707",
    "actividad_no_reconocida:dd8fc1a386",
    "contenido_sin_asignar:7c92801e67",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a10",
+   "preguntas_sin_calificar:a7",
    "tipo_desconocido:a3",
    "tipo_desconocido:a5",
    "tipo_desconocido:a6"
@@ -677,6 +700,9 @@
    "actividad_no_reconocida:aa28c4e707",
    "actividad_no_reconocida:dd8fc1a386",
    "contenido_sin_asignar:7c92801e67",
+   "preguntas_sin_calificar:a1",
+   "preguntas_sin_calificar:a10",
+   "preguntas_sin_calificar:a7",
    "tipo_desconocido:a3",
    "tipo_desconocido:a5",
    "tipo_desconocido:a6"
