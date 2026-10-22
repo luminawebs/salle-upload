@@ -470,13 +470,13 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                         and re.search(r'EVALUACI[ÓO]N\s+FINAL', text)):
                     tipo_actividad = "Cuestionario"
                 entry = {"tipo": tipo_actividad, "tipo_documento": tipo_actividad, "raw_number": raw_activity_number}
-                if tipo_actividad in UNRESOLVED_TYPES:
-                    # No X marked: the type the user chose in the review, if
-                    # any, and what the activity's own text suggests.
-                    from core.activity_type_hint import suggest_activity_type
-                    entry["sugerencia"] = suggest_activity_type(act_text_upper)
-                    if type_choices.get(current_activity):
-                        entry["tipo"] = type_choices[current_activity]
+                # What the activity's own text suggests (the review warns
+                # when no X is marked or the X contradicts it), and the type
+                # the user chose in the review, which wins.
+                from core.activity_type_hint import suggest_activity_type
+                entry["sugerencia"] = suggest_activity_type(act_text_upper)
+                if type_choices.get(current_activity):
+                    entry["tipo"] = type_choices[current_activity]
                 activity_manifest.setdefault(str(current_unit), {})[str(current_activity)] = entry
 
                 # Extract Lecturas complementarias / Material de referencia from the activity HTML

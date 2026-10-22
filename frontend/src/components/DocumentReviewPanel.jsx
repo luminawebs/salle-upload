@@ -47,9 +47,10 @@ function MakeActivityControl({ issue, busy, onChoice }) {
   );
 }
 
-// "Tipo sin definir": the author marked no tool with an X. Pre-selects the
-// type the activity's own text suggests (core/activity_type_hint.py) and says
-// why; the user confirms it or picks another. Undone like any other choice.
+// "Tipo sin definir" (no X marked) or "el tipo marcado no coincide" (the X
+// contradicts the content). Pre-selects the type the activity's own text
+// suggests (core/activity_type_hint.py) and says why; the user confirms it
+// or picks another. Undone like any other choice.
 function TypeChoiceControl({ issue, busy, onChoice }) {
   const [tipo, setTipo] = useState(issue.tipo_sugerido || '');
   return (
@@ -64,7 +65,11 @@ function TypeChoiceControl({ issue, busy, onChoice }) {
         <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={busy}
           aria-label="Tipo de actividad" className={controlClass}>
           <option value="">Tipo de actividad…</option>
-          {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{t}{t === issue.tipo_sugerido ? ' (sugerido)' : ''}</option>)}
+          {ACTIVITY_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t}{t === issue.tipo_sugerido ? ' (sugerido)' : t === issue.tipo_documento ? ' (marcado en el documento)' : ''}
+            </option>
+          ))}
         </select>
         <button type="button" onClick={() => onChoice(issue.id, { tipo })} disabled={!tipo || busy} className={actionClass}>
           {busy ? <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> : <Check className="w-3 h-3 mr-1" />}
@@ -123,7 +128,9 @@ function ResolvedText({ resolved }) {
   if (resolved.accion === 'tipo') {
     return (
       <p className="text-xs text-primary mt-1 leading-relaxed">
-        Se subirá como <b>{resolved.tipo}</b> (elegido en la revisión; el documento no tenía ninguna X marcada).
+        Se subirá como <b>{resolved.tipo}</b> (elegido en la revisión; {resolved.tipo_documento
+          ? <>el documento la marcaba como {resolved.tipo_documento}</>
+          : 'el documento no tenía ninguna X marcada'}).
       </p>
     );
   }
@@ -142,6 +149,7 @@ function ResolvedText({ resolved }) {
 }
 
 const BLOCK_ISSUES = ['actividad_no_reconocida', 'contenido_sin_asignar'];
+const TYPE_ISSUES = ['tipo_desconocido', 'tipo_no_coincide'];
 const QUIZ_ISSUES = ['cuestionario_sin_preguntas', 'cuestionario_preguntas_incompletas'];
 
 // Question count for a Cuestionario, shown on its activity row: green when
@@ -218,7 +226,7 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
           {canChoose && issue.tipo === 'actividad_no_reconocida' && (
             <MakeActivityControl issue={issue} busy={busy} onChoice={onChoice} />
           )}
-          {issue.tipo === 'tipo_desconocido' && !resolved && !ignored && (
+          {TYPE_ISSUES.includes(issue.tipo) && !resolved && !ignored && (
             <TypeChoiceControl issue={issue} busy={busy} onChoice={onChoice} />
           )}
           {canChoose && (

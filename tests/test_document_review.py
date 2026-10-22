@@ -717,6 +717,42 @@ class ActivityTypeChoiceTests(unittest.TestCase):
         # now a Tarea, so its missing rubric is reported like any other
         self.assertIn("rubrica_faltante", {p["tipo"] for p in report["cobertura"]["problemas"]})
 
+    MARKED_QUIZ = [_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                   _row("ACTIVIDAD 4: Taller de casos"),
+                   _row("¿Qué vamos a lograr? Analizar dos casos. ¿Cómo lo vamos a lograr? Entregue el análisis completo."),
+                   _row("Herramientas de la plataforma virtual (Marque con una X): Foro___ Tarea____ Cuestionario_X__ Otra ¿Cuál?___")]
+
+    def _review_doc(self, rows, course_id, issue_id=None, choice=None):
+        if choice:
+            from core.document_corrections import set_block_choice
+            cwd = os.getcwd()
+            os.chdir(ROOT)
+            try:
+                set_block_choice(course_id, issue_id, choice)
+            finally:
+                os.chdir(cwd)
+        report = _review_html(_doc(*rows), course_id)
+        return report, {p["tipo"]: p for p in report["cobertura"]["problemas"]}
+
+    def test_marked_type_that_contradicts_the_content_is_a_notice(self):
+        report, issues = self._review_doc(self.MARKED_QUIZ, "_test_type_mismatch")
+        issue = issues["tipo_no_coincide"]
+        self.assertFalse(issue["bloquea"])
+        self.assertEqual((issue["tipo_documento"], issue["tipo_sugerido"]), ("Cuestionario", "Tarea"))
+        self.assertEqual(report["unidades"]["1"]["actividades"]["4"]["tipo"], "Cuestionario", "the X wins by default")
+
+    def test_choosing_the_suggested_type_over_the_x(self):
+        report, issues = self._review_doc(self.MARKED_QUIZ, "_test_type_mismatch_choice", "tipo_no_coincide:a4", {"tipo": "Tarea"})
+        self.assertEqual(issues["tipo_no_coincide"]["resuelto"]["tipo"], "Tarea")
+        self.assertEqual(report["unidades"]["1"]["actividades"]["4"]["tipo"], "Tarea")
+        self.assertNotIn("cuestionario_sin_preguntas", issues)
+
+    def test_matching_x_has_no_notice(self):
+        rows = self.MARKED_QUIZ[:-1] + [_row("Herramientas de la plataforma virtual (Marque con una X): "
+                                             "Foro___ Tarea__X__ Cuestionario___ Otra ¿Cuál?___")]
+        _, issues = self._review_doc(rows, "_test_type_match")
+        self.assertNotIn("tipo_no_coincide", issues)
+
     def test_type_choice_only_accepts_a_type(self):
         from core.document_corrections import set_block_choice
         with self.assertRaises(ValueError):

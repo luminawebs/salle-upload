@@ -543,6 +543,27 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
                     issue["resuelto"] = {"accion": "tipo", "tipo": info["tipo"], "actividad": act,
                                          "unidad": int(unit_key), "archivo": info.get("file")}
                 issues.append(issue)
+            else:
+                # The X is the author's word, not a guarantee: when what the
+                # activity asks clearly points to another type (strong clues
+                # only, core/activity_type_hint.py), say so. A notice: the X
+                # wins unless the user picks the other type.
+                suggestion = info.get("sugerencia") or {}
+                if suggestion.get("fuerte") and suggestion.get("tipo") not in (None, doc_type):
+                    issue = _issue(
+                        "tipo_no_coincide", f"a{act}",
+                        f"Actividad {act}: el tipo marcado no coincide con el contenido",
+                        f"Está marcada como {doc_type}, pero {'; '.join(suggestion['razones'])}. "
+                        f"Parece {'una' if suggestion['tipo'] == 'Tarea' else 'un'} {suggestion['tipo']}. "
+                        f"Si el tipo marcado es correcto, ignora este aviso.",
+                        bloquea=False, actividad=act, unidad=int(unit_key),
+                        tipo_sugerido=suggestion["tipo"], razones=suggestion["razones"], tipo_documento=doc_type,
+                    )
+                    if info.get("tipo") != doc_type:
+                        issue["resuelto"] = {"accion": "tipo", "tipo": info["tipo"], "actividad": act,
+                                             "unidad": int(unit_key), "archivo": info.get("file"),
+                                             "tipo_documento": doc_type}
+                    issues.append(issue)
             quiz_issue = _quiz_issue(f"a{act}", f"Actividad {act}", (quiz_info or {}).get(f"a{act}"),
                                      actividad=act, unidad=int(unit_key)) if info.get("tipo") == "Cuestionario" else None
             if quiz_issue:

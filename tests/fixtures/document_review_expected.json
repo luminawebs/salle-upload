@@ -300,7 +300,8 @@
   "problemas": [
    "actividad_fuera_del_plan:a1",
    "actividad_fuera_del_plan:a2",
-   "cuestionario_sin_preguntas:a4"
+   "cuestionario_sin_preguntas:a4",
+   "tipo_no_coincide:a4"
   ],
   "unidades": {
    "1": {

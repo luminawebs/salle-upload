@@ -16,8 +16,9 @@ For a block of the document no unit/activity claimed, the user can:
    that activity with no special handling.
 
 For an activity whose author marked no tool with an X ("tipo sin definir"),
-the user can choose its type ({"tipo": "Tarea"} on the problem
-"tipo_desconocido:aN"), usually the one core/activity_type_hint.py suggests.
+or whose X contradicts its content ("tipo_no_coincide"), the user can choose
+its type ({"tipo": "Tarea"} on the problem "tipo_desconocido:aN" /
+"tipo_no_coincide:aN"), usually the one core/activity_type_hint.py suggests.
 The splitter applies it, so every step that asks for the activity's type
 (core/data_parser.activity_types) sees the same one.
 
@@ -75,19 +76,19 @@ def get_type_choices(course_id) -> dict:
     return {int(n): tipo for n, tipo in get_corrections(course_id)["tipos"].items()}
 
 
-_TYPE_ISSUE_RE = re.compile(r"^tipo_desconocido:a(\d+)$")
+_TYPE_ISSUE_RE = re.compile(r"^(tipo_desconocido|tipo_no_coincide):a(\d+)$")
 
 
 def set_block_choice(course_id, issue_id: str, choice) -> None:
     """
     choice: {"tipo": "Foro" | "Tarea" | "Cuestionario"} to make the block a new
     activity, {"agregar_a": N} to add it to Actividad N, or None to undo.
-    For "tipo_desconocido:aN": {"tipo": …} is Actividad N's type.
+    For "tipo_desconocido:aN" / "tipo_no_coincide:aN": {"tipo": …} is Actividad N's type.
     """
     from core.document_coverage import ACTIVITY_TYPES
     type_issue = _TYPE_ISSUE_RE.match(issue_id or "")
     if type_issue and choice is not None and set(choice) != {"tipo"}:
-        raise ValueError("Para una actividad sin tipo solo se puede elegir el tipo.")
+        raise ValueError("Para el tipo de una actividad solo se puede elegir el tipo.")
     if choice is not None:
         if set(choice) == {"tipo"}:
             if choice["tipo"] not in ACTIVITY_TYPES:
@@ -99,7 +100,7 @@ def set_block_choice(course_id, issue_id: str, choice) -> None:
             raise ValueError(f"Corrección no válida: {choice}")
     corrections = get_corrections(course_id)
     if type_issue:
-        number = type_issue.group(1)
+        number = type_issue.group(2)
         if choice is None:
             corrections["tipos"].pop(number, None)
         else:
