@@ -15,6 +15,12 @@ For a block of the document no unit/activity claimed, the user can:
    actividades/actividadN.html, so every later step treats it as part of
    that activity with no special handling.
 
+For an activity whose author marked no tool with an X ("tipo sin definir"),
+the user can choose its type ({"tipo": "Tarea"} on the problem
+"tipo_desconocido:aN"), usually the one core/activity_type_hint.py suggests.
+The splitter applies it, so every step that asks for the activity's type
+(core/data_parser.activity_types) sees the same one.
+
 Files (all under workspace/<id>/):
 - corrections.json — the choices, keyed by the review's problem id for the
   block (stable for the same document).
@@ -48,25 +54,40 @@ def _corrections_path(course_id) -> str:
 
 
 def get_corrections(course_id) -> dict:
-    """{"bloques": {problem_id: {"tipo": "Foro"} | {"agregar_a": 6}}}; empty when nothing was chosen."""
+    """
+    {"bloques": {problem_id: {"tipo": "Foro"} | {"agregar_a": 6}},
+     "tipos": {"4": "Tarea"}}; empty when nothing was chosen.
+    """
     path = _corrections_path(course_id)
     if not os.path.exists(path):
-        return {"bloques": {}}
+        return {"bloques": {}, "tipos": {}}
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return {"bloques": dict(data.get("bloques", {}))}
+        return {"bloques": dict(data.get("bloques", {})), "tipos": dict(data.get("tipos", {}))}
     except Exception as e:
         logger.error(f"No se pudo leer corrections.json para el curso {course_id}: {e}.")
-        return {"bloques": {}}
+        return {"bloques": {}, "tipos": {}}
+
+
+def get_type_choices(course_id) -> dict:
+    """{activity number: type} the user chose for activities with no X marked."""
+    return {int(n): tipo for n, tipo in get_corrections(course_id)["tipos"].items()}
+
+
+_TYPE_ISSUE_RE = re.compile(r"^tipo_desconocido:a(\d+)$")
 
 
 def set_block_choice(course_id, issue_id: str, choice) -> None:
     """
     choice: {"tipo": "Foro" | "Tarea" | "Cuestionario"} to make the block a new
     activity, {"agregar_a": N} to add it to Actividad N, or None to undo.
+    For "tipo_desconocido:aN": {"tipo": …} is Actividad N's type.
     """
     from core.document_coverage import ACTIVITY_TYPES
+    type_issue = _TYPE_ISSUE_RE.match(issue_id or "")
+    if type_issue and choice is not None and set(choice) != {"tipo"}:
+        raise ValueError("Para una actividad sin tipo solo se puede elegir el tipo.")
     if choice is not None:
         if set(choice) == {"tipo"}:
             if choice["tipo"] not in ACTIVITY_TYPES:
@@ -77,7 +98,13 @@ def set_block_choice(course_id, issue_id: str, choice) -> None:
         else:
             raise ValueError(f"Corrección no válida: {choice}")
     corrections = get_corrections(course_id)
-    if choice is None:
+    if type_issue:
+        number = type_issue.group(1)
+        if choice is None:
+            corrections["tipos"].pop(number, None)
+        else:
+            corrections["tipos"][number] = choice["tipo"]
+    elif choice is None:
         corrections["bloques"].pop(issue_id, None)
     else:
         corrections["bloques"][issue_id] = dict(choice)

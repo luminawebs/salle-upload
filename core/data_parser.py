@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import mammoth
 import re
@@ -116,6 +117,41 @@ def run_docx_parsing_workflow(course_id: int):
         logger.warning(f"  {error_msg}")
         raise FileNotFoundError(error_msg)
 
+# Types the pipeline can't turn into a Moodle activity.
+UNRESOLVED_TYPES = {"Desconocido", "No sabe"}
+_TYPES_FILE = "tipos_actividades.json"
+
+
+def _write_activity_types(base_dir: str, types_by_file: dict) -> None:
+    """workspace/<id>/tipos_actividades.json: {fragment file: type}, as the splitter decided it."""
+    os.makedirs(base_dir, exist_ok=True)
+    with open(os.path.join(base_dir, _TYPES_FILE), "w", encoding="utf-8") as f:
+        json.dump(types_by_file, f, ensure_ascii=False, indent=2)
+
+
+def activity_types(course_id) -> dict:
+    """
+    {fragment file ("actividad7.html", "actividad7_1.html" for a repeated
+    number): type} as the last split decided it: the X marked in the
+    document, the final evaluation read as a quiz, or the type the user chose
+    in the review. Every step that needs an activity's type asks here (not
+    the fragment's text, which lost its heading), so they all agree with the
+    review. {} when the document hasn't been split.
+    """
+    path = os.path.join("workspace", str(course_id), _TYPES_FILE)
+    try:
+        with open(path, encoding="utf-8") as f:
+            return dict(json.load(f))
+    except (OSError, ValueError):
+        return {}
+
+
+def activity_type_for(course_id, filename: str, html: str) -> str:
+    """The type of the activity in actividades/<filename> (see activity_types)."""
+    known = activity_types(course_id).get(os.path.basename(filename or "")) if course_id is not None else None
+    return known or detect_activity_type(BeautifulSoup(html, "html.parser").get_text(" ").upper())
+
+
 def detect_activity_type(text_upper: str) -> str:
     """
     The activity type the author marked with an X in the "Herramientas de la
@@ -232,7 +268,10 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
         full_html = f.read()
 
     soup = BeautifulSoup(full_html, "html.parser")
-    
+    from core.document_corrections import get_type_choices
+    type_choices = get_type_choices(course_id)
+    types_by_file = {}
+
     # Trackers
     current_unit = 0
     current_activity = 0
@@ -430,10 +469,15 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                 if (tipo_actividad == "Desconocido" and "HERRAMIENTA" not in act_text_upper
                         and re.search(r'EVALUACI[ÓO]N\s+FINAL', text)):
                     tipo_actividad = "Cuestionario"
-                activity_manifest.setdefault(str(current_unit), {})[str(current_activity)] = {
-                    "tipo": tipo_actividad,
-                    "raw_number": raw_activity_number,
-                }
+                entry = {"tipo": tipo_actividad, "tipo_documento": tipo_actividad, "raw_number": raw_activity_number}
+                if tipo_actividad in UNRESOLVED_TYPES:
+                    # No X marked: the type the user chose in the review, if
+                    # any, and what the activity's own text suggests.
+                    from core.activity_type_hint import suggest_activity_type
+                    entry["sugerencia"] = suggest_activity_type(act_text_upper)
+                    if type_choices.get(current_activity):
+                        entry["tipo"] = type_choices[current_activity]
+                activity_manifest.setdefault(str(current_unit), {})[str(current_activity)] = entry
 
                 # Extract Lecturas complementarias / Material de referencia from the activity HTML
                 merge_material_de_referencia(act_html, current_unit, output_dirs["material"], raw_activity_number)
@@ -476,6 +520,7 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                     f.write(act_html_transformed)
                 logger.info(f"  ✓ Extracted {act_file_name}")
                 activity_manifest[str(current_unit)][str(current_activity)]["file"] = act_file_name
+                types_by_file[act_file_name] = entry["tipo"]
         else:
             # Not a unit, not an activity.
             pass
@@ -489,6 +534,7 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
     # Written to actividades_extra/, separate from the numbered activities.
     from core.document_corrections import write_extra_activities
     write_extra_activities(course_id, trs, roles, base_dir, activity_manifest)
+    _write_activity_types(base_dir, types_by_file)
 
     logger.info("  ✓ DOCX splitting workflow completed.")
     return activity_manifest

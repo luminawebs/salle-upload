@@ -671,6 +671,70 @@ class TemplateVariantTests(unittest.TestCase):
         self.assertEqual(report["unidades"]["1"]["actividades"]["8"]["tipo"], "Cuestionario")
 
 
+class ActivityTypeChoiceTests(unittest.TestCase):
+    """An activity with no X marked: a suggested type, and the type the user chooses in the review."""
+
+    UNMARKED = [_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                _row("ACTIVIDAD 4: Gimnasio perceptual"),
+                _row("¿Qué vamos a lograr? Grabar una sesión. ¿Cómo lo vamos a lograr? Sube el video a la plataforma."),
+                _row("Herramientas de la plataforma virtual (Marque con una X): Foro___ Tarea____ Cuestionario___ Otra ¿Cuál?___")]
+
+    def test_suggestions(self):
+        from core.activity_type_hint import suggest_activity_type
+        tools = " Herramientas de la plataforma virtual (Marque con una X): Foro___ Tarea___ Cuestionario___ Otra ¿Cuál?___"
+        self.assertEqual(suggest_activity_type("Graba un video y súbelo." + tools)["tipo"], "Tarea")
+        self.assertEqual(suggest_activity_type("Participarás en un foro de discusión con tus compañeros." + tools)["tipo"], "Foro")
+        self.assertEqual(suggest_activity_type("Se debe resolver el siguiente cuestionario de selección múltiple." + tools)["tipo"],
+                         "Cuestionario")
+        self.assertEqual(suggest_activity_type("1. ¿Capital? a. Bogotá (respuesta) b. Cali. Entrega tu resumen.")["tipo"],
+                         "Cuestionario")
+        self.assertIsNone(suggest_activity_type("Lee el capítulo 3." + tools), "the tools table alone is no clue")
+        self.assertIsNone(suggest_activity_type("Consulta el foro de dudas y lee el capítulo."))
+
+    def _review(self, course_id, choice=None):
+        if choice:
+            from core.document_corrections import set_block_choice
+            cwd = os.getcwd()
+            os.chdir(ROOT)
+            try:
+                set_block_choice(course_id, "tipo_desconocido:a4", choice)
+            finally:
+                os.chdir(cwd)
+        report = _review_html(_doc(*self.UNMARKED), course_id)
+        return report, next(p for p in report["cobertura"]["problemas"] if p["tipo"] == "tipo_desconocido")
+
+    def test_unmarked_activity_gets_a_suggestion(self):
+        report, issue = self._review("_test_type_hint")
+        self.assertEqual(issue["tipo_sugerido"], "Tarea")
+        self.assertTrue(issue["razones"])
+        self.assertNotIn("resuelto", issue)
+        self.assertEqual(report["unidades"]["1"]["actividades"]["4"]["tipo"], "Desconocido")
+
+    def test_chosen_type_settles_the_problem_and_is_what_uploads(self):
+        report, issue = self._review("_test_type_choice", {"tipo": "Tarea"})
+        self.assertEqual(issue["resuelto"]["tipo"], "Tarea")
+        self.assertEqual(report["unidades"]["1"]["actividades"]["4"]["tipo"], "Tarea")
+        # now a Tarea, so its missing rubric is reported like any other
+        self.assertIn("rubrica_faltante", {p["tipo"] for p in report["cobertura"]["problemas"]})
+
+    def test_type_choice_only_accepts_a_type(self):
+        from core.document_corrections import set_block_choice
+        with self.assertRaises(ValueError):
+            set_block_choice("_test_type_bad", "tipo_desconocido:a4", {"agregar_a": 2})
+
+    def test_moodle_structure_uses_the_split_types(self):
+        from actions.structure_actions import apply_split_activity_types
+        sections = [{"unit_number": 2, "section_name": "UNIDAD 1", "activities": [
+            {"name": "ACTIVIDAD 7: Quiz", "type": "Tarea"},
+            {"name": "ACTIVIDAD 7. Repetida", "type": "Cuestionario"},
+            {"name": "ACTIVIDAD 8. Sin X", "type": None},
+            {"name": "Actividad #. Evaluación final [nombre según plan de curso]", "type": "Cuestionario"}]}]
+        apply_split_activity_types(sections, {"actividad7.html": "Cuestionario", "actividad7_1.html": "Tarea",
+                                              "actividad8.html": "Foro"})
+        self.assertEqual([(a["name"][:13], a["type"]) for a in sections[0]["activities"]],
+                         [("ACTIVIDAD 7: ", "Cuestionario"), ("ACTIVIDAD 7. ", "Tarea"), ("ACTIVIDAD 8. ", "Foro")])
+
+
 class RealDocumentRegressionTests(unittest.TestCase):
     """The real course documents must keep producing exactly the recorded result."""
 

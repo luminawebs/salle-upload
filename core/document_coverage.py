@@ -523,14 +523,26 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
     for unit_key, acts in sorted((manifest or {}).items(), key=lambda kv: int(kv[0])):
         for act_key, info in sorted(acts.items(), key=lambda kv: int(kv[0])):
             act = int(act_key)
-            if info.get("tipo") in UNRESOLVED_TYPES:
-                issues.append(_issue(
+            doc_type = info.get("tipo_documento", info.get("tipo"))
+            if doc_type in UNRESOLVED_TYPES:
+                # The suggestion from the activity's own text
+                # (core/activity_type_hint.py); the type the user chose in
+                # the review, if any, settles the problem.
+                suggestion = info.get("sugerencia") or {}
+                issue = _issue(
                     "tipo_desconocido", f"a{act}",
-                    f"Actividad {act}: tipo sin definir ({info.get('tipo')})",
+                    f"Actividad {act}: tipo sin definir ({doc_type})",
                     "No se encontró una herramienta marcada con X (Foro, Tarea, Cuestionario…) "
-                    "en la tabla «Herramientas de la plataforma virtual» de esta actividad.",
+                    "en la tabla «Herramientas de la plataforma virtual» de esta actividad."
+                    + (f" Por su contenido parece {'una' if suggestion['tipo'] == 'Tarea' else 'un'} "
+                       f"{suggestion['tipo']}." if suggestion.get("tipo") else ""),
                     actividad=act, unidad=int(unit_key),
-                ))
+                    tipo_sugerido=suggestion.get("tipo"), razones=suggestion.get("razones", []),
+                )
+                if info.get("tipo") not in UNRESOLVED_TYPES:
+                    issue["resuelto"] = {"accion": "tipo", "tipo": info["tipo"], "actividad": act,
+                                         "unidad": int(unit_key), "archivo": info.get("file")}
+                issues.append(issue)
             quiz_issue = _quiz_issue(f"a{act}", f"Actividad {act}", (quiz_info or {}).get(f"a{act}"),
                                      actividad=act, unidad=int(unit_key)) if info.get("tipo") == "Cuestionario" else None
             if quiz_issue:

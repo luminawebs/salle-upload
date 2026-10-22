@@ -407,8 +407,8 @@ def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix:
             
             if activity_type is None:
                 from bs4 import BeautifulSoup
-                from core.data_parser import detect_activity_type
-                activity_type = detect_activity_type(BeautifulSoup(content, "html.parser").get_text(" ").upper())
+                from core.data_parser import activity_type_for
+                activity_type = activity_type_for(course_id, file_path, content)
             original = content
             content = remove_questions_from_html(content, is_quiz=(activity_type == "Cuestionario"))
             if activity_type == "Cuestionario":

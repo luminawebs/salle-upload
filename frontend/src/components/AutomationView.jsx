@@ -340,6 +340,13 @@ export default function AutomationView() {
   };
 
   const showExtraActivity = (extra) => {
+    if (extra.accion === 'tipo') {
+      setFragment({
+        target: { category: 'actividades', filename: extra.archivo },
+        title: `Actividad ${extra.actividad} (Unidad ${extra.unidad}) — ${extra.tipo}, elegido en la revisión`
+      });
+      return;
+    }
     if (extra.accion === 'agregar') {
       setFragment({
         target: { category: 'actividades', filename: extra.archivo },

@@ -123,8 +123,8 @@ def build_preview(html: str, course_id=None, filename: str = None) -> dict:
     # For a quiz: the description exactly as the upload cleans it (questions
     # and answers removed), so the user can check nothing leaks to students.
     from actions.html_transformer import remove_questions_from_html
-    from core.data_parser import detect_activity_type
-    activity_type = detect_activity_type(BeautifulSoup(html, "html.parser").get_text(" ").upper())
+    from core.data_parser import activity_type_for
+    activity_type = activity_type_for(course_id, filename, html)
     description = remove_questions_from_html(html, is_quiz=True) if activity_type == "Cuestionario" else None
     if description is not None and filename and course_id:
         description = strip_accepted_questions(course_id, filename, html, description)

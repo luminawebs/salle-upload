@@ -132,6 +132,45 @@ def parse_raw_document(filepath):
     return sections
 
 
+_NUMBERED_ACTIVITY_RE = re.compile(r'^\s*ACTIVIDAD\s+([\dIVXLCDM]+)\b', re.IGNORECASE)
+
+
+def apply_split_activity_types(sections: list, types_by_file: dict) -> None:
+    """
+    Makes the activities created in Moodle match the document review: each
+    numbered activity gets the type the splitter decided (the X in the
+    document, the final evaluation as a quiz, or the type chosen in the
+    review — core/data_parser.activity_types), and a heading with no number
+    ("Actividad #. Evaluación final…", an unfilled template section) is not
+    created: such blocks become activities only when the user adds them in
+    the review (core/document_corrections, created as extra activities).
+    A repeated number is matched in document order, like the splitter names
+    its files (actividad7.html, then actividad7_1.html).
+    `types_by_file` empty (document not split): left as parse_raw_document read it.
+    """
+    if not types_by_file:
+        return
+    from actions.docx_upload_actions import parse_activity_number
+    seen = {}
+    for section in sections:
+        if section.get("unit_number", 0) < 2:
+            continue  # "Bienvenidos" and "Generalidades": fixed, not from the document
+        kept = []
+        for act in section["activities"]:
+            m = _NUMBERED_ACTIVITY_RE.match(act["name"])
+            if not m:
+                logger.info(f"'{act['name'][:60]}' no tiene número de actividad: no se crea (revísalo en la revisión del documento).")
+                continue
+            number = parse_activity_number(m.group(1))
+            occurrence = seen.get(number, 0)
+            seen[number] = occurrence + 1
+            tipo = types_by_file.get(f"actividad{number}.html" if occurrence == 0 else f"actividad{number}_{occurrence}.html")
+            if tipo:
+                act["type"] = tipo if tipo in ("Foro", "Tarea", "Cuestionario") else None
+            kept.append(act)
+        section["activities"] = kept
+
+
 def check_and_create_sections(driver, required_sections_count, wait_time=10):
     wait = WebDriverWait(driver, wait_time)
     try:
@@ -367,6 +406,8 @@ def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
     
     raw_doc_path = os.path.join("workspace", str(course_id), "raw_docx_extracted.html")
     sections = parse_raw_document(raw_doc_path)
+    from core.data_parser import activity_types
+    apply_split_activity_types(sections, activity_types(course_id))
 
     # Blocks the user turned into activities in the review panel
     # (core/document_corrections.py) — created in their unit's section,

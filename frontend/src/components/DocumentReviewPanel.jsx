@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   CircleAlert, Info, ShieldCheck, Eye, EyeOff, Undo2, ChevronDown, ChevronRight, ListTree,
-  CheckCircle2, Plus, RefreshCw, Sparkles
+  CheckCircle2, Plus, RefreshCw, Sparkles, Check
 } from 'lucide-react';
 
 // What the pipeline read from the document and what it didn't — built by
@@ -43,6 +43,34 @@ function MakeActivityControl({ issue, busy, onChoice }) {
       {issue.tipo_sugerido && (
         <span className="text-[10px] text-gray-500">Sugerido por la «X» marcada en el documento</span>
       )}
+    </div>
+  );
+}
+
+// "Tipo sin definir": the author marked no tool with an X. Pre-selects the
+// type the activity's own text suggests (core/activity_type_hint.py) and says
+// why; the user confirms it or picks another. Undone like any other choice.
+function TypeChoiceControl({ issue, busy, onChoice }) {
+  const [tipo, setTipo] = useState(issue.tipo_sugerido || '');
+  return (
+    <div className="mt-2 space-y-1.5">
+      {issue.tipo_sugerido && issue.razones?.length > 0 && (
+        <p className="text-[11px] text-gray-400">
+          Sugerencia: <b className="text-white">{issue.tipo_sugerido}</b>, porque {issue.razones.join('; ')}.
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] text-gray-400 w-full sm:w-auto">Subir como:</span>
+        <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={busy}
+          aria-label="Tipo de actividad" className={controlClass}>
+          <option value="">Tipo de actividad…</option>
+          {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{t}{t === issue.tipo_sugerido ? ' (sugerido)' : ''}</option>)}
+        </select>
+        <button type="button" onClick={() => onChoice(issue.id, { tipo })} disabled={!tipo || busy} className={actionClass}>
+          {busy ? <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> : <Check className="w-3 h-3 mr-1" />}
+          Usar este tipo
+        </button>
+      </div>
     </div>
   );
 }
@@ -89,6 +117,13 @@ function ResolvedText({ resolved }) {
         Revisado con la IA: {resolved.aceptadas === 0
           ? 'no se aceptó ningún cambio.'
           : <>{resolved.aceptadas} propuesta{resolved.aceptadas === 1 ? '' : 's'} aceptada{resolved.aceptadas === 1 ? '' : 's'}; el cuestionario subirá <b>{resolved.preguntas} pregunta{resolved.preguntas === 1 ? '' : 's'}</b>.</>}
+      </p>
+    );
+  }
+  if (resolved.accion === 'tipo') {
+    return (
+      <p className="text-xs text-primary mt-1 leading-relaxed">
+        Se subirá como <b>{resolved.tipo}</b> (elegido en la revisión; el documento no tenía ninguna X marcada).
       </p>
     );
   }
@@ -182,6 +217,9 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
           {!resolved && <UnreadQuestions questions={issue.preguntas_no_leidas} />}
           {canChoose && issue.tipo === 'actividad_no_reconocida' && (
             <MakeActivityControl issue={issue} busy={busy} onChoice={onChoice} />
+          )}
+          {issue.tipo === 'tipo_desconocido' && !resolved && !ignored && (
+            <TypeChoiceControl issue={issue} busy={busy} onChoice={onChoice} />
           )}
           {canChoose && (
             <AppendControl issue={issue} activities={activities} busy={busy} onChoice={onChoice} />

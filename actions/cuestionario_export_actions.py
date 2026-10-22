@@ -13,7 +13,7 @@ from actions.html_transformer import extract_questions_from_html_to_moodle_xml
 from actions.deprecated.puntos_extras_actions import _get_cmid_for_activity
 from actions.cuestionario_grade_actions import update_quiz_grades
 from core.activity_selection import get_skipped_activities
-from core.data_parser import detect_activity_type
+from core.data_parser import activity_type_for
 from bs4 import BeautifulSoup
 
 from core import progress
@@ -401,7 +401,7 @@ def run_cuestionario_export_workflow(driver, course_id: int, wait_time: int = 10
                 # questions for the student), which used to be imported into
                 # the question bank as if they were quiz questions.
                 with open(path, "r", encoding="utf-8") as f:
-                    activity_type = detect_activity_type(BeautifulSoup(f.read(), "html.parser").get_text(" ").upper())
+                    activity_type = activity_type_for(course_id, filename, f.read())
                 if activity_type != "Cuestionario":
                     logger.info(f"{activity_prefix} es de tipo {activity_type}: no es un cuestionario, no se exportan preguntas.")
                     continue
