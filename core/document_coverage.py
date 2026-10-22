@@ -131,15 +131,26 @@ def _parse_plan(trs, preamble) -> dict:
     descriptions mention other activities in prose ("con base en la
     actividad 2…"), which must not be read as listing them.
     """
-    plan, unit = {}, None
-    for tr, label in zip(trs, preamble):
-        if label != "plan_formacion":
-            continue
+    plan, unit, width = {}, None, 0
+    plan_rows = [tr for tr, label in zip(trs, preamble) if label == "plan_formacion"]
+    # Plans whose unit cells only hold the unit's name ("Fundamentos del
+    # desarrollo…", no "Unidad 1") are numbered by their full-width rows.
+    unnamed_units = not any(
+        _PLAN_UNIT_RE.match(_norm(cells[0].get_text(" ")))
+        for cells in (tr.find_all(["td", "th"], recursive=False) for tr in plan_rows) if cells
+    )
+    for tr in plan_rows:
         cells = tr.find_all(["td", "th"], recursive=False)
         if cells:
-            m = _PLAN_UNIT_RE.match(_norm(cells[0].get_text(" ")))
+            first = _norm(cells[0].get_text(" "))
+            m = _PLAN_UNIT_RE.match(first)
             if m:
                 unit = int(m.group(1))
+                plan.setdefault(unit, [])
+            elif unnamed_units and first == "UNIDAD" and len(cells) > 2:
+                width = len(cells)  # the column header row
+            elif width and len(cells) == width:
+                unit = (unit or 0) + 1
                 plan.setdefault(unit, [])
         if unit is None:
             continue

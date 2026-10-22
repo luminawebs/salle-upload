@@ -571,6 +571,70 @@ class RubricChoiceTests(unittest.TestCase):
         self.assertEqual(len(parse_rubricas_from_html(html)[1]), 2)
 
 
+class TemplateVariantTests(unittest.TestCase):
+    """Variants seen in the v11 documents (assets/doc-course-test/v11)."""
+
+    def test_activity_heading_with_number_sign(self):
+        from core.data_parser import normalize_activity_headings
+        self.assertEqual(normalize_activity_headings("<p>ACTIVIDAD #3: Caso</p><p>ACTIVIDAD # 4: Sim</p>"),
+                         "<p>ACTIVIDAD 3: Caso</p><p>ACTIVIDAD 4: Sim</p>")
+        self.assertIn("Actividad #. Evaluación final", normalize_activity_headings("<p>Actividad #. Evaluación final</p>"))
+
+    def test_tool_mark_with_question_mark_and_foro_de_dudas(self):
+        from core.data_parser import detect_activity_type
+        head = "HERRAMIENTAS DE LA PLATAFORMA VIRTUAL (MARQUE CON UNA X): "
+        self.assertEqual(detect_activity_type(head + "FORO_DE DUDAS __ TAREA__?X__ CUESTIONARIO___"), "Tarea")
+        self.assertEqual(detect_activity_type(head + "FORO_DE DUDAS X TAREA___"), "Foro")
+        self.assertEqual(detect_activity_type(head + "FORO_DUDAS _?_ TAREA__?__ CUESTIONARIO___"), "Desconocido")
+
+    def test_rubric_with_label_column(self):
+        from core.docx_rubrica_parser import criteria_from_table
+        table = BeautifulSoup(
+            "<table><tr><td>Criterios</td><td>Criterios de desempeño</td><td>Puntos</td></tr>"
+            "<tr><td>Criterio 1</td><td>Aplica las pruebas</td><td>1</td></tr>"
+            "<tr><td>Criterio 2</td><td>Organiza el producto</td><td>2</td></tr>"
+            "<tr><td></td><td>Total</td><td>3</td></tr></table>", "html.parser").table
+        criteria = criteria_from_table(table)
+        self.assertEqual([c["name"] for c in criteria], ["Aplica las pruebas", "Organiza el producto"])
+        self.assertEqual([c["scores"][0] for c in criteria], ["1", "2"])
+
+    def test_rubric_in_the_next_table(self):
+        from core.docx_rubrica_parser import parse_rubricas_from_html
+        rubric = RubricChoiceTests._table([("A", "2.0"), ("B", "3.0")])
+        html = (_doc(_row("ACTIVIDAD 4: Simulación"), _row("¿Qué vamos a lograr? Algo."))
+                + "<p></p>" + _doc(_row(f"¿Cómo lo vamos a evaluar? {rubric}"))
+                + _doc(_row("ACTIVIDAD 5: Otra"), _row(f"¿Cómo lo vamos a evaluar? {RubricChoiceTests._table([('C', '5.0')])}")))
+        rubricas = parse_rubricas_from_html(html)
+        self.assertEqual([c["name"] for c in rubricas[4]], ["A", "B"])
+        self.assertEqual([c["name"] for c in rubricas[5]], ["C"])
+
+    def test_plan_units_named_without_number(self):
+        plan = [_row("Plan de formación del espacio académico"),
+                _row("Unidad", "Resultados", "Actividades"),
+                _row("Fundamentos", "RA1", "Actividad 1: Video"),
+                _row("Actividad 2: Podcast"),
+                _row("Procesamiento", "RA2", "Actividad 3: Campo")]
+        html = _doc(*plan, _row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."))
+        report = _review_html(html, "_test_plan_unnamed")
+        self.assertEqual(report["cobertura"]["plan"], {"1": [1, 2], "2": [3]})
+
+    def test_final_evaluation_without_number_is_not_glued_to_the_previous_activity(self):
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                    _row("ACTIVIDAD 1. Ensayo"), *ACTIVITY_BODY,
+                    _row("Actividad #. Evaluación final del curso"),
+                    _row("1. ¿Capital? a. Bogotá (respuesta) b. Cali"))
+        report = _review_html(html, "_test_final_eval")
+        issues = {p["tipo"] for p in report["cobertura"]["problemas"]}
+        self.assertIn("contenido_sin_asignar", issues)
+        self.assertEqual(report["unidades"]["1"]["actividades"]["1"]["tipo"], "Tarea")
+
+    def test_numbered_final_evaluation_without_tools_table_is_a_quiz(self):
+        html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
+                    _row("ACTIVIDAD 8. Evaluación final"), _row("1. ¿Capital?"), _row("a. Bogotá (respuesta)"), _row("b. Cali"))
+        report = _review_html(html, "_test_final_eval_num")
+        self.assertEqual(report["unidades"]["1"]["actividades"]["8"]["tipo"], "Cuestionario")
+
+
 class RealDocumentRegressionTests(unittest.TestCase):
     """The real course documents must keep producing exactly the recorded result."""
 

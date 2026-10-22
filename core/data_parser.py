@@ -9,6 +9,17 @@ from core.document_headings import find_unit_number, is_unit_heading_row, is_int
 
 logger = logging.getLogger(__name__)
 
+# "ACTIVIDAD #3", "ACTIVIDAD # 4", "Actividad N° 5" -> "ACTIVIDAD 3"... Every
+# reader (splitter, plan, rubrics, Moodle names) expects "ACTIVIDAD <número>",
+# so the variant is fixed once here. A bare "Actividad #." (template
+# placeholder with no number) is left alone.
+_ACTIVITY_NUMBER_SIGN_RE = re.compile(r'\b(ACTIVIDAD)\s*(?:#|N\s*[°º]|No\.)\s*(\d+)', re.IGNORECASE)
+
+
+def normalize_activity_headings(html: str) -> str:
+    return _ACTIVITY_NUMBER_SIGN_RE.sub(r'\1 \2', html)
+
+
 def parse_docx_to_html(docx_path: str, course_id: int) -> str:
     """
     Parses a docx file using mammoth and returns the raw HTML string.
@@ -56,7 +67,7 @@ def parse_docx_to_html(docx_path: str, course_id: int) -> str:
             messages = result.messages # Any messages, such as warnings during conversion
             if messages:
                 logger.debug(f"Mammoth messages for {docx_path}: {messages}")
-            return html
+            return normalize_activity_headings(html)
     except Exception as e:
         logger.error(f"Error parsing {docx_path}: {e}")
         return ""
@@ -112,13 +123,15 @@ def detect_activity_type(text_upper: str) -> str:
     `text_upper` is the activity's plain text, upper-cased.
     """
     if "HERRAMIENTA" in text_upper and "PLATAFORMA VIRTUAL" in text_upper:
-        if re.search(r'FORO[_\s]*X', text_upper):
+        # The blank may hold a stray "?" next to the X ("Tarea__?x__"), and
+        # the forum may be named "Foro de dudas". A "?" alone is no mark.
+        if re.search(r'FORO(?:[_\s]*(?:DE\s*)?DUDAS)?[_\s?]*X', text_upper):
             return "Foro"
-        if re.search(r'TAREA[_\s]*X', text_upper):
+        if re.search(r'TAREA[_\s?]*X', text_upper):
             return "Tarea"
-        if re.search(r'CUESTIONARIO[_\s]*X', text_upper):
+        if re.search(r'CUESTIONARIO[_\s?]*X', text_upper):
             return "Cuestionario"
-        if re.search(r'NO SABE[_\s]*X', text_upper):
+        if re.search(r'NO SABE[_\s?]*X', text_upper):
             return "No sabe"
         if re.search(r'OTRA[_\s¿A-Z\?]*X', text_upper):
             return "Otra"
@@ -377,6 +390,10 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                     
                     stop_conditions = [
                         re.match(r'^ACTIVIDAD\s+[\dIVXLCDM]+[\s:.-]*', next_text) and "ACTIVIDADES DE APRENDIZAJE" not in next_text,
+                        # The template's "Actividad #. Evaluación final" (no
+                        # number): its questions were glued to the previous
+                        # activity. It's reported in the review instead.
+                        re.match(r'^ACTIVIDAD\s*#', next_text),
                         is_unit_heading_row(next_text, next_tr),
                         next_text.startswith("CUESTIONARIO"),
                         next_text.startswith("EVALUACIÓN") or next_text.startswith("EVALUACION"),
@@ -408,6 +425,11 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                 # else's body text, the way a whole-document row scan can.
                 act_text_upper = BeautifulSoup(act_html, "html.parser").get_text(" ").upper()
                 tipo_actividad = detect_activity_type(act_text_upper)
+                # The template's final evaluation has no "Herramientas" table:
+                # it is always a quiz.
+                if (tipo_actividad == "Desconocido" and "HERRAMIENTA" not in act_text_upper
+                        and re.search(r'EVALUACI[ÓO]N\s+FINAL', text)):
+                    tipo_actividad = "Cuestionario"
                 activity_manifest.setdefault(str(current_unit), {})[str(current_activity)] = {
                     "tipo": tipo_actividad,
                     "raw_number": raw_activity_number,

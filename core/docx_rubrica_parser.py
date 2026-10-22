@@ -69,6 +69,33 @@ def parse_rubricas_from_docx(course_id: int) -> dict:
     return parse_rubricas_from_html(html)
 
 
+# Where the next part of the document starts: another activity, the final
+# evaluation, a unit or the next "avance".
+_NEXT_SECTION_RE = re.compile(r'^(ACTIVIDAD\s*(\d|#)|UNIDAD|AQU[IÍ]\s+INICIA)')
+
+
+def _rubric_tables_after(activity_row) -> list:
+    """
+    Rubric tables in the tables that follow the activity's own one, up to the
+    next section. Word sometimes splits one activity across two tables, and
+    the rubric ends up in the second.
+    """
+    table = activity_row.find_parent('table')
+    while table.find_parent('table'):
+        table = table.find_parent('table')
+    found = []
+    for sibling in table.find_next_siblings():
+        rows = [r for r in sibling.find_all('tr') if not r.find_parent('table').find_parent('table')] \
+            if sibling.name == 'table' else [sibling]
+        for row in rows:
+            text = row.get_text(strip=True)
+            if _NEXT_SECTION_RE.match(text.upper()) and 'ACTIVIDADES DE APRENDIZAJE' not in text.upper():
+                return _innermost(found)
+            if 'Criterios de desempe' in text and 'Puntos' in text:
+                found += [t for t in row.find_all('table') if 'Criterios de desempe' in t.get_text()]
+    return _innermost(found)
+
+
 def parse_rubricas_from_html(html: str) -> dict:
     """Same as parse_rubricas_from_docx, for an HTML string already in memory."""
     soup = BeautifulSoup(html, "html.parser")
@@ -99,6 +126,8 @@ def parse_rubricas_from_html(html: str) -> dict:
                     text_upper = curr.get_text().upper()
                     if 'CRITERIOS DE DESEMPE' not in text_upper and re.search(r'^ACTIVIDAD\s*\d+', text_upper) and "ACTIVIDADES DE APRENDIZAJE" not in text_upper:
                         break
+            if not candidates:
+                candidates = _rubric_tables_after(tr)
             next_criterios_table = _pick_rubric_table(candidates)
 
             if next_criterios_table:
@@ -146,14 +175,23 @@ def criteria_from_table(table) -> list:
     if not rows and table.thead:
         rows = table.thead.find_all('tr', recursive=False)
 
+    # Columns come from the header: usually "Criterios de desempeño | Puntos",
+    # but some tables add a label column first ("Criterios | Criterios de
+    # desempeño | Puntos"), and reading the description as the points gave 0.
+    name_col, points_col = 0, 1
+    if rows:
+        header = [c.get_text(strip=True).upper() for c in rows[0].find_all(['th', 'td'], recursive=False)]
+        name_col = next((k for k, h in enumerate(header) if 'DESEMPE' in h), name_col)
+        points_col = next((k for k, h in enumerate(header) if 'PUNTO' in h), points_col)
+
     for i, row in enumerate(rows):
         if i == 0:
             continue # Skip header row
 
         cols = row.find_all(['th', 'td'], recursive=False)
-        if len(cols) >= 2:
-            criterio_text = cols[0].get_text(strip=True)
-            puntos_text = cols[1].get_text(strip=True)
+        if len(cols) > max(name_col, points_col):
+            criterio_text = cols[name_col].get_text(strip=True)
+            puntos_text = cols[points_col].get_text(strip=True)
 
             if "Total" in criterio_text or "suma total" in criterio_text.lower() or not criterio_text:
                 continue

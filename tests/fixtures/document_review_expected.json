@@ -1,8 +1,6 @@
 {
  "DP.ProcesosPsicológicosBásicos.docx": {
-  "bloqueantes": [
-   "tipo_desconocido:a8"
-  ],
+  "bloqueantes": [],
   "fragmentos": {
    "actividades/actividad1.html": "820c5e8c9ba1b0ed",
    "actividades/actividad2.html": "b8ada7fa64fabc08",
@@ -17,9 +15,7 @@
    "material/Material_de_referencia_U2.html": "de2f3424a03b9179",
    "material/Material_de_referencia_U3.html": "b7944aeb60f8c488"
   },
-  "problemas": [
-   "tipo_desconocido:a8"
-  ],
+  "problemas": [],
   "unidades": {
    "1": {
     "1": "Tarea",
@@ -33,7 +29,7 @@
    },
    "3": {
     "7": "Tarea",
-    "8": "Desconocido"
+    "8": "Cuestionario"
    }
   }
  },
@@ -166,6 +162,198 @@
     "4": "Tarea",
     "5": "Tarea",
     "6": "Cuestionario"
+   }
+  }
+ },
+ "v11/DTP_TERAPIA_DISFUNCIONES_VISIOMOTORAS_60_.docx": {
+  "bloqueantes": [
+   "contenido_sin_asignar:07bdde8fdb",
+   "contenido_sin_asignar:903ca5cfbb",
+   "contenido_sin_asignar:a5cfd3f56a",
+   "cuestionario_sin_preguntas:a6"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "8d14cdb07c720e64",
+   "actividades/actividad2.html": "2fa4e337312550e3",
+   "actividades/actividad3.html": "8603186e1fc1fea6",
+   "actividades/actividad4.html": "86765850d4c9657d",
+   "actividades/actividad5.html": "d0c9312478e0184d",
+   "actividades/actividad6.html": "ead7f821a9256f91",
+   "glosario/glosario_import.xml": "4fe97215d468f0fd",
+   "introduccion/introduccion_general.html": "113f4648422a6d10",
+   "material/Material_de_referencia_U1.html": "5d985fe282e0abae",
+   "material/Material_de_referencia_U2.html": "58a9aaa0ca72a020",
+   "material/Material_de_referencia_U3.html": "7ef34428f2b738ad"
+  },
+  "problemas": [
+   "contenido_sin_asignar:07bdde8fdb",
+   "contenido_sin_asignar:903ca5cfbb",
+   "contenido_sin_asignar:a5cfd3f56a",
+   "cuestionario_sin_preguntas:a6"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea",
+    "4": "Tarea"
+   },
+   "3": {
+    "5": "Tarea",
+    "6": "Cuestionario"
+   }
+  }
+ },
+ "v11/DTP_VISION_CEREBRO_60_.docx": {
+  "bloqueantes": [
+   "contenido_sin_asignar:903ca5cfbb",
+   "rubrica_faltante:a3",
+   "rubrica_faltante:a6",
+   "tipo_desconocido:a4",
+   "tipo_desconocido:a5",
+   "tipo_desconocido:a7"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "d98abd90ab9c43fa",
+   "actividades/actividad2.html": "68726e89d16fb18f",
+   "actividades/actividad3.html": "9149f01955da8d11",
+   "actividades/actividad4.html": "cbceb96893b3f894",
+   "actividades/actividad5.html": "590e04d0c8e4362b",
+   "actividades/actividad6.html": "c9ea72f044f230eb",
+   "actividades/actividad7.html": "94eaab145633cfb5",
+   "glosario/glosario_import.xml": "4fe97215d468f0fd",
+   "introduccion/introduccion_general.html": "39fab339a848742f",
+   "material/Material_de_referencia_U1.html": "7a5e122bf4ecbdea",
+   "material/Material_de_referencia_U2.html": "379170d1c4dbb515"
+  },
+  "problemas": [
+   "contenido_sin_asignar:903ca5cfbb",
+   "rubrica_faltante:a3",
+   "rubrica_faltante:a6",
+   "tipo_desconocido:a4",
+   "tipo_desconocido:a5",
+   "tipo_desconocido:a7"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea",
+    "3": "Tarea"
+   },
+   "2": {
+    "4": "Desconocido",
+    "5": "Desconocido",
+    "6": "Tarea",
+    "7": "Desconocido"
+   }
+  }
+ },
+ "v11/Guia_DTP-DESARROLLO_INTEGRAL_DEL_NINŽO-2023 MCM_60_.docx": {
+  "bloqueantes": [
+   "contenido_sin_asignar:617400050d"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "69296c5b15d8816f",
+   "actividades/actividad2.html": "9523e0357047d288",
+   "actividades/actividad3.html": "919195c7cd7cea28",
+   "actividades/actividad4.html": "22666051a261acd9",
+   "actividades/actividad5.html": "290a35816ce9f761",
+   "glosario/glosario_import.xml": "4fe97215d468f0fd",
+   "introduccion/introduccion_general.html": "6cea68277fe120a2",
+   "material/Material_de_referencia_U1.html": "c92bf2bb4d974dfa",
+   "material/Material_de_referencia_U2.html": "8d5344e8ae9750ce",
+   "material/Material_de_referencia_U3.html": "7f58444178bc085d"
+  },
+  "problemas": [
+   "contenido_sin_asignar:617400050d"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea"
+   },
+   "3": {
+    "4": "Tarea",
+    "5": "Tarea"
+   }
+  }
+ },
+ "v11/Guia_DTP_EVALUACION_CLINICA _DEL NINO_60_.docx": {
+  "bloqueantes": [
+   "cuestionario_sin_preguntas:a4"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "7b9d6a890cfb643d",
+   "actividades/actividad2.html": "1d45c5e71ad6671d",
+   "actividades/actividad3.html": "a78b2e31b1912a78",
+   "actividades/actividad4.html": "f366210164cd6a40",
+   "actividades/actividad5.html": "fd840e413e275777",
+   "actividades/actividad6.html": "e562a111bf0fca86",
+   "introduccion/introduccion_general.html": "8a41e1229add33b2",
+   "material/Material_de_referencia_U1.html": "7d78a03ee12baf63",
+   "material/Material_de_referencia_U2.html": "4d03637a60bf009c",
+   "material/Material_de_referencia_U3.html": "f5c1878882e8f3b1"
+  },
+  "problemas": [
+   "actividad_fuera_del_plan:a1",
+   "actividad_fuera_del_plan:a2",
+   "cuestionario_sin_preguntas:a4"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Foro",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea",
+    "4": "Cuestionario"
+   },
+   "3": {
+    "5": "Tarea",
+    "6": "Tarea"
+   }
+  }
+ },
+ "v11/Guiìa DP-Praìctica_cliìnica_60_.docx": {
+  "bloqueantes": [
+   "tipo_desconocido:a6"
+  ],
+  "fragmentos": {
+   "actividades/actividad1.html": "c34752452d598d38",
+   "actividades/actividad2.html": "aa82806a1f029f5a",
+   "actividades/actividad3.html": "1f2bf1974838b941",
+   "actividades/actividad4.html": "466eafbe20fd7743",
+   "actividades/actividad5.html": "d97a7101d872ab8d",
+   "actividades/actividad6.html": "efe17ca1c5612c18",
+   "actividades/actividad7.html": "46284ad311eb22e4",
+   "actividades/actividad8.html": "2e3c02401dc7eb6d",
+   "introduccion/introduccion_general.html": "d063df3d3d2c2e8b",
+   "material/Material_de_referencia_U1.html": "053cbb78cd656450",
+   "material/Material_de_referencia_U2.html": "442bef18a40a12bb",
+   "material/Material_de_referencia_U3.html": "23b487e2a7a85c1f"
+  },
+  "problemas": [
+   "tipo_desconocido:a6"
+  ],
+  "unidades": {
+   "1": {
+    "1": "Tarea",
+    "2": "Tarea"
+   },
+   "2": {
+    "3": "Tarea",
+    "4": "Tarea"
+   },
+   "3": {
+    "5": "Tarea",
+    "6": "Desconocido",
+    "7": "Tarea",
+    "8": "Cuestionario"
    }
   }
  },
