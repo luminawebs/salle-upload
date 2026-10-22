@@ -205,9 +205,12 @@ async def get_question_formats():
     The "Formatos de preguntas" guide: each question type with examples as a
     teacher writes them, each run through the real parser and Moodle XML
     builder right now (core/question_types/catalog.py), so it can't go stale.
+    Plus the template texts the document review treats as "plantilla sin
+    diligenciar" (core/template_placeholders.py).
     """
     from core.question_types.catalog import render_catalog
-    return render_catalog()
+    from core.template_placeholders import placeholder_catalog
+    return {**render_catalog(), "textos_plantilla": placeholder_catalog()}
 
 
 @app.get("/api/skip-activities")

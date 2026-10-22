@@ -13,6 +13,7 @@ const BLOCK_STYLES = {
   ok: { bar: 'bg-success', text: 'text-gray-200', label: 'Leído' },
   corregido: { bar: 'bg-primary', text: 'text-primary', label: 'Añadido en la revisión' },
   conocido: { bar: 'bg-gray-600', text: 'text-gray-400', label: 'No se sube (esperado)' },
+  plantilla: { bar: 'bg-gray-500', text: 'text-gray-500 italic', label: 'Plantilla sin diligenciar (no se sube)' },
   problema: { bar: 'bg-warning', text: 'text-warning', label: 'Sin asignar' },
 };
 
@@ -263,7 +264,7 @@ function DocumentMap({ blocks, onShowBlock }) {
               );
               return (
                 <li key={b.id}>
-                  {b.estado === 'problema' || b.estado === 'corregido' ? (
+                  {b.estado === 'problema' || b.estado === 'corregido' || b.estado === 'plantilla' ? (
                     <button
                       type="button"
                       onClick={() => onShowBlock(b.id)}

@@ -168,7 +168,6 @@
  "v11/DTP_TERAPIA_DISFUNCIONES_VISIOMOTORAS_60_.docx": {
   "bloqueantes": [
    "contenido_sin_asignar:07bdde8fdb",
-   "contenido_sin_asignar:903ca5cfbb",
    "contenido_sin_asignar:a5cfd3f56a",
    "cuestionario_sin_preguntas:a6"
   ],
@@ -187,9 +186,9 @@
   },
   "problemas": [
    "contenido_sin_asignar:07bdde8fdb",
-   "contenido_sin_asignar:903ca5cfbb",
    "contenido_sin_asignar:a5cfd3f56a",
-   "cuestionario_sin_preguntas:a6"
+   "cuestionario_sin_preguntas:a6",
+   "plantilla_sin_diligenciar:903ca5cfbb"
   ],
   "unidades": {
    "1": {
@@ -208,7 +207,6 @@
  },
  "v11/DTP_VISION_CEREBRO_60_.docx": {
   "bloqueantes": [
-   "contenido_sin_asignar:903ca5cfbb",
    "rubrica_faltante:a3",
    "rubrica_faltante:a6",
    "tipo_desconocido:a4",
@@ -229,7 +227,7 @@
    "material/Material_de_referencia_U2.html": "379170d1c4dbb515"
   },
   "problemas": [
-   "contenido_sin_asignar:903ca5cfbb",
+   "plantilla_sin_diligenciar:903ca5cfbb",
    "rubrica_faltante:a3",
    "rubrica_faltante:a6",
    "tipo_desconocido:a4",

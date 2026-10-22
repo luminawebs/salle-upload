@@ -628,6 +628,42 @@ class TemplateVariantTests(unittest.TestCase):
         self.assertIn("contenido_sin_asignar", issues)
         self.assertEqual(report["unidades"]["1"]["actividades"]["1"]["tipo"], "Tarea")
 
+    SAMPLE_QUESTIONS = [_row("Ejemplo estructura de pregunta"),
+                        _row("1. Enunciado Pregunta 1"), _row("a. Opción 1"), _row("b. Opción 2 (respuesta)"),
+                        _row("2. Enunciado Pregunta 2 incluyendo opción ____ para completar"), _row("a. (incluir respuesta)")]
+    UNIT = [_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?")]
+
+    def test_unfilled_template_section_is_a_notice_not_a_blocker(self):
+        html = _doc(*self.UNIT, _row("Actividad #. Evaluación final [nombre según plan de curso]"), *self.SAMPLE_QUESTIONS)
+        report = _review_html(html, "_test_template_empty")
+        issues = {p["tipo"]: p for p in report["cobertura"]["problemas"]}
+        self.assertNotIn("contenido_sin_asignar", issues)
+        issue = issues["plantilla_sin_diligenciar"]
+        self.assertFalse(issue["bloquea"])
+        self.assertIn("[nombre según plan de curso]", issue["textos_plantilla"])
+        block = next(b for b in report["cobertura"]["bloques"] if b["id"] == issue["bloque"])
+        self.assertEqual(block["estado"], "plantilla")
+
+    def test_filled_section_that_kept_a_template_line_is_still_content(self):
+        html = _doc(*self.UNIT, _row("Actividad #. Evaluación final [nombre según plan de curso]"),
+                    _row("1. ¿Capital de Colombia?"), _row("a. Bogotá (respuesta)"), _row("b. Cali"))
+        issues = {p["tipo"] for p in _review_html(html, "_test_template_filled")["cobertura"]["problemas"]}
+        self.assertIn("contenido_sin_asignar", issues)
+        self.assertNotIn("plantilla_sin_diligenciar", issues)
+
+    def test_activity_with_the_sample_questions_is_flagged(self):
+        html = _doc(*self.UNIT, _row("ACTIVIDAD 1. Cuestionario"), _row("¿Qué vamos a lograr? Algo."),
+                    _row("Herramientas de la plataforma virtual (Marque con una X): Cuestionario__X__"),
+                    *self.SAMPLE_QUESTIONS)
+        issues = {p["tipo"]: p for p in _review_html(html, "_test_template_act")["cobertura"]["problemas"]}
+        self.assertTrue(issues["texto_de_plantilla"]["bloquea"])
+        self.assertIn("Enunciado Pregunta 1", issues["texto_de_plantilla"]["textos_plantilla"])
+
+    def test_template_texts_that_stay_in_filled_documents_are_not_placeholders(self):
+        from core.template_placeholders import find_placeholders
+        self.assertEqual(find_placeholders("Indique si utilizará alguna____ Otra ¿Cuál?_______ "
+                                           "(obligatorio solo en cursos de pregrado) a. Opción correcta"), [])
+
     def test_numbered_final_evaluation_without_tools_table_is_a_quiz(self):
         html = _doc(_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto."), _row("Preguntas orientadoras", "¿Qué?"),
                     _row("ACTIVIDAD 8. Evaluación final"), _row("1. ¿Capital?"), _row("a. Bogotá (respuesta)"), _row("b. Cali"))

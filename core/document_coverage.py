@@ -11,8 +11,9 @@ written down below, and returns:
 
 - "bloques": the document as consecutive blocks of rows, each marked as read
   (a unit / an activity), known (a section the pipeline intentionally doesn't
-  upload, e.g. the general-information table), or a problem (content that
-  went nowhere).
+  upload, e.g. the general-information table), a template section nobody
+  filled in ("plantilla", core/template_placeholders.py), or a problem
+  (content that went nowhere).
 - "problemas": everything that doesn't match the expected structure, each
   with a stable id so the user can mark it "ignorar" (see
   get_ignored_issues / set_ignored_issues) and the UI can block Run until
@@ -250,6 +251,28 @@ def _issue(kind, key, titulo, detalle, bloquea=True, **extra):
     return {"id": f"{kind}:{key}", "tipo": kind, "titulo": titulo, "detalle": detalle, "bloquea": bloquea, **extra}
 
 
+def _unfilled_template(block, norm_rows) -> list:
+    """
+    The template texts in an unassigned block (core/template_placeholders.py)
+    when the block is only the template: none of its questions is a real one.
+    A filled-in section that kept a template line is still real content.
+    """
+    from core.template_placeholders import find_placeholders
+    found = find_placeholders(" ".join(norm_rows))
+    if not found:
+        return []
+    from actions.html_transformer import parse_questions
+
+    def text(html):
+        return BeautifulSoup(html or "", "html.parser").get_text(" ")
+
+    for q in parse_questions(block.get("html", "")):
+        parts = q.get("stem_html", []) + [o.get("html", "") for o in q.get("options", [])]
+        if not find_placeholders(" ".join(text(h) for h in parts)):
+            return []
+    return found
+
+
 def _block_issues(blocks):
     issues, seen = [], {}
     for b in blocks:
@@ -260,6 +283,20 @@ def _block_issues(blocks):
         seen[digest] = seen.get(digest, 0) + 1
         key = digest if seen[digest] == 1 else f"{digest}-{seen[digest]}"
         where = f"Unidad {b['unidad']}" if b["unidad"] else "antes de la primera unidad"
+        template_texts = _unfilled_template(b, norm_rows)
+        if template_texts:
+            b["estado"] = "plantilla"
+            issue = _issue(
+                "plantilla_sin_diligenciar", key,
+                f"Plantilla sin diligenciar: «{b['titulo']}»",
+                f"{b['n_filas']} fila(s) en {where} son una sección de la plantilla que no se completó "
+                f"(contiene {', '.join('«' + t + '»' for t in template_texts)}), así que no se subirá. "
+                "Si el curso la necesita, complétala en el .docx; si no, bórrala.",
+                bloquea=False, bloque=b["id"], unidad=b["unidad"], textos_plantilla=template_texts,
+            )
+            b["problema"] = issue["id"]
+            issues.append(issue)
+            continue
         looks_like_activity = sum(1 for t in norm_rows if _starts_with_any(t, ACTIVITY_PART_LABELS))
         if looks_like_activity:
             from core.data_parser import detect_activity_type
@@ -443,6 +480,22 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
                 "reconoce como el inicio de una actividad, así que ese contenido se subirá dentro de la "
                 f"Actividad {b['actividad']}. Corrige el encabezado en el .docx (p. ej. «ACTIVIDAD N.») o ignóralo.",
                 actividad=b["actividad"], unidad=b["unidad"],
+            ))
+
+    # A recognized activity that still has template texts (the sample
+    # question, "[nombre según plan de curso]"…) would upload them as is.
+    from core.template_placeholders import find_placeholders
+    for b in blocks:
+        if b["tipo"] != "actividad":
+            continue
+        template_texts = find_placeholders(" ".join(_row_text(trs[r]) for r in range(b["fila_inicio"], b["fila_fin"] + 1)))
+        if template_texts:
+            issues.append(_issue(
+                "texto_de_plantilla", f"a{b['actividad']}",
+                f"Actividad {b['actividad']}: contiene textos de ejemplo de la plantilla",
+                f"Se encontró {', '.join('«' + t + '»' for t in template_texts)}. Se subiría tal cual a Moodle. "
+                "Reemplázalo por el contenido real en el .docx o, si es correcto, ignora este aviso.",
+                actividad=b["actividad"], unidad=b["unidad"], textos_plantilla=template_texts,
             ))
 
     found = {}  # activity -> unit, as split

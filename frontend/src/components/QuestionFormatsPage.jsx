@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, RefreshCw, AlertTriangle, Copy, Check, Code2, Info } from 'lucide-react';
+import { ArrowLeft, RefreshCw, AlertTriangle, Copy, Check, Code2, Info, FileX } from 'lucide-react';
 import { QuestionCard } from './ActivityPreview';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -131,6 +131,27 @@ export default function QuestionFormatsPage({ onBack }) {
               {data.reglas.map((rule, i) => <li key={i}>{rule}</li>)}
             </ul>
           </div>
+
+          {data.textos_plantilla?.length > 0 && (
+            <div className="rounded-lg border border-border bg-surface px-4 py-3">
+              <p className="flex items-center text-xs font-semibold text-gray-300 mb-1">
+                <FileX className="w-3.5 h-3.5 mr-1.5" /> Textos de plantilla
+              </p>
+              <p className="text-xs text-gray-400 mb-2">
+                Si una sección del documento sin asignar contiene estos textos y ninguna pregunta real, se considera
+                «Plantilla sin diligenciar»: no se sube y no bloquea la carga. Si aparecen dentro de una actividad,
+                se avisa, porque se subirían tal cual.
+              </p>
+              <ul className="space-y-1 text-xs">
+                {data.textos_plantilla.map((t) => (
+                  <li key={t.texto} className="flex flex-wrap gap-x-2">
+                    <span className="font-mono text-gray-200">{t.texto}</span>
+                    <span className="text-gray-500">{t.donde}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-5">
             <nav className="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible" aria-label="Tipos de pregunta">
