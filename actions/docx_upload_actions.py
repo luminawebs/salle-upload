@@ -27,6 +27,53 @@ def parse_activity_number(val):
             res += roman.get(val[i], 0)
     return res
 
+# Example activities a course shell can come with ("ACTIVIDAD 1. XXX"): never
+# the activity a document's content belongs to.
+_PLACEHOLDER_NAME_RE = re.compile(r'\bx{3,}\b', re.IGNORECASE)
+_LEADING_ACTIVITY_RE = re.compile(r'^\s*actividad\s+([\divxlcdm]+)\b', re.IGNORECASE)
+
+
+def choose_activity(names: list, search: str):
+    """
+    Index of the activity on the course page that `search` ("ACTIVIDAD 1")
+    means, or None. A course shell can already have example activities
+    ("ACTIVIDAD 1. XXX") listed before the ones the structure step creates,
+    and taking the first name that merely contained "actividad 1" put
+    descriptions and rubrics in those (and "Actividad 1" also matched
+    "Actividad 10"). So: same activity number at the start of the name, never
+    a placeholder; other searches ("Material de referencia…") by containment.
+    """
+    def norm(text):
+        return " ".join((text or "").split()).lower()
+
+    wanted = _LEADING_ACTIVITY_RE.match(norm(search))
+    wanted_number = parse_activity_number(wanted.group(1)) if wanted else None
+    fallback = None
+    for i, name in enumerate(names):
+        if not name or _PLACEHOLDER_NAME_RE.search(name):
+            continue
+        if wanted_number is not None:
+            found = _LEADING_ACTIVITY_RE.match(norm(name))
+            if found and parse_activity_number(found.group(1)) == wanted_number:
+                return i
+        elif norm(search) in norm(name) and fallback is None:
+            fallback = i
+    return fallback
+
+
+def _activity_names(driver):
+    """(activity elements, their names) on the course page, in page order."""
+    activities, names = [], []
+    for activity in driver.find_elements(By.CSS_SELECTOR, "li.activity"):
+        try:
+            name_el = activity.find_element(By.CSS_SELECTOR, ".instancename")
+        except NoSuchElementException:
+            continue
+        activities.append(activity)
+        names.append((name_el.text.strip() if name_el.text else name_el.get_attribute("innerText")) or "")
+    return activities, names
+
+
 def get_edit_url_for_activity(driver, activity_name_prefix, wait_time):
     """
     Finds an activity by prefix name and clicks 'Editar ajustes'.
@@ -53,35 +100,18 @@ def get_edit_url_for_activity(driver, activity_name_prefix, wait_time):
         pass
         
     def find_target_in_current_dom():
-        activities = driver.find_elements(By.CSS_SELECTOR, "li.activity")
-        for activity in activities:
-            try:
-                name_el = activity.find_element(By.CSS_SELECTOR, ".instancename")
-                raw_text = name_el.text.strip() if name_el.text else name_el.get_attribute("innerText")
-                if raw_text:
-                    normalized_name = " ".join(raw_text.split()).lower()
-                    normalized_search = " ".join(activity_name_prefix.split()).lower()
-                    
-                    if normalized_search in normalized_name:
-                        return activity
-                    else:
-                        # Fallback for "Material de referencia" which might be named "Material de estudio" etc.
-                        if "material de" in normalized_search and "unidad" in normalized_search:
-                            u_match = re.search(r'unidad\s+(\d+)', normalized_search)
-                            if u_match:
-                                u_num = u_match.group(1)
-                                if "material" in normalized_name and f"unidad {u_num}" in normalized_name:
-                                    return activity
-                                    
-                        search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
-                        name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
-                        if search_match and name_match:
-                            search_val = parse_activity_number(search_match.group(1))
-                            name_val = parse_activity_number(name_match.group(1))
-                            if search_val is not None and search_val == name_val:
-                                return activity
-            except NoSuchElementException:
-                continue
+        activities, names = _activity_names(driver)
+        index = choose_activity(names, activity_name_prefix)
+        if index is not None:
+            return activities[index]
+        # Fallback for "Material de referencia" which might be named "Material de estudio" etc.
+        normalized_search = " ".join(activity_name_prefix.split()).lower()
+        u_match = re.search(r'unidad\s+(\d+)', normalized_search)
+        if "material de" in normalized_search and u_match:
+            for activity, name in zip(activities, names):
+                normalized_name = " ".join((name or "").split()).lower()
+                if "material" in normalized_name and f"unidad {u_match.group(1)}" in normalized_name:
+                    return activity
         return None
         
     target_activity = find_target_in_current_dom()
@@ -271,32 +301,10 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
     wait = WebDriverWait(driver, wait_time)
     
     # 1. Find the activity on the course page
-    activities = driver.find_elements(By.CSS_SELECTOR, "li.activity")
-    target_activity = None
-    
-    for activity in activities:
-        try:
-            name_el = activity.find_element(By.CSS_SELECTOR, ".instancename")
-            raw_text = name_el.text.strip() if name_el.text else name_el.get_attribute("innerText")
-            if raw_text:
-                normalized_name = " ".join(raw_text.split()).lower()
-                normalized_search = " ".join(activity_name_prefix.split()).lower()
-                if normalized_search in normalized_name:
-                    target_activity = activity
-                    break
-                else:
-                    # Fallback for Actividad X matching Actividad Roman_X
-                    search_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_search)
-                    name_match = re.search(r'^actividad\s+([\divxlcdm]+)', normalized_name)
-                    if search_match and name_match:
-                        search_val = parse_activity_number(search_match.group(1))
-                        name_val = parse_activity_number(name_match.group(1))
-                        if search_val is not None and search_val == name_val:
-                            target_activity = activity
-                            break
-        except NoSuchElementException:
-            continue
-            
+    activities, names = _activity_names(driver)
+    index = choose_activity(names, activity_name_prefix)
+    target_activity = activities[index] if index is not None else None
+
     if not target_activity:
         logger.error(f"Activity '{activity_name_prefix}' not found for configuring filters.")
         return False

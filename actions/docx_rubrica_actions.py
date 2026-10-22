@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from actions.moodle_actions import MoodleAutomation, navigate_to_course
 from actions.deprecated.actividad_rubrica_actions import _navigate_to_rubric_editor, fill_rubric
 from core.docx_rubrica_parser import parse_rubricas_from_docx
+from actions.docx_upload_actions import choose_activity
 from core.activity_selection import get_skipped_activities
 from config.settings import Config
 
@@ -48,44 +49,29 @@ def _find_assign_url_by_name(driver, course_id: int, activity_name: str, wait_ti
             except Exception:
                 pass
                 
-            # Get ALL activities in the course
-            activities = driver.find_elements(By.XPATH, "//li[contains(@class, 'activity')]")
-            
-            for activity in activities:
+            # Every assignment/forum in the course with its link; which one
+            # "ACTIVIDAD N" means is decided by choose_activity (exact
+            # activity number, never a shell's "ACTIVIDAD 1. XXX" example).
+            names, hrefs = [], []
+            for activity in driver.find_elements(By.XPATH, "//li[contains(@class, 'activity')]"):
                 try:
                     name_elem = activity.find_element(By.XPATH, ".//*[contains(@class, 'instancename')]")
                     name_text = name_elem.text.strip() if name_elem.text else name_elem.get_attribute("innerText")
-                    
-                    if name_text:
-                        normalized_name = ' '.join(name_text.split()).lower()
-                        normalized_search = ' '.join(activity_name.split()).lower()
-                        
-                        # We want to match the activity name flexibly, avoiding
-                        # matching "Actividad 10" when searching for "Actividad 1".
-                        words = normalized_search.split()
-                        match = True
-                        for w in words:
-                            if w.isdigit():
-                                if not re.search(rf'(^|\W){w}($|\W)', normalized_name):
-                                    match = False
-                                    break
-                            else:
-                                if w not in normalized_name:
-                                    match = False
-                                    break
-                                    
-                        if match:
-                            # Find the primary link — must be mod/assign or mod/forum
-                            for link in activity.find_elements(By.CSS_SELECTOR, "a.aalink, a.instancename"):
-                                href = link.get_attribute("href") or ""
-                                if "mod/assign" in href or "mod/forum" in href:
-                                    if href.startswith("/"):
-                                        base = re.match(r"(https?://[^/]+)", Config.MOODLE_URL).group(1)
-                                        href = base + href
-                                    logger.info(f"  ✓ Found URL for '{activity_name}' as '{name_text}': {href}")
-                                    return href, name_text
+                    href = next((link.get_attribute("href") or "" for link in activity.find_elements(By.CSS_SELECTOR, "a.aalink, a.instancename")
+                                 if "mod/assign" in (link.get_attribute("href") or "") or "mod/forum" in (link.get_attribute("href") or "")), None)
                 except Exception:
                     continue
+                if name_text and href:
+                    names.append(name_text)
+                    hrefs.append(href)
+            index = choose_activity(names, activity_name)
+            if index is not None:
+                href, name_text = hrefs[index], names[index]
+                if href.startswith("/"):
+                    base = re.match(r"(https?://[^/]+)", Config.MOODLE_URL).group(1)
+                    href = base + href
+                logger.info(f"  ✓ Found URL for '{activity_name}' as '{' '.join(name_text.split())}': {href}")
+                return href, name_text
                     
         except Exception as e:
             if attempt < max_attempts - 1:

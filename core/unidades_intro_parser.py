@@ -30,8 +30,10 @@ def run_unidades_intro_splitting_workflow(course_id: int):
 
     for tr in soup.find_all("tr"):
         text = tr.get_text(strip=True).upper()
-        # Look for UNIDAD DIDACTICA or UNIDAD at the beginning
-        match = re.search(r'^\s*UNIDAD\s*(?:DID\u00c1CTICA)?\s*(\d+)', text)
+        # Look for UNIDAD DIDACTICA or UNIDAD at the beginning \u2014 after the
+        # template's "Aqu\u00ed inicia avance 2" note, which some documents keep
+        # in the first unit's heading row (its intro was silently skipped).
+        match = re.search(r'^\s*(?:AQU[I\u00cd]\s+INICIA\s+AVANCE\s*\d*\s*)?UNIDAD\s*(?:DID[\u00c1A]CTICA)?\s*(\d+)', text)
         if match:
             current_unidad = f"UNIDAD {match.group(1)}"
             if current_unidad not in unidades:

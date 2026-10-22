@@ -10,7 +10,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from config.settings import Config
 from actions.moodle_actions import navigate_to_course
 from actions.html_transformer import extract_questions_from_html_to_moodle_xml
-from actions.deprecated.puntos_extras_actions import _get_cmid_for_activity
+from actions.docx_upload_actions import choose_activity
 from actions.cuestionario_grade_actions import update_quiz_grades
 from core.activity_selection import get_skipped_activities
 from core.data_parser import activity_type_for
@@ -19,6 +19,34 @@ from bs4 import BeautifulSoup
 from core import progress
 
 logger = logging.getLogger(__name__)
+
+def _get_cmid_for_activity(driver, activity_name: str, wait_time: int):
+    """
+    The cmid of the quiz "ACTIVIDAD N" on the course page (choose_activity:
+    exact activity number, never a course shell's "ACTIVIDAD 2. XXX"
+    example quiz), or None.
+    """
+    names, ids = [], []
+    for link in driver.find_elements(By.CSS_SELECTOR, "a.aalink, a.instancename"):
+        m = re.search(r"mod/quiz/view\.php\?id=(\d+)", link.get_attribute("href") or "")
+        if m:
+            names.append(link.get_attribute("innerText") or link.text or "")
+            ids.append(m.group(1))
+    index = choose_activity(names, activity_name)
+    return ids[index] if index is not None else None
+
+
+def _pick_category(texts: list, activity_name: str):
+    """
+    Index of the question category "Por defecto en ACTIVIDAD N…" among the
+    option texts, by the same rule as the activity itself; None if none.
+    """
+    names = []
+    for text in texts:
+        text = " ".join((text or "").split())
+        names.append(text.lower().split("por defecto en", 1)[1].strip() if "por defecto en" in text.lower() else "")
+    return choose_activity(names, activity_name)
+
 
 def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str, xml_path: str, wait_time: int) -> bool:
     wait = WebDriverWait(driver, wait_time)
@@ -56,17 +84,17 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
         
         logger.info(f"[{activity_name_prefix}] Searching for category: '{search_txt}'")
         
-        # First try to match "por defecto en {prefix}"
-        for opt in sel.options:
-            raw_text = opt.get_attribute("textContent") or ""
-            opt_text = " ".join(raw_text.split()).lower()
-            if search_txt in opt_text:
-                try:
-                    sel.select_by_value(opt.get_attribute("value"))
-                except Exception:
-                    driver.execute_script("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", category_select, opt.get_attribute("value"))
-                found_option = True
-                break
+        # First try to match "por defecto en {prefix}" (the right activity's
+        # category, not an example quiz's or "Actividad 10"'s)
+        options = list(sel.options)
+        index = _pick_category([(opt.get_attribute("textContent") or "").lower() for opt in options], activity_name_prefix)
+        if index is not None:
+            opt = options[index]
+            try:
+                sel.select_by_value(opt.get_attribute("value"))
+            except Exception:
+                driver.execute_script("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", category_select, opt.get_attribute("value"))
+            found_option = True
                 
         # Fallback: try to just match the prefix
         if not found_option:
@@ -223,20 +251,20 @@ def add_questions_to_cuestionario(driver, course_id: int, activity_name_prefix: 
                 time.sleep(1)
                 
                 suggestions = driver.find_elements(By.CSS_SELECTOR, "ul.form-autocomplete-suggestions li[role='option']")
-                search_txt = f"por defecto en {activity_name_prefix}".lower()
                 found = False
-                for li in suggestions:
-                    # Replace non-breaking spaces before matching
-                    li_text = li.get_attribute("textContent").replace("\xa0", " ").strip().lower()
-                    if search_txt in li_text:
-                        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", li)
-                        time.sleep(0.5)
-                        try:
-                            li.click()
-                        except Exception:
-                            driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));", li)
-                        found = True
-                        break
+                # The right activity's category (not an example quiz's or
+                # "Actividad 10"'s); non-breaking spaces replaced first.
+                index = _pick_category([li.get_attribute("textContent").replace("\xa0", " ").strip().lower()
+                                        for li in suggestions], activity_name_prefix)
+                if index is not None:
+                    li = suggestions[index]
+                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", li)
+                    time.sleep(0.5)
+                    try:
+                        li.click()
+                    except Exception:
+                        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles: true}));", li)
+                    found = True
                 
                 if not found:
                     for li in suggestions:

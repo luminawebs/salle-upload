@@ -135,6 +135,28 @@ def parse_raw_document(filepath):
 _NUMBERED_ACTIVITY_RE = re.compile(r'^\s*ACTIVIDAD\s+([\dIVXLCDM]+)\b', re.IGNORECASE)
 
 
+def remove_skipped_activities(sections: list, skipped: set) -> None:
+    """
+    Leaves out of the Moodle structure the activities the user excluded
+    ("ACTIVIDAD N", skipped = {"N", …}): the other steps already skipped
+    their content, but the activity itself was still created, empty.
+    """
+    if not skipped:
+        return
+    from actions.docx_upload_actions import parse_activity_number
+    for section in sections:
+        if section.get("unit_number", 0) < 2:
+            continue
+        kept = []
+        for act in section["activities"]:
+            m = _NUMBERED_ACTIVITY_RE.match(act["name"])
+            if m and str(parse_activity_number(m.group(1))) in skipped:
+                logger.info(f"Actividad {parse_activity_number(m.group(1))} excluida por el usuario — no se crea en Moodle.")
+                continue
+            kept.append(act)
+        section["activities"] = kept
+
+
 def apply_split_activity_types(sections: list, types_by_file: dict) -> None:
     """
     Makes the activities created in Moodle match the document review: each
@@ -408,6 +430,8 @@ def run_course_structure_creation_workflow(driver, course_id, wait_time=10):
     sections = parse_raw_document(raw_doc_path)
     from core.data_parser import activity_types
     apply_split_activity_types(sections, activity_types(course_id))
+    from core.activity_selection import get_skipped_activities
+    remove_skipped_activities(sections, get_skipped_activities(course_id))
 
     # Blocks the user turned into activities in the review panel
     # (core/document_corrections.py) — created in their unit's section,

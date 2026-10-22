@@ -843,6 +843,54 @@ class WordNumberingTests(unittest.TestCase):
         self.assertIn("<![CDATA[<p>¿Capital?</p>]]>", question_handler(q, 1)[0].to_moodle_xml())
 
 
+class MoodleActivityLookupTests(unittest.TestCase):
+    """Which activity on the course page each step writes to (course 71329's run)."""
+
+    PAGE = ["Avisos", "ACTIVIDAD 1. XXX Tarea", "ACTIVIDAD 2. XXX Cuestionario",
+            "ACTIVIDAD 1: Diagnóstico funcional de disfunciones no estrábicas : 17%",
+            "ACTIVIDAD 2 . Mapa conceptual · 17%", "ACTIVIDAD 3. XXX Foro",
+            "ACTIVIDAD 3: Estudio de caso clínico", "ACTIVIDAD 10. Proyecto", "Material de referencia Unidad 1"]
+
+    def test_example_activities_of_the_course_shell_are_never_chosen(self):
+        from actions.docx_upload_actions import choose_activity
+        self.assertEqual(choose_activity(self.PAGE, "ACTIVIDAD 1"), 3)
+        self.assertEqual(choose_activity(self.PAGE, "ACTIVIDAD 2"), 4)
+        self.assertEqual(choose_activity(self.PAGE, "Actividad 3"), 6)
+
+    def test_activity_1_is_not_activity_10_and_others_match_by_name(self):
+        from actions.docx_upload_actions import choose_activity
+        self.assertEqual(choose_activity(self.PAGE[7:], "ACTIVIDAD 1"), None)
+        self.assertEqual(choose_activity(self.PAGE, "ACTIVIDAD 10"), 7)
+        self.assertEqual(choose_activity(self.PAGE, "Material de referencia"), 8)
+        self.assertIsNone(choose_activity(["ACTIVIDAD 4. XXX"], "ACTIVIDAD 4"))
+
+    def test_question_category_of_the_right_quiz(self):
+        from actions.cuestionario_export_actions import _pick_category
+        options = ["Por defecto en ACTIVIDAD 2. XXX", "Por defecto en ACTIVIDAD 2: Evaluación final", "Por defecto en Curso"]
+        self.assertEqual(_pick_category([o.lower() for o in options], "ACTIVIDAD 2"), 1)
+
+    def test_excluded_activity_is_not_created(self):
+        from actions.structure_actions import remove_skipped_activities
+        sections = [{"unit_number": 4, "activities": [{"name": "ACTIVIDAD 5: Razonamiento", "type": "Tarea"},
+                                                      {"name": "ACTIVIDAD 6: Evaluación final", "type": "Cuestionario"}]}]
+        remove_skipped_activities(sections, {"6"})
+        self.assertEqual([a["name"] for a in sections[0]["activities"]], ["ACTIVIDAD 5: Razonamiento"])
+
+    def test_first_unit_intro_after_the_avance_note(self):
+        from core.unidades_intro_parser import run_unidades_intro_splitting_workflow
+        course_id = "_test_intro_u1"
+        course_dir = os.path.join(ROOT, "workspace", course_id)
+        os.makedirs(course_dir, exist_ok=True)
+        self.addCleanup(shutil.rmtree, course_dir, True)
+        html = _doc(_row("Aquí inicia avance 2 UNIDAD DIDÁCTICA 1: Fundamentos"), _row("Resumen", "Texto uno."),
+                    _row("UNIDAD DIDÁCTICA 2: Cierre"), _row("Resumen", "Texto dos."))
+        with open(os.path.join(course_dir, "raw_docx_extracted.html"), "w", encoding="utf-8") as f:
+            f.write(html)
+        run_unidades_intro_splitting_workflow(course_id)
+        self.assertEqual(sorted(os.listdir(os.path.join(course_dir, "introduccion"))),
+                         ["introduccion_unidad_1.html", "introduccion_unidad_2.html"])
+
+
 class RealDocumentRegressionTests(unittest.TestCase):
     """The real course documents must keep producing exactly the recorded result."""
 

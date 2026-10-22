@@ -828,10 +828,11 @@ def _navigate_to_rubric_editor(driver, assign_url: str, wait_time: int) -> bool:
     # Collect all links for diagnostics
     all_hrefs = [(a.get_text(" ", strip=True)[:60], a.get("href", ""))
                  for a in soup.find_all("a", href=True)]
-    # Every link on the page (thousands: the whole category menu) — only at
-    # debug level; at info it was ~4,000 log lines per rubric.
-    logger.debug(f"  Links found on page ({len(all_hrefs)}):")
-    for text, href in all_hrefs:
+    # Only the grading links the steps below look for: the page has thousands
+    # (the whole category menu), ~4,000 lines per rubric in the full log.
+    grading_links = [(t, h) for t, h in all_hrefs if "grade/grading" in h or "rubric" in h]
+    logger.debug(f"  Links found on page: {len(all_hrefs)}; grading links ({len(grading_links)}):")
+    for text, href in grading_links:
         logger.debug(f"    [{text}] → {href}")
 
     # ── Case 1: Rubric already defined — find rubric/edit.php ─────────────────
