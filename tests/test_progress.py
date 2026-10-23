@@ -100,6 +100,21 @@ class ProgressLogTests(unittest.TestCase):
 
     def test_no_split_without_breakdowns(self):
         self.assertIsNone(progress.page_time_split([]))
+        self.assertIsNone(progress.page_phase_split([{"servidor": 1, "pagina": 0, "archivos": 1}]))
+
+    def test_phases_and_slowest_files(self):
+        base = {"servidor": 1.0, "pagina": 0.2, "recursos": 60, "desde_cache": 55, "kb": 12}
+        pages = [
+            dict(base, archivos=8.0, fases={"procesar": 1.0, "scripts": 6.0, "esperando": 1.0, "al_cargar": 0.0},
+                 lentos=[{"archivo": "tracker.js", "servidor": "stats.example.com", "s": 3.0, "cache": False}]),
+            dict(base, archivos=2.0, fases={"procesar": 0.0, "scripts": 2.0, "esperando": 0.0, "al_cargar": 0.0},
+                 lentos=[{"archivo": "tracker.js", "servidor": "stats.example.com", "s": 2.0, "cache": False},
+                         {"archivo": "yui.js", "servidor": "", "s": 1.0, "cache": True}]),
+        ]
+        line = progress.page_phase_split(pages)
+        self.assertTrue(line.startswith("Después de recibir la página: 10 % procesar HTML · 80 % ejecutar scripts · "
+                                        "10 % esperando archivos · 0 % scripts al cargar"), line)
+        self.assertIn("tracker.js (stats.example.com) 5 s en total", line)
 
 
 if __name__ == "__main__":

@@ -112,6 +112,13 @@ const nav = performance.getEntriesByType('navigation')[0];
 if (!nav) return null;
 const res = performance.getEntriesByType('resource');
 const cached = res.filter(r => r.transferSize === 0 && r.decodedBodySize > 0).length;
+const s = (a, b) => Math.max(0, (b || 0) - (a || 0)) / 1000;
+const slow = res.slice().sort((a, b) => b.duration - a.duration).slice(0, 3).map(r => {
+  let host = '', file = r.name;
+  try { const u = new URL(r.name); host = u.host; file = u.pathname.split('/').filter(Boolean).pop() || u.pathname; } catch (e) {}
+  return {archivo: file.slice(0, 60), servidor: host, s: r.duration / 1000,
+          cache: r.transferSize === 0 && r.decodedBodySize > 0, tipo: r.initiatorType};
+});
 return {
   servidor: (nav.responseStart - nav.startTime) / 1000,
   pagina: (nav.responseEnd - nav.responseStart) / 1000,
@@ -119,6 +126,18 @@ return {
   recursos: res.length,
   desde_cache: cached,
   kb: Math.round(res.reduce((s, r) => s + (r.transferSize || 0), 0) / 1024),
+  // Where "archivos" goes. procesar: reading the HTML and its blocking
+  // scripts; scripts: deferred scripts until DOMContentLoaded; esperando:
+  // files still loading after that (images, videos, iframes…); al_cargar:
+  // the page's own "load" scripts. Mostly procesar/scripts = CPU-bound;
+  // mostly esperando = a slow file (see lentos).
+  fases: {
+    procesar: s(nav.responseEnd, nav.domInteractive),
+    scripts: s(nav.domInteractive, nav.domContentLoadedEventEnd),
+    esperando: s(nav.domContentLoadedEventEnd, nav.loadEventStart),
+    al_cargar: s(nav.loadEventStart, nav.loadEventEnd),
+  },
+  lentos: slow,
 };
 """
 

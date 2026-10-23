@@ -111,6 +111,12 @@ def record_page_load(url: str, seconds: float, breakdown: dict = None) -> None:
         detail = (f" (servidor {breakdown['servidor']:.1f} s · página {breakdown['pagina']:.1f} s · "
                   f"archivos {breakdown['archivos']:.1f} s; {breakdown['recursos']} archivos, "
                   f"{breakdown['desde_cache']} desde caché, {breakdown['kb']} KB descargados)")
+        phases = breakdown.get("fases")
+        if phases:
+            detail += " | fases: " + " · ".join(f"{_PHASE_NAMES[k]} {phases[k]:.1f} s" for k in _PHASE_NAMES if k in phases)
+        slow = breakdown.get("lentos")
+        if slow:
+            detail += " | más lentos: " + "; ".join(_slow_file(r) for r in slow)
     else:
         detail = ""
     logging.getLogger("tiempos").debug(f"Página cargada en {seconds:.1f} s{detail}: {url}")
@@ -119,6 +125,37 @@ def record_page_load(url: str, seconds: float, breakdown: dict = None) -> None:
 def _duration(seconds: float) -> str:
     minutes = seconds / 60
     return f"{minutes:.0f} min" if minutes >= 1 else f"{seconds:.0f} s"
+
+
+_PHASE_NAMES = {"procesar": "procesar HTML", "scripts": "ejecutar scripts",
+                "esperando": "esperando archivos", "al_cargar": "scripts al cargar"}
+
+
+def _slow_file(r: dict) -> str:
+    where = "caché" if r.get("cache") else (r.get("servidor") or "?")
+    return f"{r.get('archivo') or '?'} {r.get('s', 0):.1f} s ({where})"
+
+
+def page_phase_split(breakdowns: list):
+    """
+    "Después de recibir la página: 60 % ejecutar scripts · 30 % esperando
+    archivos…" plus the files that were slowest most often, or None. Mostly
+    scripts/processing = the droplet's CPU; mostly waiting = a slow file.
+    """
+    phases = [b["fases"] for b in breakdowns if b.get("fases")]
+    total = sum(sum(p.values()) for p in phases)
+    if not phases or total <= 0:
+        return None
+    pct = " · ".join(f"{round(100 * sum(p.get(k, 0) for p in phases) / total)} % {name}"
+                     for k, name in _PHASE_NAMES.items())
+    worst = {}
+    for b in breakdowns:
+        for r in b.get("lentos") or []:
+            key = (r.get("archivo") or "?", r.get("servidor") or "")
+            worst[key] = worst.get(key, 0) + r.get("s", 0)
+    top = sorted(worst.items(), key=lambda kv: kv[1], reverse=True)[:3]
+    files = "; ".join(f"{name} ({host or 'mismo sitio'}) {secs:.0f} s en total" for (name, host), secs in top)
+    return f"Después de recibir la página: {pct}" + (f" · archivos más lentos: {files}" if files else "")
 
 
 def page_time_split(breakdowns: list):
@@ -148,6 +185,9 @@ def summary_lines() -> list:
         split = page_time_split(_page_breakdowns)
         if split:
             lines.append(split)
+        phases = page_phase_split(_page_breakdowns)
+        if phases:
+            lines.append(phases)
         slowest = sorted(_page_loads, reverse=True)[:5]
         logging.getLogger("tiempos").debug("Páginas más lentas: " + "; ".join(f"{s:.0f} s {u}" for s, u in slowest))
     return lines
