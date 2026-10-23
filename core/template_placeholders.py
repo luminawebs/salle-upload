@@ -40,6 +40,16 @@ TEMPLATE_PLACEHOLDERS = [
         "donde": "Opciones de la pregunta de ejemplo.",
     },
     {
+        "texto": "Ejemplo estructura del glosario",
+        "patron": r"EJEMPLO ESTRUCTURA DEL GLOSARIO",
+        "donde": "Título del ejemplo del glosario «(OPCIONAL) Glosario».",
+    },
+    {
+        "texto": "1. Término: Definición",
+        "patron": r"(^|\s)(\d+\.\s*)?TERMINO\s*:\s*DEFINICION\b|^\s*(\d+\.\s*)?TERMINO\s*:?\s*$",
+        "donde": "Entrada de ejemplo del glosario: va un término real y su definición.",
+    },
+    {
         "texto": "(incluir respuesta)",
         "patron": r"\(\s*INCLUIR RESPUESTA\s*\)",
         "donde": "Pregunta de completar de ejemplo: va la respuesta real.",

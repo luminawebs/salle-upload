@@ -843,6 +843,33 @@ class WordNumberingTests(unittest.TestCase):
         self.assertIn("<![CDATA[<p>¿Capital?</p>]]>", question_handler(q, 1)[0].to_moodle_xml())
 
 
+class GlossaryTests(unittest.TestCase):
+    """Glossary terms read from the document (core/data_parser.py, glosario_import.xml)."""
+
+    UNIT = [_row("UNIDAD DIDÁCTICA 1. Intro"), _row("Resumen", "Texto.")]
+
+    def test_terms_in_the_rows_after_the_heading_up_to_the_references(self):
+        html = _doc(*self.UNIT, _row("Glosario"),
+                    "<tr><td><p><strong>Abducción:</strong> Movimiento hacia afuera.</p>"
+                    "<p><strong>Acomodación:</strong> Cambio de potencia.</p>"
+                    "<p>Referencias de glosario</p><p>AAO (2022). Section 6: Pediatric.</p></td></tr>")
+        self.assertEqual(_review_html(html, "_test_glossary_rows")["glosario"], {"encontrado": True, "entradas": 2})
+
+    def test_optional_glossary_after_the_last_activity_is_not_part_of_it(self):
+        html = _doc(*self.UNIT, _row("ACTIVIDAD 5. Auditoría"), *ACTIVITY_BODY,
+                    _row("(OPCIONAL) Glosario"), "<tr><td><p><strong>Apego:</strong> Vínculo afectivo.</p></td></tr>")
+        report = _review_html(html, "_test_glossary_after_activity")
+        self.assertEqual(report["glosario"], {"encontrado": True, "entradas": 1})
+        self.assertNotIn("contenido_sin_asignar", {p["tipo"] for p in report["cobertura"]["problemas"]})
+        self.assertIn("glosario", [b["tipo"] for b in report["cobertura"]["bloques"]])
+
+    def test_unfilled_template_glossary_is_not_imported(self):
+        html = _doc(*self.UNIT, _row("(OPCIONAL) Glosario"),
+                    _row("Incluya un glosario general para el curso. Ejemplo estructura del glosario"),
+                    "<tr><td><p>1. Término:</p><p>Definición</p></td></tr>")
+        self.assertEqual(_review_html(html, "_test_glossary_template")["glosario"], {"encontrado": False, "entradas": 0})
+
+
 class MoodleActivityLookupTests(unittest.TestCase):
     """Which activity on the course page each step writes to (course 71329's run)."""
 

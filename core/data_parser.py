@@ -179,6 +179,23 @@ def detect_activity_type(text_upper: str) -> str:
     return "Desconocido"
 
 
+def _glossary_texts(rows) -> list:
+    """The "Concepto: definición" candidates in these rows, in order, up to "Referencias…"."""
+    texts = []
+    for row in rows:
+        if not row.find_all(['td', 'th']):
+            continue
+        items = row.find_all('li') or row.find_all('p')
+        parts = [el.get_text().strip() for el in items] if len(items) > 1 else [row.get_text().strip()]
+        from core.template_placeholders import find_placeholders
+        for text in parts:
+            if re.match(r'^\s*REFERENCIAS', text.upper()):
+                return texts
+            if not find_placeholders(text):  # the template's "1. Término: Definición"
+                texts.append(text)
+    return texts
+
+
 def top_level_rows(soup) -> list:
     """
     The table rows the splitter walks, in document order: rows of tables that
@@ -346,32 +363,33 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                 ET.SubElement(info, "NAME").text = "Glosario"
                 ET.SubElement(info, "INTRO").text = ""
                 entries = ET.SubElement(info, "ENTRIES")
-                
-                entry_texts = []
-                lis = table.find_all('li')
-                if lis:
-                    for li in lis:
-                        entry_texts.append(li.get_text().strip())
-                else:
-                    for row in table.find_all('tr'):
-                        cells = row.find_all('td')
-                        if not cells: continue
-                        ps = row.find_all('p')
-                        if len(ps) > 1:
-                            for par in ps:
-                                entry_texts.append(par.get_text().strip())
-                        else:
-                            entry_texts.append(row.get_text().strip())
-                            
+
+                # The terms are in the rows after the "Glosario" heading row
+                # of its own table (they used to be looked for only in the
+                # next table, which made an empty glossary), else in the next
+                # table; up to "Referencias de glosario", whose citations
+                # ("Section 6: Pediatric…") aren't terms.
+                heading_row = p if p.name == 'tr' else p.find_parent('tr')
+                entry_texts = _glossary_texts(heading_row.find_next_siblings('tr')) if heading_row else []
+                if not entry_texts:
+                    next_table = (heading_row or p).find_next('table')
+                    entry_texts = _glossary_texts(next_table.find_all('tr') if next_table else [])
+
                 for text in entry_texts:
                     if ":" in text:
                         concept, definition = text.split(":", 1)
-                        if len(concept.strip()) < 100 and len(concept.strip()) > 0:
+                        if 0 < len(concept.strip()) < 100 and definition.strip():
                             entry = ET.SubElement(entries, "ENTRY")
                             ET.SubElement(entry, "CONCEPT").text = concept.strip()
                             ET.SubElement(entry, "DEFINITION").text = definition.strip()
                             ET.SubElement(entry, "FORMAT").text = "1"
                         
+                if not len(entries):
+                    # An unfilled "(OPCIONAL) Glosario" section, or terms in a
+                    # layout not read: no file, so no empty glossary is created.
+                    logger.info("  Glosario sin términos «Concepto: definición»: no se importará.")
+                    break
+
                 # Format XML
                 xml_str = ET.tostring(glosario_root, 'utf-8')
                 reparsed = minidom.parseString(xml_str)
@@ -444,6 +462,8 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
                         next_text.startswith("PROYECTO DE CLASE"),
                         next_text.startswith("ENCUENTRO VIRTUAL"),
                         next_text.startswith("GLOSARIO"),
+                        # The template's "(OPCIONAL) Glosario" was glued to the last activity.
+                        re.match(r'^\(?\s*OPCIONAL\s*\)?\s*GLOSARIO', next_text),
                         # "FORO 2. …" is another activity-like block, not part
                         # of this one: without this it was swallowed whole into
                         # the previous activity. It's reported in the review as

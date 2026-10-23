@@ -44,6 +44,7 @@ PREAMBLE_MARKERS = {
     "INFORMACION GENERAL": "informacion_general",
     "PLAN DE FORMACION": "plan_formacion",
     "GLOSARIO": "glosario",
+    "(OPCIONAL) GLOSARIO": "glosario",
 }
 
 # Rows every unit has between its heading and its activities. Resumen and
@@ -117,6 +118,10 @@ def _preamble_labels(trs, roles) -> list:
             mode = None
             continue
         norm = _norm(_row_text(tr))
+        if mode == "glosario" and norm.startswith("ACTIVIDAD"):
+            # e.g. the template's "Actividad #. Evaluación final" right after
+            # the glossary, in its table: reported on its own, not hidden in it.
+            mode = None
         for marker, label in PREAMBLE_MARKERS.items():
             if norm.startswith(marker):
                 mode = label
