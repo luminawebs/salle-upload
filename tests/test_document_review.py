@@ -1061,6 +1061,19 @@ class MoodleActivityLookupTests(unittest.TestCase):
         self.assertFalse(materials_already_added("Lecturas complementarias unidad 12", 1))
         self.assertFalse(materials_already_added("UNIDAD 3. Cierre\nACTIVIDAD 5", 3))
 
+    def test_second_activity_readings_are_all_merged(self):
+        import tempfile
+        from core.data_parser import merge_material_de_referencia
+        with tempfile.TemporaryDirectory() as tmp:
+            merge_material_de_referencia("<p><strong>Lecturas complementarias</strong></p><p>Autor A (2019).</p>", 3, tmp, "5")
+            merge_material_de_referencia("<p><strong>Lecturas complementarias</strong></p><p>Autor B (2020).</p>"
+                                         "<p>Autor C (2012).</p><p>Autor D (2015).</p><p>Autor E (2018).</p>", 3, tmp, "6")
+            with open(os.path.join(tmp, "Material_de_referencia_U3.html"), encoding="utf-8") as f:
+                merged = f.read()
+        for author in "ABCDE":
+            self.assertIn(f"Autor {author}", merged)
+        self.assertEqual(merged.count("Lecturas complementarias"), 1)
+
     def test_lecturas_page_has_one_title(self):
         from actions.materiales_estudio_actions import lecturas_page_body
         body = lecturas_page_body("<p><strong>Lecturas complementarias</strong></p><p>Básica:</p><ol><li>Autor (2020).</li></ol>")

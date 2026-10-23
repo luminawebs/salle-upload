@@ -334,8 +334,11 @@ def merge_material_de_referencia(act_html: str, current_unit: int, material_dir:
                     for li in new_list.find_all('li', recursive=False):
                         existing_list.append(li)
             else:
-                # If we couldn't find lists to merge, just append non-header elements
-                for tag in new_soup.contents:
+                # If we couldn't find lists to merge, just append non-header elements.
+                # Over a copy: append() moves the tag out of new_soup.contents,
+                # and iterating the live list skipped every other paragraph
+                # (half the readings of a unit's 2nd+ activity were lost).
+                for tag in list(new_soup.contents):
                     if tag.name and tag.name.lower() in ['p', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'span', 'div']:
                         normalized_text = " ".join(tag.get_text().lower().split())
                         if any(kw in normalized_text for kw in ['lecturas complementarias', 'material de referencia', 'lecturas de referencia']) and len(normalized_text) < 100:
