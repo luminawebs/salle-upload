@@ -10,7 +10,7 @@ from actions.format_actions import set_buttons_format
 from actions.course_format_initial_actions import set_custom_sections_format
 from actions.course_format_final_actions import set_final_buttons_format
 from actions.section_actions import enable_edit_mode
-from actions.docx_upload_actions import run_docx_upload_workflow
+from actions.docx_upload_actions import run_docx_upload_workflow, disable_multimedia_filter_for_course
 from actions.cuestionario_export_actions import run_cuestionario_export_workflow
 from actions.unidades_intro_actions import upload_unidades_intro_for_course
 from actions.docx_rubrica_actions import run_docx_rubrica_upload_workflow
@@ -49,6 +49,18 @@ def _enabled_steps() -> list:
     if getattr(Config, "ENABLE_COURSE_FORMAT_CHANGE", False) or getattr(Config, "ENABLE_FINAL_COURSE_FORMAT_BUTTONS", False):
         steps.append("formato_final")
     return steps
+
+
+def _multimedia_off_for_course(driver, course_id, done: dict) -> bool:
+    """
+    'Complementos multimedia' set to 'Desconectado' for the whole course, once
+    per course: by the first step that uploads content with links (activity
+    descriptions, else the Lecturas complementarias pages). False when it
+    couldn't be done: those steps then turn it off per activity / per page.
+    """
+    if course_id not in done:
+        done[course_id] = disable_multimedia_filter_for_course(driver, course_id, Config.EXPLICIT_WAIT_TIME)
+    return done[course_id]
 
 
 def run_workflow_safely(driver, course_id, moodle, workflow_name, workflow_func, *args, **kwargs):
@@ -104,6 +116,7 @@ def main():
     # nothing else ever adds them up. See core/run_summary.py.
     issue_tracker = RunIssueTracker()
     logging.getLogger().addHandler(issue_tracker)
+    multimedia_off = {}  # course_id -> filter off at course level (see _multimedia_off_for_course)
 
     try:
         # Pass the initialized driver into our action class
@@ -261,7 +274,9 @@ def main():
                     progress.step("descripciones")
                     logger.debug("Executing DOCX HTML upload workflow...")
                     try:
-                        run_docx_upload_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        course_level = _multimedia_off_for_course(driver, course_id, multimedia_off)
+                        run_docx_upload_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10),
+                                                 per_activity_filter=not course_level)
                         capture_debug_state(driver, course_id, 'docx_upload', is_error=False)
                     except Exception as e:
                         import traceback
@@ -283,7 +298,10 @@ def main():
                     progress.step("materiales")
                     logger.debug("Executing Materiales de Estudio workflow...")
                     try:
-                        run_materiales_estudio_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10))
+                        per_page_filter = (getattr(Config, "ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD", True)
+                                           and not _multimedia_off_for_course(driver, course_id, multimedia_off))
+                        run_materiales_estudio_workflow(driver, course_id, wait_time=getattr(Config, "EXPLICIT_WAIT_TIME", 10),
+                                                        per_page_filter=per_page_filter)
                         capture_debug_state(driver, course_id, 'materiales_estudio', is_error=False)
                     except Exception as e:
                         import traceback

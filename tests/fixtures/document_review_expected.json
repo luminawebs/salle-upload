@@ -249,22 +249,24 @@
  },
  "v11/Guia_DTP-DESARROLLO_INTEGRAL_DEL_NINŽO-2023 MCM_60_.docx": {
   "bloqueantes": [
-   "contenido_sin_asignar:617400050d"
+   "preguntas_sin_calificar:a6"
   ],
   "fragmentos": {
    "actividades/actividad1.html": "69296c5b15d8816f",
    "actividades/actividad2.html": "9523e0357047d288",
    "actividades/actividad3.html": "919195c7cd7cea28",
-   "actividades/actividad4.html": "22666051a261acd9",
+   "actividades/actividad4.html": "6f81364bc1930ff3",
    "actividades/actividad5.html": "16df24e86e0e865d",
+   "actividades/actividad6.html": "44129e6478e5f6fd",
    "glosario/glosario_import.xml": "b0f7ae7de144c743",
    "introduccion/introduccion_general.html": "6cea68277fe120a2",
    "material/Material_de_referencia_U1.html": "c92bf2bb4d974dfa",
    "material/Material_de_referencia_U2.html": "8d5344e8ae9750ce",
-   "material/Material_de_referencia_U3.html": "de853ff50f0a1df6"
+   "material/Material_de_referencia_U3.html": "d5f479a3d0cf66a9"
   },
   "problemas": [
-   "contenido_sin_asignar:617400050d"
+   "actividad_fuera_del_plan:a6",
+   "preguntas_sin_calificar:a6"
   ],
   "unidades": {
    "1": {
@@ -276,7 +278,8 @@
    },
    "3": {
     "4": "Tarea",
-    "5": "Tarea"
+    "5": "Tarea",
+    "6": "Cuestionario"
    }
   }
  },

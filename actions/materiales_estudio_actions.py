@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from actions.moodle_actions import navigate_to_course
 from config.settings import Config
 from core.wysiwyg_handler import inject_html_into_wysiwyg
+from actions.docx_upload_actions import disable_multimedia_filter_for_activity
 from actions.html_transformer import format_urls_in_html, format_typography_in_html
 
 from core import progress
@@ -226,7 +227,12 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
     progress.ok(f"Materiales de estudio agregados: Unidad {unidad_num}")
     return True
 
-def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
+def run_materiales_estudio_workflow(driver, course_id, wait_time=10, per_page_filter=False):
+    """
+    per_page_filter True: 'Complementos multimedia' could not be turned off for
+    the whole course, so each 'Lecturas complementarias unidad N' page gets it
+    off on its own (as the activities do), keeping its links plain.
+    """
     logger.info(f"Starting Materiales de Estudio workflow for course {course_id}")
     
     # Ensure we are on the course homepage
@@ -284,7 +290,9 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10):
             logger.info(f"Successfully added Etiqueta. Now adding 'Página' for Unidad {unidad_num}...")
             
             if getattr(Config, "ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD", True):
-                add_pagina_materiales(driver, target_section, course_id, unidad_num, wait_time)
+                added = add_pagina_materiales(driver, target_section, course_id, unidad_num, wait_time)
+                if added and per_page_filter:
+                    disable_multimedia_filter_for_activity(driver, f"Lecturas complementarias unidad {unidad_num}", wait_time)
                 time.sleep(2)
             else:
                 logger.info("Skipping 'Página' (Lecturas complementarias) because ENABLE_LECTURAS_COMPLEMENTARIAS_UPLOAD is False.")

@@ -384,11 +384,110 @@ def disable_multimedia_filter_for_activity(driver, activity_name_prefix, wait_ti
         logger.error(f"Failed to disable multimedia filter for '{activity_name_prefix}': {e}")
         return False
 
-def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix: str, wait_time: int, activity_type: str = None):
+_MEDIA_SELECT_CSS = "select[name='mediaplugin'], select.menumediaplugin, #menumediaplugin"
+_FILTER_SAVE_XPATH = "//input[@name='savechanges' or contains(translate(@value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'guardar') or contains(translate(@value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'save')]"
+_CONTEXT_ID_JS = "return (window.M && M.cfg && M.cfg.contextid) || null;"
+# Picks "Desconectado" (-1); false when the select has no such option.
+_SELECT_OFF_JS = (
+    "var s = arguments[0];"
+    "for (var i = 0; i < s.options.length; i++) {"
+    "  if (s.options[i].value === '-1') {"
+    "    s.value = '-1'; s.dispatchEvent(new Event('change', {bubbles: true})); return true;"
+    "  }"
+    "}"
+    "return false;"
+)
+_CLICK_JS = "arguments[0].click();"
+
+
+def _course_context_id(driver):
+    """The course's context id, from the course page (M.cfg, else its 'Más > Filtros' link)."""
+    try:
+        context_id = driver.execute_script(_CONTEXT_ID_JS)
+    except Exception:
+        context_id = None
+    if context_id:
+        return str(context_id)
+    for link in driver.find_elements(By.CSS_SELECTOR, "a[href*='filter/manage.php']"):
+        found = re.search(r"contextid=(\d+)", link.get_attribute("href") or "")
+        if found:
+            return found.group(1)
+    return None
+
+
+def _media_filter_select(driver, wait):
+    """The 'Complementos multimedia' select on a filters page, or None."""
+    try:
+        return wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, _MEDIA_SELECT_CSS)))
+    except TimeoutException:
+        return None
+
+
+def disable_multimedia_filter_for_course(driver, course_id, wait_time):
+    """
+    Sets 'Complementos multimedia' to 'Desconectado' once for the whole course
+    (course 'Más > Filtros'), so every activity and page in it inherits it —
+    instead of once per activity. Saves, reloads the page and only returns
+    True when the select reads 'Desconectado' again. False (with a warning)
+    when it can't be done, e.g. the filter is locked or off at site level:
+    the caller then disables it per activity, as before.
+    """
+    wait = WebDriverWait(driver, wait_time)
+
+    def failed(reason):
+        logger.warning(
+            f"No se pudo desconectar 'Complementos multimedia' a nivel de curso ({reason}). "
+            "Se desconectará en cada actividad y en cada página de Lecturas complementarias."
+        )
+        return False
+
+    try:
+        if not navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time):
+            return failed("no se pudo abrir el curso")
+        context_id = _course_context_id(driver)
+        if not context_id:
+            return failed("no se encontró el contexto del curso")
+        filters_url = f"{Config.MOODLE_URL.rstrip('/')}/filter/manage.php?contextid={context_id}"
+        logger.info(f"Abriendo los filtros del curso: {filters_url}")
+
+        driver.get(filters_url)
+        select_el = _media_filter_select(driver, wait)
+        if select_el is None:
+            return failed("la fila 'Complementos multimedia' no aparece en Filtros; puede estar bloqueada o apagada para todo el sitio")
+        if not select_el.is_enabled():
+            return failed("la opción 'Complementos multimedia' está bloqueada")
+        if not driver.execute_script(_SELECT_OFF_JS, select_el):
+            return failed("la opción 'Desconectado' no está disponible")
+
+        save_btn = wait.until(EC.presence_of_element_located((By.XPATH, _FILTER_SAVE_XPATH)))
+        driver.execute_script(_CLICK_JS, save_btn)
+        try:
+            wait.until(EC.staleness_of(save_btn))
+        except TimeoutException:
+            pass
+        time.sleep(1)
+
+        # Verify: reload and read the saved value back.
+        driver.get(filters_url)
+        select_el = _media_filter_select(driver, wait)
+        value = select_el.get_attribute("value") if select_el is not None else None
+        if value != "-1":
+            return failed(f"después de guardar, el valor no quedó en 'Desconectado' (valor leído: {value!r})")
+
+        logger.info("Complementos multimedia desconectado a nivel de curso (verificado tras recargar).")
+        progress.ok("Complementos multimedia desconectados en todo el curso")
+        return True
+    except Exception as e:
+        return failed(f"error: {e}")
+
+
+def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix: str, wait_time: int, activity_type: str = None,
+                             disable_filter: bool = True):
     """
     Uploads one activity fragment (an HTML file written by the splitter) into
     the description of the Moodle activity whose name matches activity_prefix,
-    then sets forum completion and disables the multimedia filter.
+    then sets forum completion and disables the multimedia filter (unless
+    disable_filter is False: the course already has it off).
 
     activity_type ("Cuestionario", "Tarea", …): read from the fragment's own
     "Herramientas … marque con una X" row when not given. For a Cuestionario
@@ -491,7 +590,8 @@ def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix:
                 progress.ok(f"Descripción subida: {activity_prefix}")
                 
                 # Navigate to filters and configure (it will do this inside the new tab!)
-                disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)
+                if disable_filter:
+                    disable_multimedia_filter_for_activity(driver, activity_prefix, wait_time)
             else:
                 logger.error(f"Failed to inject {filename}")
             time.sleep(2)
@@ -500,7 +600,8 @@ def upload_activity_fragment(driver, course_id, file_path: str, activity_prefix:
             driver.switch_to.window(original_window)
 
 
-def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
+def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10, per_activity_filter: bool = True):
+    """per_activity_filter False: the course already has 'Complementos multimedia' off (see disable_multimedia_filter_for_course)."""
     base_dir = os.path.join("workspace", str(course_id))
     actividades_dir = os.path.join(base_dir, "actividades")
     material_dir = os.path.join(base_dir, "material")
@@ -548,7 +649,8 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
                     activity_prefix = f"ACTIVIDAD {act_num}"
                     logger.info(f"Uploading {filename} to {activity_prefix}...")
                     
-                    upload_activity_fragment(driver, course_id, os.path.join(actividades_dir, filename), activity_prefix, wait_time)
+                    upload_activity_fragment(driver, course_id, os.path.join(actividades_dir, filename), activity_prefix, wait_time,
+                                             disable_filter=per_activity_filter)
 
     # Activities the user added in the review panel: matched by their name
     # (the document heading the structure step created them with).
@@ -556,5 +658,5 @@ def run_docx_upload_workflow(driver, course_id: int, wait_time: int = 10):
     for extra in get_extra_activities(course_id):
         logger.info(f"Uploading {extra['archivo']} to '{extra['nombre']}' (añadida en la revisión)...")
         upload_activity_fragment(driver, course_id, os.path.join(base_dir, EXTRA_DIR, extra["archivo"]), extra["nombre"], wait_time,
-                                 activity_type=extra["tipo"])
+                                 activity_type=extra["tipo"], disable_filter=per_activity_filter)
 
