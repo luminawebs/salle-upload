@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 import os
 from selenium.webdriver.common.by import By
@@ -227,6 +228,12 @@ def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_t
     progress.ok(f"Materiales de estudio agregados: Unidad {unidad_num}")
     return True
 
+def materials_already_added(section_text: str, unidad_num: int) -> bool:
+    """True if the unit's section already shows its "Lecturas complementarias unidad N" page."""
+    pattern = rf"lecturas\s+complementarias\s+unidad\s+{unidad_num}(?!\d)"
+    return re.search(pattern, " ".join((section_text or "").split()).lower()) is not None
+
+
 def run_materiales_estudio_workflow(driver, course_id, wait_time=10, per_page_filter=False):
     """
     per_page_filter True: 'Complementos multimedia' could not be turned off for
@@ -270,6 +277,14 @@ def run_materiales_estudio_workflow(driver, course_id, wait_time=10, per_page_fi
                     logger.info(f"No hay sección 'UNIDAD {unidad_num}': materiales agregados a las {unidad_num - 1} unidades.")
                 break
                 
+            if materials_already_added(target_section.text, unidad_num):
+                # A repeated run (e.g. to redo only the quiz) added the label
+                # and the page a second time.
+                logger.info(f"Unidad {unidad_num}: ya tiene «Lecturas complementarias unidad {unidad_num}»; no se agregan de nuevo.")
+                progress.info(f"Materiales de estudio ya presentes: Unidad {unidad_num}")
+                unidad_num += 1
+                continue
+
             logger.info(f"Successfully found section for Unidad {unidad_num}. Adding 'Área de texto y medios' (Etiqueta)...")
             add_etiqueta_materiales(driver, target_section, wait_time)
             time.sleep(2)

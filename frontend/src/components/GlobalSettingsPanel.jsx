@@ -21,8 +21,12 @@ export const CATEGORIES = [
     flags: [
       { key: 'ENABLE_COURSE_FORMAT_CHANGE', label: 'Cambiar a formato Secciones (Temporal)' },
       { key: 'ENABLE_COURSE_STRUCTURE_CREATION', label: 'Crear Estructura de Secciones' },
+      // These two had no switch: they always ran, so a run of a single step
+      // (e.g. the quiz) added the study materials again.
+      { key: 'ENABLE_GENERALIDADES_ACCORDION_UPLOAD', label: 'Subir Presentación del Curso (Generalidades)' },
       { key: 'ENABLE_UNIDADES_INTRO_UPLOAD', label: 'Subir Introducciones' },
       { key: 'ENABLE_DOCX_UPLOAD_HTML', label: 'Subir Recursos HTML (Actividades)' },
+      { key: 'ENABLE_MATERIALES_ESTUDIO_EXPORT', label: 'Agregar Materiales de Estudio (Lecturas complementarias)' },
       { key: 'ENABLE_GLOSARIO_UPLOAD', label: 'Crear Glosario y Subir Entradas' },
     ]
   },

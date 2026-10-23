@@ -51,6 +51,12 @@ def get_settings():
                 if line and not line.startswith("#") and "=" in line:
                     k, v = line.split("=", 1)
                     settings[k] = v
+    # A step switch missing from .env runs with its default (config/settings.py,
+    # usually on): show that, not an unchecked box for a step that will run.
+    from config.settings import Config
+    for key in dir(Config):
+        if key.startswith("ENABLE_") and key not in settings and isinstance(getattr(Config, key), bool):
+            settings[key] = "True" if getattr(Config, key) else "False"
     return settings
 
 @app.post("/api/settings")

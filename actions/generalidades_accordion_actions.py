@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 def run_generalidades_accordion_upload_workflow(driver, course_id, wait_time=10):
     logger.info("Executing Generalidades Accordion Upload workflow...")
     
-    # 1. Find the "Introducción General" label and edit it
+    # 1. Find the "Introducción General" label and edit it — on the course page:
+    # this step used to rely on the structure step having left the browser
+    # there, and failed when that step was switched off.
+    from actions.moodle_actions import navigate_to_course
+    from config.settings import Config
+    navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
     edit_url = get_edit_url_for_introduccion_general(driver, wait_time)
     if not edit_url:
         logger.error("Could not find 'Introducción General' activity to upload accordion.")

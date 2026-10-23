@@ -1031,6 +1031,14 @@ class MoodleActivityLookupTests(unittest.TestCase):
         remove_skipped_activities(sections, {"6"})
         self.assertEqual([a["name"] for a in sections[0]["activities"]], ["ACTIVIDAD 5: Razonamiento"])
 
+    def test_materials_are_not_added_twice(self):
+        from actions.materiales_estudio_actions import materials_already_added
+        section = "UNIDAD 2. Cierre\nMaterial de estudio\nLecturas complementarias unidad 2\nPágina"
+        self.assertTrue(materials_already_added(section, 2))
+        self.assertFalse(materials_already_added(section, 1))
+        self.assertFalse(materials_already_added("Lecturas complementarias unidad 12", 1))
+        self.assertFalse(materials_already_added("UNIDAD 3. Cierre\nACTIVIDAD 5", 3))
+
     def test_lecturas_page_has_one_title(self):
         from actions.materiales_estudio_actions import lecturas_page_body
         body = lecturas_page_body("<p><strong>Lecturas complementarias</strong></p><p>Básica:</p><ol><li>Autor (2020).</li></ol>")
