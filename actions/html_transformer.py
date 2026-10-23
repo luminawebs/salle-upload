@@ -1099,17 +1099,24 @@ def _style_evaluation_table(soup, table) -> None:
                                 t_node.replace_with("Total")
 
 
+# An activity title as its first paragraph: "ACTIVIDAD 1. …", "ACTIVIDAD #3", "ACTIVIDAD II:"
+_ACTIVITY_TITLE_RE = re.compile(r'^ACTIVIDAD\s*(\d+|#\s*\d*|[IVXLC]+)\b')
+
+
 def transform_activity_html(html_content: str, course_id: int = None) -> str:
     if not html_content or not html_content.strip():
         return html_content
         
     soup = BeautifulSoup(html_content, 'html.parser')
     
-    # 1. Remove the first paragraph that contains the Activity Title
+    # 1. Remove the activity's title, if it's still there (the splitter already
+    # removes it). Only a paragraph that STARTS like a title: "the first one
+    # mentioning «actividad» with a colon" deleted real content in 90 of 156
+    # test activities ("A través de esta actividad … los siguientes materiales:").
     for p in soup.find_all("p"):
-        if "ACTIVIDAD" in p.get_text().upper() and ":" in p.get_text():
+        if _ACTIVITY_TITLE_RE.match(p.get_text().strip().upper()):
             p.decompose()
-            break
+        break
             
     # 2. Replace headings with images
     heading_map = {

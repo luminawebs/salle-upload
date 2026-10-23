@@ -607,6 +607,18 @@ class TemplateVariantTests(unittest.TestCase):
                 f"<tr><td>{total}</td><td>5</td></tr></table>", "html.parser").table
             self.assertEqual([c["name"] for c in criteria_from_table(table)], ["Presenta las tablas totales"], total)
 
+    def test_intro_sentence_mentioning_the_activity_is_kept(self):
+        """Step 1 used to delete the first paragraph with «actividad» and «:», i.e. real content."""
+        from actions.html_transformer import transform_activity_html
+        html = ("<p>¿Cómo lo vamos a lograr?</p><p>Apreciado estudiante,</p>"
+                "<p>A través de esta actividad de manera individual vamos a generar una matriz. Revisa los siguientes materiales:</p>"
+                "<ul><li>Los elementos del encuentro virtual 1 y 2</li></ul>")
+        self.assertIn("A través de esta actividad", transform_activity_html(html))
+        titled = "<p>ACTIVIDAD 1. Taller de análisis</p><p>Apreciado estudiante,</p>"
+        out = transform_activity_html(titled)
+        self.assertNotIn("Taller de análisis", out)
+        self.assertIn("Apreciado estudiante", out)
+
     def test_evaluation_table_styled_by_its_columns(self):
         from actions.html_transformer import transform_activity_html
         html = ("<table><tr><td><p>Criterios</p></td><td><p>Descripción</p></td><td><p>Puntaje</p></td></tr>"
