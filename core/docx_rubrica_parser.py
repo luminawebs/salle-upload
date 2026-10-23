@@ -166,6 +166,9 @@ def _pick_rubric_table(tables):
     return tables[-1]
 
 
+_TOTAL_ROW_RE = re.compile(r'^\W*(la\s+)?(suma\s+)?total\b', re.IGNORECASE)
+
+
 def criteria_from_table(table) -> list:
     """The criteria of one 'Criterios de desempeño | Puntos' table (header row skipped)."""
     criteria_list = []
@@ -193,7 +196,9 @@ def criteria_from_table(table) -> list:
             criterio_text = cols[name_col].get_text(strip=True)
             puntos_text = cols[points_col].get_text(strip=True)
 
-            if "Total" in criterio_text or "suma total" in criterio_text.lower() or not criterio_text:
+            # The sum row ("Total", "TOTAL", "total", "La suma total debe dar")
+            # is not a criterion: as one it changed the rubric's maximum.
+            if not criterio_text or _TOTAL_ROW_RE.match(criterio_text) or "Total" in criterio_text:
                 continue
 
             scores = calculate_scores(puntos_text)

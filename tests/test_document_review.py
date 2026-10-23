@@ -598,6 +598,15 @@ class TemplateVariantTests(unittest.TestCase):
         self.assertEqual([c["name"] for c in criteria], ["Aplica las pruebas", "Organiza el producto"])
         self.assertEqual([c["scores"][0] for c in criteria], ["1", "2"])
 
+    def test_total_row_is_not_a_criterion_in_any_case(self):
+        from core.docx_rubrica_parser import criteria_from_table
+        for total in ("total", "TOTAL", "Total", "La suma total debe dar"):
+            table = BeautifulSoup(
+                "<table><tr><td>Criterios de desempeño</td><td>Puntos</td></tr>"
+                "<tr><td>Presenta las tablas totales</td><td>2</td></tr>"
+                f"<tr><td>{total}</td><td>5</td></tr></table>", "html.parser").table
+            self.assertEqual([c["name"] for c in criteria_from_table(table)], ["Presenta las tablas totales"], total)
+
     def test_rubric_in_the_next_table(self):
         from core.docx_rubrica_parser import parse_rubricas_from_html
         rubric = RubricChoiceTests._table([("A", "2.0"), ("B", "3.0")])
