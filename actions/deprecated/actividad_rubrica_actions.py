@@ -351,51 +351,133 @@ def _ensure_levels_for_criterion(driver, crit_idx: int, needed_levels: int, wait
         visible_levels = get_visible_levels(driver, crit_idx)
 
 
-def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_name: str = None):
+# Writes every rubric field in one browser round trip and fires the same
+# input/change/blur events the per-field method fires. Returns the labels of
+# the fields it could not find.
+_BATCH_FILL_JS = """
+var fields = arguments[0], missing = [];
+for (var i = 0; i < fields.length; i++) {
+    var f = fields[i];
+    var el = f.id ? document.getElementById(f.id) : document.getElementsByName(f.name)[0];
+    if (!el) { missing.push(f.label); continue; }
+    el.value = f.value;
+    ['input', 'change', 'blur'].forEach(function (t) {
+        el.dispatchEvent(new Event(t, { bubbles: true }));
+    });
+}
+return missing;
+"""
+
+# Reads every rubric field back from the DOM (null when a field is missing).
+_READ_BACK_JS = """
+return arguments[0].map(function (f) {
+    var el = f.id ? document.getElementById(f.id) : document.getElementsByName(f.name)[0];
+    return el ? el.value : null;
+});
+"""
+
+
+def _build_rubric_plan(driver, criteria_list: list[dict], wait_time: int) -> list[dict] | None:
     """
-    Fill the Moodle rubric editor form with the supplied criteria data.
-
-    Moodle's default rubric starts with 3 criteria.  We add rows as needed
-    to reach len(criteria_list).  Level count is assumed to already be 5
-    (matching the template defaults); we do NOT add/remove levels.
+    Give each criterion row exactly the levels it needs and return, per
+    criterion, its Moodle ids and the values it must end up with. None when a
+    row or level id cannot be read: such a rubric cannot be filled safely.
     """
-    
-    # ── Fill rubric name if provided and empty ────────────────────────────────
-    if rubric_name:
-        try:
-            name_input = driver.find_element(By.CSS_SELECTOR, "input[name='name'], #id_name")
-            if not name_input.get_attribute("value"):
-                logger.info(f"    Setting rubric name to: {rubric_name}")
-                name_input.clear()
-                name_input.send_keys(rubric_name)
-        except Exception as e:
-            logger.warning(f"    Could not set rubric name: {e}")
-
-    # ── Ensure correct number of criteria rows ────────────────────────────────
-    current_rows = _get_criteria_rows(driver)
-    needed = len(criteria_list)
-    
-    # Add if fewer
-    while len(current_rows) < needed:
-        logger.info(f"    Adding criterion row ({len(current_rows)} → {needed})")
-        _add_criterion(driver)
-        current_rows = _get_criteria_rows(driver)
-
-    # Delete if more
-    if len(current_rows) > needed:
-        _delete_extra_criteria(driver, needed, wait_time)
-
-    # ── Fill each criterion ───────────────────────────────────────────────────
+    plan = []
     for idx, crit in enumerate(criteria_list):
-        # Always re-fetch row to avoid stale element reference after DOM updates
+        needed_levels = len(crit["levels"])
+        _ensure_levels_for_criterion(driver, idx, needed_levels, wait_time)
+        row = _get_criteria_rows(driver)[idx]
+        _delete_extra_levels(driver, row, idx, needed_levels, wait_time)
+
+        # Re-fetch row after modifying levels
         row = _get_criteria_rows(driver)[idx]
         row_id = row.get_attribute("id") or ""
         crit_id_match = re.search(r"rubric-criteria-([a-zA-Z0-9_-]+)", row_id)
         if not crit_id_match:
-            logger.warning(f"    Could not extract criterion ID from row {idx} (ID: '{row_id}')")
-            continue
+            logger.error(f"    No se pudo leer el id del criterio {idx+1} (id de fila: '{row_id}')")
+            return None
         crit_id = crit_id_match.group(1)
-        logger.info(f"    Filling criterion {idx+1}: {crit['name'][:60]}")
+
+        all_level_tds = row.find_elements(By.CSS_SELECTOR, f"tr#rubric-criteria-{crit_id}-levels > td.level:not(.addlevel)")
+        level_tds = [td for td in all_level_tds if td.is_displayed()]
+        if len(level_tds) < needed_levels:
+            logger.error(f"    El criterio {idx+1} tiene {len(level_tds)} niveles visibles; se esperaban {needed_levels}")
+            return None
+        level_ids = []
+        for li, level_td in enumerate(level_tds[:needed_levels]):
+            lid_match = re.search(rf"rubric-criteria-{re.escape(crit_id)}-levels-([a-zA-Z0-9_-]+)", level_td.get_attribute("id") or "")
+            if not lid_match:
+                logger.error(f"    No se pudo leer el id del nivel {li+1} del criterio {idx+1}")
+                return None
+            level_ids.append(lid_match.group(1))
+
+        plan.append({
+            "crit_id": crit_id,
+            "level_ids": level_ids,
+            "name": crit["name"],
+            "levels": [crit["levels"][li] if li < len(crit["levels"]) else "" for li in range(needed_levels)],
+            "scores": [crit["scores"][li] if li < len(crit["scores"]) else "0" for li in range(needed_levels)],
+        })
+    return plan
+
+
+def _rubric_fields(plan: list[dict]) -> list[dict]:
+    """Every field of the rubric: the id (or name) Moodle gives it and its expected value."""
+    fields = []
+    for ci, p in enumerate(plan):
+        cid = p["crit_id"]
+        fields.append({"id": f"rubric-criteria-{cid}-description", "name": None,
+                       "label": f"criterio {ci+1}, descripción", "value": str(p["name"])})
+        for li, lid in enumerate(p["level_ids"]):
+            fields.append({"id": f"rubric-criteria-{cid}-levels-{lid}-definition", "name": None,
+                           "label": f"criterio {ci+1}, nivel {li+1}, texto", "value": str(p["levels"][li])})
+            fields.append({"id": None, "name": f"rubric[criteria][{cid}][levels][{lid}][score]",
+                           "label": f"criterio {ci+1}, nivel {li+1}, puntaje", "value": str(p["scores"][li])})
+    return fields
+
+
+def _normalize_field_value(value) -> str:
+    # A textarea reports its line breaks as \n whatever was written into it
+    return str(value).replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _first_rubric_mismatch(fields: list[dict], actual) -> str | None:
+    """The first field whose value in the editor differs from the expected one, as a Spanish message."""
+    if not isinstance(actual, list) or len(actual) != len(fields):
+        read = len(actual) if isinstance(actual, list) else 0
+        return f"se leyeron {read} campos de {len(fields)}"
+    for field, value in zip(fields, actual):
+        if value is None:
+            return f"{field['label']}: el campo no existe en el editor"
+        if _normalize_field_value(value) != _normalize_field_value(field["value"]):
+            return f"{field['label']}: se esperaba '{field['value'][:60]}' y el editor tiene '{str(value)[:60]}'"
+    return None
+
+
+def _verify_rubric(driver, plan: list[dict]) -> str | None:
+    """Read the rubric back from the editor: the first difference from the plan, or None when it matches."""
+    row_ids = [r.get_attribute("id") or "" for r in _get_criteria_rows(driver)]
+    expected_ids = [f"rubric-criteria-{p['crit_id']}" for p in plan]
+    if row_ids != expected_ids:
+        return f"el editor tiene {len(row_ids)} criterios y se esperaban {len(expected_ids)}"
+    fields = _rubric_fields(plan)
+    lookups = [{"id": f["id"], "name": f["name"]} for f in fields]
+    return _first_rubric_mismatch(fields, driver.execute_script(_READ_BACK_JS, lookups))
+
+
+def _fill_fields_in_batch(driver, plan: list[dict]):
+    """Write every field with one execute_script; raises when a field is missing."""
+    missing = driver.execute_script(_BATCH_FILL_JS, _rubric_fields(plan))
+    if missing:
+        raise RuntimeError(f"campos no encontrados: {', '.join(missing[:5])}")
+
+
+def _fill_fields_one_by_one(driver, plan: list[dict], wait_time: int):
+    """The original method: open each field in the editor and write it on its own."""
+    for idx, p in enumerate(plan):
+        crit_id = p["crit_id"]
+        logger.info(f"    Filling criterion {idx+1}: {p['name'][:60]}")
 
         # Description textarea
         try:
@@ -410,7 +492,7 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
             )
             _wait(driver, wait_time).until(EC.visibility_of(ta))
             # Use JS to set value to prevent newlines (\n) from triggering Moodle's 'Enter' save event
-            driver.execute_script("arguments[0].value = arguments[1];", ta, crit["name"])
+            driver.execute_script("arguments[0].value = arguments[1];", ta, p["name"])
             driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", ta)
             driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", ta)
             driver.execute_script("arguments[0].dispatchEvent(new Event('blur', { bubbles: true }));", ta)
@@ -418,35 +500,17 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
         except Exception as e:
             logger.warning(f"    Could not set criterion description: {e}")
 
-        # Levels
-        # Ensure the row has exactly the needed levels (add or delete as necessary)
-        needed_levels = len(crit["levels"])
-        _ensure_levels_for_criterion(driver, idx, needed_levels, wait_time)
-        
-        row = _get_criteria_rows(driver)[idx]
-        _delete_extra_levels(driver, row, idx, needed_levels, wait_time)
-        
-        # Re-fetch row after modifying levels
-        row = _get_criteria_rows(driver)[idx]
-        all_level_tds = row.find_elements(By.CSS_SELECTOR, f"tr#rubric-criteria-{crit_id}-levels > td.level:not(.addlevel)")
-        level_tds = [td for td in all_level_tds if td.is_displayed()]
-        
-        for li, level_td in enumerate(level_tds[:needed_levels]):
-            lid_match = re.search(rf"rubric-criteria-{re.escape(crit_id)}-levels-([a-zA-Z0-9_-]+)", level_td.get_attribute("id") or "")
-            if not lid_match:
-                logger.warning(f"    Could not extract level ID for level {li} on criterion {idx}")
-                continue
-            lid = lid_match.group(1)
-
+        for li, lid in enumerate(p["level_ids"]):
             # Level definition
             try:
+                level_td = driver.find_element(By.ID, f"rubric-criteria-{crit_id}-levels-{lid}")
                 def_plain = level_td.find_element(By.CSS_SELECTOR, "div.definition div.plainvalue")
                 _click_js(driver, def_plain)
                 time.sleep(0.3)
                 def_ta = driver.find_element(By.ID, f"rubric-criteria-{crit_id}-levels-{lid}-definition")
                 _wait(driver, wait_time).until(EC.visibility_of(def_ta))
-                
-                text = crit["levels"][li] if li < len(crit["levels"]) else ""
+
+                text = p["levels"][li]
                 driver.execute_script("arguments[0].value = arguments[1];", def_ta, text)
                 driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", def_ta)
                 driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", def_ta)
@@ -457,6 +521,7 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
 
             # Score
             try:
+                level_td = driver.find_element(By.ID, f"rubric-criteria-{crit_id}-levels-{lid}")
                 score_plain = level_td.find_element(By.CSS_SELECTOR, "div.score span.plainvalue")
                 _click_js(driver, score_plain)
                 time.sleep(0.3)
@@ -465,8 +530,8 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
                     f"input[name='rubric[criteria][{crit_id}][levels][{lid}][score]']"
                 )
                 _wait(driver, wait_time).until(EC.visibility_of(score_inp))
-                
-                score_text = crit["scores"][li] if li < len(crit["scores"]) else "0"
+
+                score_text = p["scores"][li]
                 driver.execute_script("arguments[0].value = arguments[1];", score_inp, score_text)
                 driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", score_inp)
                 driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", score_inp)
@@ -475,13 +540,87 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
             except Exception as e:
                 logger.warning(f"    Could not set level {li+1} score: {e}")
 
+
+def _fill_rubric_values(driver, plan: list[dict], wait_time: int, rubric_name: str = None) -> str | None:
+    """
+    Fill every field in one block and verify it; if the block fails or does
+    not verify, refill field by field and verify again. Returns the method
+    that produced a verified rubric, or None: then the rubric must not be saved.
+    """
+    label = f"Rúbrica '{' '.join((rubric_name or '').split())}'"
+    start = time.monotonic()
+    try:
+        _fill_fields_in_batch(driver, plan)
+        mismatch = _verify_rubric(driver, plan)
+    except Exception as e:
+        mismatch = f"el llenado en bloque falló: {e}"
+    if mismatch is None:
+        logger.info(f"    {label}: llenado en bloque en {time.monotonic() - start:.1f} s (verificado).")
+        return "bloque"
+
+    logger.warning(f"    {label}: el llenado en bloque no se verificó ({mismatch}); se usa el llenado campo por campo.")
+    start = time.monotonic()
+    try:
+        _fill_fields_one_by_one(driver, plan, wait_time)
+        mismatch = _verify_rubric(driver, plan)
+    except Exception as e:
+        mismatch = f"el llenado campo por campo falló: {e}"
+    if mismatch is None:
+        logger.info(f"    {label}: llenado campo por campo (respaldo) en {time.monotonic() - start:.1f} s (verificado).")
+        return "campo por campo"
+
+    logger.error(f"    ✗ {label}: no coincide con el documento tras el respaldo ({mismatch}). No se guarda.")
+    return None
+
+
+def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_name: str = None):
+    """
+    Fill the Moodle rubric editor form with the supplied criteria data and
+    save it, only once every field reads back as expected.
+
+    We add or delete criterion rows to reach len(criteria_list) and levels
+    to match each criterion, then write every value (in one block, or field
+    by field as a fallback).
+    """
+
+    # ── Fill rubric name if provided and empty ────────────────────────────────
+    if rubric_name:
+        try:
+            name_input = driver.find_element(By.CSS_SELECTOR, "input[name='name'], #id_name")
+            if not name_input.get_attribute("value"):
+                logger.info(f"    Setting rubric name to: {rubric_name}")
+                name_input.clear()
+                name_input.send_keys(rubric_name)
+        except Exception as e:
+            logger.warning(f"    Could not set rubric name: {e}")
+
+    # ── Ensure correct number of criteria rows ────────────────────────────────
+    current_rows = _get_criteria_rows(driver)
+    needed = len(criteria_list)
+
+    # Add if fewer
+    while len(current_rows) < needed:
+        logger.info(f"    Adding criterion row ({len(current_rows)} → {needed})")
+        _add_criterion(driver)
+        current_rows = _get_criteria_rows(driver)
+
+    # Delete if more
+    if len(current_rows) > needed:
+        _delete_extra_criteria(driver, needed, wait_time)
+
+    # ── Levels per criterion, then every value, verified ──────────────────────
+    plan = _build_rubric_plan(driver, criteria_list, wait_time)
+    if plan is None:
+        logger.error("    ✗ No se pudo preparar la estructura de la rúbrica en el editor. No se guarda.")
+        return False
+    if _fill_rubric_values(driver, plan, wait_time, rubric_name) is None:
+        return False
+
     # ── Save ──────────────────────────────────────────────────────────────────
     try:
-        # Give Moodle more time to register all blurred fields from the last criterion
-        # Moodle's YUI/Atto can be very slow to sync the DOM
-        logger.info("    Finalizing data entry, waiting for Moodle to sync...")
-        time.sleep(3)
-        
+        # No settle wait before saving: the read-back above proved every
+        # field holds its value, and the form posts those field values.
+
         # We strictly want the "Guardar" button to publish it.
         # In modern Moodle, 'saverubric' is publish, and 'saverubricdraft' is draft.
         save_selectors = [
@@ -505,7 +644,6 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
         if save_btn:
             logger.info("    Clicking Save button and waiting for 'Ready' status...")
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", save_btn)
-            time.sleep(1)
             try:
                 # Use standard click to ensure all form submission events fire properly
                 _wait(driver, 5).until(EC.element_to_be_clickable(save_btn))
@@ -539,10 +677,9 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
                 result_type = _wait(driver, 20).until(_save_confirmed)
                 
                 if result_type == "ready_status":
+                    # The status is shown on the page Moodle loads after the
+                    # save, so the rubric is already stored: no wait needed.
                     logger.info("    ✓ STATUS CONFIRMED: Rúbrica lista para su uso.")
-                    # Wait 5 seconds so the user can actually see it before we navigate away
-                    logger.info("    Waiting 5 seconds to consolidate and allow visual verification...")
-                    time.sleep(5)
                     return True
                 elif result_type == "validation_error":
                     logger.error("    ✗ Form validation error preventing save. Still on editor page.")
@@ -551,7 +688,10 @@ def fill_rubric(driver, criteria_list: list[dict], wait_time: int = 10, rubric_n
             except TimeoutException:
                 if "rubric/edit.php" not in driver.current_url:
                     logger.warning(f"    Navigated away but 'Ready' status not found. URL: {driver.current_url}")
-                    time.sleep(4)
+                    try:
+                        _wait(driver, 10).until(lambda d: d.execute_script("return document.readyState") == "complete")
+                    except TimeoutException:
+                        pass
                     return True
                 else:
                     logger.error("    ✗ Rubric save failed - still on editor page after 20s. Check for unhandled errors.")
