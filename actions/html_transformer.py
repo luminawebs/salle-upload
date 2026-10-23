@@ -678,6 +678,37 @@ _LEADING_QUESTION_NUMBER_RE = re.compile(r'^((?:\s*<[^>]+>)*)\s*\d{1,3}\s*[.)]((
 _BLANK_RE = re.compile(r'_{3,}')
 
 
+# A statement's answer at its end: "(V)", "( F )", "(v)."
+_TF_MARK_RE = re.compile(r'\(\s*([VFvf])\s*\)\s*\.?\s*$')
+_TF_CHOICES = {"V": "{1:MULTICHOICE:=Verdadero~Falso}", "F": "{1:MULTICHOICE:Verdadero~=Falso}"}
+
+
+def _true_false_group_to_cloze(q: dict) -> bool:
+    """
+    "…es verdadero o falso:" followed by several statements, each ending in
+    its answer "(V)" / "(F)", with no options: it was uploaded as text
+    without a grade. It becomes ONE question (as the author wrote it) with a
+    Verdadero/Falso list after each statement — a "completar" (cloze)
+    question, graded statement by statement. In place; False (and q
+    untouched) unless at least two statements are marked.
+    """
+    parts = [BeautifulSoup(h, 'html.parser').get_text(" ") for h in q['stem_html']]
+    marks = [_TF_MARK_RE.search(" ".join(t.split())) for t in parts]
+    if sum(1 for m in marks if m) < 2:
+        return False
+    stem = []
+    for html, text, mark in zip(q['stem_html'], parts, marks):
+        if mark:
+            statement = _TF_MARK_RE.sub("", " ".join(text.split())).strip()
+            statement = statement.replace("[", "(").replace("]", ")").replace("{", "(").replace("}", ")")
+            stem.append(f"<p>{statement} {_TF_CHOICES[mark.group(1).upper()]}</p>")
+        else:
+            stem.append(html)
+    q['stem_html'] = stem
+    q['q_type'] = 'cloze'
+    return True
+
+
 def _single_answer_to_cloze(q: dict) -> None:
     """
     "Complete: El modelo ____ …" with one option, the answer ("a. Serve and
@@ -712,6 +743,8 @@ def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "
     _format_question_urls(q)
     if q['q_type'] == 'multichoice' and len(q['options']) == 1:
         _single_answer_to_cloze(q)
+    elif q['q_type'] == 'multichoice' and not q['options']:
+        _true_false_group_to_cloze(q)
     stem_html = _LEADING_QUESTION_NUMBER_RE.sub(r"\1\2", "<br>".join(q['stem_html']), count=1)
     opts = []
     is_true_false = False

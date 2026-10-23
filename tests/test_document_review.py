@@ -897,6 +897,33 @@ class WordNumberingTests(unittest.TestCase):
         xml = question_handler(parse_questions("<p>1. Defina apego:</p><p>a) Vínculo afectivo (respuesta)</p>")[0], 1)[0].to_moodle_xml()
         self.assertIn("{1:SHORTANSWER:=Vínculo afectivo}", xml)
 
+    TF_GROUP = ("<p>14. Referente a los movimientos oculomotores es verdadero o falso:</p>"
+                "<p>Se evalúa la estabilidad de la fijación (V)</p>"
+                "<p>El test NSUCO no es estandarizado <strong>( F )</strong></p>"
+                "<p>La terapia visual no es una alternativa. (F)</p>")
+
+    def test_true_false_statements_group_is_one_cloze_question(self):
+        from actions.html_transformer import parse_questions, question_handler, ungraded_questions
+        xml = question_handler(parse_questions(self.TF_GROUP)[0], 1)[0].to_moodle_xml()
+        self.assertIn('<question type="cloze">', xml)
+        self.assertIn("Se evalúa la estabilidad de la fijación {1:MULTICHOICE:=Verdadero~Falso}", xml)
+        self.assertIn("El test NSUCO no es estandarizado {1:MULTICHOICE:Verdadero~=Falso}", xml)
+        self.assertIn("La terapia visual no es una alternativa. {1:MULTICHOICE:Verdadero~=Falso}", xml)
+        self.assertEqual(ungraded_questions(parse_questions(self.TF_GROUP)), [])
+
+    def test_a_single_marked_statement_is_left_alone(self):
+        from actions.html_transformer import parse_questions, question_handler
+        xml = question_handler(parse_questions("<p>3. Explique la vergencia fusional (V)</p>")[0], 1)[0].to_moodle_xml()
+        self.assertNotIn("MULTICHOICE", xml)
+
+    def test_ai_info_item_hidden_once_the_reader_grades_the_question(self):
+        from core.ai_question_review import _drop_info_the_reader_now_covers
+        record = {"parser": [{"tipo": "multichoice", "opciones": []}]}
+        info = {"tipo": "info", "parser_indice": 0}
+        self.assertEqual(_drop_info_the_reader_now_covers([info], record, self.TF_GROUP, None), [])
+        untouched = "<p>14. Referente a los movimientos: explique.</p>"
+        self.assertEqual(_drop_info_the_reader_now_covers([info], record, untouched, None), [info])
+
     def test_import_summary_problem(self):
         from actions.cuestionario_export_actions import import_summary_problem
         self.assertIsNone(import_summary_problem("Importando 14 preguntas desde el archivo", [], 14))

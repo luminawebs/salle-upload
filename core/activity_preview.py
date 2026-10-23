@@ -66,6 +66,19 @@ def split_sections(html: str) -> list:
     return [s for s in sections if s["html"].strip() or s["titulo"] != _INTRO_TITLE]
 
 
+# A Verdadero/Falso list in a cloze question ("{1:MULTICHOICE:=Verdadero~Falso}",
+# see actions.html_transformer._true_false_group_to_cloze), shown readable.
+_CLOZE_CHOICE_RE = re.compile(r'\{1:MULTICHOICE:([^}]*)\}')
+
+
+def _readable_cloze(html: str) -> str:
+    def show(m):
+        choices = m.group(1).split("~")
+        correct = next((c[1:] for c in choices if c.startswith("=")), "?")
+        return f"<strong>[{' / '.join(c.lstrip('=') for c in choices)} → {correct}]</strong>"
+    return _CLOZE_CHOICE_RE.sub(show, html)
+
+
 def preview_questions(html: str, course_id=None, parsed: list = None) -> list:
     """
     Each question as the export reads it: numero, tipo, enunciado_html,
@@ -96,7 +109,7 @@ def preview_questions(html: str, course_id=None, parsed: list = None) -> list:
         questions.append({
             "numero": number,
             "tipo": "verdadero_falso" if is_tf else q["q_type"],
-            "enunciado_html": "<br>".join(q["stem_html"]),
+            "enunciado_html": _readable_cloze("<br>".join(q["stem_html"])),
             "opciones": options,
             "correctas": sum(1 for o in options if o["correcta"]),
             "retroalimentacion": feedback,

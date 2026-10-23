@@ -124,6 +124,25 @@ def _parser_preview(p: dict, numero: int) -> dict:
             "correctas": sum(1 for o in options if o["correcta"]), "retroalimentacion": {}}
 
 
+def _drop_info_the_reader_now_covers(items: list, record: dict, html: str, course_id) -> list:
+    """
+    "Solo informativo" (the AI calls the question "otra": create it by hand)
+    for a question the reader now uploads with a grade — e.g. a "(V)/(F)"
+    statements group, read as one cloze question since the proposal was made —
+    is wrong and has nothing to accept: left out. Only when the reading still
+    has the same questions as the record.
+    """
+    current = shadow.parser_questions(html, course_id)
+    if len(current) != len(record.get("parser", [])):
+        return items
+
+    def graded(q):
+        return q["tipo"] != "description" and shadow._answer_problem(q) is None
+
+    return [it for it in items
+            if not (it["tipo"] == "info" and it["parser_indice"] is not None and graded(current[it["parser_indice"]]))]
+
+
 def proposal_items(record: dict) -> list:
     """
     One item per thing the AI would change, from its verified answer only.
@@ -194,7 +213,7 @@ def build_proposal(course_id, filename: str, html: str):
     if record is None or "intentos" not in record or "error" in record:
         return None
     decisions = get_decisions(course_id, filename, html)
-    items = proposal_items(record)
+    items = _drop_info_the_reader_now_covers(proposal_items(record), record, html, course_id)
     for it in items:
         it["decision"] = decisions.get(it["id"])
     actionable = [it for it in items if it["aceptable"]]

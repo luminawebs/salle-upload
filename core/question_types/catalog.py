@@ -132,6 +132,32 @@ QUESTION_FORMATS = [
         "notas": ["El estudiante escribe la respuesta; debe coincidir con el texto entre corchetes."],
     },
     {
+        # After "completar": both are cloze questions, and the AI's types are
+        # one per Moodle type (ai_question_types), so "completar" must come first.
+        "id": "verdadero_falso_varias",
+        "nombre": "Verdadero o falso con varias afirmaciones",
+        "moodle": "cloze",
+        "descripcion": "Un enunciado y varias afirmaciones, cada una terminada en su respuesta (V) o (F). "
+                       "Se sube como una sola pregunta: junto a cada afirmación el estudiante elige "
+                       "Verdadero o Falso, y se califica afirmación por afirmación.",
+        "variantes": [
+            {"titulo": "Plantilla recomendada", "tipo": "cloze", "correctas": 0, "lineas": [
+                "Pregunta 1",
+                "Enunciado: Responda verdadero o falso:",
+                "El agua hierve a 100 °C al nivel del mar. (V)",
+                "La Tierra es plana. (F)",
+                "El Sol es una estrella. (V)",
+            ]},
+            {"titulo": "Pregunta numerada", "tipo": "cloze", "correctas": 0, "lineas": [
+                "1. Referente al sistema solar, conteste verdadero o falso:",
+                "Mercurio es el planeta más cercano al Sol. (V)",
+                "La Luna tiene luz propia. (F)",
+            ]},
+        ],
+        "notas": ["Cada afirmación va en su propia línea y termina en (V) o (F).",
+                  "Se necesitan al menos dos afirmaciones; con una sola, use «Verdadero o falso»."],
+    },
+    {
         "id": "arrastrar_soltar",
         "nombre": "Arrastrar y soltar",
         "moodle": "ddwtos",
