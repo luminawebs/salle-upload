@@ -762,6 +762,28 @@ class ActivityTypeChoiceTests(unittest.TestCase):
         _, issues = self._review_doc(rows, "_test_type_match")
         self.assertNotIn("tipo_no_coincide", issues)
 
+    def test_use_this_type_through_the_api(self):
+        """The panel's «Usar este tipo» goes through /api/corrections, which used to reject it."""
+        from fastapi.testclient import TestClient
+        import server
+        course_id = "_test_type_api"
+        course_dir = os.path.join(ROOT, "workspace", course_id)
+        os.makedirs(course_dir, exist_ok=True)
+        self.addCleanup(shutil.rmtree, course_dir, True)
+        with open(os.path.join(course_dir, "raw_docx_extracted.html"), "w", encoding="utf-8") as f:
+            f.write(_doc(*self.MARKED_QUIZ))
+        cwd = os.getcwd()
+        os.chdir(ROOT)
+        self.addCleanup(os.chdir, cwd)
+        client = TestClient(server.app)
+        res = client.post("/api/corrections", json={"course_id": course_id, "issue_id": "tipo_no_coincide:a4",
+                                                    "choice": {"tipo": "Tarea"}})
+        self.assertEqual(res.status_code, 200, res.text)
+        acts = res.json()["report"]["unidades"]["1"]["actividades"]
+        self.assertEqual(acts["4"]["tipo"], "Tarea")
+        undo = client.post("/api/corrections", json={"course_id": course_id, "issue_id": "tipo_no_coincide:a4", "choice": None})
+        self.assertEqual(undo.json()["report"]["unidades"]["1"]["actividades"]["4"]["tipo"], "Cuestionario")
+
     def test_type_choice_only_accepts_a_type(self):
         from core.document_corrections import set_block_choice
         with self.assertRaises(ValueError):

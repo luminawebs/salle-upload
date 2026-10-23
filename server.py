@@ -290,6 +290,12 @@ async def post_ignored_issues_api(request: Request):
     return {"status": "success", "course_id": course_id, "ignored": sorted(get_ignored_issues(course_id))}
 
 
+# Review problems a choice can fix (core/document_corrections.set_block_choice):
+# unassigned blocks, and the type of an activity with no X or whose X
+# contradicts its content ("Usar este tipo").
+CORRECTABLE_ISSUES = ("actividad_no_reconocida:", "contenido_sin_asignar:", "tipo_desconocido:", "tipo_no_coincide:")
+
+
 @app.post("/api/corrections")
 async def post_correction(request: Request):
     """
@@ -305,9 +311,10 @@ async def post_correction(request: Request):
     choice = body.get("choice")
     if not is_safe_course_id(course_id):
         return JSONResponse(status_code=400, content={"error": "course_id inválido."})
-    if not isinstance(issue_id, str) or not issue_id.startswith(("actividad_no_reconocida:", "contenido_sin_asignar:")):
-        return JSONResponse(status_code=400, content={"error": "Solo se pueden corregir bloques sin asignar."})
-    if isinstance(choice, dict) and "tipo" in choice and not issue_id.startswith("actividad_no_reconocida:"):
+    if not isinstance(issue_id, str) or not issue_id.startswith(CORRECTABLE_ISSUES):
+        return JSONResponse(status_code=400, content={"error": "Solo se pueden corregir bloques sin asignar o el tipo de una actividad."})
+    if (isinstance(choice, dict) and "tipo" in choice
+            and not issue_id.startswith(("actividad_no_reconocida:", "tipo_desconocido:", "tipo_no_coincide:"))):
         return JSONResponse(status_code=400, content={"error": "Solo un bloque «actividad no reconocida» puede convertirse en una actividad nueva."})
     if not os.path.isfile(os.path.join("workspace", course_id, "raw_docx_extracted.html")):
         return JSONResponse(status_code=404, content={"error": "No hay un documento subido para este curso. Vuelve a subirlo."})
