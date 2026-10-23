@@ -54,6 +54,7 @@ _TITLES = {key: (title, phase) for key, title, phase in STEPS}
 _NOISY_LIBRARIES = ("selenium", "urllib3", "httpx", "httpcore", "google_genai", "PIL", "asyncio", "trio", "WDM")
 
 _page_loads = []    # [(seconds, url)] of this course's driver.get() calls
+_page_breakdowns = []  # the browser's split of each of them (record_page_load)
 _plan = []          # enabled step keys for the current course
 _current = None     # (key, start time)
 _durations = []     # [(title, seconds)]
@@ -65,6 +66,7 @@ def begin_course(enabled_steps: list) -> None:
     _plan = [key for key, _, _ in STEPS if key in enabled_steps]
     _current, _durations = None, []
     _page_loads.clear()
+    _page_breakdowns.clear()
 
 
 def _close_step() -> None:
@@ -97,15 +99,42 @@ def warn(text: str) -> None:
     logger.warning(text)
 
 
-def record_page_load(url: str, seconds: float) -> None:
-    """One driver.get() (core/driver_setup._time_page_loads)."""
+def record_page_load(url: str, seconds: float, breakdown: dict = None) -> None:
+    """
+    One driver.get() (core/driver_setup._time_page_loads). `breakdown`: the
+    browser's own split of it ({servidor, pagina, archivos} seconds, recursos,
+    desde_cache, kb), or None when it couldn't be read.
+    """
     _page_loads.append((seconds, url))
-    logging.getLogger("tiempos").debug(f"Página cargada en {seconds:.1f} s: {url}")
+    if breakdown:
+        _page_breakdowns.append(breakdown)
+        detail = (f" (servidor {breakdown['servidor']:.1f} s · página {breakdown['pagina']:.1f} s · "
+                  f"archivos {breakdown['archivos']:.1f} s; {breakdown['recursos']} archivos, "
+                  f"{breakdown['desde_cache']} desde caché, {breakdown['kb']} KB descargados)")
+    else:
+        detail = ""
+    logging.getLogger("tiempos").debug(f"Página cargada en {seconds:.1f} s{detail}: {url}")
 
 
 def _duration(seconds: float) -> str:
     minutes = seconds / 60
     return f"{minutes:.0f} min" if minutes >= 1 else f"{seconds:.0f} s"
+
+
+def page_time_split(breakdowns: list):
+    """
+    "Tiempo de las páginas: 70 % servidor de Moodle · 25 % archivos…" — how
+    much a persistent browser cache could save (the files part), or None.
+    """
+    total = sum(b["servidor"] + b["pagina"] + b["archivos"] for b in breakdowns)
+    if not breakdowns or total <= 0:
+        return None
+    pct = {k: round(100 * sum(b[k] for b in breakdowns) / total) for k in ("servidor", "pagina", "archivos")}
+    files = sum(b["recursos"] for b in breakdowns)
+    cached = sum(b["desde_cache"] for b in breakdowns)
+    mb = sum(b["kb"] for b in breakdowns) / 1024
+    return (f"Tiempo de las páginas: {pct['servidor']} % servidor de Moodle · {pct['pagina']} % descarga de la página · "
+            f"{pct['archivos']} % archivos y scripts ({files} archivos, {cached} desde caché, {mb:.1f} MB descargados)")
 
 
 def summary_lines() -> list:
@@ -116,6 +145,9 @@ def summary_lines() -> list:
         total = sum(s for s, _ in _page_loads)
         lines.append(f"Cargas de página: {len(_page_loads)} · {_duration(total)} en total · "
                      f"{total / len(_page_loads):.0f} s de promedio")
+        split = page_time_split(_page_breakdowns)
+        if split:
+            lines.append(split)
         slowest = sorted(_page_loads, reverse=True)[:5]
         logging.getLogger("tiempos").debug("Páginas más lentas: " + "; ".join(f"{s:.0f} s {u}" for s, u in slowest))
     return lines

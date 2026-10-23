@@ -86,6 +86,21 @@ class ProgressLogTests(unittest.TestCase):
         lines = progress.summary_lines()
         self.assertEqual([line.split(":")[0] for line in lines], ["Leyendo el documento", "Creando secciones y actividades"])
 
+    def test_page_time_split_server_vs_files(self):
+        progress.begin_course(["documento"])
+        progress.record_page_load("https://m/course/view.php", 10.0,
+                                  {"servidor": 7.0, "pagina": 0.5, "archivos": 2.5, "recursos": 40, "desde_cache": 0, "kb": 2048})
+        progress.record_page_load("https://m/course/edit.php", 20.0,
+                                  {"servidor": 17.0, "pagina": 0.5, "archivos": 2.5, "recursos": 30, "desde_cache": 5, "kb": 1024})
+        progress.record_page_load("https://m/mod/x", 3.0, None)  # breakdown not readable: still counted as a load
+        lines = progress.summary_lines()
+        self.assertIn("Cargas de página: 3", lines[-2])
+        self.assertEqual(lines[-1], "Tiempo de las páginas: 80 % servidor de Moodle · 3 % descarga de la página · "
+                                    "17 % archivos y scripts (70 archivos, 5 desde caché, 3.0 MB descargados)")
+
+    def test_no_split_without_breakdowns(self):
+        self.assertIsNone(progress.page_time_split([]))
+
 
 if __name__ == "__main__":
     unittest.main()

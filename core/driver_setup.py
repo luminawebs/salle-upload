@@ -102,6 +102,35 @@ def get_driver():
     return driver
 
 
+# Where one page's load time goes, from the browser's own Navigation/Resource
+# Timing: Moodle generating the page (until its first byte), downloading the
+# HTML, then the page's files (CSS/JS/images) and scripts. And how many of
+# those files came from the browser cache: a fresh profile per run has none,
+# which is what a persistent profile would change.
+_BREAKDOWN_JS = """
+const nav = performance.getEntriesByType('navigation')[0];
+if (!nav) return null;
+const res = performance.getEntriesByType('resource');
+const cached = res.filter(r => r.transferSize === 0 && r.decodedBodySize > 0).length;
+return {
+  servidor: (nav.responseStart - nav.startTime) / 1000,
+  pagina: (nav.responseEnd - nav.responseStart) / 1000,
+  archivos: Math.max(0, (nav.loadEventEnd || nav.duration) - nav.responseEnd) / 1000,
+  recursos: res.length,
+  desde_cache: cached,
+  kb: Math.round(res.reduce((s, r) => s + (r.transferSize || 0), 0) / 1024),
+};
+"""
+
+
+def _load_breakdown(driver):
+    """{servidor, pagina, archivos (s), recursos, desde_cache, kb} for the page just loaded, or None."""
+    try:
+        return driver.execute_script(_BREAKDOWN_JS)
+    except Exception:
+        return None
+
+
 def _time_page_loads(driver) -> None:
     """Records how long every driver.get() takes (core/progress: the summary
     and the full log show where a run's time goes). Measuring only."""
@@ -114,7 +143,7 @@ def _time_page_loads(driver) -> None:
         finally:
             try:
                 from core import progress
-                progress.record_page_load(url, time.monotonic() - started)
+                progress.record_page_load(url, time.monotonic() - started, _load_breakdown(driver))
             except Exception:
                 pass
 
