@@ -1096,6 +1096,20 @@ class MoodleActivityLookupTests(unittest.TestCase):
                          ["introduccion_unidad_1.html", "introduccion_unidad_2.html"])
 
 
+class RunStepsTests(unittest.TestCase):
+    def test_every_step_gated_on_edit_mode_turns_edit_mode_on(self):
+        """A step gated on edit_enabled but missing from EDIT_MODE_STEPS is skipped silently when run alone."""
+        import re
+        with open(os.path.join(ROOT, "main.py"), encoding="utf-8") as f:
+            source = f.read()
+        gated = set()
+        for condition in re.findall(r"if (.*?) and edit_enabled:", source):
+            gated.update(re.findall(r'"(ENABLE_[A-Z_]+)"', condition))
+        import main
+        self.assertTrue(gated)
+        self.assertEqual(gated - set(main.EDIT_MODE_STEPS), set())
+
+
 class RealDocumentRegressionTests(unittest.TestCase):
     """The real course documents must keep producing exactly the recorded result."""
 

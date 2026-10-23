@@ -30,6 +30,22 @@ logger = logging.getLogger("main")
 
 
 
+# The steps that change the course and need Moodle's edit mode turned on
+# first (each one is gated on edit_enabled in main()).
+EDIT_MODE_STEPS = (
+    "ENABLE_COURSE_STRUCTURE_CREATION",
+    "ENABLE_GENERALIDADES_ACCORDION_UPLOAD",
+    "ENABLE_GLOSARIO_UPLOAD",
+    "ENABLE_DOCX_UPLOAD_HTML",
+    "ENABLE_MATERIALES_ESTUDIO_EXPORT",
+    "ENABLE_CUESTIONARIO_EXPORT",
+    "ENABLE_CUESTIONARIO_GRADE_UPDATE",
+    "ENABLE_UNIDADES_INTRO_UPLOAD",
+    "ENABLE_DOCX_RUBRICA_UPLOAD",
+    "ENABLE_ACTIVITY_COMPLETION_UPDATE",
+)
+
+
 def _enabled_steps() -> list:
     """The progress steps this run will go through (core/progress.STEPS), from the step switches."""
     flags = {
@@ -174,16 +190,10 @@ def main():
                 # --- Insert specific course interactions here ---
                 # Ensure edit mode is enabled if we need to do either workflow
                 edit_enabled = False
-                if (
-                    getattr(Config, "ENABLE_COURSE_STRUCTURE_CREATION", False)
-                    or getattr(Config, "ENABLE_GENERALIDADES_ACCORDION_UPLOAD", False)
-                    or getattr(Config, "ENABLE_DOCX_UPLOAD_HTML", False)
-                    or getattr(Config, "ENABLE_CUESTIONARIO_EXPORT", False)
-                    or getattr(Config, "ENABLE_CUESTIONARIO_GRADE_UPDATE", False)
-                    or getattr(Config, "ENABLE_UNIDADES_INTRO_UPLOAD", False)
-                    or getattr(Config, "ENABLE_DOCX_RUBRICA_UPLOAD", False)
-                    or getattr(Config, "ENABLE_ACTIVITY_COMPLETION_UPDATE", False)
-                ):
+                # Every step below gated on edit_enabled must be here: the
+                # glossary and the study materials were missing, so a run with
+                # only those switched on skipped them without a word.
+                if any(getattr(Config, flag, False) for flag in EDIT_MODE_STEPS):
                     edit_enabled = enable_edit_mode(
                         driver, wait_time=Config.EXPLICIT_WAIT_TIME
                     )
