@@ -876,6 +876,13 @@ class MoodleActivityLookupTests(unittest.TestCase):
         remove_skipped_activities(sections, {"6"})
         self.assertEqual([a["name"] for a in sections[0]["activities"]], ["ACTIVIDAD 5: Razonamiento"])
 
+    def test_lecturas_page_has_one_title(self):
+        from actions.materiales_estudio_actions import lecturas_page_body
+        body = lecturas_page_body("<p><strong>Lecturas complementarias</strong></p><p>Básica:</p><ol><li>Autor (2020).</li></ol>")
+        self.assertEqual(body.lower().count("lecturas complementarias"), 1)
+        self.assertNotIn("Básica:", body)
+        self.assertIn("Autor (2020).", body)
+
     def test_first_unit_intro_after_the_avance_note(self):
         from core.unidades_intro_parser import run_unidades_intro_splitting_workflow
         course_id = "_test_intro_u1"
