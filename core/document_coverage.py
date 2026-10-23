@@ -331,6 +331,29 @@ def _block_issues(blocks):
 _MAX_LISTED_QUESTIONS = 30
 
 
+def _glossary_issues(soup) -> list:
+    """
+    A notice when the "Glosario" section has text that wasn't read as a term
+    (core/data_parser.read_glossary): the terms that were read still upload,
+    so it never blocks.
+    """
+    from core.data_parser import read_glossary
+    glossary = read_glossary(soup)
+    unread = (glossary or {}).get("sin_leer") or []
+    if not unread:
+        return []
+    read = len(glossary["terminos"])
+    return [_issue(
+        "glosario_sin_leer", "doc",
+        f"Glosario: {len(unread)} texto(s) no se leyeron como término",
+        (f"Se importarán {read} término(s). " if read else "No se importará ningún término. ")
+        + "Estos textos de la sección «Glosario» no tienen la forma «Término: definición» "
+        "(ni el término en negrita seguido de su definición), así que no se subirán. "
+        "Si son términos, corrígelos en el .docx; si no, ignora este aviso.",
+        bloquea=False, textos=[t[:200] for t in unread[:_MAX_LISTED_QUESTIONS]],
+    )]
+
+
 def _quiz_issue(key: str, label: str, summary, **extra):
     """
     The problem to report for one Cuestionario, or None. `summary` is
@@ -444,6 +467,7 @@ def analyze_document(html: str, manifest: dict, row_roles: list, report: dict, r
     preamble = _preamble_labels(trs, row_roles)
     blocks = _build_blocks(trs, row_roles, preamble)
     issues = _block_issues(blocks)
+    issues += _glossary_issues(soup)
 
     extras_by_issue = {e["issue_id"]: e for e in (extras or [])}
     appended_by_issue = {a["issue_id"]: a for a in (appended or [])}

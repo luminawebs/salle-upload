@@ -14,7 +14,13 @@ def create_glosario_activity(driver, course_id, xml_path, wait_time=10):
     """
     Creates a 'Glosario' activity in 'BIENVENIDOS AL CURSO' (section 0)
     and imports the entries from the given xml_path.
+    Skipped when the user excluded the glossary in the document review
+    (core/activity_selection.is_glossary_excluded).
     """
+    from core.activity_selection import is_glossary_excluded
+    if is_glossary_excluded(course_id):
+        progress.info("Glosario excluido en la revisión del documento: no se crea.")
+        return False
     if not os.path.exists(xml_path):
         logger.debug(f"Glosario XML not found at {xml_path}. Skipping Glosario creation.")
         progress.info("El documento no tiene glosario: no se crea.")

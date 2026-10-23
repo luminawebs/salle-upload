@@ -174,10 +174,26 @@ export function QuestionCountBadge({ found, expected }) {
   );
 }
 
+// Glossary term count, shown on the Glosario card: like QuestionCountBadge,
+// green with terms, red when none were read.
+export function TermCountBadge({ count }) {
+  if (count === undefined || count === null) return null;
+  const tone = count === 0 ? 'text-error bg-error/10 border-error/30' : 'text-success bg-success/10 border-success/30';
+  return (
+    <span
+      className={`ml-2 shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded border ${tone}`}
+      title="Términos que se importarán al glosario de Moodle."
+    >
+      {count} término{count === 1 ? '' : 's'}
+    </span>
+  );
+}
+
 // The "¿…?" lines of a Cuestionario that didn't become questions, or (with
-// `noun`) its questions that would upload without a grade.
+// `noun`) its questions that would upload without a grade, or (with `item`)
+// the glossary texts that weren't read as terms.
 // `numbered`: false when each line already starts with its question number.
-function UnreadQuestions({ questions, noun = 'no leída', numbered = true }) {
+function UnreadQuestions({ questions, noun = 'no leída', numbered = true, item = 'pregunta' }) {
   const [open, setOpen] = useState(false);
   if (!questions || !questions.length) return null;
   return (
@@ -185,7 +201,7 @@ function UnreadQuestions({ questions, noun = 'no leída', numbered = true }) {
       <button type="button" onClick={() => setOpen(!open)}
         className="flex items-center text-[11px] text-gray-300 hover:text-white">
         {open ? <ChevronDown className="w-3 h-3 mr-1" /> : <ChevronRight className="w-3 h-3 mr-1" />}
-        {open ? 'Ocultar' : 'Ver'} {questions.length} pregunta{questions.length === 1 ? '' : 's'} {noun}{questions.length === 1 ? '' : 's'}
+        {open ? 'Ocultar' : 'Ver'} {questions.length} {item}{questions.length === 1 ? '' : 's'} {noun}{questions.length === 1 ? '' : 's'}
       </button>
       {open && (
         <ol className={`mt-1.5 ml-4 space-y-1 text-[11px] text-gray-400 ${numbered ? 'list-decimal' : 'list-none'}`}>
@@ -226,6 +242,7 @@ function IssueRow({ issue, ignored, busy, activities, onToggleIgnore, onShowBloc
           )}
           {!resolved && <UnreadQuestions questions={issue.preguntas_no_leidas} />}
           {!resolved && <UnreadQuestions questions={issue.preguntas_sin_calificar} noun="afectada" numbered={false} />}
+          {!resolved && <UnreadQuestions questions={issue.textos} item="texto" noun="no leído" numbered={false} />}
           {canChoose && issue.tipo === 'actividad_no_reconocida' && (
             <MakeActivityControl issue={issue} busy={busy} onChoice={onChoice} />
           )}

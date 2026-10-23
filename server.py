@@ -7,7 +7,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse
 from core.data_parser import parse_docx_to_html
 from core.document_reviewer import review_document
-from core.activity_selection import get_skipped_activities, set_skipped_activities
+from core.activity_selection import get_skipped_activities, set_skipped_activities, is_glossary_excluded, set_glossary_excluded
 from core.document_coverage import get_ignored_issues, set_ignored_issues
 from core.document_corrections import set_block_choice
 from fastapi.middleware.cors import CORSMiddleware
@@ -235,6 +235,29 @@ async def post_skip_activities(request: Request):
         return JSONResponse(status_code=400, content={"error": "'skipped' debe ser una lista."})
     set_skipped_activities(course_id, skipped)
     return {"status": "success", "course_id": course_id, "skipped": sorted(get_skipped_activities(course_id))}
+
+
+@app.get("/api/skip-glossary")
+async def get_skip_glossary(course_id: str):
+    """Whether the user chose not to upload this course's glossary."""
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    return {"course_id": course_id, "excluido": is_glossary_excluded(course_id)}
+
+
+@app.post("/api/skip-glossary")
+async def post_skip_glossary(request: Request):
+    """Includes or excludes the whole glossary from the upload (read by
+    actions/glosario_actions.create_glosario_activity)."""
+    body = await request.json()
+    course_id = body.get("course_id", "")
+    if not is_safe_course_id(course_id):
+        return JSONResponse(status_code=400, content={"error": "course_id inválido."})
+    excluded = body.get("excluido")
+    if not isinstance(excluded, bool):
+        return JSONResponse(status_code=400, content={"error": "'excluido' debe ser true o false."})
+    set_glossary_excluded(course_id, excluded)
+    return {"status": "success", "course_id": course_id, "excluido": is_glossary_excluded(course_id)}
 
 
 @app.get("/api/ignored-issues")

@@ -179,21 +179,109 @@ def detect_activity_type(text_upper: str) -> str:
     return "Desconocido"
 
 
+_TERM_HEADERS = ("TERMINO", "CONCEPTO", "PALABRA")
+_DEFINITION_HEADERS = ("DEFINICION", "SIGNIFICADO", "DESCRIPCION")
+
+
+def _plain_upper(text: str) -> str:
+    """Upper-case, without accents or a trailing ":" ("Término:" -> "TERMINO")."""
+    import unicodedata
+    text = unicodedata.normalize("NFKD", text.strip().rstrip(":").strip())
+    return "".join(c for c in text if not unicodedata.combining(c)).upper()
+
+
+def _glossary_item_text(el) -> str:
+    """
+    The text of one glossary paragraph / list item, as "Concepto: definición"
+    when the term is only set in bold, without ":" ("<strong>Apego</strong>
+    Vínculo afectivo…" or "**Apego** – Vínculo…").
+    """
+    text = el.get_text().strip()
+    if ":" in text:
+        return text
+    bold = el.find(['strong', 'b'])
+    term = bold.get_text().strip() if bold else ""
+    if term and text.startswith(term):
+        definition = text[len(term):].strip().lstrip("-–—.").strip()
+        if definition:
+            return f"{term}: {definition}"
+    return text
+
+
 def _glossary_texts(rows) -> list:
-    """The "Concepto: definición" candidates in these rows, in order, up to "Referencias…"."""
-    texts = []
+    """
+    The "Concepto: definición" candidates in these rows, in order, up to "Referencias…".
+    A two-column table under a "Término | Definición" header row gives one
+    candidate per row.
+    """
+    from core.template_placeholders import find_placeholders
+    texts, term_table = [], False
     for row in rows:
-        if not row.find_all(['td', 'th']):
+        cells = row.find_all(['td', 'th'])
+        if not cells:
             continue
+        # The next section in the same table (the template's "Actividad #.
+        # Evaluación final" right after it) ends the glossary, as in the
+        # review (core/document_coverage._preamble_labels).
+        if _plain_upper(row.get_text(" ", strip=True)).startswith("ACTIVIDAD"):
+            return texts
+        own_cells = row.find_all(['td', 'th'], recursive=False)
+        if len(own_cells) == 2:
+            left, right = (c.get_text(" ", strip=True) for c in own_cells)
+            if _plain_upper(left).startswith(_TERM_HEADERS) and _plain_upper(right).startswith(_DEFINITION_HEADERS):
+                term_table = True
+                continue
+            if term_table and not re.match(r'^\s*REFERENCIAS', left.upper()):
+                if left or right:
+                    texts.append(f"{left.rstrip(':').strip()}: {right}" if left and right else left or right)
+                continue
+        term_table = False
         items = row.find_all('li') or row.find_all('p')
-        parts = [el.get_text().strip() for el in items] if len(items) > 1 else [row.get_text().strip()]
-        from core.template_placeholders import find_placeholders
+        parts = [_glossary_item_text(el) for el in items] if len(items) > 1 else [_glossary_item_text(row)]
         for text in parts:
             if re.match(r'^\s*REFERENCIAS', text.upper()):
                 return texts
-            if not find_placeholders(text):  # the template's "1. Término: Definición"
+            # The template's "1. Término: Definición", also split over two
+            # lines ("1. Término:" / "Definición"), and its instruction
+            # "Incluya un glosario general para el curso…".
+            if (text and not find_placeholders(text) and _plain_upper(text) not in _TERM_HEADERS + _DEFINITION_HEADERS
+                    and not _plain_upper(text).startswith("INCLUYA UN GLOSARIO")):
                 texts.append(text)
     return texts
+
+
+def read_glossary(soup):
+    """
+    The course glossary: the section under the first "Glosario" heading that
+    is followed by a table. {"terminos": [(concepto, definición)], "sin_leer":
+    [texts of the section that aren't "Concepto: definición"]}, or None when
+    the document has no glossary section.
+
+    The terms are in the rows after the "Glosario" heading row of its own
+    table (they used to be looked for only in the next table, which made an
+    empty glossary), else in the next table; up to "Referencias de glosario",
+    whose citations ("Section 6: Pediatric…") aren't terms.
+    """
+    for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'td']):
+        text_upper = p.get_text().upper().strip()
+        if "GLOSARIO" not in text_upper or "HERRAMIENTAS DE LA PLATAFORMA" in text_upper:
+            continue
+        if not (p.find_next('table') or p.find_parent('table')):
+            continue
+        heading_row = p if p.name == 'tr' else p.find_parent('tr')
+        entry_texts = _glossary_texts(heading_row.find_next_siblings('tr')) if heading_row else []
+        if not entry_texts:
+            next_table = (heading_row or p).find_next('table')
+            entry_texts = _glossary_texts(next_table.find_all('tr') if next_table else [])
+        glossary = {"terminos": [], "sin_leer": []}
+        for text in entry_texts:
+            concept, _, definition = text.partition(":")
+            if 0 < len(concept.strip()) < 100 and definition.strip():
+                glossary["terminos"].append((concept.strip(), definition.strip()))
+            else:
+                glossary["sin_leer"].append(text)
+        return glossary
+    return None
 
 
 def top_level_rows(soup) -> list:
@@ -348,58 +436,32 @@ def run_docx_splitting_workflow(course_id: int, row_roles_out: list = None):
             break
 
     # 1.5 Extract Glosario
-    glosario_found = False
-    for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'td']):
-        text_upper = p.get_text().upper().strip()
-        if "GLOSARIO" in text_upper and "HERRAMIENTAS DE LA PLATAFORMA" not in text_upper and not glosario_found:
-            table = p.find_next('table')
-            if not table and p.find_parent('table'):
-                table = p.find_parent('table')
-                
-            if table:
-                glosario_found = True
-                glosario_root = ET.Element("GLOSSARY")
-                info = ET.SubElement(glosario_root, "INFO")
-                ET.SubElement(info, "NAME").text = "Glosario"
-                ET.SubElement(info, "INTRO").text = ""
-                entries = ET.SubElement(info, "ENTRIES")
+    glossary = read_glossary(soup)
+    if glossary and not glossary["terminos"]:
+        # An unfilled "(OPCIONAL) Glosario" section, or terms in a layout not
+        # read: no file, so no empty glossary is created.
+        logger.info("  Glosario sin términos «Concepto: definición»: no se importará.")
+    elif glossary:
+        glosario_root = ET.Element("GLOSSARY")
+        info = ET.SubElement(glosario_root, "INFO")
+        ET.SubElement(info, "NAME").text = "Glosario"
+        ET.SubElement(info, "INTRO").text = ""
+        entries = ET.SubElement(info, "ENTRIES")
+        for concept, definition in glossary["terminos"]:
+            entry = ET.SubElement(entries, "ENTRY")
+            ET.SubElement(entry, "CONCEPT").text = concept
+            ET.SubElement(entry, "DEFINITION").text = definition
+            ET.SubElement(entry, "FORMAT").text = "1"
 
-                # The terms are in the rows after the "Glosario" heading row
-                # of its own table (they used to be looked for only in the
-                # next table, which made an empty glossary), else in the next
-                # table; up to "Referencias de glosario", whose citations
-                # ("Section 6: Pediatric…") aren't terms.
-                heading_row = p if p.name == 'tr' else p.find_parent('tr')
-                entry_texts = _glossary_texts(heading_row.find_next_siblings('tr')) if heading_row else []
-                if not entry_texts:
-                    next_table = (heading_row or p).find_next('table')
-                    entry_texts = _glossary_texts(next_table.find_all('tr') if next_table else [])
+        # Format XML
+        xml_str = ET.tostring(glosario_root, 'utf-8')
+        reparsed = minidom.parseString(xml_str)
+        pretty_xml_bytes = reparsed.toprettyxml(indent="  ", encoding="UTF-8")
 
-                for text in entry_texts:
-                    if ":" in text:
-                        concept, definition = text.split(":", 1)
-                        if 0 < len(concept.strip()) < 100 and definition.strip():
-                            entry = ET.SubElement(entries, "ENTRY")
-                            ET.SubElement(entry, "CONCEPT").text = concept.strip()
-                            ET.SubElement(entry, "DEFINITION").text = definition.strip()
-                            ET.SubElement(entry, "FORMAT").text = "1"
-                        
-                if not len(entries):
-                    # An unfilled "(OPCIONAL) Glosario" section, or terms in a
-                    # layout not read: no file, so no empty glossary is created.
-                    logger.info("  Glosario sin términos «Concepto: definición»: no se importará.")
-                    break
-
-                # Format XML
-                xml_str = ET.tostring(glosario_root, 'utf-8')
-                reparsed = minidom.parseString(xml_str)
-                pretty_xml_bytes = reparsed.toprettyxml(indent="  ", encoding="UTF-8")
-                
-                xml_path = os.path.join(output_dirs["glosario"], "glosario_import.xml")
-                with open(xml_path, "wb") as f:
-                    f.write(pretty_xml_bytes)
-                logger.info(f"  ✓ Extracted glosario_import.xml with {len(entries)} entries")
-                break
+        xml_path = os.path.join(output_dirs["glosario"], "glosario_import.xml")
+        with open(xml_path, "wb") as f:
+            f.write(pretty_xml_bytes)
+        logger.info(f"  ✓ Extracted glosario_import.xml with {len(entries)} entries")
 
 
     def parse_activity_number(val):

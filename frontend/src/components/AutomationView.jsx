@@ -1,13 +1,13 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Upload, CheckCircle2, FileText, AlertTriangle, RefreshCw, XCircle,
-  Code2, Eye, X, BookOpen, Terminal, Activity, Clock, Download, SlidersHorizontal, ListOrdered, HelpCircle
+  Code2, Eye, X, BookOpen, ChevronDown, ChevronRight, Terminal, Activity, Clock, Download, SlidersHorizontal, ListOrdered, HelpCircle
 } from 'lucide-react';
 import ActivityPreview from './ActivityPreview';
 import AdvancedSettingsPage from './AdvancedSettingsPage';
 import QuestionFormatsPage from './QuestionFormatsPage';
 import AutomationControls from './AutomationControls';
-import DocumentReviewPanel, { isUnresolved, QuestionCountBadge } from './DocumentReviewPanel';
+import DocumentReviewPanel, { isUnresolved, QuestionCountBadge, TermCountBadge } from './DocumentReviewPanel';
 import { AutomationContext } from '../context/AutomationContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -211,6 +211,8 @@ export default function AutomationView() {
   // pipeline steps run). Switching keeps everything above in state.
   const [page, setPage] = useState('curso');
   const [skipped, setSkipped] = useState(new Set());
+  const [glossaryExcluded, setGlossaryExcluded] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [ignoredIssues, setIgnoredIssues] = useState(new Set());
   const [busyIssue, setBusyIssue] = useState(null); // problem id while a correction is being applied
   const [reviewError, setReviewError] = useState('');
@@ -281,6 +283,31 @@ export default function AutomationView() {
       });
     } catch (err) {
       console.error('No se pudo guardar la exclusión de actividad:', err);
+    }
+  };
+
+  // The whole glossary, in or out of the upload (no per-term choice).
+  const loadGlossaryExcluded = async (cid) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/skip-glossary?course_id=${encodeURIComponent(cid)}`);
+      const data = await res.json();
+      setGlossaryExcluded(data.excluido === true);
+    } catch (err) {
+      console.error('No se pudo cargar la exclusión del glosario:', err);
+    }
+  };
+
+  const toggleGlossary = async () => {
+    const next = !glossaryExcluded;
+    setGlossaryExcluded(next); // optimistic, like toggleSkip
+    try {
+      await fetch(`${API_BASE}/api/skip-glossary`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ course_id: courseId, excluido: next })
+      });
+    } catch (err) {
+      console.error('No se pudo guardar la exclusión del glosario:', err);
     }
   };
 
@@ -422,6 +449,8 @@ export default function AutomationView() {
       setUploadedCourseId(courseId);
       setUploadStatus('done');
       loadSkipped(courseId);
+      loadGlossaryExcluded(courseId);
+      setShowTerms(false);
       loadIgnoredIssues(courseId);
     } catch (err) {
       console.error(err);
@@ -737,27 +766,59 @@ export default function AutomationView() {
                       <div className="p-4 bg-background border-b border-border flex items-center">
                         <BookOpen className="w-4 h-4 text-primary mr-2" />
                         <h3 className="font-semibold text-white">Glosario</h3>
+                        <TermCountBadge count={report.glosario?.entradas} />
                       </div>
-                      <div className="p-1">
-                        <button
-                          type="button"
-                          onClick={() => setFragment({ target: fragmentTargetFor('glosario', {}), title: 'Glosario (XML de importación)' })}
-                          className="w-full text-left hover:bg-primary/5 transition-colors"
+                      <div className="p-3">
+                        <div
+                          className={`flex items-center justify-between rounded border px-2.5 py-1.5 transition-colors ${glossaryExcluded ? 'border-border/50 bg-background/40 opacity-60' : 'border-border bg-background/80'}`}
                         >
-                          <div className="flex items-start p-3 border-t border-border mt-3">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-semibold text-white">Entradas del glosario</h4>
-                                <span className="flex items-center text-[10px] text-primary"><Eye className="w-3 h-3 mr-1" /> Ver XML</span>
-                              </div>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {report.glosario?.entradas
-                                  ? `${report.glosario.entradas} término${report.glosario.entradas === 1 ? '' : 's'} se importará${report.glosario.entradas === 1 ? '' : 'n'} al glosario de Moodle.`
-                                  : 'Aquí se muestra el XML de importación del glosario.'}
-                              </p>
-                            </div>
+                          <label className="flex items-center flex-1 cursor-pointer select-none min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={!glossaryExcluded}
+                              onChange={toggleGlossary}
+                              className="mr-2.5 shrink-0"
+                            />
+                            <span className="text-[11px] font-medium text-gray-300 truncate">
+                              Subir el glosario completo a Moodle
+                            </span>
+                            {glossaryExcluded && <span className="ml-2 text-[10px] text-gray-500 shrink-0">(excluido)</span>}
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setFragment({ target: fragmentTargetFor('glosario', {}), title: 'Glosario (XML de importación)' })}
+                            className="flex items-center text-[10px] text-primary hover:underline ml-2 shrink-0"
+                          >
+                            <Eye className="w-3 h-3 mr-1" /> Ver XML
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          {glossaryExcluded
+                            ? 'El glosario no se creará en Moodle. Marca la casilla para incluirlo.'
+                            : `${report.glosario?.entradas || 0} término${report.glosario?.entradas === 1 ? '' : 's'} se importará${report.glosario?.entradas === 1 ? '' : 'n'} al glosario de Moodle.`}
+                        </p>
+                        {report.glosario?.terminos?.length > 0 && (
+                          <div className="mt-2">
+                            <button
+                              type="button"
+                              onClick={() => setShowTerms(!showTerms)}
+                              className="flex items-center text-[11px] text-gray-300 hover:text-white"
+                            >
+                              {showTerms ? <ChevronDown className="w-3 h-3 mr-1" /> : <ChevronRight className="w-3 h-3 mr-1" />}
+                              {showTerms ? 'Ocultar' : 'Ver'} los términos
+                            </button>
+                            {showTerms && (
+                              <dl className="mt-2 max-h-96 overflow-y-auto rounded border border-border bg-background/60 divide-y divide-border">
+                                {report.glosario.terminos.map((t, i) => (
+                                  <div key={i} className="px-3 py-2">
+                                    <dt className="text-xs font-semibold text-white break-words">{t.concepto}</dt>
+                                    <dd className="text-[11px] text-gray-400 mt-0.5 leading-relaxed break-words">{t.definicion}</dd>
+                                  </div>
+                                ))}
+                              </dl>
+                            )}
                           </div>
-                        </button>
+                        )}
                       </div>
                     </div>
                   )}

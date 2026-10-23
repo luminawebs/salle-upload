@@ -853,21 +853,119 @@ class GlossaryTests(unittest.TestCase):
                     "<tr><td><p><strong>Abducción:</strong> Movimiento hacia afuera.</p>"
                     "<p><strong>Acomodación:</strong> Cambio de potencia.</p>"
                     "<p>Referencias de glosario</p><p>AAO (2022). Section 6: Pediatric.</p></td></tr>")
-        self.assertEqual(_review_html(html, "_test_glossary_rows")["glosario"], {"encontrado": True, "entradas": 2})
+        glossary = _review_html(html, "_test_glossary_rows")["glosario"]
+        self.assertEqual((glossary["encontrado"], glossary["entradas"]), (True, 2))
+        self.assertEqual(glossary["terminos"], [
+            {"concepto": "Abducción", "definicion": "Movimiento hacia afuera."},
+            {"concepto": "Acomodación", "definicion": "Cambio de potencia."},
+        ])
 
     def test_optional_glossary_after_the_last_activity_is_not_part_of_it(self):
         html = _doc(*self.UNIT, _row("ACTIVIDAD 5. Auditoría"), *ACTIVITY_BODY,
                     _row("(OPCIONAL) Glosario"), "<tr><td><p><strong>Apego:</strong> Vínculo afectivo.</p></td></tr>")
         report = _review_html(html, "_test_glossary_after_activity")
-        self.assertEqual(report["glosario"], {"encontrado": True, "entradas": 1})
+        self.assertEqual(report["glosario"]["terminos"], [{"concepto": "Apego", "definicion": "Vínculo afectivo."}])
         self.assertNotIn("contenido_sin_asignar", {p["tipo"] for p in report["cobertura"]["problemas"]})
         self.assertIn("glosario", [b["tipo"] for b in report["cobertura"]["bloques"]])
 
     def test_unfilled_template_glossary_is_not_imported(self):
         html = _doc(*self.UNIT, _row("(OPCIONAL) Glosario"),
                     _row("Incluya un glosario general para el curso. Ejemplo estructura del glosario"),
-                    "<tr><td><p>1. Término:</p><p>Definición</p></td></tr>")
-        self.assertEqual(_review_html(html, "_test_glossary_template")["glosario"], {"encontrado": False, "entradas": 0})
+                    "<tr><td><p>1. Término:</p><p>Definición</p></td></tr>",
+                    "<tr><td><p><em>Incluya un glosario general para el curso que contenga los principales "
+                    "conceptos. Ordene alfabéticamente.</em></p><p><em>Ejemplo estructura del glosario</em></p>"
+                    "<p><strong><em>1. Término: </em></strong><em>Definición</em></p></td></tr>")
+        report = _review_html(html, "_test_glossary_template")
+        self.assertEqual(report["glosario"], {"encontrado": False, "entradas": 0, "terminos": []})
+        self.assertNotIn("glosario_sin_leer", {p["tipo"] for p in report["cobertura"]["problemas"]})
+
+    def test_next_activity_in_the_same_table_ends_the_glossary(self):
+        html = _doc(*self.UNIT, _row("(OPCIONAL) Glosario"), "<tr><td><p><strong>Apego:</strong> Vínculo.</p></td></tr>",
+                    _row("Actividad #. Evaluación final (obligatorio solo en cursos de pregrado)"),
+                    _row("Construya mínimo 15 preguntas."))
+        report = _review_html(html, "_test_glossary_then_activity")
+        self.assertEqual(report["glosario"]["entradas"], 1)
+        self.assertNotIn("glosario_sin_leer", {p["tipo"] for p in report["cobertura"]["problemas"]})
+
+    def test_two_column_term_table(self):
+        html = _doc(*self.UNIT, _row("Glosario"), _row("Término", "Definición", th=True),
+                    _row("Apego", "Vínculo afectivo."), _row("Asimilación:", "Incorporar lo nuevo."))
+        report = _review_html(html, "_test_glossary_table")
+        self.assertEqual(report["glosario"]["terminos"], [
+            {"concepto": "Apego", "definicion": "Vínculo afectivo."},
+            {"concepto": "Asimilación", "definicion": "Incorporar lo nuevo."},
+        ])
+        self.assertNotIn("glosario_sin_leer", {p["tipo"] for p in report["cobertura"]["problemas"]})
+
+    def test_two_column_rows_without_the_header_are_not_terms(self):
+        html = _doc(*self.UNIT, _row("Glosario"), "<tr><td><p><strong>Apego:</strong> Vínculo.</p></td></tr>",
+                    _row("Resumen", "Texto."))
+        self.assertEqual(_review_html(html, "_test_glossary_no_header")["glosario"]["entradas"], 1)
+
+    def test_bold_term_without_colon(self):
+        html = _doc(*self.UNIT, _row("Glosario"),
+                    "<tr><td><p><strong>Apego</strong> Vínculo afectivo.</p>"
+                    "<p><strong>Asimilación</strong> – Incorporar lo nuevo.</p></td></tr>")
+        self.assertEqual(_review_html(html, "_test_glossary_bold")["glosario"]["terminos"], [
+            {"concepto": "Apego", "definicion": "Vínculo afectivo."},
+            {"concepto": "Asimilación", "definicion": "Incorporar lo nuevo."},
+        ])
+
+    def test_glossary_text_that_is_not_a_term_is_a_notice(self):
+        html = _doc(*self.UNIT, _row("Glosario"),
+                    "<tr><td><p><strong>Apego:</strong> Vínculo afectivo.</p>"
+                    "<p>Asimilación, incorporar lo nuevo.</p></td></tr>")
+        report = _review_html(html, "_test_glossary_unread")
+        self.assertEqual(report["glosario"]["entradas"], 1)
+        issue = next(p for p in report["cobertura"]["problemas"] if p["tipo"] == "glosario_sin_leer")
+        self.assertFalse(issue["bloquea"])
+        self.assertEqual(issue["textos"], ["Asimilación, incorporar lo nuevo."])
+
+
+class GlossaryExclusionTests(unittest.TestCase):
+    """The review's one checkbox for the whole glossary (core/activity_selection.py)."""
+
+    COURSE = "_test_glossary_exclusion"
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        os.chdir(ROOT)  # the choice is stored under the relative "workspace/"
+
+    def tearDown(self):
+        shutil.rmtree(os.path.join(ROOT, "workspace", self.COURSE), ignore_errors=True)
+        os.chdir(self._cwd)
+
+    def test_included_by_default_and_roundtrip(self):
+        from core.activity_selection import is_glossary_excluded, set_glossary_excluded
+        self.assertFalse(is_glossary_excluded(self.COURSE))
+        set_glossary_excluded(self.COURSE, True)
+        self.assertTrue(is_glossary_excluded(self.COURSE))
+        set_glossary_excluded(self.COURSE, False)
+        self.assertFalse(is_glossary_excluded(self.COURSE))
+
+    def test_corrupt_file_uploads_the_glossary(self):
+        from core.activity_selection import is_glossary_excluded
+        os.makedirs(os.path.join("workspace", self.COURSE), exist_ok=True)
+        with open(os.path.join("workspace", self.COURSE, "skip_glosario.json"), "w", encoding="utf-8") as f:
+            f.write("{no es json")
+        self.assertFalse(is_glossary_excluded(self.COURSE))
+
+    def test_excluded_glossary_is_not_created(self):
+        from actions.glosario_actions import create_glosario_activity
+        from core.activity_selection import set_glossary_excluded
+        xml_path = os.path.join("workspace", self.COURSE, "glosario", "glosario_import.xml")
+        os.makedirs(os.path.dirname(xml_path))
+        with open(xml_path, "w", encoding="utf-8") as f:
+            f.write("<GLOSSARY><INFO><ENTRIES><ENTRY><CONCEPT>A</CONCEPT></ENTRY></ENTRIES></INFO></GLOSSARY>")
+        set_glossary_excluded(self.COURSE, True)
+        logging.disable(logging.NOTSET)
+        try:
+            with self.assertLogs("progreso", level="INFO") as logs:
+                # No browser: an excluded glossary returns before touching the driver.
+                self.assertFalse(create_glosario_activity(None, self.COURSE, xml_path))
+        finally:
+            logging.disable(logging.CRITICAL)
+        self.assertIn("Glosario excluido", " ".join(logs.output))
 
 
 class MoodleActivityLookupTests(unittest.TestCase):

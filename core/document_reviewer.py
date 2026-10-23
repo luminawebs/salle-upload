@@ -9,6 +9,16 @@ from core.document_headings import bare_unit_number, is_intro_heading
 logger = logging.getLogger(__name__)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
+def glossary_terms(xml_path: str) -> list:
+    """The entries of glosario_import.xml, as [{"concepto", "definicion"}], in order."""
+    import xml.etree.ElementTree as ET
+    return [
+        {"concepto": (entry.findtext("CONCEPT") or "").strip(), "definicion": (entry.findtext("DEFINITION") or "").strip()}
+        for entry in ET.parse(xml_path).getroot().iter("ENTRY")
+    ]
+
+
 def review_document(course_id: int, generate_json=True, generate_text=True, cleanup_fragments=True):
     """
     Reviews the raw_docx_extracted.html for a given course ID to ensure all
@@ -215,13 +225,13 @@ def review_document(course_id: int, generate_json=True, generate_text=True, clea
     # uses it to list problems and block Run until each is fixed or ignored.
     # Whether the splitter found a glossary (it writes glosario_import.xml only
     # when it does) — most documents have none, so the UI shows a one-line
-    # note instead of a full card.
+    # note instead of a full card. "terminos" is the preview the UI lists.
     glossary_path = os.path.join(base_dir, "glosario", "glosario_import.xml")
-    report["glosario"] = {"encontrado": False, "entradas": 0}
+    report["glosario"] = {"encontrado": False, "entradas": 0, "terminos": []}
     if os.path.exists(glossary_path):
         try:
-            with open(glossary_path, "r", encoding="utf-8") as f:
-                report["glosario"] = {"encontrado": True, "entradas": f.read().count("<ENTRY>")}
+            terms = glossary_terms(glossary_path)
+            report["glosario"] = {"encontrado": True, "entradas": len(terms), "terminos": terms}
         except Exception as e:
             logger.error(f"No se pudo leer {glossary_path}: {e}")
 
