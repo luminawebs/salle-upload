@@ -62,10 +62,12 @@ HINTS = (
     },
     {
         "id": "importar_preguntas",
-        "patron": r"failed to import moodle xml",
+        "patron": r"failed to import moodle xml|no import[oó] todas las preguntas",
         "ejemplo": "Failed to import Moodle XML file for ACTIVIDAD 4: timeout",
-        "pista": "No se pudieron importar las preguntas del cuestionario. Revisa en «Vista previa» que las "
-                 "preguntas se lean bien y vuelve a ejecutar solo ese paso desde «Configuración avanzada».",
+        "pista": "No se pudieron importar (todas) las preguntas del cuestionario: Moodle se detiene en la "
+                 "primera que rechaza y deja solo las anteriores. Revisa en «Vista previa» que las preguntas "
+                 "se lean bien; en Moodle borra las preguntas importadas del banco del cuestionario y vuelve "
+                 "a ejecutar solo ese paso desde «Configuración avanzada».",
         "codigo": "actions/cuestionario_export_actions.py · import_xml_to_cuestionario",
     },
     {

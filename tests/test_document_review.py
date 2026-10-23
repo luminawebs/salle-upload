@@ -846,6 +846,27 @@ class WordNumberingTests(unittest.TestCase):
         self.assertEqual([(q["numero"], q["motivo"]) for q in ungraded_questions(parse_questions(html))],
                          [(2, "sin_opciones"), (3, "sin_respuesta")])
 
+    def test_fill_in_with_one_answer_is_a_cloze_not_a_one_choice_multichoice(self):
+        from actions.html_transformer import parse_questions, question_handler
+        html = ("<p><strong>2.</strong> Complete: El modelo __________ se basa en la interacción.<br/>"
+                "a. Serve and return (respuesta)</p>")
+        xml = question_handler(parse_questions(html)[0], 1)[0].to_moodle_xml()
+        self.assertIn('<question type="cloze">', xml)
+        self.assertIn("El modelo {1:SHORTANSWER:=Serve and return} se basa", xml)
+        self.assertNotIn("<strong>2.</strong>", xml)
+
+    def test_fill_in_without_a_blank_gets_the_answer_after_the_text(self):
+        from actions.html_transformer import parse_questions, question_handler
+        xml = question_handler(parse_questions("<p>1. Defina apego:</p><p>a) Vínculo afectivo (respuesta)</p>")[0], 1)[0].to_moodle_xml()
+        self.assertIn("{1:SHORTANSWER:=Vínculo afectivo}", xml)
+
+    def test_import_summary_problem(self):
+        from actions.cuestionario_export_actions import import_summary_problem
+        self.assertIsNone(import_summary_problem("Importando 14 preguntas desde el archivo", [], 14))
+        self.assertIn("2 opciones", import_summary_problem("Importando 14 preguntas", ["Se requieren al menos 2 opciones"], 14))
+        self.assertIn("anunció 13", import_summary_problem("Importando 13 preguntas", [], 14))
+        self.assertIsNone(import_summary_problem("Resumen sin conteo", ["", "  "], 14))
+
     def test_question_number_is_not_part_of_the_moodle_question_text(self):
         from actions.html_transformer import parse_questions, question_handler
         q = parse_questions("<p>1. ¿Capital?</p><p>A. Bogotá (respuesta)</p><p>B. Cali</p>")[0]

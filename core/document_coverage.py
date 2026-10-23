@@ -411,8 +411,9 @@ def _ungraded_issue(key: str, label: str, summary, **extra) -> list:
         f"{label} (Cuestionario): {n} pregunta{'s' if n > 1 else ''} se subiría{'n' if n > 1 else ''} sin calificar",
         f"{'Las preguntas' if n > 1 else 'La pregunta'} {numbers} no "
         f"{'tienen' if n > 1 else 'tiene'} opciones con la respuesta marcada con «(respuesta)», así que en Moodle "
-        f"{'quedarían' if n > 1 else 'quedaría'} sin puntaje (solo texto, o sin respuesta correcta). Corrige su formato "
-        "en el .docx (ver «Formatos de preguntas»), usa «Revisar con la IA», o ignóralo si es texto informativo.",
+        f"{'quedarían' if n > 1 else 'quedaría'} sin puntaje (solo texto) o, si tiene opciones pero ninguna correcta, "
+        "Moodle la rechaza y detiene la importación de las preguntas siguientes. Corrige su formato en el .docx "
+        "(ver «Formatos de preguntas»), usa «Revisar con la IA», o ignóralo si es texto informativo.",
         preguntas_sin_calificar=[f"{q['numero']}. {q['texto']}" for q in ungraded],
         archivo=summary.get("archivo"), categoria=summary.get("categoria"), **extra,
     )]

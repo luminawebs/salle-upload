@@ -48,7 +48,28 @@ def _pick_category(texts: list, activity_name: str):
     return choose_activity(names, activity_name)
 
 
-def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str, xml_path: str, wait_time: int) -> bool:
+_IMPORTING_RE = re.compile(r'Importando\s+(\d+)\s+preguntas?|Importing\s+(\d+)\s+questions?', re.IGNORECASE)
+
+
+def import_summary_problem(page_text: str, error_texts: list, expected_count: int = None):
+    """
+    What went wrong on Moodle's import summary page, or None: an error
+    notification (a rejected question), or "Importando N preguntas" with N
+    other than the number of questions in the XML file.
+    """
+    errors = [" ".join(t.split()) for t in error_texts if t and t.strip()]
+    if errors:
+        return "; ".join(errors)[:400]
+    m = _IMPORTING_RE.search(page_text or "")
+    if expected_count and m:
+        announced = int(m.group(1) or m.group(2))
+        if announced != expected_count:
+            return f"Moodle anunció {announced} pregunta(s) y el archivo tiene {expected_count}"
+    return None
+
+
+def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str, xml_path: str, wait_time: int,
+                               expected_count: int = None) -> bool:
     wait = WebDriverWait(driver, wait_time)
     
     navigate_to_course(driver, Config.MOODLE_URL, course_id, wait_time)
@@ -146,8 +167,18 @@ def import_xml_to_cuestionario(driver, course_id: int, activity_name_prefix: str
         
         logger.info(f"[{activity_name_prefix}] Step 6: Clicking continue on import summary...")
         continue_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'continuar') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'continue')]")))
+
+        # Moodle stops at the first question it rejects ("al menos 2
+        # opciones"…) but keeps the ones before it, and still shows this
+        # summary: reaching it isn't success (course 71326 got 1 of 14).
+        problem = import_summary_problem(driver.find_element(By.TAG_NAME, "body").get_attribute("innerText") or "",
+                                         [e.text for e in driver.find_elements(By.CSS_SELECTOR, ".alert-danger, .notifyproblem, .errorbox")],
+                                         expected_count)
         driver.execute_script("arguments[0].click();", continue_btn)
-        
+        if problem:
+            logger.error(f"{activity_name_prefix}: Moodle no importó todas las preguntas al banco: {problem}")
+            return False
+
         logger.info(f"Successfully imported Moodle XML file for {activity_name_prefix}.")
         return True
     except Exception as e:
@@ -381,7 +412,7 @@ def export_quiz_questions(driver, course_id: int, html_path: str, activity_prefi
         if export_enabled:
             logger.info(f"Exporting questions for {activity_prefix}...")
             export_success = False
-            if import_xml_to_cuestionario(driver, course_id, activity_prefix, xml_path, wait_time):
+            if import_xml_to_cuestionario(driver, course_id, activity_prefix, xml_path, wait_time, expected_count=q_count):
                 progress.ok(f"{activity_prefix}: {q_count} preguntas importadas al banco")
                 if add_questions_to_cuestionario(driver, course_id, activity_prefix, q_count, wait_time):
                     export_success = True

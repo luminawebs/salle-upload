@@ -670,8 +670,36 @@ def ungraded_questions(questions: list) -> list:
 # The document's own number at the start of a question ("1. ¿…?", "12) …"):
 # Moodle numbers the questions itself ("Pregunta 1"), and in a shuffled quiz
 # "5." on question 1 would mislead. Leading tags are kept; "1.5 mm…" isn't a
-# number label (no space after the dot).
-_LEADING_QUESTION_NUMBER_RE = re.compile(r'^((?:\s*<[^>]+>)*)\s*\d{1,3}\s*[.)]\s+')
+# number label (no space after the dot). The number may be bold on its own
+# ("<strong>1.</strong> ¿…?"): the closing tags right after it are kept too.
+_LEADING_QUESTION_NUMBER_RE = re.compile(r'^((?:\s*<[^>]+>)*)\s*\d{1,3}\s*[.)]((?:\s*</[^>]+>)*)\s+')
+
+# A blank to fill in the question text ("El modelo ________ se basa en…").
+_BLANK_RE = re.compile(r'_{3,}')
+
+
+def _single_answer_to_cloze(q: dict) -> None:
+    """
+    "Complete: El modelo ____ …" with one option, the answer ("a. Serve and
+    return"), was exported as a multiple choice with a single choice, which
+    Moodle rejects ("al menos 2 opciones") — and the import stopped there,
+    leaving the quiz with only the questions before it. It's a fill-in: the
+    answer goes in the blank (or after the text if there's no blank) as a
+    "completar" (cloze) question, the format in the "Formatos de preguntas"
+    guide. In place, like _format_question_urls.
+    """
+    answer = " ".join(BeautifulSoup(q['options'][0]['html'], 'html.parser').get_text(" ").split())
+    answer = re.sub(r'^[a-zA-Z][.)]\s+', '', answer)  # the option letter ("a. Serve and return")
+    answer = answer.replace("]", ")").replace("}", ")")
+    stem = q['stem_html']
+    for i, part in enumerate(stem):
+        if _BLANK_RE.search(part):
+            stem[i] = _BLANK_RE.sub(f"[={answer}]", part, count=1)
+            break
+    else:
+        stem.append(f"<p>[={answer}]</p>")
+    q['options'] = []
+    q['q_type'] = 'cloze'
 
 
 def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "doc"):
@@ -682,7 +710,9 @@ def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "
     guide (core/question_types/catalog.py) always agree.
     """
     _format_question_urls(q)
-    stem_html = _LEADING_QUESTION_NUMBER_RE.sub(r"\1", "<br>".join(q['stem_html']), count=1)
+    if q['q_type'] == 'multichoice' and len(q['options']) == 1:
+        _single_answer_to_cloze(q)
+    stem_html = _LEADING_QUESTION_NUMBER_RE.sub(r"\1\2", "<br>".join(q['stem_html']), count=1)
     opts = []
     is_true_false = False
     correct_is_true = False
