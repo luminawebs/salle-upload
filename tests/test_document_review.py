@@ -607,6 +607,21 @@ class TemplateVariantTests(unittest.TestCase):
                 f"<tr><td>{total}</td><td>5</td></tr></table>", "html.parser").table
             self.assertEqual([c["name"] for c in criteria_from_table(table)], ["Presenta las tablas totales"], total)
 
+    def test_evaluation_table_styled_by_its_columns(self):
+        from actions.html_transformer import transform_activity_html
+        html = ("<table><tr><td><p>Criterios</p></td><td><p>Descripción</p></td><td><p>Puntaje</p></td></tr>"
+                "<tr><td><p>Criterio 1</p></td><td><p>Identifica hallazgos</p></td><td><p>1.0</p></td></tr>"
+                "<tr><td><p></p></td><td><p>Total</p></td><td><p>5.0</p></td></tr></table>")
+        table = BeautifulSoup(transform_activity_html(html), "html.parser").find("table")
+        self.assertEqual(table.get("border"), "1")
+        rows = table.find_all("tr")
+        self.assertEqual([td.get("width") for td in rows[1].find_all("td")], ["90", "394", "48"])
+        self.assertEqual(rows[1].find_all("td")[2].get_text(strip=True), "1,0")
+        two_cols = ("<table><tr><td><p>Criterios de desempeño</p></td><td><p>Puntos</p></td></tr>"
+                    "<tr><td><p>Aplica</p></td><td><p>2</p></td></tr><tr><td><p>Total</p></td><td><p>5</p></td></tr></table>")
+        rows = BeautifulSoup(transform_activity_html(two_cols), "html.parser").find("table").find_all("tr")
+        self.assertEqual([td.get("width") for td in rows[1].find_all("td")], ["436", "48"])
+
     def test_rubric_in_the_next_table(self):
         from core.docx_rubrica_parser import parse_rubricas_from_html
         rubric = RubricChoiceTests._table([("A", "2.0"), ("B", "3.0")])

@@ -969,6 +969,103 @@ def format_typography_in_html(html_content: str) -> str:
             tag.append(new_span)
     return str(soup)
 
+def _is_evaluation_table(table) -> bool:
+    """
+    The activity's grading table: the template's "Criterios de desempeño |
+    Puntos", or any table whose header names criteria and points ("Criterios
+    | Descripción | Puntaje" — it was left unstyled).
+    """
+    if "Criterios de desempeño" in table.get_text():
+        return True
+    first = table.find("tr")
+    header = first.get_text(" ", strip=True).upper() if first else ""
+    return "CRITERIO" in header and "PUNT" in header
+
+
+def _style_evaluation_table(soup, table) -> None:
+    """
+    Course style for the grading table. Columns come from the header: points
+    ("Puntos"/"Puntaje", narrow, centered), the description ("…desempeño"/
+    "Descripción", wide) and any label column ("Criterio 1"). A 3-column table
+    used to get the wide width on its label column and 48 px on the text.
+    """
+    table['style'] = "width: 60%; border-collapse: collapse; border: 1px solid #000;"
+    table['border'] = "1"
+    table['cellspacing'] = "0"
+    table['cellpadding'] = "0"
+    table.wrap(soup.new_tag("div", align="center"))
+
+    rows = table.find_all("tr")
+    header = [c.get_text(" ", strip=True).upper() for c in rows[0].find_all(["td", "th"])] if rows else []
+    points_col = next((k for k, h in enumerate(header) if "PUNT" in h), len(header) - 1)
+    desc_col = next((k for k, h in enumerate(header) if "DESEMPE" in h or "DESCRIP" in h),
+                    0 if points_col != 0 else 1)
+    has_label_col = len(header) > 2
+    widths = {"desc": "394" if has_label_col else "436", "label": "90", "points": "48"}
+
+    def kind(j):
+        # Without a label column (the template's 2 columns), or for a cell past
+        # the header's (a row with an extra cell), anything but the text is
+        # scored like the points, as it always was.
+        if j == desc_col:
+            return "desc"
+        if j == points_col or not has_label_col or j >= len(header):
+            return "points"
+        return "label"
+
+    def decimal_score(td):
+        inner_p = td.find("p")
+        if inner_p:
+            inner_p['align'] = "right"
+            txt = inner_p.get_text(strip=True)
+            if txt.isdigit():
+                for t_node in inner_p.find_all(string=True):
+                    t_node.replace_with(t_node.replace(txt, f"{txt},0"))
+            elif re.fullmatch(r'\d+\.\d+', txt):  # "1.0" as the document wrote it -> "1,0"
+                for t_node in inner_p.find_all(string=True):
+                    t_node.replace_with(t_node.replace(txt, txt.replace(".", ",")))
+
+    for i, row in enumerate(rows):
+        tds = row.find_all(["td", "th"])
+        if i == 0:  # header
+            row['style'] = RUBRIC_HEADER_STYLE
+            for j, td in enumerate(tds):
+                td['valign'] = "top"
+                td['style'] = "border: 1px solid #000;"
+                td['width'] = widths[kind(j)]
+                inner_p = td.find("p")
+                if inner_p:
+                    inner_p['align'] = "center"
+        elif i < len(rows) - 1:  # criteria
+            for j, td in enumerate(tds):
+                td['valign'] = "top"
+                td['width'] = widths[kind(j)]
+                if kind(j) == "points":
+                    td['style'] = "text-align: center; border: 1px solid #000;"
+                    decimal_score(td)
+                else:
+                    td['style'] = "border: 1px solid #000;"
+                    inner_p = td.find("p")
+                    if inner_p:
+                        inner_p['align'] = "left"
+        else:  # total
+            for j, td in enumerate(tds):
+                td['valign'] = "top"
+                td['width'] = widths[kind(j)]
+                if kind(j) == "points":
+                    td['style'] = "text-align: center; border: 1px solid #000;"
+                    decimal_score(td)
+                else:
+                    td['style'] = "border: 1px solid #000;"
+                    inner_p = td.find("p")
+                    if inner_p:
+                        inner_p['align'] = "right"
+                        # Replace "La suma total debe dar" with "Total"
+                        for t_node in inner_p.find_all(string=True):
+                            if "La suma total" in t_node:
+                                t_node.replace_with("Total")
+
+
 def transform_activity_html(html_content: str, course_id: int = None) -> str:
     if not html_content or not html_content.strip():
         return html_content
@@ -1078,80 +1175,9 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
     # 4. Format the Rubric Table
     tables = soup.find_all("table")
     for table in tables:
-        if "Criterios de desempeño" in table.get_text():
-            table['style'] = "width: 60%; border-collapse: collapse; border: 1px solid #000;"
-            table['border'] = "1"
-            table['cellspacing'] = "0"
-            table['cellpadding'] = "0"
-            
-            div_wrapper = soup.new_tag("div", align="center")
-            table.wrap(div_wrapper)
-            
+        if _is_evaluation_table(table):
+            _style_evaluation_table(soup, table)
             rows = table.find_all("tr")
-            for i, row in enumerate(rows):
-                tds = row.find_all(["td", "th"])
-                
-                # Header row
-                if i == 0:
-                    row['style'] = RUBRIC_HEADER_STYLE
-                    for td in tds:
-                        td['valign'] = "top"
-                        td['style'] = "border: 1px solid #000;"
-                        if "Criterios" in td.get_text():
-                            td['width'] = "436"
-                            inner_p = td.find("p")
-                            if inner_p: inner_p['align'] = "center"
-                        else:
-                            td['width'] = "48"
-                            inner_p = td.find("p")
-                            if inner_p: inner_p['align'] = "center"
-                            
-                # Data rows
-                elif i < len(rows) - 1:
-                    for j, td in enumerate(tds):
-                        td['valign'] = "top"
-                        if j == 0:
-                            td['width'] = "436"
-                            td['style'] = "border: 1px solid #000;"
-                            inner_p = td.find("p")
-                            if inner_p: inner_p['align'] = "left"
-                        else:
-                            td['width'] = "48"
-                            td['style'] = "text-align: center; border: 1px solid #000;"
-                            inner_p = td.find("p")
-                            if inner_p: 
-                                inner_p['align'] = "right"
-                                # Replace integer score with comma decimal
-                                txt = inner_p.get_text(strip=True)
-                                if txt.isdigit():
-                                    for t_node in inner_p.find_all(string=True):
-                                        t_node.replace_with(t_node.replace(txt, f"{txt},0"))
-                                
-                # Footer row
-                else:
-                    for j, td in enumerate(tds):
-                        td['valign'] = "top"
-                        if j == 0:
-                            td['width'] = "436"
-                            td['style'] = "border: 1px solid #000;"
-                            inner_p = td.find("p")
-                            if inner_p:
-                                inner_p['align'] = "right"
-                                # Replace "La suma total debe dar" with "Total"
-                                for t_node in inner_p.find_all(string=True):
-                                    if "La suma total" in t_node:
-                                        t_node.replace_with("Total")
-                        else:
-                            td['width'] = "48"
-                            td['style'] = "text-align: center; border: 1px solid #000;"
-                            inner_p = td.find("p")
-                            if inner_p:
-                                inner_p['align'] = "right"
-                                txt = inner_p.get_text(strip=True)
-                                if txt.isdigit():
-                                    for t_node in inner_p.find_all(string=True):
-                                        t_node.replace_with(t_node.replace(txt, f"{txt},0"))
-            
             # Validate the last row contains "Total" and "5"
             if len(rows) > 0:
                 last_row_text = rows[-1].get_text(strip=True).lower()
