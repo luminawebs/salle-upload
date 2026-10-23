@@ -1115,6 +1115,18 @@ class MoodleActivityLookupTests(unittest.TestCase):
         self.assertFalse(materials_already_added("Lecturas complementarias unidad 12", 1))
         self.assertFalse(materials_already_added("UNIDAD 3. Cierre\nACTIVIDAD 5", 3))
 
+    def test_lecturas_page_is_a_list_without_repeats_and_with_inline_links(self):
+        from actions.materiales_estudio_actions import lecturas_page_body
+        html = ("<p><strong>Lecturas complementarias</strong></p>"
+                "<p>Clippinger, Business Plans , Expert Press, 2019.</p><p><a href='https://x.org/1'>https://x.org/1</a></p>"
+                "<p>Otro, Libro, 2020. <a href='https://x.org/2'>https://x.org/2</a></p>"
+                "<p>Clippinger, Business Plans, Expert Press, 2019.</p><p><a href='https://x.org/1'>https://x.org/1</a></p>"
+                "<p>Otro, Libro, 2020. <a href='https://x.org/3'>https://x.org/3</a></p>")
+        items = BeautifulSoup(lecturas_page_body(html), "html.parser").find("ul").find_all("li", recursive=False)
+        self.assertEqual(len(items), 3, "the repeated reference once; same text with another link stays")
+        self.assertIn("https://x.org/1", str(items[0]), "the link on its own line joins its reference")
+        self.assertIn("Clippinger", items[0].get_text())
+
     def test_second_activity_readings_are_all_merged(self):
         import tempfile
         from core.data_parser import merge_material_de_referencia

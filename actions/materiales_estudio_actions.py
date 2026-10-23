@@ -85,12 +85,32 @@ def add_etiqueta_materiales(driver, section_element, wait_time=10):
         
     return True
 
+def _reference_key(html: str) -> str:
+    """The same reference written twice ("Plans , Business" / "Plans, Business"), as one key."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    text = re.sub(r"\s+([,.;:)])", r"\1", soup.get_text(" ").lower())
+    # The links count too: the same text with another link is another reading.
+    links = sorted(a.get("href", "") for a in soup.find_all("a"))
+    return " ".join(text.split()).strip(" .") + "|" + " ".join(links)
+
+
+def _only_a_link(tag) -> bool:
+    """A paragraph that is just a link or a URL (the reference's link put on its own line)."""
+    text = " ".join(tag.get_text(" ").split())
+    links = " ".join(" ".join(a.get_text(" ").split()) for a in tag.find_all("a"))
+    return bool(text) and (text == links or re.fullmatch(r"https?://\S+", text) is not None)
+
+
 def lecturas_page_body(fragment_html: str) -> str:
     """
     The "Lecturas complementarias unidad N" page body from the unit's
-    Material_de_referencia_UN.html: one "Lecturas complementarias" title (the
-    document's own heading was shown again under it), without the template's
-    "Básica:" / "Complementaria:" labels.
+    Material_de_referencia_UN.html (every activity's readings, in order):
+    one "Lecturas complementarias" title (the document's own heading was shown
+    again under it), without the template's "Básica:" / "Complementaria:"
+    labels, as a bulleted list with each reference once — the unit's
+    activities often list the same readings — and a link on its own line
+    joined to the reference above it, so "(Disponible aquí)" follows the text.
     """
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(fragment_html, "html.parser")
@@ -101,7 +121,33 @@ def lecturas_page_body(fragment_html: str) -> str:
             p.decompose()
         elif text.rstrip(':').strip() in ('lecturas complementarias', 'material de referencia', 'lecturas de referencia'):
             p.decompose()
-    return "<p><strong>Lecturas complementarias</strong></p>" + str(soup)
+
+    # Each reference as HTML, in document order: a paragraph, or a list item.
+    entries, others = [], []
+    for tag in list(soup.contents):
+        if not getattr(tag, "name", None):
+            continue
+        items = tag.find_all("li") if tag.name in ("ul", "ol") else [tag] if tag.name == "p" else None
+        if items is None:
+            others.append(str(tag))  # a table or anything else: kept as it was
+            continue
+        for item in items:
+            if not item.get_text(strip=True) and not item.find("a"):
+                continue
+            inner = item.decode_contents().strip()
+            if entries and _only_a_link(item):
+                entries[-1] += " " + inner
+            else:
+                entries.append(inner)
+
+    seen, unique = set(), []
+    for entry in entries:
+        key = _reference_key(entry)
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(entry)
+    body = ("<ul>" + "".join(f"<li>{e}</li>" for e in unique) + "</ul>") if unique else ""
+    return "<p><strong>Lecturas complementarias</strong></p>" + body + "".join(others)
 
 
 def add_pagina_materiales(driver, section_element, course_id, unidad_num, wait_time=10):
