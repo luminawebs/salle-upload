@@ -95,6 +95,21 @@ def _reference_key(html: str) -> str:
     return " ".join(text.split()).strip(" .") + "|" + " ".join(links)
 
 
+# A number or dash typed at the start of a reference ("1. ", "2) ", "- ", "•"):
+# the list's bullet replaces it, so the page doesn't show "• 1. Autor…".
+_TYPED_MARKER_RE = re.compile(r"^\s*(?:\d{1,2}\s*[.)]|[-–—•·▪])\s*")
+
+
+def _without_typed_marker(html: str) -> str:
+    """The reference's HTML without a number or dash typed before its first word."""
+    from bs4 import BeautifulSoup, NavigableString
+    soup = BeautifulSoup(html, "html.parser")
+    first = next((s for s in soup.find_all(string=True) if s.strip()), None)
+    if isinstance(first, NavigableString) and _TYPED_MARKER_RE.match(first):
+        first.replace_with(_TYPED_MARKER_RE.sub("", first, count=1))
+    return str(soup)
+
+
 def _only_a_link(tag) -> bool:
     """A paragraph that is just a link or a URL (the reference's link put on its own line)."""
     text = " ".join(tag.get_text(" ").split())
@@ -138,7 +153,7 @@ def lecturas_page_body(fragment_html: str) -> str:
             if entries and _only_a_link(item):
                 entries[-1] += " " + inner
             else:
-                entries.append(inner)
+                entries.append(_without_typed_marker(inner))
 
     seen, unique = set(), []
     for entry in entries:

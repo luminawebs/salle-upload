@@ -1127,6 +1127,16 @@ class MoodleActivityLookupTests(unittest.TestCase):
         self.assertIn("https://x.org/1", str(items[0]), "the link on its own line joins its reference")
         self.assertIn("Clippinger", items[0].get_text())
 
+    def test_lecturas_page_bullets_replace_numbers_and_dashes(self):
+        from actions.materiales_estudio_actions import lecturas_page_body
+        html = ("<p><strong>Lecturas complementarias</strong></p>"
+                "<ol><li>Autor A (2019). Libro.</li></ol>"
+                "<p>2. Autor B (2020). Artículo.</p><p>-Autor C (2018). Guía.</p><p>2019. Anuario.</p>")
+        out = BeautifulSoup(lecturas_page_body(html), "html.parser")
+        self.assertNotIn("<ol", str(out))
+        self.assertEqual([li.get_text(" ", strip=True) for li in out.ul.find_all("li", recursive=False)],
+                         ["Autor A (2019). Libro.", "Autor B (2020). Artículo.", "Autor C (2018). Guía.", "2019. Anuario."])
+
     def test_second_activity_readings_are_all_merged(self):
         import tempfile
         from core.data_parser import merge_material_de_referencia
