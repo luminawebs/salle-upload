@@ -619,6 +619,22 @@ class TemplateVariantTests(unittest.TestCase):
         self.assertNotIn("Taller de análisis", out)
         self.assertIn("Apreciado estudiante", out)
 
+    def test_production_info_hidden_even_without_evaluation_section(self):
+        from actions.html_transformer import transform_activity_html
+        no_eval = ("<p>¿Cómo lo vamos a lograr?</p><p>Realiza un mapa mental.</p>"
+                   "<p>Información para el equipo de producción de la DEE</p><p>Herramientas de la plataforma virtual</p>"
+                   "<p>(Marque con una X): Foro___ Tarea__X__</p>")
+        out = transform_activity_html(no_eval)
+        self.assertIn("Realiza un mapa mental", out)
+        self.assertNotIn("equipo de producción", out)
+        self.assertNotIn("Marque con una X", out)
+        before_eval = ("<p>Texto.</p><p>Información para el equipo de producción de la DEE</p><p>Tarea__X__</p>"
+                       "<p>¿Cómo lo vamos a evaluar?</p><table><tr><td><p>Criterios de desempeño</p></td>"
+                       "<td><p>Puntos</p></td></tr><tr><td><p>Aplica</p></td><td><p>5</p></td></tr></table>")
+        out = transform_activity_html(before_eval)
+        self.assertNotIn("Tarea__X__", out)
+        self.assertIn("Aplica", out, "the evaluation table after it stays")
+
     def test_evaluation_table_styled_by_its_columns(self):
         from actions.html_transformer import transform_activity_html
         html = ("<table><tr><td><p>Criterios</p></td><td><p>Descripción</p></td><td><p>Puntaje</p></td></tr>"

@@ -1141,6 +1141,16 @@ def _style_evaluation_table(soup, table) -> None:
                                 t_node.replace_with("Total")
 
 
+_PRODUCTION_INFO_RE = re.compile(r'^INFORMACION PARA EL EQUIPO DE PRODUCCION')
+
+
+def _plain_upper(text: str) -> str:
+    """Upper-case, accent-free, single-spaced."""
+    import unicodedata
+    text = "".join(c for c in unicodedata.normalize("NFKD", text or "") if not unicodedata.combining(c))
+    return " ".join(text.split()).upper()
+
+
 # An activity title as its first paragraph: "ACTIVIDAD 1. …", "ACTIVIDAD #3", "ACTIVIDAD II:"
 _ACTIVITY_TITLE_RE = re.compile(r'^ACTIVIDAD\s*(\d+|#\s*\d*|[IVXLC]+)\b')
 
@@ -1184,6 +1194,20 @@ def transform_activity_html(html_content: str, course_id: int = None) -> str:
                 matched = True
                 break
                 
+    # 2.4 "Información para el equipo de producción" (the tools to use, external
+    # tools, readings…) is never for students. It went away only as part of
+    # step 2.5, so an activity with no "¿Cómo lo vamos a evaluar?" showed it
+    # (Visión y cerebro, Actividad 6). Removed up to the evaluation banner, if
+    # that comes later.
+    production = next((p for p in soup.find_all("p")
+                       if _PRODUCTION_INFO_RE.match(_plain_upper(p.get_text(" ", strip=True)))), None)
+    if production is not None:
+        curr = production
+        while curr is not None and curr.get("data-section") != "¿Cómo lo vamos a evaluar?":
+            next_sib = curr.find_next_sibling()
+            curr.decompose()
+            curr = next_sib
+
     # 2.5 Clean up everything after the Evaluation banner except the table
     if eval_header_p:
         curr = eval_header_p.find_next_sibling()
