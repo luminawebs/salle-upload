@@ -449,7 +449,9 @@ def _parse_question_blocks(soup, course_id: int = None, style_tables: bool = Tru
                 # Use regex to remove '=' even if it's right after an opening tag
                 clean_html_opt = re.sub(r'(>|^)\s*=\s*', r'\1', clean_html_opt, count=1).strip()
                 # Move any unmarked distractors from the stem into options
-                if state == 'STEM':
+                if state == 'STEM' and _stem_tail_to_options(current_q):
+                    pass
+                elif state == 'STEM':
                     # Keep at least the first stem line: it IS the question.
                     # Popping it too emptied the stem and the whole question
                     # was silently dropped (e.g. "1. ¿Capital?" / "=a) Bogotá").
@@ -538,6 +540,28 @@ def _parse_question_blocks(soup, course_id: int = None, style_tables: bool = Tru
     for q, nxt in zip(questions, questions[1:] + [None]):
         q['block_end'] = nxt['block_start'] if nxt else region_end
     return questions, blocks, (region_start, region_end)
+
+
+def _stem_tail_to_options(q: dict) -> bool:
+    """
+    At a question's first "=" option, still reading the stem: the lines after
+    the question itself (the last stem line ending in "?" or ":") are the
+    options before the marked one — "Pregunta 1 / Tipo: múltiple / ¿…? /
+    option / =option / option" with no "Opciones:" line. Their length doesn't
+    matter (a 15-word option used to stay in the stem). False, with the stem
+    untouched, when no line ends like a question or nothing follows it.
+    """
+    texts = [BeautifulSoup(h, 'html.parser').get_text(" ", strip=True) for h in q['stem_html']]
+    asks = [k for k, t in enumerate(texts) if t.endswith(('?', ':'))]
+    if not asks or asks[-1] == len(texts) - 1:
+        return False
+    tail = q['stem_html'][asks[-1] + 1:]
+    del q['stem_html'][asks[-1] + 1:]
+    for html in tail:
+        if BeautifulSoup(html, 'html.parser').get_text(strip=True):
+            clean = re.sub(r'(>|^)\s*[\-\*]\s*', r'\1', html, count=1).strip()
+            q['options'].append({'html': clean, 'is_correct': False})
+    return True
 
 
 def question_excerpts(html_content: str):
@@ -709,6 +733,20 @@ def _true_false_group_to_cloze(q: dict) -> bool:
     return True
 
 
+_PREGUNTA_HEADER_RE = re.compile(r'(?i)pregunta\s+\d+\s*[.:]?')
+
+
+def _looks_like_fill_in(q: dict) -> bool:
+    """
+    A one-option question that is a fill-in: a blank ("____"), "Complete" or "Defina".
+    Anything else with one option is a choice question whose other options
+    weren't read — made into a fill-in it showed a text box (Pregunta 11 of
+    1_Guia EAV_Ajustada); left as it is, the review and the import flag it.
+    """
+    text = " ".join(BeautifulSoup(h, 'html.parser').get_text(" ") for h in q['stem_html'])
+    return bool(_BLANK_RE.search(text) or re.search(r'(?i)\b(complet[ae]|defin[ae])\b', text))
+
+
 def _single_answer_to_cloze(q: dict) -> None:
     """
     "Complete: El modelo ____ …" with one option, the answer ("a. Serve and
@@ -741,11 +779,15 @@ def question_handler(q: dict, q_num: int, course_id=None, document_name: str = "
     guide (core/question_types/catalog.py) always agree.
     """
     _format_question_urls(q)
-    if q['q_type'] == 'multichoice' and len(q['options']) == 1:
+    if q['q_type'] == 'multichoice' and len(q['options']) == 1 and _looks_like_fill_in(q):
         _single_answer_to_cloze(q)
     elif q['q_type'] == 'multichoice' and not q['options']:
         _true_false_group_to_cloze(q)
-    stem_html = _LEADING_QUESTION_NUMBER_RE.sub(r"\1\2", "<br>".join(q['stem_html']), count=1)
+    stem_parts = q['stem_html']
+    if len(stem_parts) > 1 and _PREGUNTA_HEADER_RE.fullmatch(BeautifulSoup(stem_parts[0], 'html.parser').get_text(" ", strip=True)):
+        # The template's own "Pregunta 1" line: Moodle numbers the questions.
+        stem_parts = stem_parts[1:]
+    stem_html = _LEADING_QUESTION_NUMBER_RE.sub(r"\1\2", "<br>".join(stem_parts), count=1)
     opts = []
     is_true_false = False
     correct_is_true = False

@@ -936,6 +936,26 @@ class WordNumberingTests(unittest.TestCase):
         untouched = "<p>14. Referente a los movimientos: explique.</p>"
         self.assertEqual(_drop_info_the_reader_now_covers([info], record, untouched, None), [info])
 
+    def test_template_question_without_opciones_line(self):
+        """1_Guia EAV_Ajustada: no «Opciones:» line, a 15-word option, the correct one last."""
+        from actions.html_transformer import parse_questions, question_handler
+        html = ("<p>Pregunta 11</p><p>Tipo: múltiple</p>"
+                "<p>Durante una sustentación, un evaluador pregunta por qué. ¿Cuál es la respuesta más adecuada?</p>"
+                "<p><strong> </strong></p><p>Evitar responder y continuar con la presentación</p>"
+                "<p>Reconocer la situación y argumentar la decisión con base en evidencias y condiciones del proyecto</p>"
+                "<p><strong>=</strong>Indicar que todas las decisiones fueron tomadas por el tutor</p>")
+        q = parse_questions(html)[0]
+        self.assertEqual(len(q["options"]), 3)
+        self.assertEqual([o["is_correct"] for o in q["options"]], [False, False, True])
+        xml = question_handler(q, 1)[0].to_moodle_xml()
+        self.assertIn('<question type="multichoice">', xml)
+        self.assertNotIn("Pregunta 11", xml.split("<questiontext")[1])
+
+    def test_one_option_without_a_blank_is_not_made_a_fill_in(self):
+        from actions.html_transformer import parse_questions, question_handler
+        q = parse_questions("<p>1. ¿Cuál es la respuesta más adecuada?</p><p>=a) Reconocer la situación</p>")[0]
+        self.assertNotIn("cloze", question_handler(q, 1)[0].to_moodle_xml())
+
     def test_import_summary_problem(self):
         from actions.cuestionario_export_actions import import_summary_problem
         self.assertIsNone(import_summary_problem("Importando 14 preguntas desde el archivo", [], 14))
