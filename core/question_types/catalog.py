@@ -211,6 +211,9 @@ QUESTION_FORMATS = [
 
 GENERAL_RULES = [
     "Numere cada pregunta: «1.», «2.»… o «Pregunta 1».",
+    "Las etiquetas «Enunciado:» y «Opciones:» son recomendadas pero opcionales: si se omiten, "
+    "el enunciado termina en la línea de la pregunta (la que termina en «?» o «:») y las líneas "
+    "siguientes son las opciones.",
     "La retroalimentación es opcional: «Retroalimentación:» (para todos), "
     "«Retroalimentación para respuesta correcta:» o «… para respuestas incorrectas:».",
     "Las preguntas terminan donde empieza «¿Cómo lo vamos a evaluar?», «Entregable» "
