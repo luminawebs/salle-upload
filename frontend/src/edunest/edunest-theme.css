@@ -1,0 +1,146 @@
+/* =====================================================================
+   edunest · tema en variables CSS (capa de marca + marca blanca)
+   ---------------------------------------------------------------------
+   Un solo contrato de variables (--en-*) para todos los productos.
+   - Sin atributo, o data-brand="edunest": marca edunest (oscuro, navy + ámbar).
+   - data-theme="light": la variante clara de edunest (contenido, documentos).
+   - data-brand="camara" | "poli" | "lasalle": tema de cliente (marca blanca).
+   Los colores van como canales RGB ("3 17 25") para que Tailwind pueda
+   aplicar opacidad: bg-primary/10. Úsalo con tailwind-preset.js o
+   directamente: color: rgb(var(--en-text)).
+   Fuente de los valores: design system edunest (tokens.json) y, para los
+   clientes, el código de cada producto (camcom/plantillas/comun/aula.css,
+   poli, salle-upload/html_generator).
+   ===================================================================== */
+
+/* ---------- Capa 1: marca edunest (oscuro, por defecto) ---------- */
+:root,
+[data-brand="edunest"] {
+  --en-bg: 3 17 25;              /* brand-navy #031119 */
+  --en-surface: 27 38 44;        /* brand-slate #1b262c */
+  --en-surface-raised: 41 52 58; /* #29343a */
+  --en-border: 43 55 62;         /* blanco 16% sobre navy, sólido #2b373e (decorativo) */
+  --en-border-control: 116 124 128; /* #747c80 — 3.6:1 sobre surface, bordes de controles */
+  --en-heading: 224 233 242;     /* brand-mist #e0e9f2 */
+  --en-text: 205 207 209;        /* blanco 80% sobre navy #cdcfd1 — 9.9:1 en surface */
+  --en-text-muted: 164 169 172;  /* blanco 64% #a4a9ac — 6.5:1 en surface */
+  --en-text-subtle: 144 150 154; /* blanco 56% #90969a — 5.2:1 en surface */
+  --en-primary: 227 161 39;      /* brand-amber #e3a127 (relleno) */
+  --en-primary-hover: 200 138 31;/* #c88a1f */
+  --en-on-primary: 3 17 25;      /* navy sobre ámbar, 8.5:1 — nunca blanco */
+  --en-primary-text: 227 161 39; /* ámbar como texto, 6.9:1 en surface */
+  --en-focus: 255 191 42;        /* brand-yellow #ffbf2a */
+  --en-success: 126 214 155;     /* #7ed69b */
+  --en-warning: 255 162 107;     /* #ffa26b — naranja, distinto del ámbar de marca */
+  --en-error: 255 154 154;       /* #ff9a9a */
+  --en-font-sans: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --en-radius: 12px;
+  --en-radius-control: 8px;
+  --en-radius-pill: 999px;
+  color-scheme: dark;
+}
+
+/* edunest claro: contenido de cursos, documentos, embebidos en LMS */
+[data-theme="light"],
+[data-brand="edunest"][data-theme="light"] {
+  --en-bg: 246 244 239;          /* #f6f4ef papel cálido */
+  --en-surface: 255 255 255;
+  --en-surface-raised: 238 234 226; /* #eeeae2 */
+  --en-border: 230 231 232;      /* navy 10% sobre blanco */
+  --en-border-control: 129 136 144; /* #818890 — 3.6:1 */
+  --en-heading: 11 30 40;        /* #0b1e28 */
+  --en-text: 47 62 70;           /* #2f3e46 */
+  --en-text-muted: 85 99 107;    /* #55636b */
+  --en-text-subtle: 92 105 112;  /* #5c6970 */
+  --en-primary: 227 161 39;
+  --en-primary-hover: 200 138 31;
+  --en-on-primary: 3 17 25;
+  --en-primary-text: 138 90 11;  /* #8a5a0b — 5.9:1 en blanco */
+  --en-focus: 138 90 11;
+  --en-success: 21 87 36;        /* #155724 */
+  --en-warning: 154 79 0;        /* #9a4f00 */
+  --en-error: 114 28 36;         /* #721c24 */
+  color-scheme: light;
+}
+
+/* ---------- Capa 2: marca blanca — temas de cliente ----------
+   Solo cambian estas variables. Componentes, espaciado y comportamiento
+   son los mismos para todos. Los temas de cliente son claros.            */
+
+/* Cámara de Comercio — Aula Virtual Empresarial Soacha (camcom/aula.css) */
+[data-brand="camara"] {
+  --en-bg: 246 246 247;          /* #f6f6f7 */
+  --en-surface: 255 255 255;
+  --en-surface-raised: 239 239 241; /* #efeff1 */
+  --en-border: 208 208 212;      /* #d0d0d4 */
+  --en-border-control: 141 141 148; /* #8d8d94 — 3.3:1 */
+  --en-heading: 20 20 20;        /* #141414 */
+  --en-text: 26 26 26;           /* #1a1a1a */
+  --en-text-muted: 92 92 99;     /* #5c5c63 */
+  --en-text-subtle: 92 92 99;
+  --en-primary: 200 16 46;       /* rojo Cámara #c8102e — blanco encima 5.9:1 */
+  --en-primary-hover: 158 12 36; /* #9e0c24 */
+  --en-on-primary: 255 255 255;
+  --en-primary-text: 158 12 36;  /* #9e0c24 como texto */
+  --en-focus: 200 16 46;
+  --en-success: 19 122 80;       /* #137a50 */
+  --en-warning: 154 79 0;
+  --en-error: 179 38 30;         /* #b3261e */
+  --en-font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color-scheme: light;
+}
+
+/* Politécnico Grancolombiano — poli.edunest.co (luminawebs/poli) */
+[data-brand="poli"] {
+  --en-bg: 248 250 252;          /* #F8FAFC */
+  --en-surface: 255 255 255;
+  --en-surface-raised: 234 243 255; /* #EAF3FF */
+  --en-border: 226 232 240;      /* slate-200 */
+  --en-border-control: 148 163 184; /* slate-400 */
+  --en-heading: 42 52 88;        /* #2A3458 */
+  --en-text: 51 65 85;           /* slate-700 */
+  --en-text-muted: 100 116 139;  /* slate-500, 4.8:1 */
+  --en-text-subtle: 100 116 139;
+  --en-primary: 42 52 88;        /* #2A3458 — botones */
+  --en-primary-hover: 31 39 68;  /* #1f2744 */
+  --en-on-primary: 255 255 255;
+  --en-primary-text: 42 52 88;
+  --en-focus: 31 178 222;        /* cian #1FB2DE (solo foco y decoración: 2.5:1 en blanco) */
+  --en-success: 4 120 87;        /* emerald-700 */
+  --en-warning: 154 79 0;
+  --en-error: 217 54 54;         /* #d93636 — el #F64C4C del repo da 3.5:1, se oscurece */
+  --en-font-sans: "Outfit", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+/* Universidad de La Salle — PROVISIONAL: solo lo que usa la plantilla de
+   curso en salle-upload. Confirmar con el manual de marca de La Salle.   */
+[data-brand="lasalle"] {
+  --en-bg: 253 253 236;          /* crema #FDFDEC */
+  --en-surface: 255 255 255;
+  --en-surface-raised: 250 201 106; /* #FAC96A */
+  --en-border: 231 185 23;       /* #E7B917 (decorativo) */
+  --en-border-control: 129 136 144;
+  --en-heading: 0 0 0;
+  --en-text: 20 20 20;
+  --en-text-muted: 85 85 85;
+  --en-text-subtle: 85 85 85;
+  --en-primary: 242 169 0;       /* dorado #F2A900 — texto negro encima 9.2:1 */
+  --en-primary-hover: 231 185 23;
+  --en-on-primary: 20 20 20;
+  --en-primary-text: 138 100 0;  /* #8a6400 — 5.2:1 sobre crema */
+  --en-focus: 0 0 0;
+  --en-success: 21 87 36;
+  --en-warning: 154 79 0;
+  --en-error: 179 38 30;
+  --en-font-sans: Tahoma, Arial, Helvetica, sans-serif;
+  color-scheme: light;
+}
+
+/* Base mínima para cualquier producto */
+body {
+  background: rgb(var(--en-bg));
+  color: rgb(var(--en-text));
+  font-family: var(--en-font-sans);
+}
+:focus-visible { outline: 2px solid rgb(var(--en-focus)); outline-offset: 2px; }
