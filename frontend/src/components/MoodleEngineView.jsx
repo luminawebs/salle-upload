@@ -68,7 +68,7 @@ const CircularProgress = ({ percentage }) => {
     <div className="flex flex-col items-center justify-center relative">
       <svg height={radius * 2} width={radius * 2}>
         <circle
-          stroke="#222a3bff"
+          style={{ stroke: "rgb(var(--en-surface-raised))" }}
           fill="transparent"
           strokeWidth={stroke}
           r={normalizedRadius}
@@ -76,11 +76,10 @@ const CircularProgress = ({ percentage }) => {
           cy={radius}
         />
         <circle
-          stroke="#00D68F"
+          style={{ stroke: "rgb(var(--en-success))", strokeDashoffset, transition: "stroke-dashoffset 0.5s ease 0s" }}
           fill="transparent"
           strokeWidth={stroke}
           strokeDasharray={circumference + ' ' + circumference}
-          style={{ strokeDashoffset, transition: 'stroke-dashoffset 0.5s ease 0s' }}
           strokeLinecap="round"
           r={normalizedRadius}
           cx={radius}
@@ -425,7 +424,7 @@ export default function MoodleEngineView({ setActiveTab }) {
             <button
               onClick={handleRun}
               disabled={status === 'Running'}
-              className={`flex items-center px-6 py-4 rounded-lg font-semibold transition-all shadow-lg text-md justify-center w-full ${status === 'Running' ? 'bg-border cursor-not-allowed text-gray-400' : 'bg-primary hover:bg-purple-500 text-white'}`}
+              className={`flex items-center px-6 py-4 rounded-lg font-semibold transition-all shadow-lg text-md justify-center w-full ${status === 'Running' ? 'bg-border cursor-not-allowed text-gray-400' : 'bg-primary hover:bg-primary-hover text-on-primary'}`}
             >
               {status === 'Running' ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
               {status === 'Running' ? "Procesando..." : "Iniciar Automatización"}
@@ -468,7 +467,7 @@ export default function MoodleEngineView({ setActiveTab }) {
               {WORKFLOW_PHASES.map((phase, idx) => (
                 <div key={phase.id} className="relative">
                   <div className={`absolute -left-9 mt-1 w-6 h-6 rounded-full flex items-center justify-center border-2 ${status === 'Running' && progress >= (idx * 25) ? 'bg-primary border-primary' : 'bg-surface border-border'}`}>
-                    {status === 'Running' && progress >= (idx * 25 + 25) ? <Check className="w-3 h-3 text-white" /> : <div className="w-2 h-2 rounded-full bg-gray-500"></div>}
+                    {status === 'Running' && progress >= (idx * 25 + 25) ? <Check className="w-3 h-3 text-on-primary" /> : <div className="w-2 h-2 rounded-full bg-gray-500"></div>}
                   </div>
 
                   <div className="bg-background border border-border rounded-xl p-4 transition-all hover:border-gray-700">
@@ -494,7 +493,7 @@ export default function MoodleEngineView({ setActiveTab }) {
                         return (
                           <label key={task.key} className={`flex items-center p-2.5 rounded-lg cursor-pointer transition border ${isActive ? 'bg-primary/5 border-primary/30' : 'bg-surface/50 border-transparent hover:bg-surface'}`}>
                             <div className={`w-5 h-5 rounded border flex items-center justify-center mr-3 ${isActive ? 'bg-primary border-primary' : 'bg-surface border-gray-600'}`}>
-                              {isActive && <Check className="w-3.5 h-3.5 text-white" />}
+                              {isActive && <Check className="w-3.5 h-3.5 text-on-primary" />}
                             </div>
                             <span className={`text-sm ${isActive ? 'text-white' : 'text-gray-400'}`}>{task.label}</span>
                             <input
@@ -528,14 +527,14 @@ export default function MoodleEngineView({ setActiveTab }) {
                 <button
                   key={phase.id}
                   onClick={() => setActiveLogTab(idx)}
-                  className={`flex-1 py-2.5 px-1 text-[10px] sm:text-[11px] font-bold text-center uppercase tracking-tight transition-colors border-b-2 ${activeLogTab === idx ? 'bg-[#1e2638] text-primary border-primary' : 'bg-surface text-gray-500 border-transparent hover:text-gray-300 hover:bg-[#1e2638]/50'}`}
+                  className={`flex-1 py-2.5 px-1 text-[10px] sm:text-[11px] font-bold text-center uppercase tracking-tight transition-colors border-b-2 ${activeLogTab === idx ? 'bg-surface-raised text-primary border-primary' : 'bg-surface text-gray-500 border-transparent hover:text-gray-300 hover:bg-surface-raised/50'}`}
                 >
                   <span className="truncate block w-full">{phase.shortTitle}</span>
                 </button>
               ))}
             </div>
 
-            <div className="flex-1 bg-[#0f141f] rounded-b-xl border border-border flex flex-col relative shadow-inner min-h-0">
+            <div className="flex-1 bg-background rounded-b-xl border border-border flex flex-col relative shadow-inner min-h-0">
               <div className="flex items-center px-4 py-2 border-b border-white/5 bg-black/20">
                 <Terminal className="w-4 h-4 text-gray-400 mr-2" />
                 <h2 className="text-xs font-semibold text-gray-300 uppercase tracking-widest">
